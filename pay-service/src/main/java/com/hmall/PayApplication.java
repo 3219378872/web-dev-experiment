@@ -1,16 +1,19 @@
-package com.hmall.cart;
+package com.hmall;
 
-import com.hmall.api.client.ItemClient;
+import com.hmall.api.client.OrderClient;
+import com.hmall.api.client.UserClient;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@MapperScan("com.hmall.cart.mapper")
-@EnableFeignClients(basePackageClasses = {ItemClient.class})
 @SpringBootApplication
-public class CartApplication {
+@MapperScan({"com.hmall.mapper"})
+@EnableFeignClients(basePackageClasses = {OrderClient.class, UserClient.class})
+class PayApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(CartApplication.class, args);
+        SpringApplication.run(PayApplication.class, args);
     }
+
 }

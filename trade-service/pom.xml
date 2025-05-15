@@ -9,7 +9,7 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>cart-service</artifactId>
+    <artifactId>trade-service</artifactId>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -33,6 +33,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <!--加密-->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-rsa</artifactId>
+<!--            <version>1.0.9.RELEASE</version>-->
+        </dependency>
         <!--数据库-->
         <dependency>
             <groupId>mysql</groupId>
@@ -43,26 +53,20 @@
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
-        <!--redis-->
+        <!--单元测试-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-<!--        hutool-->
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-            <version>5.8.24</version>
-        </dependency>
-        <!--openFeign-->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
         <dependency>
             <groupId>com.heima</groupId>
             <artifactId>hm-api</artifactId>
             <version>1.0.0</version>
+        </dependency>
+        <!-- Maven 示例 -->
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-slf4j</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -74,5 +78,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
