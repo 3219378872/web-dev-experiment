@@ -1,0 +1,23 @@
+server:
+  port: 8087
+spring:
+  application:
+    name: file-service
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:mysql://${hm.db.host:localhost}:${hm.db.port:3306}/hmall?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    username: ${hm.db.username:root}
+    password: ${hm.db.password:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+mybatis-plus:
+  type-aliases-package: com.hmall.file.domain.po
+file:
+  upload-dir: ./uploads
+logging:
+  level:
+    com.hmall: debug
