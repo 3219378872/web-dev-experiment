@@ -1,0 +1,77 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hmall
+    ports: ["3306:3306"]
+    volumes: ["./docker/mysql:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  nacos:
+    image: nacos/nacos-server:v2.1.0
+    environment:
+      MODE: standalone
+    ports: ["8848:8848"]
+    depends_on: [mysql]
+
+  redis:
+    image: redis:7.0
+    ports: ["6379:6379"]
+
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    ports: ["5672:5672", "15672:15672"]
+
+  hm-gateway:
+    build: ./hm-gateway
+    ports: ["8080:8080"]
+    depends_on: [nacos]
+
+  user-service:
+    build: ./user-service
+    depends_on: [nacos, mysql, redis]
+
+  item-service:
+    build: ./item-service
+    depends_on: [nacos, mysql, redis]
+
+  cart-service:
+    build: ./cart-service
+    depends_on: [nacos, mysql, redis]
+
+  trade-service:
+    build: ./trade-service
+    depends_on: [nacos, mysql]
+
+  pay-service:
+    build: ./pay-service
+    depends_on: [nacos, mysql]
+
+  notify-service:
+    build: ./notify-service
+    depends_on: [nacos, mysql]
+
+  file-service:
+    build: ./file-service
+    depends_on: [nacos, mysql]
+
+  hmall-web:
+    image: nginx:alpine
+    volumes:
+      - "./hmall-web/dist:/usr/share/nginx/html"
+      - "./hmall-web/nginx.conf:/etc/nginx/conf.d/default.conf"
+    ports: ["80:80"]
+    depends_on: [hm-gateway]
+
+  hmall-admin:
+    image: nginx:alpine
+    volumes:
+      - "./hmall-admin/dist:/usr/share/nginx/html"
+      - "./hmall-admin/nginx.conf:/etc/nginx/conf.d/default.conf"
+    ports: ["81:80"]
+    depends_on: [hm-gateway]
