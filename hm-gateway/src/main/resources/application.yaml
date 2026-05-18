@@ -1,33 +1,5 @@
 server:
   port: 8080
-spring:
-  cloud:
-    nacos:
-      server-addr: 192.168.100.128
-    gateway:
-      routes:
-        - id: item-service
-          uri: lb://item-service
-          predicates:
-            - Path=/items/**,/search/**
-        - id: cart-service
-          uri: lb://cart-service
-          predicates:
-            - Path=/carts/**
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/users/**,/addresses/**
-        - id: trade-service
-          uri: lb://trade-service
-          predicates:
-            - Path=/orders/**
-        - id: pay-service
-          uri: lb://pay-service
-          predicates:
-            - Path=/pay-orders/**
-  application:
-    name: gateway-service
 hm:
   jwt:
     location: classpath:hmall.jks
@@ -38,5 +10,11 @@ hm:
     excludePaths:
       - /search/**
       - /users/login
+      - /users/register
+      - /users/send-code
+      - /users/reset-password
       - /items/**
       - /hi
+      - /notifications/active
+      - /upload/**
+      - /files/**

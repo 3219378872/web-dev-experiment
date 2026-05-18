@@ -44,6 +44,14 @@ public class AuthGlobalFilter implements GlobalFilter , Ordered {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
+
+        // admin 路径校验角色
+        if (antPathMatcher.match("/admin/**", request.getPath().toString())
+                && !"admin".equals(tokenInfo.getRole())) {
+            exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+            return exchange.getResponse().setComplete();
+        }
+
         //传递用户信息
         String userInfo = tokenInfo.getUserId().toString();
         ServerWebExchange webExchange = exchange.mutate()
