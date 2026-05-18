@@ -7,11 +7,14 @@ import com.hmall.api.dto.ItemDTO;
 import com.hmall.api.dto.OrderDetailDTO;
 import com.hmall.api.dto.OrderFormDTO;
 import com.hmall.common.exception.BadRequestException;
+import com.hmall.common.exception.BizIllegalException;
 import com.hmall.common.utils.UserContext;
 import com.hmall.domain.po.Order;
 import com.hmall.domain.po.OrderDetail;
+import com.hmall.domain.po.OrderLogistics;
 import com.hmall.mapper.OrderMapper;
 import com.hmall.service.IOrderDetailService;
+import com.hmall.service.IOrderLogisticsService;
 import com.hmall.service.IOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,7 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements IOrderService {
 
     private final IOrderDetailService detailService;
+    private final IOrderLogisticsService logisticsService;
     private final ItemClient itemClient;
     private final CartClient cartClient;
 
@@ -92,6 +96,63 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setStatus(2);
         order.setPayTime(LocalDateTime.now());
         updateById(order);
+    }
+
+    @Override
+    public void cancelOrder(Long orderId, Long userId) {
+        Order order = getById(orderId);
+        if (order == null || !order.getUserId().equals(userId)) {
+            throw new BadRequestException("订单不存在");
+        }
+        if (order.getStatus() != 1) {
+            throw new BizIllegalException("当前状态不可取消");
+        }
+        order.setStatus(5);
+        order.setCloseTime(LocalDateTime.now());
+        updateById(order);
+    }
+
+    @Override
+    public void confirmReceive(Long orderId, Long userId) {
+        Order order = getById(orderId);
+        if (order == null || !order.getUserId().equals(userId)) {
+            throw new BadRequestException("订单不存在");
+        }
+        if (order.getStatus() != 3) {
+            throw new BizIllegalException("当前状态不可确认收货");
+        }
+        order.setStatus(4);
+        order.setEndTime(LocalDateTime.now());
+        updateById(order);
+    }
+
+    @Override
+    public void refund(Long orderId, Long userId) {
+        Order order = getById(orderId);
+        if (order == null || !order.getUserId().equals(userId)) {
+            throw new BadRequestException("订单不存在");
+        }
+        if (order.getStatus() != 2 && order.getStatus() != 3) {
+            throw new BizIllegalException("当前状态不可申请退款");
+        }
+        order.setStatus(6);
+        order.setUpdateTime(LocalDateTime.now());
+        updateById(order);
+    }
+
+    @Override
+    public void ship(Long orderId, String trackingNumber) {
+        Order order = getById(orderId);
+        if (order == null) throw new BadRequestException("订单不存在");
+        order.setStatus(3);
+        order.setConsignTime(LocalDateTime.now());
+        updateById(order);
+        OrderLogistics logistics = logisticsService.lambdaQuery()
+                .eq(OrderLogistics::getOrderId, orderId).one();
+        if (logistics != null) {
+            logistics.setLogisticsNumber(trackingNumber);
+            logisticsService.updateById(logistics);
+        }
     }
 
     private List<OrderDetail> buildDetails(Long orderId, List<ItemDTO> items, Map<Long, Integer> numMap) {
