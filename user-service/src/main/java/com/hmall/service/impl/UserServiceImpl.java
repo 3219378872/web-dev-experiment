@@ -1,5 +1,6 @@
 package com.hmall.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmall.api.dto.LoginFormDTO;
 import com.hmall.common.exception.BadRequestException;
@@ -7,6 +8,8 @@ import com.hmall.common.exception.BizIllegalException;
 import com.hmall.common.exception.ForbiddenException;
 import com.hmall.common.utils.UserContext;
 import com.hmall.config.JwtProperties;
+import com.hmall.domain.dto.RegisterFormDTO;
+import com.hmall.domain.dto.ResetPasswordDTO;
 import com.hmall.domain.po.User;
 import com.hmall.domain.vo.UserLoginVO;
 import com.hmall.enums.UserStatus;
@@ -15,9 +18,16 @@ import com.hmall.service.IUserService;
 import com.hmall.utils.JwtTool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -32,10 +42,12 @@ import org.springframework.util.Assert;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
     private final PasswordEncoder passwordEncoder;
-
     private final JwtTool jwtTool;
-
     private final JwtProperties jwtProperties;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final JavaMailSender mailSender;
+    @Value("${spring.mail.username:}")
+    private String mailFrom;
 
     @Override
     public UserLoginVO login(LoginFormDTO loginDTO) {
@@ -82,5 +94,67 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new RuntimeException("扣款失败，可能是余额不足！", e);
         }
         log.info("扣款成功");
+    }
+
+    @Override
+    public void sendVerifyCode(String email) {
+        String code = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
+        redisTemplate.opsForValue().set("verify:code:" + email, code, Duration.ofMinutes(5));
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(mailFrom);
+        message.setTo(email);
+        message.setSubject("hmall 验证码");
+        message.setText("您的验证码是：" + code + "，5分钟内有效。");
+        mailSender.send(message);
+    }
+
+    @Override
+    public void register(RegisterFormDTO form) {
+        String cachedCode = (String) redisTemplate.opsForValue().get("verify:code:" + form.getEmail());
+        if (cachedCode == null || !cachedCode.equals(form.getCode())) {
+            throw new BadRequestException("验证码错误或已过期");
+        }
+        if (lambdaQuery().eq(User::getUsername, form.getUsername()).count() > 0) {
+            throw new BadRequestException("用户名已存在");
+        }
+        User user = new User();
+        user.setUsername(form.getUsername());
+        user.setPassword(passwordEncoder.encode(form.getPassword()));
+        user.setEmail(form.getEmail());
+        user.setRole("user");
+        user.setStatus(UserStatus.NORMAL);
+        user.setCreateTime(LocalDateTime.now());
+        save(user);
+        redisTemplate.delete("verify:code:" + form.getEmail());
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordDTO form) {
+        String cachedCode = (String) redisTemplate.opsForValue().get("verify:code:" + form.getEmail());
+        if (cachedCode == null || !cachedCode.equals(form.getCode())) {
+            throw new BadRequestException("验证码错误或已过期");
+        }
+        User user = lambdaQuery().eq(User::getEmail, form.getEmail()).one();
+        if (user == null) {
+            throw new BadRequestException("邮箱未注册");
+        }
+        user.setPassword(passwordEncoder.encode(form.getNewPassword()));
+        updateById(user);
+        redisTemplate.delete("verify:code:" + form.getEmail());
+    }
+
+    @Override
+    public void updateProfile(User profile) {
+        User user = getById(UserContext.getUser());
+        if (StrUtil.isNotBlank(profile.getNickname())) {
+            user.setNickname(profile.getNickname());
+        }
+        if (StrUtil.isNotBlank(profile.getAvatar())) {
+            user.setAvatar(profile.getAvatar());
+        }
+        if (StrUtil.isNotBlank(profile.getEmail())) {
+            user.setEmail(profile.getEmail());
+        }
+        updateById(user);
     }
 }
