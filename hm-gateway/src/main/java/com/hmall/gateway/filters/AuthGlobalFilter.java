@@ -37,7 +37,7 @@ public class AuthGlobalFilter implements GlobalFilter , Ordered {
         if(Objects.nonNull(authorization) && !authorization.isEmpty()){
             token = authorization.get(0);
         }
-        JwtTool.TokenInfo tokenInfo = null;
+        JwtTool.TokenInfo tokenInfo;
         try {
             tokenInfo = jwtTool.parseToken(token);
         } catch (Exception e) {
