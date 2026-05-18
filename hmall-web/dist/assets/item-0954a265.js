@@ -1,0 +1,1 @@
+import{p as s}from"./index-5d354977.js";const g=e=>s.get("/items/page",{params:e}),i=e=>s.get(`/items/${e}`),o=e=>s.get("/items/search",{params:e}),m=e=>s.get(`/items/${e}/reviews`),c=(e,t)=>s.post(`/items/${e}/reviews`,t),r=()=>s.get("/categories");export{r as a,i as b,m as c,o as d,g,c as s};

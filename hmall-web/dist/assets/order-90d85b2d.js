@@ -1,0 +1,1 @@
+import{p as e}from"./index-5d354977.js";const o=r=>e.post("/orders",r),t=r=>e.get("/orders",{params:r}),c=r=>e.put(`/orders/${r}/cancel`),d=r=>e.put(`/orders/${r}/confirm`),n=r=>e.post(`/orders/${r}/refund`);export{c as a,d as b,o as c,t as g,n as r};
