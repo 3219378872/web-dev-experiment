@@ -62,5 +62,24 @@ public class User implements Serializable {
      */
     private Integer balance;
 
+    /**
+     * 角色：user/admin
+     */
+    private String role;
+
+    /**
+     * 邮箱
+     */
+    private String email;
+
+    /**
+     * 头像
+     */
+    private String avatar;
+
+    /**
+     * 昵称
+     */
+    private String nickname;
 
 }

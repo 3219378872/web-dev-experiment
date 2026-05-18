@@ -54,7 +54,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new BadRequestException("用户名或密码错误");
         }
         // 5.生成TOKEN
-        String token = jwtTool.createToken(user.getId(), jwtProperties.getTokenTTL());
+        String role = user.getRole() != null ? user.getRole() : "user";
+        String token = jwtTool.createToken(user.getId(), role, jwtProperties.getTokenTTL());
         // 6.封装VO返回
         UserLoginVO vo = new UserLoginVO();
         vo.setUserId(user.getId());
