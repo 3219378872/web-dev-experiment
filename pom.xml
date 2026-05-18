@@ -18,6 +18,8 @@
         <module>trade-service</module>
         <module>pay-service</module>
         <module>hm-gateway</module>
+        <module>notify-service</module>
+        <module>file-service</module>
     </modules>
 
     <parent>
