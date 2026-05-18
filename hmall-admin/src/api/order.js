@@ -1,0 +1,4 @@
+import request from './request'
+export const getOrders = (params) => request.get('/admin/orders', { params })
+export const shipOrder = (id, trackingNumber) => request.put(`/admin/orders/${id}/ship`, null, { params: { trackingNumber } })
+export const updateOrderStatus = (id, status) => request.put(`/admin/orders/${id}/status`, null, { params: { status } })
