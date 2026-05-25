@@ -11,10 +11,9 @@ import reactor.core.publisher.Mono;
 
 
 @Component
-public class MytestFilter implements GlobalFilter, Ordered {
+public class MyTestFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        //TODO:模拟登录逻辑
         ServerHttpRequest request = exchange.getRequest();
         HttpHeaders headers = request.getHeaders();
         System.out.println("headers:" + headers);

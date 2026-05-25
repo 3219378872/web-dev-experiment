@@ -16,13 +16,13 @@ import com.hmall.enums.UserStatus;
 import com.hmall.mapper.UserMapper;
 import com.hmall.service.IUserService;
 import com.hmall.utils.JwtTool;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -38,16 +38,24 @@ import java.time.LocalDateTime;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
     private final PasswordEncoder passwordEncoder;
     private final JwtTool jwtTool;
     private final JwtProperties jwtProperties;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final JavaMailSender mailSender;
+
+    @Autowired(required = false)
+    private JavaMailSender mailSender;
     @Value("${spring.mail.username:}")
     private String mailFrom;
+
+    public UserServiceImpl(PasswordEncoder passwordEncoder, JwtTool jwtTool, JwtProperties jwtProperties, RedisTemplate<String, Object> redisTemplate) {
+        this.passwordEncoder = passwordEncoder;
+        this.jwtTool = jwtTool;
+        this.jwtProperties = jwtProperties;
+        this.redisTemplate = redisTemplate;
+    }
 
     @Override
     public UserLoginVO login(LoginFormDTO loginDTO) {
@@ -98,6 +106,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public void sendVerifyCode(String email) {
+        if (mailSender == null) {
+            log.warn("MailSender not configured, cannot send verification code");
+            return;
+        }
         String code = String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
         redisTemplate.opsForValue().set("verify:code:" + email, code, Duration.ofMinutes(5));
         SimpleMailMessage message = new SimpleMailMessage();

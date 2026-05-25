@@ -5,10 +5,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Collection;
-import java.util.List;
 
-@FeignClient(value = "cart-service")
+@FeignClient(name = "cart-service")
 public interface CartClient {
-    @DeleteMapping
+    @DeleteMapping("/carts")
     void deleteCartItemByIds(@RequestParam("ids") Collection<Long> ids);
 }

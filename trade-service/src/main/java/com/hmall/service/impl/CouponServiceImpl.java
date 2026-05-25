@@ -42,11 +42,11 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon>
         if (coupon.getRemainingStock() <= 0) {
             throw new BizIllegalException("优惠券已被抢光");
         }
-        Integer count = userCouponMapper.selectCount(
+        long count = userCouponMapper.selectCount(
                 new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<UserCoupon>()
                         .eq(UserCoupon::getUserId, userId)
                         .eq(UserCoupon::getCouponId, couponId));
-        if (count != null && count > 0) {
+        if (count > 0) {
             throw new BizIllegalException("已领取过该优惠券");
         }
         coupon.setRemainingStock(coupon.getRemainingStock() - 1);

@@ -1,12 +1,10 @@
 server:
   port: 8085
 spring:
-  application:
-    name: hm-service
-  profiles:
-    active: dev
+  main:
+    allow-bean-definition-overriding: true
   datasource:
-    url: jdbc:mysql://${hm.db.host}:3306/hm-pay?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://${hm.db.host}:3306/hmall?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: ${hm.db.pw}
@@ -20,13 +18,6 @@ mybatis-plus:
     db-config:
       update-strategy: not_null
       id-type: auto
-logging:
-  level:
-    com.hmall: debug
-  pattern:
-    dateformat: HH:mm:ss:SSS
-  file:
-    path: "logs/${spring.application.name}"
 knife4j:
   enable: true
   openapi:

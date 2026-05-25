@@ -1,6 +1,6 @@
 spring:
   application:
-    name: gateway-service
+    name: pay-service
   profiles:
     active: dev
   cloud:

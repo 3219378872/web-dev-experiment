@@ -1,7 +1,21 @@
-version: '3.8'
+x-java-service: &java-service
+  restart: unless-stopped
+  environment:
+    hm.db.host: mysql
+    hm.db.port: "3306"
+    hm.db.username: root
+    hm.db.password: root
+    hm.db.pw: root
+    hm.nacos.host: nacos
+    hm.nacos.port: "8848"
+    hm.redis.host: redis
+    hm.redis.port: "6379"
+    spring.cloud.nacos.server-addr: nacos:8848
+
 services:
   mysql:
     image: mysql:8.0
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: hmall
@@ -9,69 +23,129 @@ services:
     volumes: ["./docker/mysql:/var/lib/mysql"]
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
+      interval: 10s
+      timeout: 10s
       retries: 10
+      start_period: 30s
 
   nacos:
     image: nacos/nacos-server:v2.1.0
+    restart: unless-stopped
     environment:
       MODE: standalone
-    ports: ["8848:8848"]
-    depends_on: [mysql]
+      PREFER_HOST_MODE: hostname
+    ports: ["8848:8848", "9848:9848"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:8848/nacos/v1/console/health/readiness"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
 
   redis:
     image: redis:7.0
+    restart: unless-stopped
     ports: ["6379:6379"]
 
-  rabbitmq:
-    image: rabbitmq:3.9-management
-    ports: ["5672:5672", "15672:15672"]
-
   hm-gateway:
+    <<: *java-service
     build: ./hm-gateway
     ports: ["8080:8080"]
-    depends_on: [nacos]
+    depends_on:
+      nacos:
+        condition: service_healthy
 
   user-service:
+    <<: *java-service
     build: ./user-service
-    depends_on: [nacos, mysql, redis]
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
 
   item-service:
+    <<: *java-service
     build: ./item-service
-    depends_on: [nacos, mysql, redis]
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
 
   cart-service:
+    <<: *java-service
     build: ./cart-service
-    depends_on: [nacos, mysql, redis]
+    environment:
+      hm.db.host: mysql
+      hm.db.port: "3306"
+      hm.db.username: root
+      hm.db.password: root
+      hm.db.pw: root
+      hm.nacos.host: nacos
+      hm.nacos.port: "8848"
+      hm.redis.host: redis
+      hm.redis.port: "6379"
+      spring.cloud.nacos.server-addr: nacos:8848
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/hmall?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
 
   trade-service:
+    <<: *java-service
     build: ./trade-service
-    depends_on: [nacos, mysql]
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
 
   pay-service:
+    <<: *java-service
     build: ./pay-service
-    depends_on: [nacos, mysql]
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
 
   notify-service:
+    <<: *java-service
     build: ./notify-service
-    depends_on: [nacos, mysql]
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
 
   file-service:
+    <<: *java-service
     build: ./file-service
-    depends_on: [nacos, mysql]
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
 
   hmall-web:
     image: nginx:alpine
+    restart: unless-stopped
     volumes:
       - "./hmall-web/dist:/usr/share/nginx/html"
       - "./hmall-web/nginx.conf:/etc/nginx/conf.d/default.conf"
     ports: ["80:80"]
-    depends_on: [hm-gateway]
+    depends_on:
+      - hm-gateway
 
   hmall-admin:
     image: nginx:alpine
+    restart: unless-stopped
     volumes:
       - "./hmall-admin/dist:/usr/share/nginx/html"
       - "./hmall-admin/nginx.conf:/etc/nginx/conf.d/default.conf"
     ports: ["81:80"]
-    depends_on: [hm-gateway]
+    depends_on:
+      - hm-gateway
