@@ -1,0 +1,194 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Agent harness lint
+        run: python3 scripts/agent_harness.py check
+      - name: Knowledge base lint
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags origin "${{ github.base_ref }}"
+            python3 scripts/knowledge_base.py check --base "origin/${{ github.base_ref }}"
+          else
+            python3 scripts/knowledge_base.py check
+          fi
+      - name: Agent instruction mirror
+        run: diff -u AGENTS.md CLAUDE.md
+      - name: Engineering lint
+        run: python3 scripts/engineering-lint.py
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "11"
+          cache: maven
+      - name: Backend unit tests
+        run: mvn -B -ntp -q test
+
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: 123
+          MYSQL_DATABASE: hm
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -p123"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "11"
+          cache: maven
+      - name: Backend integration tests
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/hm?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: "123"
+          SPRING_REDIS_HOST: 127.0.0.1
+          SPRING_REDIS_PORT: "6379"
+        run: mvn -B -ntp -q -Pintegration verify -DskipUnitTests=true
+
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "11"
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Harness summary smoke
+        run: python3 scripts/agent_harness.py summary
+      - name: Backend compile smoke
+        run: mvn -B -ntp -q -DskipTests compile
+      - name: hmall-web build
+        working-directory: hmall-web
+        run: |
+          npm ci --no-audit --no-fund
+          npm test --if-present
+          npm run build
+      - name: hmall-admin build
+        working-directory: hmall-admin
+        run: |
+          npm ci --no-audit --no-fund
+          npm test --if-present
+          npm run build
+      - name: Compose smoke (parse + render)
+        run: docker compose -f docker-compose.yml config -q
+
+  codex-review:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs:
+      - lint
+      - test
+      - integration
+      - smoke
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify Codex secrets
+        env:
+          HAS_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY != '' }}
+          HAS_OPENAI_RESPONSES_API_ENDPOINT: ${{ secrets.OPENAI_RESPONSES_API_ENDPOINT != '' }}
+        run: |
+          if [ "$HAS_OPENAI_API_KEY" != "true" ]; then
+            echo "Missing repository secret: OPENAI_API_KEY" >&2
+            exit 1
+          fi
+          if [ "$HAS_OPENAI_RESPONSES_API_ENDPOINT" != "true" ]; then
+            echo "Missing repository secret: OPENAI_RESPONSES_API_ENDPOINT" >&2
+            exit 1
+          fi
+      - name: Codex task completion and compliance review
+        id: codex_review
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          model: gpt-5.4
+          effort: high
+          responses-api-endpoint: ${{ secrets.OPENAI_RESPONSES_API_ENDPOINT }}
+          sandbox: read-only
+          output-file: codex-review.md
+          prompt: |
+            Review this pull request as a blocking CI gate for the hmall
+            (Spring Cloud microservices + Vue 3 dual-frontend) repository.
+
+            Inspect the PR diff, docs/agent-harness task records, AGENTS.md,
+            CLAUDE.md, docs/agent-harness/README.md,
+            docs/agent-harness/quality-rules.md, docs/knowledge-base/INDEX.md,
+            and any updated docs/knowledge-base/modules or flows pages.
+
+            Determine whether the code completes the stated task and complies
+            with the repository harness workflow. Check specifically:
+            - a matching harness task record exists for this PR;
+            - the implementation satisfies the task / spec / plan rather than
+              only changing tests;
+            - local acceptance evidence is recorded with exact commands and
+              outcomes (mvn test / npm test / docker compose / playwright);
+            - module boundaries and safety rules in AGENTS.md / CLAUDE.md /
+              knowledge-base are not violated;
+            - any code change to a knowledge-base tracked path also updates the
+              corresponding modules/flows page or bumps last_synced_commit with
+              a sync_note (K005);
+            - no unresolved placeholders or unexplained skipped checks remain;
+            - branch, remote branch, pull request, and remote branch cleanup
+              fields are present or appropriately marked pending before merge;
+            - public API contracts (com.hmall.common.domain.R / PageDTO) are
+              not silently broken.
+
+            Output exactly two sections:
+            1. blocking findings
+            2. non-blocking notes
+
+            If any blocking finding exists, fail the action. If there are no
+            blocking findings, say "blocking findings: none".
+      - name: Fail on blocking Codex findings
+        run: |
+          if ! grep -qi "blocking findings: none" codex-review.md; then
+            cat codex-review.md
+            exit 1
+          fi
