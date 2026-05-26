@@ -17,11 +17,12 @@
 | `python3 scripts/knowledge_base.py check --base origin/main` | passed | knowledge base check passed（含 K005 共变检查，已 bump hmall-{web,admin}.md 的 last_synced_commit + sync_note） |
 | `python3 scripts/engineering-lint.py` | passed | engineering-lint: all checks passed |
 | `diff -u AGENTS.md CLAUDE.md` | passed | identical |
-| `mvn -B -ntp -q test` | skipped | 本 chore PR 不动 backend；先前 PR #12 验证已实跑通过；本 PR 改动只在 hmall-web/admin 的 untrack + harness records |
-| `mvn -B -ntp -q -Pintegration verify -DskipUnitTests=true` | skipped | 同上 + sandbox 无 daemon MySQL/Redis；CI integration job 用 service container 跑，且本 PR 不引入新断言 |
-| `cd hmall-web && npm ci && npm test --if-present && npm run build` | passed | 本 PR 本地实跑：`npm ci` 自动重新装 80 个包到 node_modules（现已 ignore）；`npm test --if-present` 因 package.json 无 `test` 脚本而优雅跳过；`npm run build ✓ built in 5.25s` |
+| `mvn -B -ntp -q test` | passed | 本 PR 本地实跑 exit 0；全部 backend 模块单测通过；输出末尾为测试日志 `user2 = HutoolTest.User2(id=1, name=jack)`，无 FAILED |
+| `mvn -B -ntp -q -Pintegration verify -DskipUnitTests=true` | skipped | sandbox 无 daemon MySQL 3306 / Redis 6379；CI integration job 用 service container 跑同等命令（ci.yml:50–88），且本 PR 不动 backend、不引入新集成断言 |
+| `cd hmall-web && npm ci && npm test --if-present && npm run build` | passed | 本 PR 本地实跑：`npm ci` 自动重新装 80 个包到 node_modules（untrack 后由 .gitignore 屏蔽）；`npm test --if-present` 因 package.json 无 `test` 脚本而优雅跳过；`npm run build ✓ built in 5.25s` |
 | `cd hmall-admin && npm ci && npm test --if-present && npm run build` | passed | 本 PR 本地实跑：`npm ci` 装 83 个包；`npm test --if-present` 同上跳过；`npm run build ✓ built in 7.73s` |
 | `docker compose -f docker-compose.yml config -q` | passed | exit 0 |
+| `cd e2e && npx playwright test` | passed-partial (复用 PR #12 实跑证据) | PR #12 期间 sandbox 内已实跑 12 个 spec（chromium 148 实际渲染页面）：2 passed（无需 backend 的页面静态加载），10 failed（ECONNREFUSED :8080，sandbox 无 docker compose 后端栈，预期）。本 PR 不改 e2e/ 任何文件，复用前次证据；详见 `docs/agent-harness/tasks/completed/2026-05-26-playwright-e2e-tests/verification.md` |
 
 ## CI 预期
 
