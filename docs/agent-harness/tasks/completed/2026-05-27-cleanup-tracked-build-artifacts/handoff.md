@@ -44,12 +44,12 @@ Done — merged via PR #13 at 2026-05-26T18:28:38Z (merge commit `5849a47`); rem
   `npm ci` 才能跑 CI 等价的 build。
 
 ## Next Action
-> **Progress note**: 步骤 1（branch push）和 2（PR #13 创建）已完成；当前处于步骤 3
-> CI/codex-review 迭代中。
+> **Final note (post-merge)**: PR #13 已 merge (2026-05-26T18:28:38Z, merge commit
+> `5849a47`); remote branch 已由 pr-cleanup.yml 自动删除; 本任务已由 PR #14
+> 归档到 completed/。原本任务记录中的 \"push branch / create PR / wait CI\" 步骤
+> 均已实际执行完毕，此处保留原文仅作历史参考。
 
-3. 等 CI 5/5 jobs 全绿 + codex-review `blocking findings: none`（迭代中）。
-4. squash merge + `--delete-branch`，本任务由下一次 chore PR 归档（与 PR #12/#13
-   同样的递归模式 —— 下一个 PR 顺手把本 task 移到 completed/）。
+（任务已 done；原 Next Action 数字步骤已全部执行完毕，详见 Status 行与 Branch And PR 节。）
 
 ## Worktree Or Branch
 - `task/2026-05-27-cleanup-tracked-build-artifacts`
@@ -57,10 +57,10 @@ Done — merged via PR #13 at 2026-05-26T18:28:38Z (merge commit `5849a47`); rem
 ## Branch And PR
 - Base branch: `main`
 - Task branch: `task/2026-05-27-cleanup-tracked-build-artifacts`
-- Remote branch: `origin/task/2026-05-27-cleanup-tracked-build-artifacts`
-- Pull request: https://github.com/3219378872/web-dev-experiment/pull/13（已创建）
-- Remote branch cleanup: pending until PR #13 merged (PR-cleanup workflow 会自动删除)
+- Remote branch: `origin/task/2026-05-27-cleanup-tracked-build-artifacts` (deleted post-merge by pr-cleanup.yml)
+- Pull request: https://github.com/3219378872/web-dev-experiment/pull/13 (merged at 2026-05-26T18:28:38Z)
+- Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #13 merged).
 
 ## CI And Review
-- CI status: 推送后由 GitHub Actions 触发；本 PR 不动 backend / workflow / 业务前端代码，预期 5/5 jobs green。
-- Codex review: 推送后等 codex 评审；本 PR 是纯 chore（untrack + 归档），预期 `blocking findings: none`。
+- CI status: passed —— PR #13 merge commit (`5849a47`) 上的 main push CI 5/5 jobs 全绿。
+- Codex review: passed (blocking findings: none) on PR #13，经 5 轮迭代后通过。
