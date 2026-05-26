@@ -2,9 +2,9 @@
 title: hmall-admin
 tracks:
   - hmall-admin/
-last_synced_commit: 1ac210b
-last_synced_date: 2026-05-26
-sync_note: "视觉回归整改: img alt / 导航高亮 / 图片回退 / router scrollBehavior"
+last_synced_commit: 67f9833
+last_synced_date: 2026-05-27
+sync_note: "PR #13 chore: untrack 历史污染进 git 的 node_modules/dist 产物；不动 src/ 业务代码与组件结构"
 ---
 
 # hmall-admin
