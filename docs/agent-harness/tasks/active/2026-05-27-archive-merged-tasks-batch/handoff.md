@@ -52,7 +52,7 @@ PR-open（即将推送 + 创建 PR + 等 CI/codex-review）。
 - Base branch: `main`
 - Task branch: `task/2026-05-27-archive-merged-tasks-batch`
 - Remote branch: `origin/task/2026-05-27-archive-merged-tasks-batch`
-- Pull request: 推送后创建，URL 回写。
+- Pull request: https://github.com/3219378872/web-dev-experiment/pull/12
 - Remote branch cleanup: pending until PR is merged.
 
 ## CI And Review
