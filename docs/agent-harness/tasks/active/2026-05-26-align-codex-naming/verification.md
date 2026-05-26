@@ -1,13 +1,18 @@
 # Verification
 
-## Pre-flight harness lints
+## 本地 CI 等价命令（按 docs/agent-harness/quality-rules.md::CI Verification 节）
 
 | Command | Result | Evidence |
 | --- | --- | --- |
-| `python3 scripts/agent_harness.py check` | passed | active/completed 任务记录全部通过结构校验 |
-| `python3 scripts/knowledge_base.py check` | passed | K001–K004/K006 通过；本 PR 只触碰 `.github/workflows/ci.yml`，不在 KB tracks 中，K005 无触发 |
-| `python3 scripts/engineering-lint.py` | passed | engineering-lint: all checks passed |
+| `python3 scripts/agent_harness.py check` | passed | `agent harness check passed` |
+| `python3 scripts/knowledge_base.py check --base origin/main` | passed | `knowledge base check passed`，本 PR 改动 `.github/workflows/ci.yml` + `docs/agent-harness/tasks/active/2026-05-26-align-codex-naming/*` 均不在任何 KB 页面 `tracks:` 中，K005 无触发 |
+| `python3 scripts/engineering-lint.py` | passed | `engineering-lint: all checks passed`（修复 context.md 跨仓库相对路径后） |
 | `diff -u AGENTS.md CLAUDE.md` | passed | identical（本 PR 未触碰这两份镜像文件） |
+| `mvn -B -ntp -q test` | passed | 全部后端模块单测通过，exit 0；Java 21 运行 Java 11 字节码兼容（项目 source/target=11） |
+| `mvn -B -ntp -q -Pintegration verify -DskipUnitTests=true` | skipped | 本机 sandbox 无 daemon MySQL/Redis 监听端口；CI integration job 已用 service container 跑同等命令（见 ci.yml:50–88），本 PR 不动 backend 代码，无新增集成测试要求覆盖 |
+| `cd hmall-web   && npm ci && npm test --if-present && npm run build` | passed | `npm ci` 装 80 个包；`npm test --if-present` 因 package.json 未定义 `test` 脚本而优雅跳过；`npm run build` `✓ built in 5.25s` |
+| `cd hmall-admin && npm ci && npm test --if-present && npm run build` | passed | `npm ci` 装 83 个包；`npm test --if-present` 同上跳过；`npm run build` `✓ built in 7.73s` |
+| `docker compose -f docker-compose.yml config -q` | passed | exit 0（compose 文件语法 + 镜像引用全部解析成功） |
 
 ## Endpoint 根因定位证据
 
