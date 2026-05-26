@@ -3,7 +3,7 @@ status: pr-open
 base_branch: main
 task_branch: task/2026-05-27-archive-cleanup-task
 remote_branch: origin/task/2026-05-27-archive-cleanup-task
-pull_request: null
+pull_request: https://github.com/3219378872/web-dev-experiment/pull/14
 ci_status: pending
 codex_review: pending
 remote_cleanup: pending
@@ -11,4 +11,4 @@ spec: null
 plan: null
 spec_waiver: chore 归档，无设计决策（task.yaml 终态字段刷 + agent_harness.py complete）。
 plan_waiver: 单一动作 + 自带 task record，无多步实施。
-pr_waiver: 临时占位 —— gh pr create 后回写 URL；后续 commit 清空本字段。
+pr_waiver: null
