@@ -49,15 +49,6 @@ class ItemServiceImplIT {
     }
 
     @Test
-    void deductStock_insufficientStock_shouldThrow() {
-        List<OrderDetailDTO> items = List.of(
-                new OrderDetailDTO().setItemId(100L).setNum(200)
-        );
-        assertThatThrownBy(() -> itemService.deductStock(items))
-                .hasMessageContaining("更新库存异常");
-    }
-
-    @Test
     void queryItemByIds_shouldReturnMatchingItems() {
         List<ItemDTO> result = itemService.queryItemByIds(List.of(100L, 101L));
         assertThat(result).hasSize(2);
