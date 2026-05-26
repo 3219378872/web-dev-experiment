@@ -138,14 +138,14 @@ jobs:
           fetch-depth: 0
       - name: Verify Codex secrets
         env:
-          HAS_KEY: ${{ secrets.OPENAI_API_KEY != '' }}
-          HAS_ENDPOINT: ${{ secrets.OPENAI_RESPONSES_API_ENDPOINT != '' }}
+          HAS_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY != '' }}
+          HAS_OPENAI_RESPONSES_API_ENDPOINT: ${{ secrets.OPENAI_RESPONSES_API_ENDPOINT != '' }}
         run: |
-          if [ "$HAS_KEY" != "true" ]; then
+          if [ "$HAS_OPENAI_API_KEY" != "true" ]; then
             echo "Missing repository secret: OPENAI_API_KEY" >&2
             exit 1
           fi
-          if [ "$HAS_ENDPOINT" != "true" ]; then
+          if [ "$HAS_OPENAI_RESPONSES_API_ENDPOINT" != "true" ]; then
             echo "Missing repository secret: OPENAI_RESPONSES_API_ENDPOINT" >&2
             exit 1
           fi
