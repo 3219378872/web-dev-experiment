@@ -23,7 +23,7 @@ PR open —— https://github.com/3219378872/web-dev-experiment/pull/3；本地 
 - `pay-service/src/test/java/com/hmall/enums/PayTypeTest.java`
 
 测试标注（1 个）：
-- `hm-service/src/test/java/com/hmall/service/impl/ItemServiceImplTest.java`（@Disabled）
+- hm-service src/test/.../ItemServiceImplTest.java（@Disabled，task #3 已迁移至 item-service IT）
 
 Harness 任务记录：
 - `docs/agent-harness/tasks/active/2026-05-26-backend-unit-tests/`

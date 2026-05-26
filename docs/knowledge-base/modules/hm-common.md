@@ -2,9 +2,9 @@
 title: hm-common
 tracks:
   - hm-common/
-last_synced_commit: bc09d0e
+last_synced_commit: 33e9420
 last_synced_date: 2026-05-26
-sync_note: ""
+sync_note: "添加 AbstractIT 基类（未使用），不改业务逻辑"
 ---
 
 # hm-common

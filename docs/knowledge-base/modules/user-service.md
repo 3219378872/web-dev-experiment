@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: bc09d0e
+last_synced_commit: 33e9420
 last_synced_date: 2026-05-26
-sync_note: ""
+sync_note: "添加集成测试（UserServiceImplIT, AddressServiceImplIT, FavoriteServiceImplIT），不改业务逻辑"
 ---
 
 # user-service

@@ -2,9 +2,9 @@
 title: pay-service
 tracks:
   - pay-service/
-last_synced_commit: bc09d0e
+last_synced_commit: 33e9420
 last_synced_date: 2026-05-26
-sync_note: ""
+sync_note: "添加集成测试（PayOrderServiceImplIT）+ DDL 修复 pay_order 扩展列"
 ---
 
 # pay-service

@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: bc09d0e
+last_synced_commit: 33e9420
 last_synced_date: 2026-05-26
-sync_note: ""
+sync_note: "trade-service/pay-service/cart-service/item-service 添加集成测试"
 ---
 
 # order-checkout-flow
