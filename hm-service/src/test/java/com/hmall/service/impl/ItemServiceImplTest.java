@@ -3,6 +3,7 @@ package com.hmall.service.impl;
 import com.hmall.domain.dto.OrderDetailDTO;
 import com.hmall.service.IItemService;
 import com.hmall.utils.JwtTool;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,7 @@ import java.time.Duration;
 import java.util.List;
 
 @SpringBootTest
+@Disabled("依赖运行中的 MySQL/Nacos/Redis，迁移到 task #3 集成测试（Testcontainers + -Pintegration profile）")
 class ItemServiceImplTest {
 
     @Autowired
