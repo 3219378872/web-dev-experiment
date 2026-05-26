@@ -47,11 +47,11 @@ python3 scripts/engineering-lint.py
   - **integration**：MySQL 8 + Redis 7 service container，`mvn -Pintegration verify`。
   - **smoke**：harness summary、`mvn compile`、`hmall-web` + `hmall-admin` 的
     `npm ci / npm test --if-present / npm run build`、`docker compose config -q`。
-  - **codex-review**（PR-only，blocking）：依赖前 4 个 job 通过，用
+  - **codex-review**（PR-only，强门控）：依赖前 4 个 job 通过，用
     `openai/codex-action@v1`（`gpt-5.4`）做任务完成度与合规审查；输出
     `blocking findings: none` 才放行。需仓库 secrets：
     `OPENAI_API_KEY`、`OPENAI_RESPONSES_API_ENDPOINT`。
-    若 secrets 缺失则自动跳过（graceful degradation）。
+    缺失 secrets 或任一检查不通过则阻塞合并。
 - `knowledge-base-sync.yml` —— 每周一 06:00 UTC 跑 `knowledge_base.py sync-report`，
   通过 `peter-evans/create-pull-request@v6` 开 `chore: knowledge base sync` PR。
 - `pr-cleanup.yml` —— PR 关闭即删除合并分支。

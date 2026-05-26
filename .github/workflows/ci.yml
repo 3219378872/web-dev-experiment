@@ -137,20 +137,20 @@ jobs:
         with:
           fetch-depth: 0
       - name: Verify Codex secrets
-        id: secrets_check
         env:
           HAS_KEY: ${{ secrets.OPENAI_API_KEY != '' }}
           HAS_ENDPOINT: ${{ secrets.OPENAI_RESPONSES_API_ENDPOINT != '' }}
         run: |
-          if [ "$HAS_KEY" != "true" ] || [ "$HAS_ENDPOINT" != "true" ]; then
-            echo "Missing OPENAI_API_KEY or OPENAI_RESPONSES_API_ENDPOINT — skipping codex-review"
-            echo "skip=true" >> $GITHUB_OUTPUT
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
+          if [ "$HAS_KEY" != "true" ]; then
+            echo "Missing repository secret: OPENAI_API_KEY" >&2
+            exit 1
+          fi
+          if [ "$HAS_ENDPOINT" != "true" ]; then
+            echo "Missing repository secret: OPENAI_RESPONSES_API_ENDPOINT" >&2
+            exit 1
           fi
       - name: Codex task completion and compliance review
         id: codex_review
-        if: steps.secrets_check.outputs.skip != 'true'
         uses: openai/codex-action@v1
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
@@ -193,7 +193,6 @@ jobs:
             If any blocking finding exists, fail the action. If there are no
             blocking findings, say "blocking findings: none".
       - name: Fail on blocking Codex findings
-        if: steps.secrets_check.outputs.skip != 'true'
         run: |
           if ! grep -qi "blocking findings: none" codex-review.md; then
             cat codex-review.md
