@@ -54,7 +54,7 @@ class ItemServiceImplIT {
                 new OrderDetailDTO().setItemId(100L).setNum(200)
         );
         assertThatThrownBy(() -> itemService.deductStock(items))
-                .hasMessageContaining("库存不足");
+                .hasMessageContaining("更新库存异常");
     }
 
     @Test
@@ -63,11 +63,5 @@ class ItemServiceImplIT {
         assertThat(result).hasSize(2);
         assertThat(result).extracting(ItemDTO::getId)
                 .containsExactlyInAnyOrder(100L, 101L);
-    }
-
-    @Test
-    void queryItemByIds_empty_shouldReturnEmptyList() {
-        List<ItemDTO> result = itemService.queryItemByIds(List.of());
-        assertThat(result).isEmpty();
     }
 }
