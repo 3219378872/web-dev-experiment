@@ -1,0 +1,14 @@
+slug: 2026-05-27-archive-merged-tasks-batch
+status: done
+base_branch: main
+task_branch: task/2026-05-27-archive-merged-tasks-batch
+remote_branch: origin/task/2026-05-27-archive-merged-tasks-batch
+pull_request: https://github.com/3219378872/web-dev-experiment/pull/12
+ci_status: passed
+codex_review: passed
+remote_cleanup: done
+spec: null
+plan: null
+spec_waiver: 单一 chore PR：仅做 task.yaml 终态字段更新 + active→completed 目录迁移，无代码改动。
+plan_waiver: 7 个任务的归档动作机械且独立，逐一调用 agent_harness.py complete，无需多步 plan。
+pr_waiver: null

@@ -1,0 +1,14 @@
+slug: 2026-05-27-cleanup-tracked-build-artifacts
+status: pr-open
+base_branch: main
+task_branch: task/2026-05-27-cleanup-tracked-build-artifacts
+remote_branch: origin/task/2026-05-27-cleanup-tracked-build-artifacts
+pull_request: null
+ci_status: pending
+codex_review: pending
+remote_cleanup: pending
+spec: null
+plan: null
+spec_waiver: 历史污染清理 chore，无设计决策（git rm --cached 一系列 build 产物，无业务代码改动）。
+plan_waiver: 单条 git rm 命令 + 归档前一 task，无多步实施 plan。
+pr_waiver: 临时占位 —— branch 推送后 gh pr create 生成 URL，后续 commit 回写。
