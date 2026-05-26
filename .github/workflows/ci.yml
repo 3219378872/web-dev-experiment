@@ -137,26 +137,20 @@ jobs:
         with:
           fetch-depth: 0
       - name: Verify Codex secrets
+        id: secrets_check
         env:
-          HAS_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY != '' }}
-          HAS_OPENAI_RESPONSES_API_ENDPOINT: ${{ secrets.OPENAI_RESPONSES_API_ENDPOINT != '' }}
+          HAS_KEY: ${{ secrets.OPENAI_API_KEY != '' }}
+          HAS_ENDPOINT: ${{ secrets.OPENAI_RESPONSES_API_ENDPOINT != '' }}
         run: |
-          missing=""
-          if [ "$HAS_OPENAI_API_KEY" != "true" ]; then
-            echo "Missing repository secret: OPENAI_API_KEY" >&2
-            missing=1
-          fi
-          if [ "$HAS_OPENAI_RESPONSES_API_ENDPOINT" != "true" ]; then
-            echo "Missing repository secret: OPENAI_RESPONSES_API_ENDPOINT" >&2
-            missing=1
-          fi
-          if [ -n "$missing" ]; then
-            echo "codex-review skipped due to missing secrets"
-            exit 0
+          if [ "$HAS_KEY" != "true" ] || [ "$HAS_ENDPOINT" != "true" ]; then
+            echo "Missing OPENAI_API_KEY or OPENAI_RESPONSES_API_ENDPOINT — skipping codex-review"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
           fi
       - name: Codex task completion and compliance review
         id: codex_review
-        if: ${{ secrets.OPENAI_API_KEY != '' && secrets.OPENAI_RESPONSES_API_ENDPOINT != '' }}
+        if: steps.secrets_check.outputs.skip != 'true'
         uses: openai/codex-action@v1
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
@@ -199,12 +193,8 @@ jobs:
             If any blocking finding exists, fail the action. If there are no
             blocking findings, say "blocking findings: none".
       - name: Fail on blocking Codex findings
-        if: ${{ secrets.OPENAI_API_KEY != '' && secrets.OPENAI_RESPONSES_API_ENDPOINT != '' }}
+        if: steps.secrets_check.outputs.skip != 'true'
         run: |
-          if [ ! -f codex-review.md ]; then
-            echo "codex-review.md not found — review was skipped"
-            exit 0
-          fi
           if ! grep -qi "blocking findings: none" codex-review.md; then
             cat codex-review.md
             exit 1
