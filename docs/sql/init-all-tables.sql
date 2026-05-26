@@ -95,12 +95,24 @@ CREATE TABLE IF NOT EXISTS order_logistics (
 
 CREATE TABLE IF NOT EXISTS pay_order (
     id BIGINT PRIMARY KEY,
-    biz_order_no BIGINT,
-    pay_channel VARCHAR(32),
+    biz_order_no BIGINT NOT NULL,
+    pay_order_no BIGINT,
+    biz_user_id BIGINT,
+    pay_channel_code VARCHAR(32),
     amount INT,
-    status VARCHAR(32),
+    pay_type INT,
+    status INT DEFAULT 0,
+    expand_json VARCHAR(1024),
+    result_code VARCHAR(32),
+    result_msg VARCHAR(255),
+    pay_success_time DATETIME,
+    pay_over_time DATETIME,
+    qr_code_url VARCHAR(255),
     create_time DATETIME,
-    update_time DATETIME
+    update_time DATETIME,
+    creater BIGINT,
+    updater BIGINT,
+    is_delete TINYINT(1) DEFAULT 0
 );
 
 -- ==================== 扩展表 ====================

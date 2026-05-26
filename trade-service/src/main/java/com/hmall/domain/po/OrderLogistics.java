@@ -2,6 +2,7 @@ package com.hmall.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -50,6 +51,7 @@ public class OrderLogistics implements Serializable {
     /**
      * 收件人手机号码
      */
+    @TableField("phone")
     private String mobile;
 
     /**
@@ -65,11 +67,13 @@ public class OrderLogistics implements Serializable {
     /**
      * 区
      */
+    @TableField("district")
     private String town;
 
     /**
      * 街道
      */
+    @TableField("detail")
     private String street;
 
     /**
