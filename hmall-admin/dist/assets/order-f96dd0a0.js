@@ -1,1 +1,0 @@
-import{r as t}from"./request-8b05bce3.js";const e=s=>t.get("/admin/orders",{params:s}),d=(s,r)=>t.put(`/admin/orders/${s}/ship`,null,{params:{trackingNumber:r}}),o=(s,r)=>t.put(`/admin/orders/${s}/status`,null,{params:{status:r}});export{e as g,d as s,o as u};

@@ -1,1 +1,0 @@
-import{r as i}from"./request-8b05bce3.js";const e=t=>i.get("/admin/notifications",{params:t}),s=t=>i.post("/admin/notifications",t),n=(t,a)=>i.put(`/admin/notifications/${t}`,a),c=t=>i.delete(`/admin/notifications/${t}`),d=t=>i.get("/admin/feedbacks",{params:t}),f=(t,a)=>i.put(`/admin/feedbacks/${t}/reply`,a);export{d as a,c as d,e as g,f as r,s,n as u};

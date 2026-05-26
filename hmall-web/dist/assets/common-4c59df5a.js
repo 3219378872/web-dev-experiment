@@ -1,1 +1,0 @@
-import{p as e}from"./index-5d354977.js";const a=t=>e.post("/feedbacks",t),o=()=>e.get("/notifications/active"),i=t=>e.post("/favorites",null,{params:{itemId:t}}),c=t=>e.delete(`/favorites/${t}`),r=()=>e.get("/favorites"),n=t=>e.get(`/favorites/check/${t}`);export{i as a,r as b,n as c,o as g,c as r,a as s};
