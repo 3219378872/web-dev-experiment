@@ -71,12 +71,34 @@ mvn -q -pl hm-service -am verify
 
 ## CI Verification
 
-GitHub Actions 把 harness + KB 验证作为 lint。`lint` job 必须运行：
+GitHub Actions（`.github/workflows/ci.yml`）有 5 个 job，全部不得跳过：
+
+| Job | 内容 |
+| --- | --- |
+| `lint` | harness check + KB check（PR 时含 K005）+ AGENTS↔CLAUDE 镜像 + engineering-lint |
+| `test` | `mvn -B -ntp -q test` |
+| `integration` | MySQL 8 + Redis 7 service container，`mvn -Pintegration verify` |
+| `smoke` | harness summary + `mvn compile` + 两端 `npm ci/test/build` + `docker compose config -q` |
+| `codex-review` | PR-only，依赖前 4 job 通过；blocking-findings 非空则失败 |
+
+`codex-review` 需仓库 secrets `OPENAI_API_KEY`、`OPENAI_RESPONSES_API_ENDPOINT`；
+未配置时该 job 会硬失败（不静默跳过）。
+
+辅助 workflow：
+- `knowledge-base-sync.yml` —— 每周一自动生成 `SYNC-STATUS.md` 并开 PR。
+- `pr-cleanup.yml` —— PR 合并即删除远程分支。
+
+本地等价命令（用于 PR 前自检）：
 
 ```bash
 python3 scripts/agent_harness.py check
 python3 scripts/knowledge_base.py check --base origin/main
 python3 scripts/engineering-lint.py
+mvn -B -ntp -q test
+mvn -B -ntp -q -Pintegration verify -DskipUnitTests=true   # 需本地 MySQL/Redis
+cd hmall-web   && npm ci && npm test --if-present && npm run build
+cd hmall-admin && npm ci && npm test --if-present && npm run build
+docker compose -f docker-compose.yml config -q
 ```
 
 ## Frontend Verification

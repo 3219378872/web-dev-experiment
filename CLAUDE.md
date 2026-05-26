@@ -36,6 +36,28 @@ python3 scripts/engineering-lint.py
 本地验收、推远程、开 PR、过 CI 与 review、合并后删除远程分支，把分支/PR/CI/review/
 清理证据写进 harness 任务记录。
 
+## CI / GitHub Actions
+
+`.github/workflows/` 下三个工作流（参照 bidking-controller 配置，不得跳过）：
+
+- `ci.yml` —— 每 PR + push to main 触发，5 个 job：
+  - **lint**：harness check、KB check（PR 时 `--base origin/<base>` 启用 K005）、
+    AGENTS↔CLAUDE 字节镜像、engineering-lint。
+  - **test**：`mvn -B -ntp -q test` 后端单元测试。
+  - **integration**：MySQL 8 + Redis 7 service container，`mvn -Pintegration verify`。
+  - **smoke**：harness summary、`mvn compile`、`hmall-web` + `hmall-admin` 的
+    `npm ci / npm test --if-present / npm run build`、`docker compose config -q`。
+  - **codex-review**（PR-only，blocking）：依赖前 4 个 job 通过，用
+    `openai/codex-action@v1` 做任务完成度与合规审查；输出
+    `blocking findings: none` 才放行。需仓库 secrets：
+    `OPENAI_API_KEY`、`OPENAI_RESPONSES_API_ENDPOINT`。
+- `knowledge-base-sync.yml` —— 每周一 06:00 UTC 跑 `knowledge_base.py sync-report`，
+  通过 `peter-evans/create-pull-request@v6` 开 `chore: knowledge base sync` PR。
+- `pr-cleanup.yml` —— PR 关闭即删除合并分支。
+
+CI 默认不放过任何一个 job。若某 job 因密钥缺失需临时绕过，必须在 PR 描述与
+对应 harness 任务的 `handoff.md` 写明原因。
+
 ## Knowledge Base
 
 `docs/knowledge-base/` 是"项目当前如何工作"的策展层：每个 Maven 模块 / 前端目录
