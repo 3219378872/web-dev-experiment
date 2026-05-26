@@ -1,7 +1,7 @@
 # Handoff: Backend Integration Tests
 
 ## Status
-PR open —— https://github.com/3219378872/web-dev-experiment/pull/4；本地 compile + unit tests 通过；集成测试需 CI MySQL/Redis。
+Done — merged via PR #4 at 2026-05-26T08:57:28Z; remote branch deleted by pr-cleanup.yml; task archived to completed/ by PR #12.
 
 ## Files Changed
 

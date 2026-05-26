@@ -1,7 +1,7 @@
 # Handoff: Align Codex Naming
 
 ## Status
-PR-open，等本次 task-record 提交后 codex-review 复跑验证。
+Done — merged via PR #11 at 2026-05-26T16:12:25Z; remote branch deleted by pr-cleanup.yml; task archived to completed/ by PR #12.
 
 ## Files Changed
 - `.github/workflows/ci.yml` —— `codex-review.Verify Codex secrets` step 的两个
@@ -50,7 +50,7 @@ PR-open，等本次 task-record 提交后 codex-review 复跑验证。
 - Task branch: `task/2026-05-26-align-codex-naming`
 - Remote branch: `origin/task/2026-05-26-align-codex-naming`
 - Pull request: https://github.com/3219378872/web-dev-experiment/pull/11
-- Remote branch cleanup: pending until PR is merged.
+- Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #11 merged at 2026-05-26T16:12:25Z).
 
 ## CI And Review
 - CI status: lint / test / integration / smoke 全 green；codex-review 在

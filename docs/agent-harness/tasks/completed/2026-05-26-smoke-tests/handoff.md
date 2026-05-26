@@ -1,7 +1,7 @@
 # Handoff: Smoke Tests
 
 ## Status
-Implementing —— smoke.sh 脚本已编写；待 CI 更新与全量验证。
+Done — merged via PR #5 at 2026-05-26T09:08:06Z; remote branch deleted by pr-cleanup.yml; task archived to completed/ by PR #12.
 
 ## Files Changed
 - `scripts/smoke/smoke.sh`（新增）

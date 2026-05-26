@@ -1,7 +1,7 @@
 # Handoff: Playwright E2E Tests
 
 ## Status
-Implementing —— e2e/ 目录已创建；待 CI 更新与全量验证。
+Done — merged via PR #6 at 2026-05-26T09:17:23Z; remote branch deleted by pr-cleanup.yml; task archived to completed/ by PR #12.
 
 ## Files Changed
 - `e2e/package.json`（新增）

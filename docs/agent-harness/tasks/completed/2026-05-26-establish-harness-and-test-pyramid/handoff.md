@@ -1,7 +1,7 @@
 # Handoff: Establish Harness And Test Pyramid
 
 ## Status
-Implementing — harness 脚手架已完成并通过 self-test；测试金字塔分阶段推进中。
+Done — merged via PR #1 at 2026-05-26T06:16:02Z; remote branch deleted by pr-cleanup.yml; task archived to completed/ by PR #12.
 
 ## Files Changed
 - `scripts/_agent_harness/__init__.py`
@@ -60,8 +60,8 @@ Implementing — harness 脚手架已完成并通过 self-test；测试金字塔
 - Task branch: `task/2026-05-26-establish-harness-and-test-pyramid`
 - Remote branch: `origin/task/2026-05-26-establish-harness-and-test-pyramid`
 - Pull request: none - create after local acceptance and push.
-- Remote branch cleanup: pending until PR is merged.
+- Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #1 merged at 2026-05-26T06:16:02Z).
 
 ## CI And Review
-- CI status: not run yet — GitHub Actions 尚未在本仓库配置。
-- Codex review: not run yet.
+- CI status: passed (5/5 jobs green on PR #1 merge run).
+- Codex review: passed (blocking findings: none) on PR #1.

@@ -17,4 +17,4 @@
 | bidking-controller 临时诊断 PR 清理 | done | PR #15 closed；远程分支已删；ci.yml 字节恢复 |
 | Acceptance evidence 列出 exact commands + outcomes | done | `verification.md` 四组表格（pre-flight lints / 根因定位 / CI 行为对比 / cleanup） |
 | Next-step CI 验证计划 | done | `handoff.md::Next Action` 列出推送后期待的 codex-review 复跑结果 |
-| 当前 CI 状态、codex_review 状态在 task.yaml 真实反映 | done | `ci_status: gating-pending`，`codex_review: blocking-on-harness-record` |
+| 当前 CI 状态、codex_review 状态在 task.yaml 真实反映 | done | 终态：`ci_status: passed`，`codex_review: passed`（值均在 README.md::task.yaml 字段允许枚举内）。PR 期间一度尝试过非枚举值 `gating-pending` / `blocking-on-harness-record`，已在 PR #11 的 commit 973971b 修回 `pending`，最终 PR #12 归档时刷为 `passed`。 |

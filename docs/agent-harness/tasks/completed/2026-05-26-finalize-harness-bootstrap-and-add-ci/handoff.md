@@ -1,7 +1,7 @@
 # Handoff: Finalize Harness Bootstrap And Add Ci
 
 ## Status
-Implementing —— PR 即将创建。
+Done — merged via PR #2 at 2026-05-26T08:01:11Z; remote branch deleted by pr-cleanup.yml; task archived to completed/ by PR #12.
 
 ## Files Changed
 - `.github/workflows/ci.yml`（新）
@@ -46,8 +46,8 @@ Implementing —— PR 即将创建。
 - Task branch: `task/2026-05-26-finalize-harness-bootstrap-and-add-ci`
 - Remote branch: `origin/task/2026-05-26-finalize-harness-bootstrap-and-add-ci`
 - Pull request: none - create after local acceptance and push.
-- Remote branch cleanup: pending until PR is merged.
+- Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #2 merged at 2026-05-26T08:01:11Z).
 
 ## CI And Review
-- CI status: not run yet —— 推送后由 GitHub Actions 触发。
-- Codex review: not run yet —— 仓库未配置 secrets。
+- CI status: passed (5/5 jobs green on PR #2 merge run).
+- Codex review: passed (blocking findings: none) on PR #2.

@@ -15,4 +15,4 @@
 | `pr-cleanup.yml` PR 合并后删合并分支 | done | `pull_request.closed + merged==true` |
 | `CLAUDE.md` ⇄ `AGENTS.md` 同步含 CI 章节 | done | `diff -q CLAUDE.md AGENTS.md` 无差异 |
 | `quality-rules.md` CI Verification 小节列出全部 5 job | done | `docs/agent-harness/quality-rules.md` |
-| PR 在 main 上 merge 并删除远程分支 | pending | 等本 PR 创建后由 GitHub 完成 |
+| PR 在 main 上 merge 并删除远程分支 | done | PR #2 merged at 2026-05-26T08:01:11Z, remote branch auto-deleted by pr-cleanup.yml |

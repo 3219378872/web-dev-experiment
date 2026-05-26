@@ -1,7 +1,7 @@
 # Handoff: Backend Unit Tests
 
 ## Status
-PR open —— https://github.com/3219378872/web-dev-experiment/pull/3；本地 81/81 tests 通过；待 CI 与 review。
+Done — merged via PR #3 at 2026-05-26T08:01:00Z; remote branch deleted by pr-cleanup.yml; task archived to completed/ by PR #12.
 
 ## Files Changed
 源码修复（1 个）：
@@ -62,8 +62,8 @@ Harness 任务记录：
 - Task branch: `task/2026-05-26-backend-unit-tests`
 - Remote branch: `origin/task/2026-05-26-backend-unit-tests`
 - Pull request: none - create after local acceptance and push.
-- Remote branch cleanup: pending until PR is merged.
+- Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #3 merged at 2026-05-26T08:01:00Z).
 
 ## CI And Review
-- CI status: not run yet —— 等 push 后 GitHub Actions 触发。
-- Codex review: not run yet —— 等 PR #2 提供的 codex-review job + secrets。
+- CI status: passed (5/5 jobs green on PR #3 merge run).
+- Codex review: passed (blocking findings: none) on PR #3.

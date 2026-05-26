@@ -8,4 +8,4 @@
 | hmall-admin 测试覆盖核心流程 | done | login/items 2 个 spec |
 | auth.setup.ts token 注入 | done | loginAs + injectToken |
 | TypeScript 编译通过 | done | tsconfig.json |
-| CI integration | pending | ci.yml 待更新 |
+| CI integration | done | PR #6 合并时 ci.yml 已含对应 step；当时 main push CI 5/5 绿 |
