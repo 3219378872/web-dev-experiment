@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS user_coupons (
     coupon_id BIGINT NOT NULL,
     status INT DEFAULT 1,
     used_order_id BIGINT,
+    use_time DATETIME,
     create_time DATETIME,
     INDEX idx_user_id (user_id)
 );
