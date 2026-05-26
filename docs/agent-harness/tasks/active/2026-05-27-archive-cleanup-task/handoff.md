@@ -1,7 +1,10 @@
 # Handoff: Archive Cleanup Task
 
 ## Status
-PR-open（即将推送 + 创建 PR + 等 CI/codex-review）。
+PR-open —— PR #14 已创建（https://github.com/3219378872/web-dev-experiment/pull/14），
+remote branch `origin/task/2026-05-27-archive-cleanup-task` 已推送，
+本地 CI 等价命令全套实跑通过（mvn test exit 0 + 两端 npm build + docker compose config 全 pass），
+当前等 CI/codex-review 迭代。
 
 ## Files Changed
 - `docs/agent-harness/tasks/active/2026-05-27-cleanup-tracked-build-artifacts/` →
@@ -33,11 +36,11 @@ PR-open（即将推送 + 创建 PR + 等 CI/codex-review）。
   不再开 PR #15 归档本 task。
 
 ## Next Action
-> **Progress note**: 步骤 1-2 已完成；步骤 3 编辑 narrative 中；步骤 4-5 即将完成。
+> **Progress note**: 步骤 1-5 已完成；当前处于步骤 6（CI/codex-review 迭代）。
 
-4. 本地验收（pending - 即将跑）
-5. push + PR（pending - 即将做）
-6. 等 CI 5/5 + codex-review `blocking findings: none`，merge
+6. 等 CI 5/5 + codex-review `blocking findings: none`，merge PR #14（迭代中）。
+7. PR merge 后 pr-cleanup.yml 自动删 remote branch；本任务 task record 保留在
+   active/ 作为递归尾巴，不再开 PR #15 归档。
 
 ## Worktree Or Branch
 - `task/2026-05-27-archive-cleanup-task`
@@ -46,8 +49,8 @@ PR-open（即将推送 + 创建 PR + 等 CI/codex-review）。
 - Base branch: `main`
 - Task branch: `task/2026-05-27-archive-cleanup-task`
 - Remote branch: `origin/task/2026-05-27-archive-cleanup-task`
-- Pull request: 推送后开 PR，URL 回写。
-- Remote branch cleanup: pending until PR is merged.
+- Pull request: https://github.com/3219378872/web-dev-experiment/pull/14
+- Remote branch cleanup: pending until PR #14 merged (pr-cleanup.yml 自动删除).
 
 ## CI And Review
 - CI status: 推送后由 GitHub Actions 触发。

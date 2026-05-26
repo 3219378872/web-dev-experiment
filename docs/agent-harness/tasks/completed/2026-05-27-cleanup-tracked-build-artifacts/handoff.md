@@ -1,9 +1,9 @@
 # Handoff: Cleanup Tracked Build Artifacts
 
 ## Status
-PR-open —— PR #13 已创建（https://github.com/3219378872/web-dev-experiment/pull/13），
-remote branch `origin/task/2026-05-27-cleanup-tracked-build-artifacts` 已推送，CI/
-codex-review 迭代中（已应用 1 轮 codex 反馈：K005 KB 同步 + 本次反馈的 verification 完整化 + 归档 handoff 终态对齐）。
+Done — merged via PR #13 at 2026-05-26T18:28:38Z (merge commit `5849a47`); remote branch
+`origin/task/2026-05-27-cleanup-tracked-build-artifacts` 已由 pr-cleanup.yml 自动删除；
+本任务由 PR #14 归档到 completed/。PR #13 期间经过 5 轮 codex review 迭代后通过强门控。
 
 ## Files Changed
 - 25124 个 deletion：`hmall-web/node_modules/**`、`hmall-admin/node_modules/**`、
