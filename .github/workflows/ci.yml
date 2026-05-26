@@ -149,6 +149,54 @@ jobs:
             echo "Missing repository secret: OPENAI_RESPONSES_API_ENDPOINT" >&2
             exit 1
           fi
+      - name: Diagnose endpoint reachability and secret integrity
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ENDPOINT: ${{ secrets.OPENAI_RESPONSES_API_ENDPOINT }}
+        run: |
+          set +e
+          echo "::group::secret fingerprints (no values exposed)"
+          KEY_LEN=$(printf %s "$OPENAI_API_KEY" | wc -c)
+          EP_LEN=$(printf %s "$ENDPOINT" | wc -c)
+          KEY_SHA=$(printf %s "$OPENAI_API_KEY" | sha256sum | cut -c1-12)
+          EP_SHA=$(printf %s "$ENDPOINT" | sha256sum | cut -c1-12)
+          echo "key  len=$KEY_LEN sha12=$KEY_SHA"
+          echo "ep   len=$EP_LEN  sha12=$EP_SHA  scheme=${ENDPOINT%%://*}"
+          echo "ep   trailing_slash=$([ "${ENDPOINT: -1}" = "/" ] && echo yes || echo no)"
+          echo "ep   has_/responses=$(case "$ENDPOINT" in *"/responses"*) echo yes;; *) echo no;; esac)"
+          echo "::endgroup::"
+          echo "::group::DNS + HTTPS reachability"
+          HOST=$(printf %s "$ENDPOINT" | sed -E 's|https?://||; s|/.*||')
+          echo "host=$HOST"
+          getent hosts "$HOST"
+          echo "::endgroup::"
+          echo "::group::non-stream Responses API ping"
+          curl -sS -o /tmp/r1.json \
+            -w "http=%{http_code} ttfb=%{time_starttransfer} total=%{time_total}\n" \
+            -X POST "${ENDPOINT%/}/responses" \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"model":"gpt-5.4","input":"ping","stream":false}' \
+            --max-time 60
+          echo "--- response head ---"
+          head -c 500 /tmp/r1.json; echo
+          echo "::endgroup::"
+          echo "::group::stream Responses API ping (effort=high, mirrors codex-action)"
+          curl -sS -N -X POST "${ENDPOINT%/}/responses" \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Accept: text/event-stream" \
+            -d '{"model":"gpt-5.4","input":"ping","stream":true,"reasoning":{"effort":"high"}}' \
+            --max-time 120 \
+            > /tmp/r2.sse 2>&1
+          STREAM_EXIT=$?
+          BYTES=$(wc -c < /tmp/r2.sse)
+          EVENTS=$(grep -c '^event:' /tmp/r2.sse)
+          COMPLETED=$(grep -c '^event: response.completed' /tmp/r2.sse)
+          echo "exit=$STREAM_EXIT bytes=$BYTES events=$EVENTS completed_frames=$COMPLETED"
+          echo "--- last 8 lines ---"
+          tail -8 /tmp/r2.sse
+          echo "::endgroup::"
       - name: Codex task completion and compliance review
         id: codex_review
         uses: openai/codex-action@v1
