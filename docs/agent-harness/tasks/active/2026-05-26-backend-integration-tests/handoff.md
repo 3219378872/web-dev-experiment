@@ -1,7 +1,7 @@
 # Handoff: Backend Integration Tests
 
 ## Status
-Implementing —— 本地 compile + unit tests 通过；待 push 与开 PR；集成测试需 MySQL/Redis。
+PR open —— https://github.com/3219378872/web-dev-experiment/pull/4；本地 compile + unit tests 通过；集成测试需 CI MySQL/Redis。
 
 ## Files Changed
 
