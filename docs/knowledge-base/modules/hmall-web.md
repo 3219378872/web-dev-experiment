@@ -2,7 +2,7 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: dfb0ed7
+last_synced_commit: 9c355c1
 last_synced_date: 2026-05-27
 sync_note: "PR #13 chore: untrack 历史污染进 git 的 node_modules/dist 产物；不动 src/ 业务代码与组件结构"
 ---
