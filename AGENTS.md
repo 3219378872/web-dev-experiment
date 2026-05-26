@@ -48,9 +48,8 @@ python3 scripts/engineering-lint.py
   - **smoke**：harness summary、`mvn compile`、`hmall-web` + `hmall-admin` 的
     `npm ci / npm test --if-present / npm run build`、`docker compose config -q`。
   - **codex-review**（PR-only，blocking）：依赖前 4 个 job 通过，用
-    `openai/codex-action@v1` 做任务完成度与合规审查；输出
-    `blocking findings: none` 才放行。模型通过 `vars.CODEX_MODEL` 配置
-    （默认 `deepseek-v4-pro`）。需仓库 secrets：
+    `openai/codex-action@v1`（`gpt-5.4`）做任务完成度与合规审查；输出
+    `blocking findings: none` 才放行。需仓库 secrets：
     `OPENAI_API_KEY`、`OPENAI_RESPONSES_API_ENDPOINT`。
     若 secrets 缺失则自动跳过（graceful degradation）。
 - `knowledge-base-sync.yml` —— 每周一 06:00 UTC 跑 `knowledge_base.py sync-report`，

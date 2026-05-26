@@ -154,7 +154,7 @@ jobs:
         uses: openai/codex-action@v1
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
-          model: ${{ vars.CODEX_MODEL || 'deepseek-v4-pro' }}
+          model: gpt-5.4
           effort: high
           responses-api-endpoint: ${{ secrets.OPENAI_RESPONSES_API_ENDPOINT }}
           sandbox: read-only
