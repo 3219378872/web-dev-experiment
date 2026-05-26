@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS user (
     phone VARCHAR(32),
     create_time DATETIME NOT NULL,
     update_time DATETIME,
-    status VARCHAR(32) DEFAULT 'NORMAL',
+    status INT DEFAULT 1,
     balance INT DEFAULT 0,
     role VARCHAR(16) DEFAULT 'user',
     email VARCHAR(128),
