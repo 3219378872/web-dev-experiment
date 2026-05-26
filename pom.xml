@@ -154,6 +154,10 @@
                                     </includes>
                                     <forkCount>1</forkCount>
                                     <reuseForks>true</reuseForks>
+                                    <systemPropertyVariables>
+                                        <spring.cloud.bootstrap.enabled>false</spring.cloud.bootstrap.enabled>
+                                        <spring.cloud.nacos.config.enabled>false</spring.cloud.nacos.config.enabled>
+                                    </systemPropertyVariables>
                                 </configuration>
                             </execution>
                         </executions>
