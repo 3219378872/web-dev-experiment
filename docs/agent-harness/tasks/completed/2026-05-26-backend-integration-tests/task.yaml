@@ -1,12 +1,12 @@
 slug: 2026-05-26-backend-integration-tests
-status: implementing
+status: done
 base_branch: main
 task_branch: task/2026-05-26-backend-integration-tests
 remote_branch: origin/task/2026-05-26-backend-integration-tests
 pull_request: https://github.com/3219378872/web-dev-experiment/pull/4
-ci_status: pending
-codex_review: not-run
-remote_cleanup: pending
+ci_status: passed
+codex_review: passed
+remote_cleanup: done
 spec: docs/superpowers/specs/2026-05-18-hmall-refactor-design.md
 plan: docs/superpowers/plans/2026-05-18-hmall-refactor-plan.md
 spec_waiver: null
