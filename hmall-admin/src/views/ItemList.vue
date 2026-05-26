@@ -10,7 +10,7 @@
     </div>
     <el-table :data="items">
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column label="图片" width="80"><template #default="{row}"><img :src="row.image" style="width:50px;height:50px;object-fit:cover" /></template></el-table-column>
+      <el-table-column label="图片" width="80"><template #default="{row}"><img :src="row.image || '/placeholder.png'" alt="商品图片" style="width:50px;height:50px;object-fit:cover" /></template></el-table-column>
       <el-table-column prop="name" label="名称" />
       <el-table-column label="价格" width="120"><template #default="{row}">&yen;{{(row.price/100).toFixed(2)}}</template></el-table-column>
       <el-table-column prop="stock" label="库存" width="80" />

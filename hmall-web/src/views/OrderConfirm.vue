@@ -18,7 +18,7 @@
     <el-card class="section-card"><template #header>商品清单</template>
       <el-table :data="cartStore.selectedItems" v-if="cartStore.selectedItems.length">
         <el-table-column label="商品">
-          <template #default="{ row }"><div style="display:flex;align-items:center;gap:8px"><img :src="row.image" style="width:40px;height:40px;object-fit:cover" />{{ row.name }}</div></template>
+          <template #default="{ row }"><div style="display:flex;align-items:center;gap:8px"><img :src="row.image || "/placeholder.png"" style="width:40px;height:40px;object-fit:cover" :alt="row.name" />{{ row.name }}</div></template>
         </el-table-column>
         <el-table-column label="单价"><template #default="{ row }">&yen;{{ (row.price/100).toFixed(2) }}</template></el-table-column>
         <el-table-column label="数量"><template #default="{ row }">x{{ row.num }}</template></el-table-column>

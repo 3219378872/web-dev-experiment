@@ -1,6 +1,6 @@
 <template>
   <el-card class="product-card" shadow="hover" @click="goDetail">
-    <img :src="item.image || '/placeholder.png'" class="product-image" />
+    <img :src="item.image || '/placeholder.png'" class="product-image" :alt="item.name" />
     <div class="product-info">
       <h3 class="product-name">{{ item.name }}</h3>
       <p class="product-price">&yen;{{ (item.price / 100).toFixed(2) }}</p>

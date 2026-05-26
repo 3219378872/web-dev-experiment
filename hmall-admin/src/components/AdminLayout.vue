@@ -2,7 +2,7 @@
   <el-container style="height:100vh">
     <el-aside width="220px" style="background:#304156">
       <div style="color:#fff;text-align:center;padding:16px;font-size:18px;font-weight:bold">hmall 管理后台</div>
-      <el-menu :default-active="route.path" router background-color="#304156" text-color="#bfcbd9" active-text-color="#409eff">
+      <el-menu :default-active="route.path" :default-openeds="['items-group', 'system-group']" router background-color="#304156" text-color="#bfcbd9" active-text-color="#409eff">
         <el-menu-item index="/dashboard"><el-icon><DataAnalysis /></el-icon>数据看板</el-menu-item>
         <el-menu-item index="/users"><el-icon><User /></el-icon>用户管理</el-menu-item>
         <el-sub-menu index="items-group">
