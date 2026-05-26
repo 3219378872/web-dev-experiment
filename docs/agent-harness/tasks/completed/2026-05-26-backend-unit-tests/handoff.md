@@ -61,7 +61,7 @@ Harness 任务记录：
 - Base branch: `main`
 - Task branch: `task/2026-05-26-backend-unit-tests`
 - Remote branch: `origin/task/2026-05-26-backend-unit-tests`
-- Pull request: none - create after local acceptance and push.
+- Pull request: https://github.com/3219378872/web-dev-experiment/pull/3 (merged at 2026-05-26T08:01:00Z)
 - Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #3 merged at 2026-05-26T08:01:00Z).
 
 ## CI And Review

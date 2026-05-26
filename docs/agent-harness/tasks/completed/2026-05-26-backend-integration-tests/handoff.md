@@ -41,6 +41,8 @@ Harness 任务记录：
 - jacoco coverage 检查设为 BUNDLE/INSTRUCTION/0.50（保守值），CI 首次运行可能触发调整
 
 ## Next Action
+> **Final note (post-merge)**: 所有 1–5 步骤已实际执行：PR #4 已 merge (2026-05-26T08:57:28Z); remote branch 已由 pr-cleanup.yml 自动删除; 本任务已由 PR #12 归档到 completed/。
+
 1. push `task/2026-05-26-backend-integration-tests`
 2. `gh pr create`，记录 PR URL
 3. 等 CI integration job 通过（需要 MySQL + Redis service containers）
@@ -49,4 +51,4 @@ Harness 任务记录：
 ## Branch And PR
 - Base branch: `main`
 - Task branch: `task/2026-05-26-backend-integration-tests`
-- Pull request: none - create after local acceptance and push
+- Pull request: https://github.com/3219378872/web-dev-experiment/pull/4 (merged at 2026-05-26T08:57:28Z)

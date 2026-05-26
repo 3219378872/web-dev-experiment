@@ -9,6 +9,6 @@ codex_review: passed
 remote_cleanup: done
 spec: null
 plan: null
-spec_waiver: 工程化补丁（CI 工作流 + task
+spec_waiver: 工程化补丁（CI 工作流 + task #1 归档），参照 bidking-controller 现有实现，无需独立设计
 plan_waiver: 三个 workflow 文件 + 文档同步，单步可完成，无需多步 plan
 pr_waiver: null

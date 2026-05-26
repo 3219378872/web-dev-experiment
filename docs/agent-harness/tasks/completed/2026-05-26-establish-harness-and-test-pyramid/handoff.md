@@ -59,7 +59,7 @@ Done — merged via PR #1 at 2026-05-26T06:16:02Z; remote branch deleted by pr-c
 - Base branch: `main`
 - Task branch: `task/2026-05-26-establish-harness-and-test-pyramid`
 - Remote branch: `origin/task/2026-05-26-establish-harness-and-test-pyramid`
-- Pull request: none - create after local acceptance and push.
+- Pull request: https://github.com/3219378872/web-dev-experiment/pull/1 (merged at 2026-05-26T06:16:02Z)
 - Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #1 merged at 2026-05-26T06:16:02Z).
 
 ## CI And Review

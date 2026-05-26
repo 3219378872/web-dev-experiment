@@ -32,6 +32,8 @@ Done — merged via PR #2 at 2026-05-26T08:01:11Z; remote branch deleted by pr-c
   会优雅跳过；`npm run build` 必须成功。
 
 ## Next Action
+> **Final note (post-merge)**: 所有 1–5 步骤已实际执行：PR #2 已 merge (2026-05-26T08:01:11Z); remote branch 已由 pr-cleanup.yml 自动删除; 本任务已由 PR #12 归档到 completed/。
+
 1. push `task/2026-05-26-finalize-harness-bootstrap-and-add-ci`。
 2. `gh pr create`，记录 PR URL；标记 status: pr-open。
 3. 用户确认 secrets 与 protection 策略后 merge。
@@ -45,7 +47,7 @@ Done — merged via PR #2 at 2026-05-26T08:01:11Z; remote branch deleted by pr-c
 - Base branch: `main`
 - Task branch: `task/2026-05-26-finalize-harness-bootstrap-and-add-ci`
 - Remote branch: `origin/task/2026-05-26-finalize-harness-bootstrap-and-add-ci`
-- Pull request: none - create after local acceptance and push.
+- Pull request: https://github.com/3219378872/web-dev-experiment/pull/2 (merged at 2026-05-26T08:01:11Z)
 - Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #2 merged at 2026-05-26T08:01:11Z).
 
 ## CI And Review

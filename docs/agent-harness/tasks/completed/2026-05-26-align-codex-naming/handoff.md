@@ -35,6 +35,8 @@ Done — merged via PR #11 at 2026-05-26T16:12:25Z; remote branch deleted by pr-
   事故，与本任务修复无关，但若再次发生需走 githubstatus.com 排查。
 
 ## Next Action
+> **Final note (post-merge)**: 所有 1–5 步骤已实际执行：PR #11 已 merge (2026-05-26T16:12:25Z); remote branch 已由 pr-cleanup.yml 自动删除; 本任务已由 PR #12 归档到 completed/。
+
 1. push 本任务记录到 `task/2026-05-26-align-codex-naming`。
 2. 等 PR #11 自动触发 CI；期望 codex-review 这次输出 `blocking findings: none`。
 3. 若 codex-review 通过，由 maintainer merge PR #11；`pr-cleanup.yml` 自动删
