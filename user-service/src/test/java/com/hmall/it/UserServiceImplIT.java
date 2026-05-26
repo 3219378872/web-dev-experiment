@@ -18,8 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -30,11 +28,33 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest(properties = {"spring.cloud.bootstrap.enabled=false"})
 @ActiveProfiles("test")
 @Transactional
-@Sql(scripts = "/sql/data-user.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class UserServiceImplIT {
 
+    private static final String TEST_PASSWORD = "admin123";
+
     @BeforeEach
-    void setUp() { UserContext.setUser(1L); }
+    void setUp() {
+        UserContext.setUser(1L);
+        User u1 = new User();
+        u1.setId(1L);
+        u1.setUsername("testuser");
+        u1.setPassword(passwordEncoder.encode(TEST_PASSWORD));
+        u1.setRole("user");
+        u1.setStatus(UserStatus.NORMAL);
+        u1.setBalance(10000);
+        u1.setEmail("testuser@test.com");
+        userService.save(u1);
+
+        User u2 = new User();
+        u2.setId(2L);
+        u2.setUsername("existing");
+        u2.setPassword(passwordEncoder.encode(TEST_PASSWORD));
+        u2.setRole("user");
+        u2.setStatus(UserStatus.NORMAL);
+        u2.setBalance(5000);
+        u2.setEmail("existing@test.com");
+        userService.save(u2);
+    }
 
     @AfterEach
     void tearDown() { UserContext.removeUser(); }
@@ -52,7 +72,7 @@ class UserServiceImplIT {
     void login_withValidCredentials_shouldReturnToken() {
         LoginFormDTO form = new LoginFormDTO();
         form.setUsername("testuser");
-        form.setPassword("admin123");
+        form.setPassword(TEST_PASSWORD);
 
         UserLoginVO result = userService.login(form);
 
@@ -80,7 +100,7 @@ class UserServiceImplIT {
 
         LoginFormDTO form = new LoginFormDTO();
         form.setUsername("testuser");
-        form.setPassword("admin123");
+        form.setPassword(TEST_PASSWORD);
 
         assertThatThrownBy(() -> userService.login(form))
                 .isInstanceOf(ForbiddenException.class)
@@ -137,7 +157,7 @@ class UserServiceImplIT {
 
     @Test
     void deductMoney_validPassword_shouldDeduct() {
-        userService.deductMoney("admin123", 1000);
+        userService.deductMoney(TEST_PASSWORD, 1000);
         User user = userService.getById(1L);
         assertThat(user.getBalance()).isEqualTo(9000);
     }
