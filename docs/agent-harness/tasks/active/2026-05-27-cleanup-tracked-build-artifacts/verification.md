@@ -14,12 +14,13 @@
 | Command | Result | Evidence |
 | --- | --- | --- |
 | `python3 scripts/agent_harness.py check` | passed | agent harness check passed |
-| `python3 scripts/knowledge_base.py check` | passed | knowledge base check passed |
+| `python3 scripts/knowledge_base.py check --base origin/main` | passed | knowledge base check passed（含 K005 共变检查，已 bump hmall-{web,admin}.md 的 last_synced_commit + sync_note） |
 | `python3 scripts/engineering-lint.py` | passed | engineering-lint: all checks passed |
 | `diff -u AGENTS.md CLAUDE.md` | passed | identical |
 | `mvn -B -ntp -q test` | skipped | 本 chore PR 不动 backend；先前 PR #12 验证已实跑通过；本 PR 改动只在 hmall-web/admin 的 untrack + harness records |
-| `cd hmall-web && npm ci && npm run build` | passed | 本 PR 本地实跑：npm ci 自动重新装 80 个包到 node_modules（现已 ignore），`✓ built in 5.25s` |
-| `cd hmall-admin && npm ci && npm run build` | passed | 本 PR 本地实跑：npm ci 装 83 个包，`✓ built in 7.73s` |
+| `mvn -B -ntp -q -Pintegration verify -DskipUnitTests=true` | skipped | 同上 + sandbox 无 daemon MySQL/Redis；CI integration job 用 service container 跑，且本 PR 不引入新断言 |
+| `cd hmall-web && npm ci && npm test --if-present && npm run build` | passed | 本 PR 本地实跑：`npm ci` 自动重新装 80 个包到 node_modules（现已 ignore）；`npm test --if-present` 因 package.json 无 `test` 脚本而优雅跳过；`npm run build ✓ built in 5.25s` |
+| `cd hmall-admin && npm ci && npm test --if-present && npm run build` | passed | 本 PR 本地实跑：`npm ci` 装 83 个包；`npm test --if-present` 同上跳过；`npm run build ✓ built in 7.73s` |
 | `docker compose -f docker-compose.yml config -q` | passed | exit 0 |
 
 ## CI 预期

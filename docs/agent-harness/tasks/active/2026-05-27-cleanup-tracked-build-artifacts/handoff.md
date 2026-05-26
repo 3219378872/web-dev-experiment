@@ -1,7 +1,9 @@
 # Handoff: Cleanup Tracked Build Artifacts
 
 ## Status
-PR-open（即将推送 + 创建 PR + 等 CI/codex-review）。
+PR-open —— PR #13 已创建（https://github.com/3219378872/web-dev-experiment/pull/13），
+remote branch `origin/task/2026-05-27-cleanup-tracked-build-artifacts` 已推送，CI/
+codex-review 迭代中（已应用 1 轮 codex 反馈：K005 KB 同步 + 本次反馈的 verification 完整化 + 归档 handoff 终态对齐）。
 
 ## Files Changed
 - 25124 个 deletion：`hmall-web/node_modules/**`、`hmall-admin/node_modules/**`、
@@ -42,8 +44,8 @@ PR-open（即将推送 + 创建 PR + 等 CI/codex-review）。
 - Base branch: `main`
 - Task branch: `task/2026-05-27-cleanup-tracked-build-artifacts`
 - Remote branch: `origin/task/2026-05-27-cleanup-tracked-build-artifacts`
-- Pull request: 推送后创建，URL 回写。
-- Remote branch cleanup: pending until PR is merged.
+- Pull request: https://github.com/3219378872/web-dev-experiment/pull/13（已创建）
+- Remote branch cleanup: pending until PR #13 merged (PR-cleanup workflow 会自动删除)
 
 ## CI And Review
 - CI status: 推送后由 GitHub Actions 触发；本 PR 不动 backend / workflow / 业务前端代码，预期 5/5 jobs green。
