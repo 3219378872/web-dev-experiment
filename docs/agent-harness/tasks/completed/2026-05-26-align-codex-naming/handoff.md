@@ -37,9 +37,7 @@ Done — merged via PR #11 at 2026-05-26T16:12:25Z; remote branch deleted by pr-
 ## Next Action
 > **Final note (post-merge)**: 所有 1–5 步骤已实际执行：PR #11 已 merge (2026-05-26T16:12:25Z); remote branch 已由 pr-cleanup.yml 自动删除; 本任务已由 PR #12 归档到 completed/。
 
-1. push 本任务记录到 `task/2026-05-26-align-codex-naming`。
-2. 等 PR #11 自动触发 CI；期望 codex-review 这次输出 `blocking findings: none`。
-3. 若 codex-review 通过，由 maintainer merge PR #11；`pr-cleanup.yml` 自动删
+（任务已 done；原 Next Action 数字步骤已全部执行完毕，详见 Status 行与 Branch And PR 节。）
    远程分支；本任务由 `agent_harness.py complete` 归档到 `completed/`，
    `remote_cleanup: done`。
 4. 若 codex-review 仍报 blocking，按其新 findings 迭代。
@@ -50,12 +48,10 @@ Done — merged via PR #11 at 2026-05-26T16:12:25Z; remote branch deleted by pr-
 ## Branch And PR
 - Base branch: `main`
 - Task branch: `task/2026-05-26-align-codex-naming`
-- Remote branch: `origin/task/2026-05-26-align-codex-naming`
-- Pull request: https://github.com/3219378872/web-dev-experiment/pull/11
-- Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #11 merged at 2026-05-26T16:12:25Z).
+- Remote branch: `origin/task/2026-05-26-align-codex-naming` (deleted post-merge by pr-cleanup.yml)
+- Pull request: https://github.com/3219378872/web-dev-experiment/pull/11 (merged at 2026-05-26T16:12:25Z)
+- Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #11 merged).
 
 ## CI And Review
-- CI status: lint / test / integration / smoke 全 green；codex-review 在
-  endpoint 修复后已从「网络层失败」转为「内容判定阻塞」（run 26457968513）。
-- Codex review: 上一次 run 输出两条 blocking findings（缺自有 harness
-  记录、缺 acceptance evidence），本次提交即针对这两条补齐，期望复跑通过。
+- CI status: passed —— PR #11 merge commit 上的 main push CI 5/5 jobs 全绿。
+- Codex review: passed (blocking findings: none) on PR #11.

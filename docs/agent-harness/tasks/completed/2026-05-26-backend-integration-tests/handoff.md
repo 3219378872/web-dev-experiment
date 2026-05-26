@@ -43,12 +43,15 @@ Harness 任务记录：
 ## Next Action
 > **Final note (post-merge)**: 所有 1–5 步骤已实际执行：PR #4 已 merge (2026-05-26T08:57:28Z); remote branch 已由 pr-cleanup.yml 自动删除; 本任务已由 PR #12 归档到 completed/。
 
-1. push `task/2026-05-26-backend-integration-tests`
-2. `gh pr create`，记录 PR URL
-3. 等 CI integration job 通过（需要 MySQL + Redis service containers）
-4. merge 后 task → done 归档；启动 task #4（smoke tests）
+（任务已 done；原 Next Action 数字步骤已全部执行完毕，详见 Status 行与 Branch And PR 节。）
 
 ## Branch And PR
 - Base branch: `main`
 - Task branch: `task/2026-05-26-backend-integration-tests`
+- Remote branch: `origin/task/2026-05-26-backend-integration-tests` (deleted post-merge by pr-cleanup.yml)
 - Pull request: https://github.com/3219378872/web-dev-experiment/pull/4 (merged at 2026-05-26T08:57:28Z)
+- Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #4 merged).
+
+## CI And Review
+- CI status: passed —— PR #4 merge commit 上的 main push CI 5/5 jobs 全绿。
+- Codex review: passed (blocking findings: none) on PR #4.

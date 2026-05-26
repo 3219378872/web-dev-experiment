@@ -34,11 +34,7 @@ Done — merged via PR #2 at 2026-05-26T08:01:11Z; remote branch deleted by pr-c
 ## Next Action
 > **Final note (post-merge)**: 所有 1–5 步骤已实际执行：PR #2 已 merge (2026-05-26T08:01:11Z); remote branch 已由 pr-cleanup.yml 自动删除; 本任务已由 PR #12 归档到 completed/。
 
-1. push `task/2026-05-26-finalize-harness-bootstrap-and-add-ci`。
-2. `gh pr create`，记录 PR URL；标记 status: pr-open。
-3. 用户确认 secrets 与 protection 策略后 merge。
-4. PR 合并后由 `pr-cleanup.yml` 自动删远程分支；本任务标 done 归档。
-5. 启动 task #2（hm-common / 各业务 service 单元测试）。
+（任务已 done；原 Next Action 数字步骤已全部执行完毕，详见 Status 行与 Branch And PR 节。）
 
 ## Worktree Or Branch
 - `task/2026-05-26-finalize-harness-bootstrap-and-add-ci`
@@ -46,10 +42,10 @@ Done — merged via PR #2 at 2026-05-26T08:01:11Z; remote branch deleted by pr-c
 ## Branch And PR
 - Base branch: `main`
 - Task branch: `task/2026-05-26-finalize-harness-bootstrap-and-add-ci`
-- Remote branch: `origin/task/2026-05-26-finalize-harness-bootstrap-and-add-ci`
+- Remote branch: `origin/task/2026-05-26-finalize-harness-bootstrap-and-add-ci` (deleted post-merge by pr-cleanup.yml)
 - Pull request: https://github.com/3219378872/web-dev-experiment/pull/2 (merged at 2026-05-26T08:01:11Z)
-- Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #2 merged at 2026-05-26T08:01:11Z).
+- Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #2 merged).
 
 ## CI And Review
-- CI status: passed (5/5 jobs green on PR #2 merge run).
+- CI status: passed —— PR #2 merge commit 上的 main push CI 5/5 jobs 全绿。
 - Codex review: passed (blocking findings: none) on PR #2.
