@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,6 +44,7 @@ class UserServiceImplIT {
         u1.setStatus(UserStatus.NORMAL);
         u1.setBalance(10000);
         u1.setEmail("testuser@test.com");
+        u1.setCreateTime(LocalDateTime.now());
         userService.save(u1);
 
         User u2 = new User();
@@ -53,6 +55,7 @@ class UserServiceImplIT {
         u2.setStatus(UserStatus.NORMAL);
         u2.setBalance(5000);
         u2.setEmail("existing@test.com");
+        u2.setCreateTime(LocalDateTime.now());
         userService.save(u2);
     }
 
