@@ -1,4 +1,12 @@
 spring:
+  cloud:
+    bootstrap:
+      enabled: false
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/hmall?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai}
     username: ${SPRING_DATASOURCE_USERNAME:root}
@@ -7,12 +15,6 @@ spring:
   redis:
     host: ${SPRING_REDIS_HOST:localhost}
     port: ${SPRING_REDIS_PORT:6379}
-  cloud:
-    nacos:
-      discovery:
-        enabled: false
-      config:
-        enabled: false
   sql:
     init:
       mode: always
