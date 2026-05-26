@@ -1,0 +1,11 @@
+repos:
+  - repo: local
+    hooks:
+      - id: engineering-lint
+        name: Engineering Lint
+        description: Validates md links, CLAUDE/AGENTS sync, and harness compliance.
+        entry: python3 scripts/engineering-lint.py
+        language: system
+        files: '\.(md|py|yaml|yml|java|vue|ts|js)$'
+        pass_filenames: false
+        always_run: true
