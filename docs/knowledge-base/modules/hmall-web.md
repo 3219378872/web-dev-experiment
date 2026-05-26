@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: bc09d0e
+last_synced_commit: 1ac210b
 last_synced_date: 2026-05-26
-sync_note: ""
+sync_note: "视觉回归整改: img alt / 导航高亮 / 图片回退 / router scrollBehavior"
 ---
 
 # hmall-web

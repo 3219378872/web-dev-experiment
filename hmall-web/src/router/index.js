@@ -16,7 +16,11 @@ const routes = [
   { path: '/feedback', name: 'Feedback', component: () => import('@/views/Feedback.vue'), meta: { requiresAuth: true } }
 ]
 
-const router = createRouter({ history: createWebHistory(), routes })
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+  scrollBehavior() { return { top: 0 } }
+})
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !localStorage.getItem('token')) {

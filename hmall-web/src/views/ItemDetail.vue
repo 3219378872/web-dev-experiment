@@ -1,7 +1,7 @@
 <template>
   <div class="item-detail" v-if="item">
     <el-row :gutter="40">
-      <el-col :md="10"><img :src="item.image || '/placeholder.png'" class="detail-image" /></el-col>
+      <el-col :md="10"><img :src="item.image || '/placeholder.png'" class="detail-image" :alt="item.name" /></el-col>
       <el-col :md="14">
         <h1 class="item-name">{{ item.name }}</h1>
         <p class="item-price">&yen;{{ (item.price / 100).toFixed(2) }}</p>

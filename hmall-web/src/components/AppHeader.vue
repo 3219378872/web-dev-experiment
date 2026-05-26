@@ -44,4 +44,5 @@ function search() {
 .logo { font-size: 20px; font-weight: bold; color: #409eff; white-space: nowrap; }
 .search-input { width: 360px; }
 .header-actions { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+a.router-link-active { color: #409eff; font-weight: bold; }
 </style>

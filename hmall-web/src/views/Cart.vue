@@ -6,7 +6,7 @@
       <el-table-column label="商品" width="400">
         <template #default="{ row }">
           <div style="display:flex;align-items:center;gap:12px;">
-            <img :src="row.image || '/placeholder.png'" style="width:60px;height:60px;object-fit:cover;border-radius:4px" />
+            <img :src="row.image || '/placeholder.png'" style="width:60px;height:60px;object-fit:cover;border-radius:4px" :alt="row.name" />
             <span>{{ row.name }}</span>
           </div>
         </template>
