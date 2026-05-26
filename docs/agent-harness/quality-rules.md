@@ -62,12 +62,20 @@ mvn -q -DskipTests=false test
 mvn -q -pl hm-service -am verify
 ```
 
+## Knowledge Base 同步
+
+代码改动涉及 [knowledge-base](../knowledge-base/INDEX.md) 中某页的 `tracks`
+路径时，必须在同一 PR 内同步更新该页（K005）。若内容确无需更新，把
+`last_synced_commit` 推到当前 HEAD，并在 `sync_note` 写明原因（轻量豁免）。
+新增 Maven 模块或前端目录时必须同步新增 `modules/<name>.md`（K002）。
+
 ## CI Verification
 
-GitHub Actions 把 harness 验证作为 lint。`lint` job 必须运行：
+GitHub Actions 把 harness + KB 验证作为 lint。`lint` job 必须运行：
 
 ```bash
 python3 scripts/agent_harness.py check
+python3 scripts/knowledge_base.py check --base origin/main
 python3 scripts/engineering-lint.py
 ```
 

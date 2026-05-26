@@ -28,12 +28,35 @@ approved 设计放 `docs/superpowers/specs/`，多步实施计划放 `docs/super
 
 ```bash
 python3 scripts/agent_harness.py check
+python3 scripts/knowledge_base.py check
 python3 scripts/engineering-lint.py
 ```
 
 每个实质性任务必须走 branch→PR 循环：从 `main` 切 `task/YYYY-MM-DD-short-slug`、
 本地验收、推远程、开 PR、过 CI 与 review、合并后删除远程分支，把分支/PR/CI/review/
 清理证据写进 harness 任务记录。
+
+## Knowledge Base
+
+`docs/knowledge-base/` 是"项目当前如何工作"的策展层：每个 Maven 模块 / 前端目录
+一个 `modules/<name>.md`，跨服务流程一个 `flows/<name>.md`，索引在
+`docs/knowledge-base/INDEX.md`。
+
+每页带 YAML frontmatter 声明 `tracks`（负责覆盖的仓库路径）与
+`last_synced_commit`。`scripts/knowledge_base.py check` 是阻塞性 lint，规则：
+
+| ID | 规则 |
+| --- | --- |
+| K001 | 页面 frontmatter 可解析 |
+| K002 | 每个 Maven 模块与前端目录都被恰好一个 modules 页面覆盖 |
+| K003 | `tracks` 中的路径在仓库中存在 |
+| K004 | 页面 markdown 链接全部可解析（含 CLAUDE.md/AGENTS.md/INDEX.md/README.md） |
+| K005 | PR 改动 tracks 路径时也必须改对应页面（需 `--base` 才触发） |
+| K006 | INDEX.md 引用了全部页面 |
+
+新增 Maven 模块或前端目录必须在同一 PR 里加 `modules/<name>.md`（K002）。
+若代码改动确实不需要内容更新，bump `last_synced_commit` 到当前 HEAD 并在
+`sync_note` 写明原因 —— 这是 K005 的轻量豁免。
 
 ## Module Map
 
@@ -100,6 +123,14 @@ python3 scripts/agent_harness.py new <slug>
 python3 scripts/agent_harness.py check
 python3 scripts/agent_harness.py summary
 python3 scripts/agent_harness.py complete <full-slug>
+```
+
+Knowledge Base CLI：
+
+```bash
+python3 scripts/knowledge_base.py check                # 结构+链接，K005 跳过
+python3 scripts/knowledge_base.py check --base origin/main   # 含 K005 共变
+python3 scripts/knowledge_base.py sync-report --output /tmp/kb-sync.md
 ```
 
 ## Testing Layers

@@ -12,6 +12,11 @@ Implementing — harness 脚手架已完成并通过 self-test；测试金字塔
 - `scripts/_agent_harness/gc.py`
 - `scripts/_agent_harness/cli.py`
 - `scripts/agent_harness.py`
+- `scripts/_knowledge_base/__init__.py`
+- `scripts/_knowledge_base/model.py`
+- `scripts/_knowledge_base/checks.py`
+- `scripts/_knowledge_base/cli.py`
+- `scripts/knowledge_base.py`
 - `scripts/engineering-lint.py`
 - `.pre-commit-config.yaml`
 - `.gitignore`
@@ -25,11 +30,17 @@ Implementing — harness 脚手架已完成并通过 self-test；测试金字塔
 - `docs/agent-harness/templates/audit.md`
 - `docs/agent-harness/templates/handoff.md`
 - `docs/agent-harness/tasks/active/2026-05-26-establish-harness-and-test-pyramid/`
+- `docs/knowledge-base/README.md`
+- `docs/knowledge-base/INDEX.md`
+- `docs/knowledge-base/modules/{hm-common,hm-api,hm-gateway,hm-service,user-service,item-service,cart-service,trade-service,pay-service,notify-service,file-service,hmall-web,hmall-admin}.md`
+- `docs/knowledge-base/flows/{order-checkout-flow,auth-and-gateway-flow}.md`
 
 ## Commands Run
 - `python3 scripts/agent_harness.py new establish-harness-and-test-pyramid --date 2026-05-26`
 - `python3 scripts/agent_harness.py check`
 - `python3 scripts/agent_harness.py summary`
+- `python3 scripts/knowledge_base.py check`
+- `python3 scripts/engineering-lint.py`
 
 ## Known Risks
 - WSL2 上 Testcontainers 启动 MySQL/Redis 可能需 DOCKER_HOST 环境变量配置；

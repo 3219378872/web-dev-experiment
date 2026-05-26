@@ -20,6 +20,8 @@
 ```bash
 python3 scripts/agent_harness.py summary
 python3 scripts/agent_harness.py check
+python3 scripts/knowledge_base.py check
+python3 scripts/knowledge_base.py sync-report --output /tmp/kb-sync.md
 diff -u AGENTS.md CLAUDE.md
 ```
 

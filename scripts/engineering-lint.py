@@ -78,10 +78,13 @@ def main():
     harness_check = os.system(
         f"cd {ROOT} && python3 scripts/agent_harness.py check 2>/dev/null"
     )
+    kb_check = os.system(
+        f"cd {ROOT} && python3 scripts/knowledge_base.py check 2>/dev/null"
+    )
     if errors:
         print("\n".join(errors))
         print(f"\n{len(errors)} engineering-lint error(s) found")
-    exit_code = 1 if errors or harness_check != 0 else 0
+    exit_code = 1 if errors or harness_check != 0 or kb_check != 0 else 0
     if exit_code == 0:
         print("engineering-lint: all checks passed")
     sys.exit(exit_code)
