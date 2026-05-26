@@ -2,9 +2,9 @@
 title: hm-service
 tracks:
   - hm-service/
-last_synced_commit: bc09d0e
+last_synced_commit: 33e9420
 last_synced_date: 2026-05-26
-sync_note: ""
+sync_note: "删除旧 ItemServiceImplTest（迁移至 item-service IT）"
 ---
 
 # hm-service
