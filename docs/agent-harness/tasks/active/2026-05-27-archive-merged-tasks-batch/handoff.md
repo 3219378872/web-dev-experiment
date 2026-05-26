@@ -1,7 +1,7 @@
 # Handoff: Archive Merged Tasks Batch
 
 ## Status
-PR-open（即将推送 + 创建 PR + 等 CI/codex-review）。
+PR-open —— PR #12 已创建，CI/codex-review 迭代修复中（已应用 5 轮 codex review 反馈）。
 
 ## Files Changed
 - `docs/agent-harness/tasks/active/<7 个 slug>/` → `completed/<同名>/`（整体迁移，

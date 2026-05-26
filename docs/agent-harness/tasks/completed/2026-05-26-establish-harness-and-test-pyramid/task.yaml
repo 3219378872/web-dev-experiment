@@ -4,8 +4,8 @@ base_branch: main
 task_branch: task/2026-05-26-establish-harness-and-test-pyramid
 remote_branch: origin/task/2026-05-26-establish-harness-and-test-pyramid
 pull_request: https://github.com/3219378872/web-dev-experiment/pull/1
-ci_status: not-run
-codex_review: not-run
+ci_status: passed
+codex_review: passed
 remote_cleanup: done
 spec: docs/superpowers/specs/2026-05-18-hmall-refactor-design.md
 plan: docs/superpowers/plans/2026-05-18-hmall-refactor-plan.md

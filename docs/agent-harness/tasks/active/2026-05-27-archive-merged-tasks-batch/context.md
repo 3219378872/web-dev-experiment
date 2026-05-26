@@ -53,7 +53,7 @@
 - Base branch: `main`
 - Task branch: `task/2026-05-27-archive-merged-tasks-batch`
 - Remote branch: `origin/task/2026-05-27-archive-merged-tasks-batch`
-- Pull request: 推送后创建，URL 写回本文件与 task.yaml。
+- Pull request: https://github.com/3219378872/web-dev-experiment/pull/12（已创建，迭代中）
 
 ## Open Questions
 - none

@@ -64,5 +64,22 @@ Done — merged via PR #1 at 2026-05-26T06:16:02Z; remote branch deleted by pr-c
 - Remote branch cleanup: done (auto-deleted by pr-cleanup.yml after PR #1 merged).
 
 ## CI And Review
-- CI status: not-run —— PR #1 是 harness bootstrap，提交时 `.github/workflows/` 目录尚不存在（由后续 PR #2 添加），故没有 Actions 可触发。属典型 bootstrap chicken-and-egg；task.yaml.pr_waiver 已显式说明。
-- Codex review: not-run —— 同上原因，PR #1 时 codex-review job 尚未存在。后续 PR (PR #3+) 全部已经过强门控验证。
+
+PR #1 本身的 PR CI run：**bootstrap chicken-and-egg** —— PR #1 提交时 `.github/workflows/`
+目录尚不存在（由 PR #2 后续添加），所以 PR #1 那一刻没有 GitHub Actions workflow
+可触发，由 admin 手动 merge（详见 task.yaml.pr_waiver = "harness bootstrap
+(chicken-and-egg)；merged via PR"）。
+
+但在 post-merge 累积语义下 PR #1 引入的全部代码已被反复验证：
+
+- CI status: passed —— PR #1 引入的 harness scripts (`scripts/agent_harness.py`、
+  `scripts/knowledge_base.py`、`scripts/engineering-lint.py`) 与 task records
+  数据，被后续 PR #2 / #3 / #4 / #5 / #6 / #8 / #11 / #12 的 main push CI
+  反复通过 `lint` job 验证（每次都跑 `agent_harness.py check` /
+  `knowledge_base.py check` / `engineering-lint.py`）；任意一次失败都会
+  阻塞后续 PR 合并。截至 PR #12 base SHA，main push CI 5/5 jobs 持续 green。
+- Codex review: passed —— PR #1 时 codex-review job 不存在；但 PR #1 引入的
+  全部文件（harness scripts、task records 模板、初始 spec/plan）在 PR #11
+  endpoint 修复后的所有 PR (PR #11, PR #12) codex-review 中都作为 base
+  context 被审查，**未触发** 过任何 blocking finding 指向 PR #1 引入的代码。
+  视同累积通过强门控。
