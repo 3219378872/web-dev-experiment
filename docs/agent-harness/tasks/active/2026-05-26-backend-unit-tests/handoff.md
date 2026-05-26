@@ -1,7 +1,7 @@
 # Handoff: Backend Unit Tests
 
 ## Status
-Implementing —— 本地 81/81 tests 通过；待 push 与开 PR。
+PR open —— https://github.com/3219378872/web-dev-experiment/pull/3；本地 81/81 tests 通过；待 CI 与 review。
 
 ## Files Changed
 源码修复（1 个）：
@@ -49,11 +49,10 @@ Harness 任务记录：
   字节码生成；CI 仍用 Temurin 11，行为应一致。
 
 ## Next Action
-1. push `task/2026-05-26-backend-unit-tests`。
-2. `gh pr create`，记录 PR URL；status: pr-open。
-3. 等 CI（若 PR #2 已 merge 则 lint + test 应均 pass，integration/smoke/codex
-   仍按 PR #2 已知风险表现）。
-4. merge 后 task → done 归档；启动 task #3（集成测试 + Testcontainers + jacoco）。
+1. ~~push `task/2026-05-26-backend-unit-tests`~~ done
+2. ~~`gh pr create`~~ done → https://github.com/3219378872/web-dev-experiment/pull/3
+3. 等 CI review 通过后 merge
+4. merge 后 task → done 归档；启动 task #3（集成测试 + Testcontainers + jacoco）
 
 ## Worktree Or Branch
 - `task/2026-05-26-backend-unit-tests`
