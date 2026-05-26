@@ -1,0 +1,14 @@
+slug: 2026-05-26-smoke-tests
+status: implementing
+base_branch: main
+task_branch: task/2026-05-26-smoke-tests
+remote_branch: origin/task/2026-05-26-smoke-tests
+pull_request: https://github.com/3219378872/web-dev-experiment/pull/5
+ci_status: pending
+codex_review: not-run
+remote_cleanup: pending
+spec: docs/superpowers/specs/2026-05-18-hmall-refactor-design.md
+plan: docs/superpowers/plans/2026-05-18-hmall-refactor-plan.md
+spec_waiver: null
+plan_waiver: null
+pr_waiver: null
