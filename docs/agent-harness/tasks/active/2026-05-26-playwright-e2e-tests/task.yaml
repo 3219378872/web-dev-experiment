@@ -1,0 +1,14 @@
+slug: 2026-05-26-playwright-e2e-tests
+status: implementing
+base_branch: main
+task_branch: task/2026-05-26-playwright-e2e-tests
+remote_branch: origin/task/2026-05-26-playwright-e2e-tests
+pull_request: null
+ci_status: not-run
+codex_review: not-run
+remote_cleanup: pending
+spec: docs/superpowers/specs/2026-05-18-hmall-refactor-design.md
+plan: docs/superpowers/plans/2026-05-18-hmall-refactor-plan.md
+spec_waiver: null
+plan_waiver: null
+pr_waiver: null
