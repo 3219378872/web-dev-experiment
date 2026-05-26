@@ -23,7 +23,7 @@
 ## Related Artifacts
 - Spec: none - 单点配置对齐 + 一次 secret 值校正，无需独立 spec。
 - Plan: none - 改动量极小且线性。
-- 参考实现: `../bidking-controller/.github/workflows/ci.yml` 同 step。
+- 参考实现：对照 sibling 仓库 bidking-controller 的同名 codex-review 步骤（仓库外部，不在本仓库 path 内）。
 
 ## Likely Files
 - `.github/workflows/ci.yml`（仅 codex-review.Verify Codex secrets 步骤的两个
