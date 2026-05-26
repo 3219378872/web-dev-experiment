@@ -1,0 +1,14 @@
+{
+  "name": "hmall-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "npx playwright test",
+    "test:web": "npx playwright test --project=hmall-web",
+    "test:admin": "npx playwright test --project=hmall-admin"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.0",
+    "typescript": "^5.3.0"
+  }
+}
