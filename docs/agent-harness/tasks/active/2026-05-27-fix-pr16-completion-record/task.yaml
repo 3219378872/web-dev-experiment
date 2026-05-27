@@ -1,0 +1,14 @@
+slug: 2026-05-27-fix-pr16-completion-record
+status: pr-open
+base_branch: main
+task_branch: task/2026-05-27-fix-pr16-completion-record
+remote_branch: origin/task/2026-05-27-fix-pr16-completion-record
+pull_request: https://github.com/3219378872/web-dev-experiment/pull/18
+ci_status: pending
+codex_review: pending
+remote_cleanup: pending
+spec: null
+plan: null
+spec_waiver: harness 书务修正，无设计决策。
+plan_waiver: 修复已完成任务的 handoff 最终状态 + 更新 task.yaml 字段，直接做。
+pr_waiver: null
