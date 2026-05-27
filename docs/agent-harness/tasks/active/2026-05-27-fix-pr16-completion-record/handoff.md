@@ -2,7 +2,8 @@
 
 ## Status
 
-待 push 远程开 PR，CI 通过 + codex-review 放行后合并。
+PR #18 已开，CI lint/test/integration/smoke 全过，codex-review 第 1 轮有
+1 个 blocking finding（本任务 handoff.md 与 task.yaml 状态不一致）。本轮修复后推送 round 2。
 
 ## Files Changed
 
@@ -24,7 +25,8 @@
 
 ## Next Action
 
-push → 开 PR → 等 CI + codex-review → 合并 → 删除远程分支 → 归档本任务。
+推送 round 2 修复 → 等 CI + codex-review 通过 → 合并 →
+删除远程分支 → 归档本任务。
 
 ## Worktree Or Branch
 
@@ -34,11 +36,11 @@ push → 开 PR → 等 CI + codex-review → 合并 → 删除远程分支 → 
 
 - Base branch: `main`
 - Task branch: `task/2026-05-27-fix-pr16-completion-record`
-- Remote branch: `origin/task/2026-05-27-fix-pr16-completion-record`（待推）
-- Pull request: 待开。
+- Remote branch: `origin/task/2026-05-27-fix-pr16-completion-record`（已推）
+- Pull request: #18（已开）。
 - Remote branch cleanup: 合并后 `pr-cleanup.yml` 自动删除。
 
 ## CI And Review
 
-- CI status: not run yet（推送后触发）。
-- Codex review: not run yet。
+- CI status: round 1 lint/test/integration/smoke 全过。
+- Codex review: round 1 失败（1 blocking finding：本任务 handoff.md 与 task.yaml 状态不一致）。本轮修复后推 round 2。
