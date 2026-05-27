@@ -28,7 +28,7 @@ public class AuthGlobalFilter implements GlobalFilter , Ordered {
         //获取request
         ServerHttpRequest request = exchange.getRequest();
         //判断是否需要拦截
-        if(isExclude(request.getPath().toString())){
+        if(isExclude(request.getPath().toString(), request.getMethod())){
             return chain.filter(exchange);
         }
         //获取token校验
@@ -63,11 +63,24 @@ public class AuthGlobalFilter implements GlobalFilter , Ordered {
         return chain.filter(webExchange);
     }
 
-    private boolean isExclude(String path) {
+    private boolean isExclude(String path, org.springframework.http.HttpMethod method) {
         List<String> excludePaths = authProperties.getExcludePaths();
         for (String excludePath : excludePaths) {
             if(antPathMatcher.match(excludePath,path)){
                return true;
+            }
+        }
+        // Read-only exclusions: only GET/HEAD/OPTIONS bypass auth
+        if (method != null && (method == org.springframework.http.HttpMethod.GET
+                || method == org.springframework.http.HttpMethod.HEAD
+                || method == org.springframework.http.HttpMethod.OPTIONS)) {
+            List<String> excludeReadPaths = authProperties.getExcludeReadPaths();
+            if (excludeReadPaths != null) {
+                for (String excludeReadPath : excludeReadPaths) {
+                    if(antPathMatcher.match(excludeReadPath, path)){
+                        return true;
+                    }
+                }
             }
         }
         return false;

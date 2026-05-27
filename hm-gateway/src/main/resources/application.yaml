@@ -14,8 +14,9 @@ hm:
       - /users/send-code
       - /users/reset-password
       - /items/**
-      - /categories/**
       - /hi
       - /notifications/active
       - /upload/**
       - /files/**
+    excludeReadPaths:
+      - /categories/**
