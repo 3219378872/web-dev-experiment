@@ -2,9 +2,9 @@
 title: hmall-admin
 tracks:
   - hmall-admin/
-last_synced_commit: 9c355c1
+last_synced_commit: b045ce1
 last_synced_date: 2026-05-27
-sync_note: "PR #13 chore: untrack 历史污染进 git 的 node_modules/dist 产物；不动 src/ 业务代码与组件结构"
+sync_note: "PR #16 加 npm test 占位脚本（node -e 打印一行说明，exit 0），让 CI smoke 的 npm test --if-present 显式暴露无 vitest 缺口；不动 src/"
 ---
 
 # hmall-admin

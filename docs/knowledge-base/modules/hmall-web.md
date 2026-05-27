@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 883f5fb
+last_synced_commit: b045ce1
 last_synced_date: 2026-05-27
-sync_note: "对齐 API 响应描述与后端实际混合封装；不改 hmall-web 源码"
+sync_note: "PR #16 加 npm test 占位脚本（node -e 打印一行说明，exit 0），让 CI smoke 的 npm test --if-present 显式暴露无 vitest 缺口；不动 src/"
 ---
 
 # hmall-web
