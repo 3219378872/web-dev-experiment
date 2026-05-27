@@ -172,6 +172,17 @@ services:
       mysql:
         condition: service_healthy
 
+  hm-service:
+    <<: *java-service
+    build: ./hm-service
+    depends_on:
+      nacos:
+        condition: service_healthy
+      nacos-init:
+        condition: service_completed_successfully
+      mysql:
+        condition: service_healthy
+
   hmall-web:
     image: nginx:alpine
     restart: unless-stopped
