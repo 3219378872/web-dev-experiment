@@ -40,6 +40,7 @@ e2e/blob-report/
 # Docker / 运行时
 runtime/
 data/
+docker/mysql/
 logs/
 *.sqlite3
 *.sqlite3-shm

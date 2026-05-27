@@ -2,9 +2,9 @@
 title: hm-gateway
 tracks:
   - hm-gateway/
-last_synced_commit: bc09d0e
-last_synced_date: 2026-05-26
-sync_note: ""
+last_synced_commit: 9679b3a
+last_synced_date: 2026-05-27
+sync_note: "2026-05-27: 加 /categories/** 到鉴权白名单；新增 init-nacos-routes.sh"
 ---
 
 # hm-gateway
