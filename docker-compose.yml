@@ -183,6 +183,32 @@ services:
       mysql:
         condition: service_healthy
 
+  smoke-test:
+    image: curlimages/curl:latest
+    restart: "no"
+    depends_on:
+      hm-service:
+        condition: service_started
+      hm-gateway:
+        condition: service_started
+    volumes:
+      - "./scripts/smoke:/smoke:ro"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        apk add --no-cache jq >/dev/null 2>&1 || true
+        echo "Waiting for gateway to be ready..."
+        for i in $$(seq 1 30); do
+          if curl -sf http://hm-gateway:8080/items/page?page=1\&size=1 >/dev/null 2>&1; then
+            echo "Gateway ready, running smoke tests..."
+            sh /smoke/smoke.sh http://hm-gateway:8080
+            exit $$?
+          fi
+          sleep 2
+        done
+        echo "ERROR: Gateway not ready after 60s" >&2
+        exit 1
+
   hmall-web:
     image: nginx:alpine
     restart: unless-stopped
