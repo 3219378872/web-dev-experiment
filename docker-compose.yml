@@ -197,16 +197,20 @@ services:
     command:
       - |
         apk add --no-cache jq >/dev/null 2>&1 || true
-        echo "Waiting for gateway to be ready..."
-        for i in $$(seq 1 30); do
-          if curl -sf http://hm-gateway:8080/items/page?page=1\&size=1 >/dev/null 2>&1; then
-            echo "Gateway ready, running smoke tests..."
+        echo "Waiting for all services to be ready..."
+        for i in $$(seq 1 40); do
+          ITEMS=$$(curl -sf -o /dev/null -w '%{http_code}' "http://hm-gateway:8080/items/page?page=1&size=1" 2>/dev/null || echo "000")
+          CATS=$$(curl -sf -o /dev/null -w '%{http_code}' "http://hm-gateway:8080/categories" 2>/dev/null || echo "000")
+          NOTIFY=$$(curl -sf -o /dev/null -w '%{http_code}' "http://hm-gateway:8080/notifications/active" 2>/dev/null || echo "000")
+          if [ "$$ITEMS" = "200" ] && [ "$$CATS" = "200" ] && [ "$$NOTIFY" = "200" ]; then
+            echo "All services ready, running smoke tests..."
             sh /smoke/smoke.sh http://hm-gateway:8080
             exit $$?
           fi
-          sleep 2
+          echo "  Attempt $$i: items=$$ITEMS categories=$$CATS notifications=$$NOTIFY"
+          sleep 3
         done
-        echo "ERROR: Gateway not ready after 60s" >&2
+        echo "ERROR: Services not ready after 120s" >&2
         exit 1
 
   hmall-web:

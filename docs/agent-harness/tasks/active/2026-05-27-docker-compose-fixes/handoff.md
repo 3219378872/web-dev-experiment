@@ -30,10 +30,11 @@ Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 - hm-service 已加入 docker-compose.yml，`/hi` 端点可用。
 - `nacos-init` 使用 `apk add python3` 安装依赖，首次运行可能稍慢。
 - SQL init 通过 MySQL 的 `/docker-entrypoint-initdb.d/` 机制自动导入，
-  仅在数据卷为空时生效（首次启动）。
+  仅在数据卷为空时生效（首次启动）；verification 含 `docker compose down -v` 证据。
+- smoke-test 等待 items/categories/notifications 三个端点均返回 200 后才执行，
+  超时 120s，避免服务就绪竞态。
 - WSL2 宿主机→Docker 网络不通（iptables DROP 规则），smoke test 需从
   容器内部运行。这是环境问题，非代码缺陷。
-- `nacos-init` 使用 `apk add python3` 安装依赖，首次运行可能稍慢。
 
 ## Next Action
 
@@ -52,6 +53,6 @@ Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 
 ## CI And Review
 
-- CI status: round 14 — lint/test/integration/smoke passed
-- Codex review: round 13 failed（2 blocking findings: KB 文档未同步 excludeReadPaths、缺少匿名写拒绝验证证据）
-- Round 14 修复：更新 hm-gateway.md 和 auth-and-gateway-flow.md；添加匿名 POST/PUT/DELETE /categories 拒绝验证
+- CI status: round 15 — lint/test/integration/smoke passed
+- Codex review: round 14 failed（2 blocking findings: smoke-test 竞态条件、SQL 修复无 clean-volume 证据）
+- Round 15 修复：smoke-test 增加多端点就绪检查；verification 增加 `docker compose down -v` 证据；修正 audit.md 证据行

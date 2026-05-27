@@ -8,7 +8,7 @@ Docker 网络内 10/10 通过。
 ## Scope
 
 - In scope: gateway 鉴权白名单（含读写分离）、SQL 初始化数据、Nacos 路由初始化自动化、
-  hm-service 部署、.gitignore、gateway 路由完整性
+  hm-service 部署、.gitignore、gateway 路由完整性、smoke-test 就绪检查改进
 - Out of scope: WSL2 宿主机网络修复、e2e 测试适配
 
 ## Related Artifacts
