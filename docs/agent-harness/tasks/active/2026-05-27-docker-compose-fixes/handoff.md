@@ -28,7 +28,7 @@ Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 ## Known Risks
 
 - hm-service 未部署（docker-compose.yml 中无此容器），`/hi` 端点不可用。
-  本次不处理，后续可选部署。
+  smoke test #1 已改为 skip（不计入失败），后续可选部署。
 - WSL2 宿主机→Docker 网络不通（iptables DROP 规则），smoke test 需从
   容器内部运行。这是环境问题，非代码缺陷。
 - `nacos-init` 使用 `apk add python3` 安装依赖，首次运行可能稍慢。
