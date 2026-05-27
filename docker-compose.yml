@@ -202,12 +202,14 @@ services:
           ITEMS=$$(curl -sf -o /dev/null -w '%{http_code}' "http://hm-gateway:8080/items/page?page=1&size=1" 2>/dev/null || echo "000")
           CATS=$$(curl -sf -o /dev/null -w '%{http_code}' "http://hm-gateway:8080/categories" 2>/dev/null || echo "000")
           NOTIFY=$$(curl -sf -o /dev/null -w '%{http_code}' "http://hm-gateway:8080/notifications/active" 2>/dev/null || echo "000")
-          if [ "$$ITEMS" = "200" ] && [ "$$CATS" = "200" ] && [ "$$NOTIFY" = "200" ]; then
+          # user-service: POST /users/login with bad creds returns 400/401 if service is up
+          USER=$$(curl -sf -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"username":"x","password":"x"}' "http://hm-gateway:8080/users/login" 2>/dev/null || echo "000")
+          if [ "$$ITEMS" = "200" ] && [ "$$CATS" = "200" ] && [ "$$NOTIFY" = "200" ] && ([ "$$USER" = "400" ] || [ "$$USER" = "401" ]); then
             echo "All services ready, running smoke tests..."
             sh /smoke/smoke.sh http://hm-gateway:8080
             exit $$?
           fi
-          echo "  Attempt $$i: items=$$ITEMS categories=$$CATS notifications=$$NOTIFY"
+          echo "  Attempt $$i: items=$$ITEMS categories=$$CATS notifications=$$NOTIFY user=$$USER"
           sleep 3
         done
         echo "ERROR: Services not ready after 120s" >&2
