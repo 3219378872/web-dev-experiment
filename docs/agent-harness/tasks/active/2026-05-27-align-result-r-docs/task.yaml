@@ -1,0 +1,14 @@
+slug: 2026-05-27-align-result-r-docs
+status: created
+base_branch: main
+task_branch: task/2026-05-27-align-result-r-docs
+remote_branch: origin/task/2026-05-27-align-result-r-docs
+pull_request: null
+ci_status: not-run
+codex_review: not-run
+remote_cleanup: not-applicable
+spec: null
+plan: null
+spec_waiver: docs-only 对齐修正，无设计决策（命名漂移与现行模式描述）。
+plan_waiver: 单 commit docs 改动，无多步实施。
+pr_waiver: null

@@ -120,5 +120,7 @@ cd hmall-admin && npm test && npm run build
 
 ## API Contract Safety
 
-- 公共 API 一律走 `hm-common.dto.Result<T>` / `PageDTO<T>` 封装；不允许裸返 entity。
+- 公共 API 响应遵循 `hm-common.domain.R<T>` / `PageDTO<T>` 约定：写操作返回
+  `R<Void>` 并由 `CommonExceptionAdvice` 统一异常包装；只读接口可直接返回
+  `PageDTO<T>` / `*VO` / `*DTO`，但禁止裸返数据库 entity（必须经 DTO 隔离）。
 - 改动接口字段或 HTTP 状态码视为 breaking change，需 spec + 调用方迁移说明。
