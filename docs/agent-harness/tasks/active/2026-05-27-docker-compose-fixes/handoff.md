@@ -53,6 +53,6 @@ Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 
 ## CI And Review
 
-- CI status: round 16 — lint/test/integration/smoke passed
-- Codex review: round 15 failed（1 blocking finding: task.yaml ci_status/codex_review 字段过期）
-- Round 16 修复：task.yaml ci_status/codex_review 设为 pending（等待最新 review 结果）
+- CI status: round 17 — lint/test/integration/smoke passed
+- Codex review: round 16 failed（1 blocking finding: smoke-test 未等待 user-service 就绪）
+- Round 17 修复：smoke-test 增加 user-service 就绪检查（POST /users/login 返回 400/401）
