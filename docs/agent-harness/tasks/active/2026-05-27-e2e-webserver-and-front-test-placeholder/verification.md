@@ -14,9 +14,11 @@
 | `cd hmall-web && npm run build` | pass | `✓ built in 5.48s`（无回归） |
 | `cd hmall-admin && npm run build` | pass | `✓ built in 8.58s`（无回归） |
 | `cd e2e && npx playwright test --list` | pass | 列出 12 个 spec，无 config 加载错误 |
+| `cd hmall-web && npm run dev -- --host --port 5173 --strictPort`（手动验证 webServer） | pass | Vite 启动成功，`curl -s -o /dev/null -w "%{http_code}" http://localhost:5173/` → `200` |
+| `cd hmall-admin && npm run dev -- --host --port 5174 --strictPort`（手动验证 webServer） | pass | Vite 启动成功，`curl -s -o /dev/null -w "%{http_code}" http://localhost:5174/` → `200` |
 | `npx --prefix e2e tsc --noEmit --project e2e/tsconfig.json` | pre-existing errors | 5 个 pre-existing 错误（`localStorage` ×3、`path`、`__dirname`），**0 新增**；本 PR 改动不引入新 tsc 错误 |
 | `docker compose config -q` | pass | exit 0（compose 文件不变） |
-| Playwright 实跑 e2e | not run | 需 backend gateway + 前端 + 用户数据齐套；e2e webServer 仅自动起前端不起 backend；视为 follow-up（task #7） |
+| Playwright 实跑 e2e | not run | 需 backend gateway + 用户数据齐套；e2e webServer 仅自动起前端不起 backend；视为 follow-up（task #7） |
 
 ## Evidence Table（PR 改动）
 
