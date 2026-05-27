@@ -2,8 +2,8 @@
 
 ## Status
 
-本地验收完成。Smoke test 10/10 通过（从 Docker 网络内运行）。
-待 push 远程、开 PR、过 CI 与 review。
+PR #21 已创建。Smoke test 10/10 通过（从 Docker 网络内运行）。
+待 CI 与 codex review 通过后合并。
 
 ## Files Changed
 
@@ -44,8 +44,8 @@ Push 远程、开 PR、过 CI 与 codex review。
 
 - Base branch: `main`
 - Task branch: `task/2026-05-27-docker-compose-fixes`
-- Remote branch: 待 push
-- Pull request: 待创建
+- Remote branch: `origin/task/2026-05-27-docker-compose-fixes`
+- Pull request: #21（https://github.com/3219378872/web-dev-experiment/pull/21）
 
 ## CI And Review
 

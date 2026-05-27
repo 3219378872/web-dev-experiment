@@ -1,9 +1,9 @@
 slug: 2026-05-27-docker-compose-fixes
-status: created
+status: pr-open
 base_branch: main
 task_branch: task/2026-05-27-docker-compose-fixes
 remote_branch: origin/task/2026-05-27-docker-compose-fixes
-pull_request: null
+pull_request: 21
 ci_status: not-run
 codex_review: not-run
 remote_cleanup: not-applicable
