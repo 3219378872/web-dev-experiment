@@ -52,6 +52,6 @@ Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 
 ## CI And Review
 
-- CI status: round 12 — lint/test/integration/smoke passed
-- Codex review: round 11 failed（2 blocking findings: gateway 路由不完整、integration 证据缺失）
-- Round 12 修复：添加 `/admin/reviews/**` 路由到 item-service；补充 CI integration job 证据
+- CI status: round 13 — lint/test/integration/smoke passed
+- Codex review: round 12 failed（1 blocking finding: `/categories/**` 鉴权白名单过宽，允许匿名写操作）
+- Round 13 修复：引入 `excludeReadPaths` 配置，将 `/categories/**` 移至仅 GET/HEAD/OPTIONS 放行

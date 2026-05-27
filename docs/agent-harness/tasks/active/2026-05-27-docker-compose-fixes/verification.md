@@ -16,6 +16,7 @@
 | 12 | `docker compose exec hm-gateway curl -sf --max-time 5 http://localhost:8080/items/page?page=1&size=10` | passed | 200 + valid JSON |
 | 13 | `docker compose exec hm-gateway curl -sf --max-time 5 http://localhost:8080/categories` | passed | 200 |
 | 14 | `docker compose exec hm-gateway curl -sf --max-time 5 -X POST -H 'Content-Type: application/json' -d '{"username":"testuser","password":"admin123"}' http://localhost:8080/users/login` | passed | 返回 token |
+| 15 | `mvn -B -ntp -q test` | passed | BUILD SUCCESS（含 hm-gateway 变更） |
 
 ## Notes
 
