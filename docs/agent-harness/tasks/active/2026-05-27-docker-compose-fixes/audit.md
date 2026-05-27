@@ -12,5 +12,5 @@
 | Smoke test 自动化 | passed | smoke-test 服务自动运行，含 jq 依赖 |
 | .gitignore 排除 Docker 数据卷 | passed | `docker/mysql/` 已加入 .gitignore |
 | 不引入新 tsc / lint 错误 | passed | 仅改 yaml / sql / sh / gitignore |
-| 不破坏现有 API 响应格式 | passed | 无 Java 代码改动 |
+| 不破坏现有 API 响应格式 | passed | 仅改动 gateway 鉴权过滤器，未触及 R<T>/PageDTO<T> 契约 |
 | 鉴权白名单不泄露写操作 | passed | `/categories/**` 仅 GET/HEAD/OPTIONS 放行，POST/PUT/DELETE 需认证 |
