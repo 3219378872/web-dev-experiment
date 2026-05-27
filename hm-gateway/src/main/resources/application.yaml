@@ -18,3 +18,5 @@ hm:
       - /notifications/active
       - /upload/**
       - /files/**
+    excludeReadPaths:
+      - /categories/**

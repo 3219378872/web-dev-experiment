@@ -12,4 +12,5 @@ import java.util.List;
 public class AuthProperties {
     private List<String> includePaths;
     private List<String> excludePaths;
+    private List<String> excludeReadPaths;
 }

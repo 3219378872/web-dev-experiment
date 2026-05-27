@@ -2,7 +2,8 @@
 
 ## Status
 
-PR #20 已开，等待 CI + codex-review 通过后合并。
+PR #20 已合并。CI 全部 5 job 通过（lint、test、integration、smoke、codex-review）。
+远程分支已由 `pr-cleanup.yml` 自动删除。
 
 ## Files Changed
 
@@ -25,21 +26,22 @@ PR #20 已开，等待 CI + codex-review 通过后合并。
 
 ## Next Action
 
-push → 开 PR → 等 CI + codex-review → 合并 → 删除远程分支 → 归档本任务。
+本任务已完成。
 
 ## Worktree Or Branch
 
-- `task/2026-05-27-archive-pr18-task`
+- `task/2026-05-27-archive-pr18-task`（已删除）
 
 ## Branch And PR
 
 - Base branch: `main`
 - Task branch: `task/2026-05-27-archive-pr18-task`
-- Remote branch: `origin/task/2026-05-27-archive-pr18-task`（已推）
-- Pull request: #20（已开）。
-- Remote branch cleanup: 合并后 `pr-cleanup.yml` 自动删除。
+- Remote branch: 已由 `pr-cleanup.yml` 自动删除
+- Pull request: #20（已合并）
+- Remote branch cleanup: 已完成
 
 ## CI And Review
 
-- CI status: not run yet（推送后触发）。
-- Codex review: not run yet。
+- CI status: passed（lint 7s、test 34s、integration 2m14s、smoke 2m16s）
+- Codex review: passed（round 1 通过）
+- Remote cleanup: done（pr-cleanup.yml 自动删除）

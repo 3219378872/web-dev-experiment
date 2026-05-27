@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 33e9420
-last_synced_date: 2026-05-26
-sync_note: "user-service / hm-common 添加集成测试，不改业务逻辑"
+last_synced_commit: 0c7fdd3
+last_synced_date: 2026-05-27
+sync_note: "2026-05-27: 引入 excludeReadPaths（仅 GET/HEAD/OPTIONS 放行），/categories/** 移至读白名单"
 ---
 
 # auth-and-gateway-flow
@@ -24,7 +24,8 @@ sync_note: "user-service / hm-common 添加集成测试，不改业务逻辑"
 3. **前端持久化** —— 返回 token，前端存 localStorage，后续 axios 请求自动注入
    `Authorization: Bearer <token>`。
 4. **鉴权拦截** —— 后续请求经 Gateway，`AuthGlobalFilter` 校验 JWT：
-   - 白名单路径放行。
+   - 白名单路径（`excludePaths`）放行。
+   - 读白名单路径（`excludeReadPaths`）仅 GET/HEAD/OPTIONS 放行；写操作需认证。
    - 解析 token 失败 / 过期 → 401。
    - 解析成功 → 将 userId 写入 header `user-info`，转发下游。
 5. **下游用户上下文** —— 业务服务通过 [hm-common](../modules/hm-common.md)
