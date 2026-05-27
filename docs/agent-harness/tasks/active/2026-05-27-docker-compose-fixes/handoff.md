@@ -3,6 +3,7 @@
 ## Status
 
 PR #21 已创建。Smoke test 10/10 通过（从 Docker 网络内运行）。
+Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 待 CI 与 codex review 通过后合并。
 
 ## Files Changed
@@ -10,6 +11,7 @@ PR #21 已创建。Smoke test 10/10 通过（从 Docker 网络内运行）。
 - `hm-gateway/src/main/resources/application.yaml`（加 `/categories/**` 到鉴权白名单）
 - `docs/sql/init-all-tables.sql`（修复 user.status 类型 + 密码 hash）
 - `scripts/init-nacos-routes.sh`（新增：Nacos gateway 路由初始化脚本）
+- `docker-compose.yml`（新增 `nacos-init` 服务，所有 Java 服务依赖它）
 - `.gitignore`（加 `docker/mysql/`）
 
 ## Commands Run
@@ -19,9 +21,9 @@ PR #21 已创建。Smoke test 10/10 通过（从 Docker 网络内运行）。
 - `python3 scripts/knowledge_base.py check --base origin/main` → passed
 - `python3 scripts/engineering-lint.py` → passed
 - `mvn -B -ntp test` → BUILD SUCCESS
-- `docker compose up -d` → 12 容器 Up
+- `docker compose up -d` → 13 容器 Up（含 nacos-init exited(0)）
+- `docker compose ps` → nacos-init exited(0)，其余服务 Up
 - smoke test（Docker 网络内）→ 10/10 passed
-- `bash scripts/init-nacos-routes.sh` → Nacos API 返回 true
 
 ## Known Risks
 
@@ -29,8 +31,7 @@ PR #21 已创建。Smoke test 10/10 通过（从 Docker 网络内运行）。
   本次不处理，后续可选部署。
 - WSL2 宿主机→Docker 网络不通（iptables DROP 规则），smoke test 需从
   容器内部运行。这是环境问题，非代码缺陷。
-- Nacos 路由配置需在 `docker compose up` 后手动运行 `init-nacos-routes.sh`。
-  可考虑加入 docker-compose.yml 的 init 容器或 entrypoint。
+- `nacos-init` 使用 `apk add python3` 安装依赖，首次运行可能稍慢。
 
 ## Next Action
 
@@ -49,5 +50,5 @@ PR #21 已创建。Smoke test 10/10 通过（从 Docker 网络内运行）。
 
 ## CI And Review
 
-- CI status: round 2 — lint/test/integration/smoke passed，codex-review 2 blocking findings
-- Codex review: round 2 failed（task.yaml PR URL 格式、ci/codex 状态未更新、verification 命令不精确）
+- CI status: round 3 — lint/test/integration/smoke passed，codex-review 2 blocking findings
+- Codex review: round 3 failed（Nacos init 未自动化、验证证据时序/路径问题）
