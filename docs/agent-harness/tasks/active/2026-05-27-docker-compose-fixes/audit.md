@@ -3,6 +3,8 @@
 | Requirement | Status | Evidence |
 | --- | --- | --- |
 | Gateway 鉴权白名单包含公开读接口 | passed | `/categories/**` 已加入 `hm.auth.excludePaths` |
+| hm-service 部署 | passed | hm-service 已加入 docker-compose.yml |
+| /hi 端点可用 | passed | smoke test #1 通过 |
 | SQL 初始化数据类型与实体枚举匹配 | passed | `user.status` 列定义 INT + 种子数据 int (1=NORMAL) |
 | SQL 密码 hash 与文档注释一致 | passed | hash 对应 `admin123`，与注释一致 |
 | SQL 自动导入 | passed | `init-all-tables.sql` 挂载到 `/docker-entrypoint-initdb.d/` |
