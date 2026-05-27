@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | `cmp CLAUDE.md AGENTS.md` | pass | byte equal（本 PR 不改 CLAUDE.md/AGENTS.md，但 lint 仍校验） |
 | `python3 scripts/agent_harness.py check` | pass | `agent harness check passed` |
-| `python3 scripts/knowledge_base.py check --base origin/main` | pass | `knowledge base check passed`（本 PR 不动 KB tracks 路径） |
+| `python3 scripts/knowledge_base.py check --base origin/main` | pass | `knowledge base check passed`（本 PR 改动 `hmall-web/`、`hmall-admin/` 路径，对应 KB 页面已同步更新，K005 通过） |
 | `python3 scripts/engineering-lint.py` | pass | `engineering-lint: all checks passed` |
 | `mvn -B -ntp test` | pass | 当前分支 HEAD `BUILD SUCCESS`（80 个测试 0 失败；后端无源码改动） |
 | `cd hmall-web && npm test` | pass | 输出 `hmall-web has no unit tests yet (vitest setup pending)`，exit 0 |
@@ -16,6 +16,7 @@
 | `cd e2e && npx playwright test --list` | pass | 列出 12 个 spec，无 config 加载错误 |
 | `cd hmall-web && npm run dev -- --host --port 5173 --strictPort`（手动验证 webServer） | pass | Vite 启动成功，`curl -s -o /dev/null -w "%{http_code}" http://localhost:5173/` → `200` |
 | `cd hmall-admin && npm run dev -- --host --port 5174 --strictPort`（手动验证 webServer） | pass | Vite 启动成功，`curl -s -o /dev/null -w "%{http_code}" http://localhost:5174/` → `200` |
+| `cd e2e && npx playwright test hmall-web/browse.spec.ts --reporter=line`（验证 webServer 自动启动） | pass（预期 spec 失败） | Playwright 输出 `[WebServer]` 前缀行证明自动启动了 Vite dev server；Vite 尝试代理到 `localhost:8080` 产生 `ECONNREFUSED`（无 backend），说明 webServer 进程已正常运行。spec 因后端不可用而断言失败，属预期行为 |
 | `npx --prefix e2e tsc --noEmit --project e2e/tsconfig.json` | pre-existing errors | 5 个 pre-existing 错误（`localStorage` ×3、`path`、`__dirname`），**0 新增**；本 PR 改动不引入新 tsc 错误 |
 | `docker compose config -q` | pass | exit 0（compose 文件不变） |
 | Playwright 实跑 e2e | not run | 需 backend gateway + 用户数据齐套；e2e webServer 仅自动起前端不起 backend；视为 follow-up（task #7） |
