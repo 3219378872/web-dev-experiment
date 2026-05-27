@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS `user` (
     avatar VARCHAR(512),
     nickname VARCHAR(64),
     role VARCHAR(16) DEFAULT 'user',
-    status VARCHAR(16) DEFAULT 'NORMAL',
+    status INT DEFAULT 1 COMMENT '0=FROZEN 1=NORMAL',
     balance INT DEFAULT 0,
     create_time DATETIME,
     update_time DATETIME
