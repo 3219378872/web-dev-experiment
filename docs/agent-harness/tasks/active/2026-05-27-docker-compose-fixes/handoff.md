@@ -52,6 +52,6 @@ Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 
 ## CI And Review
 
-- CI status: round 13 — lint/test/integration/smoke passed
-- Codex review: round 12 failed（1 blocking finding: `/categories/**` 鉴权白名单过宽，允许匿名写操作）
-- Round 13 修复：引入 `excludeReadPaths` 配置，将 `/categories/**` 移至仅 GET/HEAD/OPTIONS 放行
+- CI status: round 14 — lint/test/integration/smoke passed
+- Codex review: round 13 failed（2 blocking findings: KB 文档未同步 excludeReadPaths、缺少匿名写拒绝验证证据）
+- Round 14 修复：更新 hm-gateway.md 和 auth-and-gateway-flow.md；添加匿名 POST/PUT/DELETE /categories 拒绝验证

@@ -2,9 +2,9 @@
 title: hm-gateway
 tracks:
   - hm-gateway/
-last_synced_commit: 9679b3a
+last_synced_commit: 0c7fdd3
 last_synced_date: 2026-05-27
-sync_note: "2026-05-27: 加 /categories/** 到鉴权白名单；新增 init-nacos-routes.sh"
+sync_note: "2026-05-27: 引入 excludeReadPaths（仅 GET/HEAD/OPTIONS 放行），/categories/** 移至读白名单"
 ---
 
 # hm-gateway
@@ -20,7 +20,7 @@ Spring Cloud Gateway 反向代理：路由分发、JWT 鉴权、CORS、限流、
 - 路由规则在 Nacos 共享配置（`shared-jwt.yaml` / 网关 `application.yaml`）中。
 - 通过 header `user-info` 把解析后的 userId 传给下游；下游用
   `hm-common.interceptor.UserInfoInterceptor` 写入 `UserContext`。
-- 白名单（`auth.excludePaths`）走未鉴权放行。
+- 白名单（`auth.excludePaths`）走未鉴权放行；读白名单（`auth.excludeReadPaths`）仅 GET/HEAD/OPTIONS 放行。
 - `DynamicRouteLoader` 监听 Nacos `gateway-routes.json` 实现动态路由。
 
 ## 上游
