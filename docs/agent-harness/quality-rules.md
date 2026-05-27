@@ -120,5 +120,20 @@ cd hmall-admin && npm test && npm run build
 
 ## API Contract Safety
 
-- 公共 API 一律走 `hm-common.dto.Result<T>` / `PageDTO<T>` 封装；不允许裸返 entity。
-- 改动接口字段或 HTTP 状态码视为 breaking change，需 spec + 调用方迁移说明。
+- 公共 API 响应封装当前在仓库内不统一：
+  - **一致部分**：`CommonExceptionAdvice` 把任何抛出的异常统一包成
+    `hm-common.domain.R<Void>` 返回 —— 这是唯一全栈一致的封装入口。
+  - **成功响应（混合）**：新版接口（`item-service` / `notify-service` /
+    `user-service/{Address,Favorite}Controller` + `UserController` 的
+    `sendCode`/`register`/`resetPassword`/`updateProfile` / `trade-service` 的
+    `cancel`/`confirm`/`refund`/`admin/*` / `CouponController`）写返 `R<Void>`、
+    读返 `*VO`/`PageDTO<T>`/`List<*>`；遗留接口（`hm-service`、`pay-service`、
+    `cart-service`、`trade-service/OrderController` 的
+    `createOrder`/`markOrderPaySuccess`/`updateOrder`、
+    `user-service/UserController.{login,deductMoney}`、`AddressController.list()`
+    等）多数返 `void`/`Long`/`String`/`*VO`，包含裸返数据库 entity（如
+    `List<Address>`）。两个前端 axios `r => r.data` 拦截器对两种形态都兼容。
+  - **新增 endpoint 指引**：优先 `R<Void>`(写) + `*VO`/`PageDTO<T>`(读)；
+    **不要无前端协调地改既有 endpoint 形态**，否则破坏现网调用。
+- 改动接口字段、HTTP 状态码或响应外壳形态视为 breaking change，需 spec +
+  调用方迁移说明。
