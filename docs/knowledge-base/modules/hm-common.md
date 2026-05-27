@@ -2,9 +2,9 @@
 title: hm-common
 tracks:
   - hm-common/
-last_synced_commit: 33e9420
-last_synced_date: 2026-05-26
-sync_note: "添加 AbstractIT 基类（未使用），不改业务逻辑"
+last_synced_commit: 883f5fb
+last_synced_date: 2026-05-27
+sync_note: "对齐文档与实际混合响应封装模式（不改 hm-common 代码）"
 ---
 
 # hm-common
@@ -17,7 +17,9 @@ sync_note: "添加 AbstractIT 基类（未使用），不改业务逻辑"
 
 ## 公开接口与契约
 
-- `com.hmall.common.domain.R<T>` / `PageDTO<T>` —— 全部 controller 返回值必须用它们包装。
+- `com.hmall.common.domain.R<T>` / `PageDTO<T>` —— 响应封装类型；在仓库内
+  使用不统一（详见 *注意事项与陷阱*）。`CommonExceptionAdvice` 用 `R<Void>`
+  统一包装异常路径。
 - `com.hmall.common.domain.PageQuery` —— 分页/排序参数基类。
 - `CommonException` / `BadRequestException` / `UnauthorizedException` /
   `ForbiddenException` / `BizIllegalException` / `DbException` —— 全栈统一抛出。
@@ -43,6 +45,12 @@ sync_note: "添加 AbstractIT 基类（未使用），不改业务逻辑"
 
 ## 注意事项与陷阱
 
-- 任何 controller 都必须返回 `R<T>` 或 `PageDTO<T>`；裸返 entity 视为 breaking change。
+- 响应封装在仓库内**不统一**：异常路径由 `CommonExceptionAdvice` 一致返
+  `R<Void>`；成功路径混合 `R<T>`/`R<Void>`、`*VO`/`*DTO`/`PageDTO<T>`、
+  裸 `void`/`Long`/`String`，甚至裸返数据库 entity（如
+  `user-service/AddressController.list()` → `List<Address>`）。两个前端
+  axios `r => r.data` 拦截器对两种形态都兼容。
+- 新增 endpoint 优先 `R<Void>`(写) + `*VO`/`PageDTO<T>`(读)；**不要无前端
+  协调地改既有 endpoint 形态**，否则破坏现网调用。
 - `UserContext` 是 ThreadLocal，异步线程必须显式传递。
 - 修改 `R` 字段顺序或名称会破坏前端解析。
