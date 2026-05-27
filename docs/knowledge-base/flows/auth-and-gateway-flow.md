@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 33e9420
-last_synced_date: 2026-05-26
-sync_note: "user-service / hm-common 添加集成测试，不改业务逻辑"
+last_synced_commit: 2829bb9
+last_synced_date: 2026-05-27
+sync_note: "2026-05-27: 加 /categories/** 到鉴权白名单，不影响流程描述"
 ---
 
 # auth-and-gateway-flow
