@@ -11,7 +11,7 @@ Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 - `hm-gateway/src/main/resources/application.yaml`（加 `/categories/**` 到鉴权白名单）
 - `docs/sql/init-all-tables.sql`（修复 user.status 类型 + 密码 hash）
 - `scripts/init-nacos-routes.sh`（新增：Nacos gateway 路由初始化脚本）
-- `docker-compose.yml`（新增 `nacos-init`、`hm-service`；MySQL 挂载 SQL init；所有 Java 服务依赖 nacos-init）
+- `docker-compose.yml`（新增 `nacos-init`、`hm-service`、`smoke-test`；MySQL 挂载 SQL init；所有 Java 服务依赖 nacos-init）
 - `.gitignore`（加 `docker/mysql/`）
 
 ## Commands Run
@@ -21,9 +21,9 @@ Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 - `python3 scripts/knowledge_base.py check --base origin/main` → passed
 - `python3 scripts/engineering-lint.py` → passed
 - `mvn -B -ntp test` → BUILD SUCCESS
-- `docker compose up -d` → 14 容器 Up（含 hm-service、nacos-init exited(0)）
-- `docker compose ps` → nacos-init exited(0)，其余 13 服务 Up
-- smoke test（Docker 网络内）→ 10/10 passed
+- `docker compose up -d` → 16 容器启动
+- `docker compose ps` → nacos-init exited(0)、smoke-test exited(0)，其余 14 服务 Up
+- `docker compose logs smoke-test` → 10/10 passed
 
 ## Known Risks
 
