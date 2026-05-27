@@ -49,5 +49,5 @@ PR #21 已创建。Smoke test 10/10 通过（从 Docker 网络内运行）。
 
 ## CI And Review
 
-- CI status: round 1 — lint/test/integration/smoke passed，codex-review 3 blocking findings
-- Codex review: round 1 failed（SQL schema 未改列类型、verification 不完整、metadata 不一致）
+- CI status: round 2 — lint/test/integration/smoke passed，codex-review 2 blocking findings
+- Codex review: round 2 failed（task.yaml PR URL 格式、ci/codex 状态未更新、verification 命令不精确）
