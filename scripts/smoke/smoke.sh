@@ -1,8 +1,8 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
 # Smoke tests for hmall microservice stack
-# Usage: bash scripts/smoke/smoke.sh [BASE_URL]
+# Usage: sh scripts/smoke/smoke.sh [BASE_URL]
 #   default BASE_URL: http://localhost:8080
 
 BASE_URL="${1:-http://localhost:8080}"
@@ -13,21 +13,20 @@ green()  { printf '\033[32m%s\033[0m\n' "$1"; }
 red()    { printf '\033[31m%s\033[0m\n' "$1"; }
 
 check() {
-    local num="$1" method="$2" path="$3" expected="$4"
-    local extra_args=("${@:5}")
-    local url="${BASE_URL}${path}"
+    _num="$1"; _method="$2"; _path="$3"; _expected="$4"
+    shift 4
+    _url="${BASE_URL}${_path}"
 
-    local http_code
-    http_code=$(curl -s -o /tmp/smoke_resp.txt -w '%{http_code}' \
+    _http_code=$(curl -s -o /tmp/smoke_resp.txt -w '%{http_code}' \
         --connect-timeout 5 --max-time 10 \
-        -X "$method" "${extra_args[@]}" "$url" 2>/tmp/smoke_err.txt || true)
+        -X "$_method" "$@" "$_url" 2>/tmp/smoke_err.txt || true)
 
-    if [ "$http_code" = "$expected" ]; then
-        green "[PASS] #${num} ${method} ${path} -> ${http_code}"
+    if [ "$_http_code" = "$_expected" ]; then
+        green "[PASS] #${_num} ${_method} ${_path} -> ${_http_code}"
         PASS=$((PASS + 1))
         return 0
     else
-        red "[FAIL] #${num} ${method} ${path} -> expected ${expected}, got ${http_code}"
+        red "[FAIL] #${_num} ${_method} ${_path} -> expected ${_expected}, got ${_http_code}"
         echo "  Response: $(head -c 200 /tmp/smoke_resp.txt)"
         FAIL=$((FAIL + 1))
         return 1
@@ -35,28 +34,27 @@ check() {
 }
 
 check_json() {
-    local num="$1" method="$2" path="$3" expected="$4"
-    local extra_args=("${@:5}")
-    local url="${BASE_URL}${path}"
+    _num="$1"; _method="$2"; _path="$3"; _expected="$4"
+    shift 4
+    _url="${BASE_URL}${_path}"
 
-    local http_code
-    http_code=$(curl -s -o /tmp/smoke_resp.txt -w '%{http_code}' \
+    _http_code=$(curl -s -o /tmp/smoke_resp.txt -w '%{http_code}' \
         --connect-timeout 5 --max-time 10 \
-        -X "$method" "${extra_args[@]}" "$url" 2>/tmp/smoke_err.txt || true)
+        -X "$_method" "$@" "$_url" 2>/tmp/smoke_err.txt || true)
 
-    if [ "$http_code" != "$expected" ]; then
-        red "[FAIL] #${num} ${method} ${path} -> expected ${expected}, got ${http_code}"
+    if [ "$_http_code" != "$_expected" ]; then
+        red "[FAIL] #${_num} ${_method} ${_path} -> expected ${_expected}, got ${_http_code}"
         echo "  Response: $(head -c 200 /tmp/smoke_resp.txt)"
         FAIL=$((FAIL + 1))
         return 1
     fi
 
     if jq -e . /tmp/smoke_resp.txt >/dev/null 2>&1; then
-        green "[PASS] #${num} ${method} ${path} -> ${http_code} (valid JSON)"
+        green "[PASS] #${_num} ${_method} ${_path} -> ${_http_code} (valid JSON)"
         PASS=$((PASS + 1))
         return 0
     else
-        red "[FAIL] #${num} ${method} ${path} -> ${http_code} but invalid JSON"
+        red "[FAIL] #${_num} ${_method} ${_path} -> ${_http_code} but invalid JSON"
         FAIL=$((FAIL + 1))
         return 1
     fi
