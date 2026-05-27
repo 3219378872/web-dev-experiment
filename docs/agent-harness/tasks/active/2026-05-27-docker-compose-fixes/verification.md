@@ -17,6 +17,10 @@
 | 13 | `docker compose exec hm-gateway curl -sf --max-time 5 http://localhost:8080/categories` | passed | 200 |
 | 14 | `docker compose exec hm-gateway curl -sf --max-time 5 -X POST -H 'Content-Type: application/json' -d '{"username":"testuser","password":"admin123"}' http://localhost:8080/users/login` | passed | 返回 token |
 | 15 | `mvn -B -ntp -q test` | passed | BUILD SUCCESS（含 hm-gateway 变更） |
+| 16 | `curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8080/categories -H 'Content-Type: application/json' -d '{"name":"test"}'` | 401 | 匿名 POST /categories 被拒（需认证） |
+| 17 | `curl -s -o /dev/null -w '%{http_code}' -X PUT http://localhost:8080/categories/1 -H 'Content-Type: application/json' -d '{"name":"test"}'` | 401 | 匿名 PUT /categories/1 被拒（需认证） |
+| 18 | `curl -s -o /dev/null -w '%{http_code}' -X DELETE http://localhost:8080/categories/1` | 401 | 匿名 DELETE /categories/1 被拒（需认证） |
+| 19 | `curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/categories` | 200 | 匿名 GET /categories 放行（读白名单） |
 
 ## Notes
 
