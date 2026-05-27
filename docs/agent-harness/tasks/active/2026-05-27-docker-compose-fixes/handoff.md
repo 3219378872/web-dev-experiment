@@ -53,6 +53,6 @@ Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 
 ## CI And Review
 
-- CI status: round 15 — lint/test/integration/smoke passed
-- Codex review: round 14 failed（2 blocking findings: smoke-test 竞态条件、SQL 修复无 clean-volume 证据）
-- Round 15 修复：smoke-test 增加多端点就绪检查；verification 增加 `docker compose down -v` 证据；修正 audit.md 证据行
+- CI status: round 16 — lint/test/integration/smoke passed
+- Codex review: round 15 failed（1 blocking finding: task.yaml ci_status/codex_review 字段过期）
+- Round 16 修复：task.yaml ci_status/codex_review 设为 pending（等待最新 review 结果）
