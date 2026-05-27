@@ -2,8 +2,8 @@
 
 ## Discovery
 
-`/goal` 审查阶段对照 `hm-common/.../R.java` 与现有 controller / 前端 axios 拦截器
-发现以下漂移：
+`/goal` 审查阶段对照 `hm-common/src/main/java/com/hmall/common/domain/R.java`
+与现有 controller / 前端 axios 拦截器发现以下漂移：
 
 1. **类名漂移**：`CLAUDE.md` / `AGENTS.md` / `docs/agent-harness/quality-rules.md`
    多处引用 `Result<T>`，实际类名为 `R<T>`（包 `com.hmall.common.domain`）。
@@ -40,8 +40,8 @@
 - 业务模块（cart / trade / item / notify / file / hm-api）单测覆盖几乎为零，
   与 CLAUDE.md "目标核心 service/util 80% 覆盖率" 差距明显。
 - `e2e/playwright.config.ts` 无 `webServer` 配置，跑前需手动启动两个前端，
-  上次 `e2e/test-results/.last-run.json` 12 个 spec 全失败
-  （`ERR_CONNECTION_REFUSED`）。
+  上次本地运行（`e2e/test-results` 残留，gitignored，CI 无）12 个 spec
+  全失败（`ERR_CONNECTION_REFUSED`）。
 - `hmall-web` / `hmall-admin` `package.json` 没有 `test` 脚本（前端 0 个 vitest）。
 
 以上将在后续 PR 中分别处理。
