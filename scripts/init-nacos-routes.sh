@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
 # Seed Nacos with gateway-routes.json so hm-gateway can route to microservices.
 # Usage: bash scripts/init-nacos-routes.sh [NACOS_URL]
@@ -121,7 +121,7 @@ ROUTES='[
   }
 ]'
 
-ENCODED=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.stdin.read(), safe=''))" <<< "$ROUTES")
+ENCODED=$(printf '%s' "$ROUTES" | python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.stdin.read(), safe=''))")
 
 HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 15 \
   -X POST "${NACOS_URL}/nacos/v1/cs/configs" \
