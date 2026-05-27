@@ -34,7 +34,7 @@ PR #21 已创建。Smoke test 10/10 通过（从 Docker 网络内运行）。
 
 ## Next Action
 
-Push 远程、开 PR、过 CI 与 codex review。
+修复 codex review blocking findings 后重新提交，等待 CI 通过后合并。
 
 ## Worktree Or Branch
 
@@ -49,5 +49,5 @@ Push 远程、开 PR、过 CI 与 codex review。
 
 ## CI And Review
 
-- CI status: not run yet
-- Codex review: not run yet
+- CI status: round 1 — lint/test/integration/smoke passed，codex-review 3 blocking findings
+- Codex review: round 1 failed（SQL schema 未改列类型、verification 不完整、metadata 不一致）

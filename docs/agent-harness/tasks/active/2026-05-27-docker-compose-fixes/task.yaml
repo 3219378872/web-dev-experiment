@@ -6,7 +6,7 @@ remote_branch: origin/task/2026-05-27-docker-compose-fixes
 pull_request: 21
 ci_status: not-run
 codex_review: not-run
-remote_cleanup: not-applicable
+remote_cleanup: pending
 spec: null
 plan: null
 spec_waiver: "bug fix，不需要独立 spec"
