@@ -66,7 +66,7 @@ services:
           if curl -sf http://nacos:8848/nacos/v1/console/health/readiness >/dev/null 2>&1; then
             echo "Nacos ready, seeding gateway routes..."
             sh /scripts/init-nacos-routes.sh http://nacos:8848
-            exit 0
+            exit $$?
           fi
           sleep 2
         done

@@ -108,6 +108,16 @@ ROUTES='[
         }
       }
     ]
+  },
+  {
+    "id": "hm-service",
+    "uri": "lb://hm-service",
+    "predicates": [
+      {
+        "name": "Path",
+        "args": { "_genkey_0": "/hi" }
+      }
+    ]
   }
 ]'
 
