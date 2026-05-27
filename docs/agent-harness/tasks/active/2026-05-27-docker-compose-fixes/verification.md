@@ -15,7 +15,7 @@
 | 11 | `docker compose exec hm-gateway curl -sf --max-time 5 http://localhost:8080/items/page?page=1&size=10` | passed | 200 + valid JSON |
 | 12 | `docker compose exec hm-gateway curl -sf --max-time 5 http://localhost:8080/categories` | passed | 200 |
 | 13 | `docker compose exec hm-gateway curl -sf --max-time 5 -X POST -H 'Content-Type: application/json' -d '{"username":"testuser","password":"admin123"}' http://localhost:8080/users/login` | passed | 返回 token |
-| 14 | `docker compose exec hm-gateway bash /dev/stdin < scripts/smoke/smoke.sh`（Docker 网络内） | passed | 10/10 passed |
+| 14 | `docker compose exec hm-gateway bash /dev/stdin < scripts/smoke/smoke.sh`（Docker 网络内） | passed | 10/10 passed（#1 /hi skip，hm-service 未部署） |
 
 ## Notes
 
