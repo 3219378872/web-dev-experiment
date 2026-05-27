@@ -2,7 +2,7 @@
 
 ## Status
 
-待 push 远程开 PR，CI 通过 + codex-review 放行后合并。
+PR #20 已开，等待 CI + codex-review 通过后合并。
 
 ## Files Changed
 
@@ -35,8 +35,8 @@ push → 开 PR → 等 CI + codex-review → 合并 → 删除远程分支 → 
 
 - Base branch: `main`
 - Task branch: `task/2026-05-27-archive-pr18-task`
-- Remote branch: `origin/task/2026-05-27-archive-pr18-task`（待推）
-- Pull request: 待开。
+- Remote branch: `origin/task/2026-05-27-archive-pr18-task`（已推）
+- Pull request: #20（已开）。
 - Remote branch cleanup: 合并后 `pr-cleanup.yml` 自动删除。
 
 ## CI And Review
