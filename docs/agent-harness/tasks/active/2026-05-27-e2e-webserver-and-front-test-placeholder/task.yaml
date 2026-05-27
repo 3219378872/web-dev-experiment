@@ -1,0 +1,14 @@
+slug: 2026-05-27-e2e-webserver-and-front-test-placeholder
+status: pr-open
+base_branch: main
+task_branch: task/2026-05-27-e2e-webserver-and-front-test-placeholder
+remote_branch: origin/task/2026-05-27-e2e-webserver-and-front-test-placeholder
+pull_request: https://github.com/3219378872/web-dev-experiment/pull/16
+ci_status: pending
+codex_review: pending
+remote_cleanup: pending
+spec: null
+plan: null
+spec_waiver: 工程化补缺（playwright webServer + 前端 test 占位 + 归档），无设计决策。
+plan_waiver: 三处小改 + 归档动作直接合并，单 PR 完成。
+pr_waiver: null
