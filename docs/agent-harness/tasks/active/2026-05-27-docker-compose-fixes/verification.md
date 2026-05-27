@@ -22,5 +22,5 @@
 - Nacos 路由初始化已通过 `nacos-init` 服务自动化，不再需要手动运行 `init-nacos-routes.sh`。
 - `nacos-init` 使用 `curlimages/curl` 镜像 + `apk add python3`，挂载 `./scripts` 目录。
 - 所有 Java 服务依赖 `nacos-init` 的 `service_completed_successfully` 条件。
-- `mvn -B -ntp verify -Pintegration` 跳过：WSL2 宿主机无法访问 Docker MySQL（端口 3306 不可达）。
+- `mvn -B -ntp verify -Pintegration` 本地跳过：WSL2 宿主机无法访问 Docker MySQL（端口 3306 不可达）。CI integration job 已通过（run 26505386582，conclusion: success）。
 - `npx --prefix e2e playwright test --list` 跳过：本 PR 不改 e2e spec。
