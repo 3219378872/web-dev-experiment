@@ -23,7 +23,8 @@ ROUTES='[
           "_genkey_0": "/items/**",
           "_genkey_1": "/search/**",
           "_genkey_2": "/categories/**",
-          "_genkey_3": "/admin/items/**"
+          "_genkey_3": "/admin/items/**",
+          "_genkey_4": "/admin/reviews/**"
         }
       }
     ]
