@@ -1,0 +1,14 @@
+slug: 2026-05-27-e2e-webserver-and-front-test-placeholder
+status: created
+base_branch: main
+task_branch: task/2026-05-27-e2e-webserver-and-front-test-placeholder
+remote_branch: origin/task/2026-05-27-e2e-webserver-and-front-test-placeholder
+pull_request: null
+ci_status: not-run
+codex_review: not-run
+remote_cleanup: not-applicable
+spec: null
+plan: null
+spec_waiver: 工程化补缺（playwright webServer + 前端 test 占位 + 归档），无设计决策。
+plan_waiver: 三处小改 + 归档动作直接合并，单 PR 完成。
+pr_waiver: null
