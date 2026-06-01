@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 9ac1cc5
+last_synced_commit: 7aae71e
 last_synced_date: 2026-06-01
-sync_note: "2026-06-01: 占位脚本替换为 vitest + 真实单元测试（App mount + api config）"
+sync_note: "添加 ESLint + Prettier + pre-commit hooks；新增 .eslintrc.cjs、.prettierrc 与 lint/format scripts；单元测试已迁移到 vitest"
 ---
 
 # hmall-web
@@ -35,6 +35,7 @@ sync_note: "2026-06-01: 占位脚本替换为 vitest + 真实单元测试（App 
 
 - `package.json` —— 依赖与脚本。
 - `vite.config.ts` —— 构建/代理配置。
+- `.eslintrc.cjs`、`.prettierrc` —— 代码质量与格式化配置。
 - `src/api/` —— axios 客户端、按服务划分的 API 调用。
 - `src/router/index.ts` —— 路由。
 - `src/stores/` —— Pinia store。
@@ -47,3 +48,4 @@ sync_note: "2026-06-01: 占位脚本替换为 vitest + 真实单元测试（App 
 - 鉴权失败（401）必须跳登录并清 token，不要静默重试。
 - 商品图懒加载；首屏 LCP 关注度高。
 - 路由 meta 标记是否需登录，由全局守卫统一处理。
+- 提交前运行 `npm run lint` 和 `npm run format`；pre-commit hook 自动检查。

@@ -1,9 +1,9 @@
-import request from './request'
-export const createOrder = (data) => request.post('/orders', data)
-export const getOrders = (params) => request.get('/orders', { params })
-export const cancelOrder = (id) => request.put(`/orders/${id}/cancel`)
-export const confirmOrder = (id) => request.put(`/orders/${id}/confirm`)
-export const refundOrder = (id) => request.post(`/orders/${id}/refund`)
-export const getCoupons = () => request.get('/coupons')
-export const claimCoupon = (id) => request.post(`/coupons/${id}/claim`)
-export const getMyCoupons = () => request.get('/my-coupons')
+import request from './request';
+export const createOrder = (data) => request.post('/orders', data);
+export const getOrders = (params) => request.get('/orders', { params });
+export const cancelOrder = (id) => request.put(`/orders/${id}/cancel`);
+export const confirmOrder = (id) => request.put(`/orders/${id}/confirm`);
+export const refundOrder = (id) => request.post(`/orders/${id}/refund`);
+export const getCoupons = () => request.get('/coupons');
+export const claimCoupon = (id) => request.post(`/coupons/${id}/claim`);
+export const getMyCoupons = () => request.get('/my-coupons');

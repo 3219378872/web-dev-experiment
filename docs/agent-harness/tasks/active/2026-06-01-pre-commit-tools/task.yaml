@@ -1,0 +1,14 @@
+slug: 2026-06-01-pre-commit-tools
+status: pr-open
+base_branch: main
+task_branch: task/2026-06-01-pre-commit-v2
+remote_branch: origin/task/2026-06-01-pre-commit-v2
+pull_request: "https://github.com/3219378872/web-dev-experiment/pull/27"
+ci_status: pending
+codex_review: fix
+remote_cleanup: pending
+spec: null
+plan: null
+spec_waiver: "开发工具链配置，不需要独立 spec"
+plan_waiver: "实施目标明确，不需要独立 plan"
+pr_waiver: null

@@ -8,6 +8,8 @@ test.describe('Cart', () => {
 
   test('cart page shows empty state when logged in', async ({ page }) => {
     await page.goto('/cart');
-    await expect(page.locator('.el-table, table, .cart-container, [class*="cart"]').first()).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.locator('.el-table, table, .cart-container, [class*="cart"]').first()
+    ).toBeVisible({ timeout: 10000 });
   });
 });
