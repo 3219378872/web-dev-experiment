@@ -184,8 +184,11 @@ def check_co_change(
         page_in_staged = _page_in(staged_files)
 
         for track in page.tracks:
-            # Check 1: committed track changes need committed page update
-            if _track_in(committed_files, track) and not page_in_committed:
+            # Check 1: committed track changes need page update (committed or staged).
+            # A staged KB page is valid remediation for a previously committed track change.
+            if _track_in(committed_files, track) and not (
+                page_in_committed or page_in_staged
+            ):
                 issues.append(
                     CheckIssue(
                         "K005",
