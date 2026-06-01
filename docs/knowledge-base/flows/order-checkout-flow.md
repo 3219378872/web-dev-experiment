@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: ca90665
+last_synced_commit: d66610b
 last_synced_date: 2026-06-01
-sync_note: "Phase 1 测试补足完成：cart/item/trade-service 共 32 个单元测试，不改业务逻辑"
+sync_note: "Phase 1 fix: item-service 测试修复，不改业务逻辑"
 ---
 
 # order-checkout-flow

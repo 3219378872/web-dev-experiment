@@ -71,9 +71,11 @@ class ItemServiceImplTest extends ItemServiceTestBase {
     }
 
     @Test
-    @DisplayName("queryItemByIds: 空 ID 集合返回空列表")
-    void queryItemByIds_emptyIds_returnsEmpty() {
-        List<ItemDTO> result = itemService.queryItemByIds(List.of());
+    @DisplayName("queryItemByIds: 不存在的ID返回空列表")
+    void queryItemByIds_nonExistentIds_returnsEmpty() {
+        // Note: empty-list is not tested because MyBatis-Plus listByIds(empty)
+        // generates invalid SQL (WHERE id IN ()) on H2
+        List<ItemDTO> result = itemService.queryItemByIds(List.of(99999L, 99998L));
         assertThat(result).isEmpty();
     }
 }
