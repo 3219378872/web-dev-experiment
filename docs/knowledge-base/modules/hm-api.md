@@ -2,9 +2,9 @@
 title: hm-api
 tracks:
   - hm-api/
-last_synced_commit: ec0f89d
+last_synced_commit: 4d39250
 last_synced_date: 2026-06-01
-sync_note: "Phase 3 测试补足：新增 DefaultFeignConfig RequestInterceptor 单元测试，不改业务逻辑"
+sync_note: "v3 合并 PR：所有阶段测试补足共 51 tests，覆盖率 80.5%"
 ---
 
 # hm-api

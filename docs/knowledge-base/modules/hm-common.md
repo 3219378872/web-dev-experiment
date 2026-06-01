@@ -2,9 +2,9 @@
 title: hm-common
 tracks:
   - hm-common/
-last_synced_commit: 8c38db8
+last_synced_commit: 4d39250
 last_synced_date: 2026-05-27
-sync_note: "对齐文档与实际混合响应封装模式（不改 hm-common 代码）"
+sync_note: "v3 合并 PR：所有阶段测试补足共 51 tests，覆盖率 80.5%"
 ---
 
 # hm-common
