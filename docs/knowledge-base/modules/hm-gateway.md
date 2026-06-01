@@ -2,9 +2,9 @@
 title: hm-gateway
 tracks:
   - hm-gateway/
-last_synced_commit: a434038
-last_synced_date: 2026-05-27
-sync_note: "2026-05-27: 引入 excludeReadPaths（仅 GET/HEAD/OPTIONS 放行），/categories/** 移至读白名单"
+last_synced_commit: 9ac1cc5
+last_synced_date: 2026-06-01
+sync_note: "2026-06-01: 新增 AuthGlobalFilterTest + GatewayAuthIntegrationTest"
 ---
 
 # hm-gateway
