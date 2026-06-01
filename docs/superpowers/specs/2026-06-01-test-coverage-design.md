@@ -104,28 +104,23 @@ python3 scripts/engineering-lint.py                             # PASS
 
 ### 4.1 notify-service（17 Java 文件）
 
-实际商务逻辑有限：NotificationServiceImpl 仅 `getActiveNotifications`
-（状态过滤+排序），FeedbackServiceImpl 和 CustomerMessageServiceImpl
-是空壳（无自定义方法）。无 RabbitMQ 代码、无模板渲染逻辑。
-
 | 被测类 | 测试类型 | 关键场景 |
 |--------|---------|---------|
-| NotificationServiceImpl | Unit (H2) | getActiveNotifications 状态过滤、排序 |
-| FeedbackServiceImpl | Unit (H2) | 基础 CRUD（save/getById） |
-| CustomerMessageServiceImpl | Unit (H2) | 基础 CRUD（save/getById） |
+| 消息通知 Service | Unit (Mockito) | 站内信发送、短信渠道模拟、邮件模板渲染、通知状态更新 |
+| 消息模板 Service | Unit (Mockito) | 模板 CRUD、变量替换 |
+| RabbitMQ 消息发送 | **Integration** | 通知消息投递确认、死信处理 |
 
-预估：~6 个单元测试
+预估：~20-25 个单元测试 + 1 个集成测试
 
 ### 4.2 file-service（6 Java 文件）
 
-UploadServiceImpl 只有 `uploadImage`（文件写入磁盘+记录持久化）和
-`getFile`（getById 代理）。无 MinIO SDK 集成、无图片缩略图代码。
-
 | 被测类 | 测试类型 | 关键场景 |
 |--------|---------|---------|
-| UploadServiceImpl | Unit (MockMultipartFile) | uploadImage（正常/空文件）、getFile |
+| 文件上传 Service | Unit (Mockito) | 上传策略（文件类型校验/大小限制）、签名 URL 生成、元数据保存 |
+| 图片处理 | Unit (Mockito) | 缩略图逻辑（如有） |
+| MinIO 操作 | **Integration** | 上传→获取签名 URL→删除 全流程 |
 
-预估：~4 个单元测试
+预估：~10-12 个单元测试 + 1 个集成测试
 
 ### Phase 2 验证门控
 
@@ -188,9 +183,9 @@ import static org.assertj.core.api.Assertions.assertThat;  // AssertJ
 | 阶段 | 模块 | 预估测试数 | PR |
 |------|------|-----------|-----|
 | Phase 1 | trade + cart + item | ~95-110 UT + 3-5 IT | `task/2026-06-XX-test-phase1-core` |
-| Phase 2 | notify + file | ~10 UT | `task/2026-06-XX-test-phase2-support` |
-| Phase 3 | hm-api | ~3 UT | `task/2026-06-XX-test-phase3-api` |
-| **合计** | 6 模块 | **~45 UT** | 3 PRs |
+| Phase 2 | notify + file | ~30-37 UT + 2 IT | `task/2026-06-XX-test-phase2-support` |
+| Phase 3 | hm-api | ~25-35 UT | `task/2026-06-XX-test-phase3-api` |
+| **合计** | 6 模块 | **~150-182 UT + 5-7 IT** | 3 PRs |
 
 每阶段 PR 合并后需通过 CI 全流程（lint → test → integration → smoke → codex-review）。
 
