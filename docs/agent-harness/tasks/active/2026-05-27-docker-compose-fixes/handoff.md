@@ -38,7 +38,8 @@ Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 
 ## Next Action
 
-修复 codex review blocking findings 后重新提交，等待 CI 通过后合并。
+Round 18 blocking finding: 误包含已合并的 `archive-pr18-task` 目录。已移除。
+等待 CI 通过（lint/test/integration/smoke/codex-review）后合并。
 
 ## Worktree Or Branch
 
@@ -53,6 +54,8 @@ Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 
 ## CI And Review
 
-- CI status: round 17 — lint/test/integration/smoke passed
-- Codex review: round 16 failed（1 blocking finding: smoke-test 未等待 user-service 就绪）
-- Round 17 修复：smoke-test 增加 user-service 就绪检查（POST /users/login 返回 400/401）
+- CI status: round 17-18 — lint/test/integration/smoke passed; codex-review failed
+- Codex review round 16: smoke-test 未等待 user-service 就绪（已修）
+- Codex review round 17: 增加 user-service 就绪检查（POST /users/login 返回 400/401）
+- Codex review round 18: 误包含 archive-pr18-task 目录（已移除）；handoff 文本 stale（已更新）
+- Next: push round 19 fix，等待 CI + codex-review 全部通过
