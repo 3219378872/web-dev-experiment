@@ -9,6 +9,6 @@ codex_review: pending
 remote_cleanup: pending
 spec: docs/superpowers/specs/2026-06-01-test-coverage-design.md
 plan: docs/superpowers/plans/2026-06-01-test-phase1-core.md
-spec_waiver: null
+spec_waiver: 此 PR 为回滚操作，目的是撤销过早合并的 4 个测试 PR（#28/#29/#30/#31）。回滚后测试文件被移除，恢复 main 到 pre-PR 状态。这不是 spec 实现 PR，而是纠正合并流程的前置步骤。测试将在后续 v2 PR 中按 spec 重新提交。
 plan_waiver: 回滚操作，无多步实施。
 pr_waiver: null
