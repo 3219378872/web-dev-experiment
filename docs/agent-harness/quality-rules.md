@@ -11,6 +11,11 @@
 | H003 | `plan` 是 `docs/superpowers/plans/` 路径，或 null 配合 `plan_waiver` |
 | H004 | 四个叙述文件存在且非空 |
 | H005 | `task_branch` 匹配 `task/YYYY-MM-DD-<slug>` |
+| H006 | `remote_branch` 是 `origin/<task_branch>` |
+| H008 | `pull_request` 在 `pr-open`/`merged`/`done` 时已设置或有 `pr_waiver` |
+| H010 | `ci_status` 在 `merged`/`done` 任务上为 `passed` |
+| H011 | `codex_review` 在 `merged`/`done` 任务上为 `passed` |
+| H012 | `remote_cleanup` 在 `merged`/`done` 任务上已解决 |
 | H020 | 无未解析占位符（`TODO`、`TBD`、`fill in`） |
 | H021 | 无未解析模板指导语（`explain why`、`replace with`） |
 | H030 | 已完成任务记录处于终态（`done` 或 `abandoned`） |

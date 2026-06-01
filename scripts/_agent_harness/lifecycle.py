@@ -62,12 +62,19 @@ def new_task(repo_root: Path, slug: str, *, date: str | None = None) -> Path:
         target / "task.yaml",
         TaskRecord(
             slug=full_slug,
-            status=TaskStatus.ACTIVE,
+            status=TaskStatus.CREATED,
+            base_branch="main",
             task_branch=task_branch,
+            remote_branch=f"origin/{task_branch}",
+            pull_request=None,
+            ci_status="not-run",
+            codex_review="not-run",
+            remote_cleanup="not-applicable",
             spec=None,
             plan=None,
             spec_waiver=None,
             plan_waiver=None,
+            pr_waiver=None,
         ),
     )
     return target
@@ -91,10 +98,10 @@ def complete_task(repo_root: Path, slug: str) -> Path:
     if not task_dir.is_dir():
         raise HarnessError(f"active task not found: {slug}")
     record = read_task_yaml(task_dir / "task.yaml")
-    if record.status is not TaskStatus.ACTIVE:
+    if record.status is not TaskStatus.MERGED:
         raise HarnessError(
-            f"task {slug} status must be 'active' to complete "
-            f"(current: {record.status.value})"
+            f"task {slug} is not merged (status={record.status.value}); "
+            f"complete requires status 'merged'"
         )
     issues = check_task(task_dir)
     if issues:
