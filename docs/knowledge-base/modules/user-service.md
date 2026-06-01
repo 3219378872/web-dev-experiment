@@ -2,7 +2,7 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: 4d39250
+last_synced_commit: 44e2d196f1eb7ddb2991e36f10ba095307a54094
 last_synced_date: 2026-05-26
 sync_note: "v3 合并 PR：所有阶段测试补足共 51 tests，覆盖率 80.5%"
 ---
