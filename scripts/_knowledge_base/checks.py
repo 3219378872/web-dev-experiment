@@ -155,22 +155,60 @@ def _check_index(kb_root: Path, pages: list[Page]) -> list[CheckIssue]:
 
 
 def check_co_change(
-    pages: list[Page], changed_files: set[str]
+    pages: list[Page], committed_files: set[str], staged_files: set[str]
 ) -> list[CheckIssue]:
+    """K005: tracked paths changed without corresponding KB page update.
+
+    Two independent checks:
+    1. Committed track changes → committed page update required (existing behavior)
+    2. Staged track changes → staged page update required (pre-commit safeguard)
+    """
     issues: list[CheckIssue] = []
+    all_files = committed_files | staged_files
+
     for page in pages:
         rel_suffix = f"knowledge-base/{page.path.parent.name}/{page.path.name}"
-        page_changed = any(
-            c == str(page.path) or c.endswith(rel_suffix) for c in changed_files
-        )
-        if page_changed:
-            continue
-        for track in page.tracks:
+
+        def _page_in(files: set[str]) -> bool:
+            return any(
+                c == str(page.path) or c.endswith(rel_suffix) for c in files
+            )
+
+        def _track_in(files: set[str], track: str) -> bool:
             track_norm = track.rstrip("/")
-            if any(
-                c == track_norm or c.startswith(track_norm + "/")
-                for c in changed_files
-            ):
+            return any(
+                c == track_norm or c.startswith(track_norm + "/") for c in files
+            )
+
+        page_in_committed = _page_in(committed_files)
+        page_in_staged = _page_in(staged_files)
+
+        for track in page.tracks:
+            # Check 1: committed track changes need committed page update
+            if _track_in(committed_files, track) and not page_in_committed:
+                issues.append(
+                    CheckIssue(
+                        "K005",
+                        str(page.path),
+                        f"tracked path changed in commits but page not updated: {track}",
+                    )
+                )
+                break
+
+            # Check 2: staged track changes need staged page update
+            # (catches the case where a committed KB page masks unstaged tracked changes)
+            if _track_in(staged_files, track) and not page_in_staged:
+                issues.append(
+                    CheckIssue(
+                        "K005",
+                        str(page.path),
+                        f"tracked path has staged changes but page not staged: {track}",
+                    )
+                )
+                break
+
+            # Fallback combined check (belt-and-suspenders)
+            if _track_in(all_files, track) and not _page_in(all_files):
                 issues.append(
                     CheckIssue(
                         "K005",
@@ -179,30 +217,39 @@ def check_co_change(
                     )
                 )
                 break
+
     return issues
 
 
-def _git_changed_files(repo_root: Path, base_ref: str) -> set[str]:
-    changed: set[str] = set()
+def _git_changed_files(
+    repo_root: Path, base_ref: str
+) -> tuple[set[str], set[str]]:
+    """Return (committed_files, staged_files) for K005 co-change checks."""
     # Committed changes since branching from base
+    committed: set[str] = set()
     result = subprocess.run(
         ["git", "-C", str(repo_root), "diff", "--name-only", f"{base_ref}...HEAD"],
         capture_output=True,
         text=True,
         check=True,
     )
-    changed.update(line.strip() for line in result.stdout.splitlines() if line.strip())
+    committed.update(
+        line.strip() for line in result.stdout.splitlines() if line.strip()
+    )
     # Staged (but not yet committed) changes — relevant during pre-commit
-    staged = subprocess.run(
+    staged: set[str] = set()
+    staged_result = subprocess.run(
         ["git", "-C", str(repo_root), "diff", "--cached", "--name-only"],
         capture_output=True,
         text=True,
     )
-    if staged.returncode == 0:
-        changed.update(
-            line.strip() for line in staged.stdout.splitlines() if line.strip()
+    if staged_result.returncode == 0:
+        staged.update(
+            line.strip()
+            for line in staged_result.stdout.splitlines()
+            if line.strip()
         )
-    return changed
+    return committed, staged
 
 
 def stale_pages(repo_root: Path) -> list[tuple[Page, str]]:
@@ -258,6 +305,6 @@ def check_knowledge_base(
     issues.extend(_check_links(repo_root, pages))
     issues.extend(_check_index(kb_root, pages))
     if base_ref:
-        changed = _git_changed_files(repo_root, base_ref)
-        issues.extend(check_co_change(pages, changed))
+        committed, staged = _git_changed_files(repo_root, base_ref)
+        issues.extend(check_co_change(pages, committed, staged))
     return issues
