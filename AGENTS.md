@@ -20,8 +20,8 @@
 
 实质性变更必须使用仓库本地的 agent harness（`docs/agent-harness/`）。
 在 `docs/agent-harness/tasks/active/` 下建立任务记录，含 context、verification、
-audit、handoff 四个叙述文件与 `task.yaml` 结构化文件。
-长流程文档放 `docs/agent-harness/`，不要塞进本文件。
+audit、handoff 四个叙述文件与 `task.yaml`（`status: active`）。
+完成的任务移到 `completed/` 并设 `status: done`。长流程文档放 `docs/agent-harness/`，不要塞进本文件。
 
 approved 设计放 `docs/superpowers/specs/`，多步实施计划放 `docs/superpowers/plans/`。
 交付前请运行：
@@ -33,8 +33,7 @@ python3 scripts/engineering-lint.py
 ```
 
 每个实质性任务必须走 branch→PR 循环：从 `main` 切 `task/YYYY-MM-DD-short-slug`、
-本地验收、推远程、开 PR、过 CI 与 review、合并后删除远程分支，把分支/PR/CI/review/
-清理证据写进 harness 任务记录。
+本地验收、推远程、开 PR、过 CI 与 review、合并后删除远程分支。
 
 ## CI / GitHub Actions
 
@@ -48,8 +47,8 @@ python3 scripts/engineering-lint.py
   - **smoke**：harness summary、`mvn compile`、`hmall-web` + `hmall-admin` 的
     `npm ci / npm test --if-present / npm run build`、`docker compose config -q`。
   - **codex-review**（PR-only，强门控）：依赖前 4 个 job 通过，用
-    `openai/codex-action@v1`（`gpt-5.4`）做任务完成度与合规审查；输出
-    `blocking findings: none` 才放行。需仓库 secrets：
+    `openai/codex-action@v1`（`gpt-5.5`）审查实现是否完成 spec/PR 描述目标；
+    输出 `blocking findings: none` 才放行。需仓库 secrets：
     `OPENAI_API_KEY`、`OPENAI_RESPONSES_API_ENDPOINT`。
     缺失 secrets 或任一检查不通过则阻塞合并。
 - `knowledge-base-sync.yml` —— 每周一 06:00 UTC 跑 `knowledge_base.py sync-report`，

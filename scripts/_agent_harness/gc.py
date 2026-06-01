@@ -11,7 +11,7 @@ from _agent_harness.model import HarnessError, TaskStatus, read_task_yaml
 
 STALE_WINDOW_DAYS = 14
 _DATE_PREFIX_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
-_NON_TERMINAL = {TaskStatus.CREATED, TaskStatus.IMPLEMENTING}
+_ACTIVE_LIKE = {TaskStatus.ACTIVE}
 _COMMAND_ROW_RE = re.compile(r"\|\s*`[^`]+`\s*\|")
 _SKIPPED_RE = re.compile(r"\b(skipped|not run)\b", re.IGNORECASE)
 
@@ -85,11 +85,7 @@ def _gc_notes(repo_root: Path, today: dt.date) -> list[str]:
             notes.append(
                 f"misplaced: {task_dir.name} is {record.status.value} but under active/"
             )
-        elif record.status is TaskStatus.MERGED:
-            notes.append(
-                f"ready-to-complete: {task_dir.name} is merged; run 'complete'"
-            )
-        elif record.status in _NON_TERMINAL and _is_stale(task_dir, today):
+        elif record.status in _ACTIVE_LIKE and _is_stale(task_dir, today):
             started = _dir_date(task_dir.name)
             age = (today - started).days if started is not None else 0
             notes.append(
@@ -147,8 +143,6 @@ def build_summary(
     plans_without_task_refs = _plans_without_task_refs(repo_root)
     if issues:
         next_action = "Fix active task check failures."
-    elif any(n.startswith("ready-to-complete") for n in gc_notes):
-        next_action = "Run 'complete' for merged tasks."
     elif active:
         next_action = "Continue active task work and keep verification current."
     else:

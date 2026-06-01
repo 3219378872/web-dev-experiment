@@ -42,14 +42,14 @@ docs/agent-harness/tasks/completed/
 ## task.yaml 字段
 
 - `slug`：完整 slug（`YYYY-MM-DD-short-slug`）。
-- `status`：`created` / `implementing` / `pr-open` / `merged` / `done` / `abandoned`。
-- `base_branch`、`task_branch`、`remote_branch`。
-- `pull_request`：PR URL，或 `null` 配合 `pr_waiver` 原因。
-- `ci_status`、`codex_review`：`not-run` / `pending` / `passed` / `failed`。
-- `remote_cleanup`：`pending` / `done` / `not-applicable`。
+- `status`：`active` / `done` / `abandoned`。
+  （旧值 `created`/`implementing`/`pr-open`/`merged` 读取时自动映射为 `active`）。
+- `task_branch`：任务分支名。
 - `spec`、`plan`：`docs/superpowers/` 下路径，或 `null` 配合 `spec_waiver`/`plan_waiver`。
 
 四个 `.md` 文件保持纯叙述；checker 只从 `task.yaml` 读结构化规则。
+旧格式字段（`base_branch`/`remote_branch`/`pull_request`/`ci_status`/`codex_review`/
+`remote_cleanup`/`pr_waiver`）在读取时静默接受，写入时不再生成。
 
 ## 交付流程
 
@@ -59,10 +59,9 @@ docs/agent-harness/tasks/completed/
 2. 创建/更新 active 任务记录。
 3. 在任务分支实现。
 4. 本地跑验收，把命令与结果记在 `verification.md`。
-5. 推送 `origin/task/YYYY-MM-DD-short-slug`。
-6. 开 PR，把 URL 记在 `handoff.md`。
-7. CI 通过、review 通过。
-8. 合并后删除远程分支，记录清理证据，再把任务挪到 `completed/`。
+5. 推送远端、开 PR。
+6. CI 通过、review 通过。
+7. 合并后删除远程分支，把任务 `complete` 到 `completed/`。
 
 ## CLI
 

@@ -70,7 +70,7 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("summary", help="Summarize harness task state.")
 
-    complete_p = sub.add_parser("complete", help="Complete a merged task.")
+    complete_p = sub.add_parser("complete", help="Complete an active task (move to completed/).")
     complete_p.add_argument("slug")
 
     abandon_p = sub.add_parser("abandon", help="Abandon a task.")

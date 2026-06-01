@@ -1,0 +1,7 @@
+slug: 2026-06-01-harness-slim
+status: active
+task_branch: task/2026-06-01-harness-slim
+spec: null
+plan: null
+spec_waiver: "参照 bidking-controller PR #23 模式"
+plan_waiver: "改动明确，不需要独立 plan"
