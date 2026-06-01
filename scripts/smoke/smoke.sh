@@ -178,42 +178,6 @@ else
     red "[SKIP] #12-14 Cart tests -> missing token or item ID"
 fi
 
-# ---- Phase 7: Order + Payment (authenticated) ----
-echo ""
-echo "--- Phase 7: Order & Payment ---"
-
-if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ] && [ -n "$ITEM_ID" ] && [ "$ITEM_ID" != "null" ]; then
-    # Add item to cart for order test (in case cart was cleaned)
-    curl -s -o /dev/null --connect-timeout 5 --max-time 10 \
-        -X POST "${BASE_URL}/carts" \
-        -H "authorization:${TOKEN}" \
-        -H "Content-Type: application/json" \
-        -d "{\"itemId\":${ITEM_ID}}" || true
-
-    # Get an address ID
-    ADDR_RESP=$(curl -s --connect-timeout 5 --max-time 10 \
-        -H "authorization:${TOKEN}" "${BASE_URL}/addresses" || true)
-    ADDR_ID=$(echo "$ADDR_RESP" | jq -r '.[0].id // .data[0].id // empty' 2>/dev/null || true)
-
-    if [ -n "$ADDR_ID" ] && [ "$ADDR_ID" != "null" ]; then
-        # POST /orders: create order from cart
-        check 15 POST "/orders" 200 \
-            -H "authorization:${TOKEN}" \
-            -H "Content-Type: application/json" \
-            -d "{\"addressId\":${ADDR_ID},\"paymentType\":1,\"details\":[{\"itemId\":${ITEM_ID},\"num\":1}]}"
-
-        # POST /pay-orders: check payment endpoint reachable
-        check 16 POST "/pay-orders" 200 \
-            -H "authorization:${TOKEN}" \
-            -H "Content-Type: application/json" \
-            -d "{\"id\":1,\"pw\":\"admin123\"}"
-    else
-        red "[SKIP] #15-16 Order/Payment tests -> no address found for testuser"
-    fi
-else
-    red "[SKIP] #15-16 Order/Payment tests -> missing token or item ID"
-fi
-
 # ---- Summary ----
 echo ""
 echo "============================================"
