@@ -1,0 +1,14 @@
+slug: task-2026-06-01-revert-premature-merges
+status: active
+base_branch: main
+task_branch: task/2026-06-01-revert-premature-merges
+remote_branch: origin/task/2026-06-01-revert-premature-merges
+pull_request: https://github.com/3219378872/web-dev-experiment/pull/32
+ci_status: pending
+codex_review: pending
+remote_cleanup: pending
+spec: docs/superpowers/specs/2026-06-01-test-coverage-design.md
+plan: docs/superpowers/plans/2026-06-01-test-phase1-core.md
+spec_waiver: null
+plan_waiver: 回滚操作，无多步实施。
+pr_waiver: null
