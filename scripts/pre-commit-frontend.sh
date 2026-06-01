@@ -50,16 +50,44 @@ for proj in "${PROJECT_DIRS[@]}"; do
   proj_dir="$ROOT_DIR/$proj"
 
   # ── Prettier ──────────────────────────────────────────────────────
-  echo "[pre-commit] $proj: running Prettier..."
-  if ! (cd "$proj_dir" && npx --no-install prettier --write --log-level error $all); then
-    echo ""
-    echo "⚠️  Prettier failed on staged files in $proj."
-    echo "   Check that prettier is installed: cd $proj && npm ci"
-    HAD_ERROR=1
-  fi
+  # Split files: "safe" (fully staged, no unstaged changes → can --write)
+  # vs "unsafe" (partial staging, unstaged chunks exist → --check only)
+  safe_files=()
+  unsafe_files=()
   for pf in $all; do
-    git add "$pf"
+    rel="${pf#$proj_dir/}"
+    if git diff --quiet -- "$rel" 2>/dev/null; then
+      safe_files+=("$pf")
+    else
+      unsafe_files+=("$pf")
+    fi
   done
+
+  # Format safe files (no unstaged hunks → safe to modify working tree)
+  if [ ${#safe_files[@]} -gt 0 ]; then
+    echo "[pre-commit] $proj: formatting ${#safe_files[@]} fully-staged file(s)..."
+    if ! (cd "$proj_dir" && npx --no-install prettier --write --log-level error "${safe_files[@]}"); then
+      echo ""
+      echo "⚠️  Prettier failed on staged files in $proj."
+      echo "   Check that prettier is installed: cd $proj && npm ci"
+      HAD_ERROR=1
+    fi
+    for pf in "${safe_files[@]}"; do
+      git add "$pf"
+    done
+  fi
+
+  # Validate unsafe files (partially staged → check only, don't touch working tree)
+  if [ ${#unsafe_files[@]} -gt 0 ]; then
+    echo "[pre-commit] $proj: checking ${#unsafe_files[@]} partially-staged file(s)..."
+    if ! (cd "$proj_dir" && npx --no-install prettier --check --log-level error "${unsafe_files[@]}"); then
+      echo ""
+      echo "⚠️  Prettier found formatting issues in partially-staged files."
+      echo "   Run manually: cd $proj && npx prettier --write <file>"
+      echo "   Then re-stage to include in this commit."
+      HAD_ERROR=1
+    fi
+  fi
 
   # ── ESLint (js/vue/ts only) ───────────────────────────────────────
   lint_files=()

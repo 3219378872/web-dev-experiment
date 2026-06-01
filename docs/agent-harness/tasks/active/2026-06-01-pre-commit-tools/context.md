@@ -40,4 +40,5 @@
 
 - 不在源码中硬编码密钥/口令/Token
 - 不破坏现有 API 响应格式
-- pre-commit hook 仅对 staged 文件操作，不修改工作区其他文件
+- pre-commit hook 区分 safe/unsafe 文件：safe（全部 staged → Prettier --write + git add）、
+  unsafe（partial staging → Prettier --check 仅验证，不修改工作区文件）
