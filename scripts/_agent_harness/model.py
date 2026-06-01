@@ -10,10 +10,7 @@ class HarnessError(RuntimeError):
 
 
 class TaskStatus(enum.Enum):
-    CREATED = "created"
-    IMPLEMENTING = "implementing"
-    PR_OPEN = "pr-open"
-    MERGED = "merged"
+    ACTIVE = "active"
     DONE = "done"
     ABANDONED = "abandoned"
 
@@ -23,38 +20,37 @@ _STATUS_BY_VALUE = {status.value: status for status in TaskStatus}
 _FIELDS = (
     "slug",
     "status",
-    "base_branch",
     "task_branch",
+    "spec",
+    "plan",
+    "spec_waiver",
+    "plan_waiver",
+)
+_OPTIONAL = {"spec", "plan", "spec_waiver", "plan_waiver"}
+
+# Legacy fields silently accepted for backward compatibility with
+# pre-slim task.yaml records.  They are read but never validated
+# or written by the new harness.
+_LEGACY_FIELDS = {
+    "base_branch",
     "remote_branch",
     "pull_request",
     "ci_status",
     "codex_review",
     "remote_cleanup",
-    "spec",
-    "plan",
-    "spec_waiver",
-    "plan_waiver",
     "pr_waiver",
-)
-_OPTIONAL = {"pull_request", "spec", "plan", "spec_waiver", "plan_waiver", "pr_waiver"}
+}
 
 
 @dataclasses.dataclass(frozen=True)
 class TaskRecord:
     slug: str
     status: TaskStatus
-    base_branch: str
     task_branch: str
-    remote_branch: str
-    pull_request: str | None
-    ci_status: str
-    codex_review: str
-    remote_cleanup: str
     spec: str | None
     plan: str | None
     spec_waiver: str | None
     plan_waiver: str | None
-    pr_waiver: str | None
 
 
 def _parse_scalar(raw: str) -> str | None:
@@ -84,30 +80,27 @@ def read_task_yaml(path: Path) -> TaskRecord:
     if not path.exists():
         raise HarnessError(f"missing task.yaml: {path}")
     data = _parse_yaml(path.read_text(encoding="utf-8"))
-    unknown = set(data) - set(_FIELDS)
+    unknown = set(data) - set(_FIELDS) - _LEGACY_FIELDS
     if unknown:
         raise HarnessError(f"task.yaml unknown keys: {sorted(unknown)}")
     missing = [f for f in _FIELDS if f not in data and f not in _OPTIONAL]
     if missing:
         raise HarnessError(f"task.yaml missing keys: {missing}")
     status_value = data["status"]
+    # Legacy status values → active
+    _legacy_active = {"created", "implementing", "pr-open", "merged"}
+    if status_value in _legacy_active:
+        status_value = "active"
     if status_value not in _STATUS_BY_VALUE:
         raise HarnessError(f"task.yaml invalid status: {status_value!r}")
     return TaskRecord(
         slug=data["slug"] or "",
         status=_STATUS_BY_VALUE[status_value],
-        base_branch=data.get("base_branch") or "main",
         task_branch=data.get("task_branch") or "",
-        remote_branch=data.get("remote_branch") or "",
-        pull_request=data.get("pull_request"),
-        ci_status=data.get("ci_status") or "not-run",
-        codex_review=data.get("codex_review") or "not-run",
-        remote_cleanup=data.get("remote_cleanup") or "not-applicable",
         spec=data.get("spec"),
         plan=data.get("plan"),
         spec_waiver=data.get("spec_waiver"),
         plan_waiver=data.get("plan_waiver"),
-        pr_waiver=data.get("pr_waiver"),
     )
 
 

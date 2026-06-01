@@ -15,8 +15,6 @@ REQUIRED_MD = ("context.md", "verification.md", "audit.md", "handoff.md")
 PLACEHOLDER_RE = re.compile(r"\b(TODO|TBD|fill in)\b", re.IGNORECASE)
 GUIDANCE_RE = re.compile(r"\b(explain why|replace with)\b", re.IGNORECASE)
 TASK_BRANCH_RE = re.compile(r"^task/\d{4}-\d{2}-\d{2}-[a-z0-9-]+$")
-PR_REQUIRED = {TaskStatus.PR_OPEN, TaskStatus.MERGED, TaskStatus.DONE}
-DONE_LIKE = {TaskStatus.MERGED, TaskStatus.DONE}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -35,8 +33,6 @@ def _record_issues(task: str, record: TaskRecord) -> list[CheckIssue]:
 
     if not TASK_BRANCH_RE.match(record.task_branch):
         add("H005", "task_branch must match task/YYYY-MM-DD-<slug>")
-    if record.remote_branch != f"origin/{record.task_branch}":
-        add("H006", "remote_branch must be origin/<task_branch>")
     if record.spec is None and not record.spec_waiver:
         add("H002", "spec must be a path or null with a spec_waiver reason")
     if record.spec and not record.spec.startswith("docs/superpowers/specs/"):
@@ -45,22 +41,6 @@ def _record_issues(task: str, record: TaskRecord) -> list[CheckIssue]:
         add("H003", "plan must be a path or null with a plan_waiver reason")
     if record.plan and not record.plan.startswith("docs/superpowers/plans/"):
         add("H003", "plan must live under docs/superpowers/plans/")
-    if (
-        record.status in PR_REQUIRED
-        and record.pull_request is None
-        and not record.pr_waiver
-    ):
-        add("H008", "pull_request must be set or have a pr_waiver reason")
-    if record.status in DONE_LIKE and not record.pr_waiver:
-        if record.ci_status != "passed":
-            add("H010", "ci_status must be 'passed' for merged/done tasks")
-        if record.codex_review != "passed":
-            add("H011", "codex_review must be 'passed' for merged/done tasks")
-    if record.status in DONE_LIKE and record.remote_cleanup not in {
-        "done",
-        "not-applicable",
-    }:
-        add("H012", "remote_cleanup must be resolved for merged/done tasks")
     return issues
 
 
