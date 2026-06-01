@@ -2,7 +2,7 @@
 title: hm-common
 tracks:
   - hm-common/
-last_synced_commit: 8c38db8
+last_synced_commit: 883f5fb
 last_synced_date: 2026-05-27
 sync_note: "对齐文档与实际混合响应封装模式（不改 hm-common 代码）"
 ---

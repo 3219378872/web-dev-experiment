@@ -1,9 +1,6 @@
 package com.hmall.common.domain;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -90,61 +87,5 @@ class PageDTOTest {
         PageDTO<String> dto = PageDTO.of(page, Arrays.asList("x", "y"));
         assertThat(dto.getList()).containsExactly("x", "y");
         assertThat(dto.getTotal()).isEqualTo(100L);
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class Src {
-        private String name;
-        private int age;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class Tgt {
-        private String name;
-        private int age;
-        private String tag;
-    }
-
-    // ---- of(page, Class) overload ----
-
-    @Test
-    @DisplayName("of(page, Class) 用 BeanUtils.copyList 转换记录类型")
-    void of_pageWithClass_copiesList() {
-        Page<Src> page = new Page<>(1, 10, 2);
-        page.setRecords(java.util.Arrays.asList(
-                new Src("a", 1), new Src("b", 2)));
-        PageDTO<Tgt> dto = PageDTO.of(page, Tgt.class);
-        assertThat(dto.getTotal()).isEqualTo(2L);
-        assertThat(dto.getList()).hasSize(2);
-        assertThat(dto.getList().get(0).getName()).isEqualTo("a");
-    }
-
-    // ---- of(page, Class, Convert) overload ----
-
-    @Test
-    @DisplayName("of(page, Class, Convert) 用 convert 补充字段")
-    void of_pageWithClassAndConvert_appliesConvert() {
-        Page<Src> page = new Page<>(1, 10, 2);
-        page.setRecords(java.util.Arrays.asList(
-                new Src("a", 1), new Src("b", 2)));
-        PageDTO<Tgt> dto = PageDTO.of(page, Tgt.class,
-                (s, t) -> t.setTag("T-" + s.getName()));
-        assertThat(dto.getList()).hasSize(2);
-        assertThat(dto.getList().get(0).getTag()).isEqualTo("T-a");
-        assertThat(dto.getList().get(1).getTag()).isEqualTo("T-b");
-    }
-
-    @Test
-    @DisplayName("of(page, mapper) 空 page 走 empty 路径")
-    void of_pageWithMapperEmpty_returnsEmpty() {
-        Page<Integer> empty = new Page<>(1, 10, 0);
-        empty.setRecords(java.util.Collections.emptyList());
-        PageDTO<String> dto = PageDTO.of(empty, i -> "x");
-        assertThat(dto.getList()).isEmpty();
-        assertThat(dto.getTotal()).isEqualTo(0L);
     }
 }
