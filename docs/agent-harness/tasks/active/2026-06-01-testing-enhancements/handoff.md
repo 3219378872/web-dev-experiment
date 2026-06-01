@@ -7,7 +7,7 @@ PR 已创建。新增 AuthGlobalFilter 单元测试、Gateway 集成测试、前
 - `hm-gateway/src/test/java/com/hmall/gateway/filters/AuthGlobalFilterTest.java` — 8 tests
 - `hm-gateway/src/test/java/com/hmall/gateway/it/GatewayAuthIntegrationTest.java` — 5 tests
 - `hm-gateway/src/test/resources/application-test.yaml` — test config
-- `scripts/smoke/smoke.sh` — 10→16 tests (cart+order+pay)
+- `scripts/smoke/smoke.sh` — 10→14 tests (item detail + cart flow)
 - `hmall-web/package.json` — vitest
 - `hmall-web/vitest.config.ts` — vitest config
 - `hmall-web/src/__tests__/` — 2 tests
