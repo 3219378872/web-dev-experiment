@@ -1,0 +1,13 @@
+slug: task-2026-06-01-test-coverage-boost-v2
+status: active
+base_branch: main
+task_branch: task/2026-06-01-test-coverage-boost-v2
+pull_request: TBD
+ci_status: pending
+codex_review: pending
+remote_cleanup: pending
+spec: docs/superpowers/specs/2026-06-01-test-coverage-design.md
+plan: docs/superpowers/plans/2026-06-01-test-phase1-core.md
+spec_waiver: null
+plan_waiver: null
+pr_waiver: null
