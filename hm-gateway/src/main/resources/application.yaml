@@ -13,10 +13,10 @@ hm:
       - /users/register
       - /users/send-code
       - /users/reset-password
-      - /items/**
       - /hi
       - /notifications/active
       - /upload/**
       - /files/**
     excludeReadPaths:
       - /categories/**
+      - /items/**
