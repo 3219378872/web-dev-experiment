@@ -127,6 +127,118 @@ fi
 
 check 10 GET "/addresses" 401 -H "authorization:invalid-token"
 
+# ---- Phase 5: Item Detail ----
+echo ""
+echo "--- Phase 5: Item Detail ---"
+
+# Extract first item ID from items page response
+ITEM_ID=$(curl -s --connect-timeout 5 --max-time 10 \
+    "${BASE_URL}/items/page?page=1&size=1" | jq -r '.data.list[0].id // .list[0].id // empty' 2>/dev/null || true)
+
+if [ -n "$ITEM_ID" ] && [ "$ITEM_ID" != "null" ]; then
+    check_json 11 GET "/items/${ITEM_ID}" 200
+else
+    red "[SKIP] #11 GET /items/{id} -> could not extract item ID from /items/page"
+fi
+
+# ---- Phase 6: Cart Operations (authenticated) ----
+echo ""
+echo "--- Phase 6: Cart ---"
+
+if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ] && [ -n "$ITEM_ID" ] && [ "$ITEM_ID" != "null" ]; then
+    check 12 POST "/carts" 200 \
+        -H "authorization:${TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "{\"itemId\":${ITEM_ID}}"
+
+    CART_RESP=$(curl -s --connect-timeout 5 --max-time 10 \
+        -H "authorization:${TOKEN}" "${BASE_URL}/carts" || true)
+    CART_COUNT=$(echo "$CART_RESP" | jq 'length' 2>/dev/null || echo "0")
+    CART_HTTP=$(curl -s -o /tmp/smoke_resp.txt -w '%{http_code}' \
+        --connect-timeout 5 --max-time 10 \
+        -H "authorization:${TOKEN}" "${BASE_URL}/carts")
+
+    if [ "$CART_HTTP" = "200" ] && [ "$CART_COUNT" -gt 0 ] 2>/dev/null; then
+        green "[PASS] #13 GET /carts -> 200, ${CART_COUNT} item(s)"
+        PASS=$((PASS + 1))
+
+        # Extract cart item ID for cleanup
+        CART_ITEM_ID=$(echo "$CART_RESP" | jq -r '.[0].id // empty' 2>/dev/null || true)
+        if [ -n "$CART_ITEM_ID" ] && [ "$CART_ITEM_ID" != "null" ]; then
+            check 14 DELETE "/carts/${CART_ITEM_ID}" 200 -H "authorization:${TOKEN}"
+        else
+            red "[SKIP] #14 DELETE /carts/{id} -> could not extract cart item ID"
+        fi
+    else
+        red "[FAIL] #13 GET /carts -> expected 200 + items, got ${CART_HTTP}"
+        echo "  Response: $(head -c 200 /tmp/smoke_resp.txt)"
+        FAIL=$((FAIL + 1))
+    fi
+else
+    red "[SKIP] #12-14 Cart tests -> missing token or item ID"
+fi
+
+# ---- Phase 7: Order + Payment (authenticated) ----
+echo ""
+echo "--- Phase 7: Order & Payment ---"
+
+if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ] && [ -n "$ITEM_ID" ] && [ "$ITEM_ID" != "null" ]; then
+    # Add item to cart for order test (in case cart was cleaned)
+    curl -s -o /dev/null --connect-timeout 5 --max-time 10 \
+        -X POST "${BASE_URL}/carts" \
+        -H "authorization:${TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "{\"itemId\":${ITEM_ID}}" || true
+
+    # Get an address ID
+    ADDR_RESP=$(curl -s --connect-timeout 5 --max-time 10 \
+        -H "authorization:${TOKEN}" "${BASE_URL}/addresses" || true)
+    ADDR_ID=$(echo "$ADDR_RESP" | jq -r '.[0].id // .data[0].id // empty' 2>/dev/null || true)
+
+    if [ -n "$ADDR_ID" ] && [ "$ADDR_ID" != "null" ]; then
+        ORDER_RESP=$(curl -s -o /tmp/smoke_resp.txt -w '%{http_code}' \
+            --connect-timeout 5 --max-time 10 \
+            -X POST "${BASE_URL}/orders" \
+            -H "authorization:${TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{\"addressId\":${ADDR_ID},\"paymentType\":1,\"details\":[{\"itemId\":${ITEM_ID},\"num\":1}]}")
+
+        if [ "$ORDER_RESP" = "200" ]; then
+            green "[PASS] #15 POST /orders -> 200 (order created)"
+            PASS=$((PASS + 1))
+
+            # Extract order ID and try payment
+            ORDER_ID=$(cat /tmp/smoke_resp.txt | jq -r '.data // . // empty' 2>/dev/null | jq -r '.id // empty' 2>/dev/null || true)
+            if [ -n "$ORDER_ID" ] && [ "$ORDER_ID" != "null" ]; then
+                PAY_RESP=$(curl -s -o /dev/null -w '%{http_code}' \
+                    --connect-timeout 5 --max-time 10 \
+                    -X POST "${BASE_URL}/pay-orders/${ORDER_ID}" \
+                    -H "authorization:${TOKEN}" \
+                    -H "Content-Type: application/json" \
+                    -d "{\"id\":${ORDER_ID},\"pw\":\"admin123\"}" || true)
+
+                if [ "$PAY_RESP" = "200" ]; then
+                    green "[PASS] #16 POST /pay-orders/{id} -> 200 (payment processed)"
+                    PASS=$((PASS + 1))
+                else
+                    red "[FAIL] #16 POST /pay-orders/{id} -> expected 200, got ${PAY_RESP}"
+                    FAIL=$((FAIL + 1))
+                fi
+            else
+                red "[SKIP] #16 POST /pay-orders/{id} -> could not extract order ID"
+            fi
+        else
+            red "[FAIL] #15 POST /orders -> expected 200, got ${ORDER_RESP}"
+            echo "  Response: $(head -c 200 /tmp/smoke_resp.txt)"
+            FAIL=$((FAIL + 1))
+        fi
+    else
+        red "[SKIP] #15-16 Order/Payment tests -> no address found for testuser"
+    fi
+else
+    red "[SKIP] #15-16 Order/Payment tests -> missing token or item ID"
+fi
+
 # ---- Summary ----
 echo ""
 echo "============================================"
