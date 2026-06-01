@@ -202,9 +202,9 @@ services:
           ITEMS=$$(curl -sf -o /dev/null -w '%{http_code}' "http://hm-gateway:8080/items/page?page=1&size=1" 2>/dev/null || echo "000")
           CATS=$$(curl -sf -o /dev/null -w '%{http_code}' "http://hm-gateway:8080/categories" 2>/dev/null || echo "000")
           NOTIFY=$$(curl -sf -o /dev/null -w '%{http_code}' "http://hm-gateway:8080/notifications/active" 2>/dev/null || echo "000")
-          # user-service: any non-000 response means the service is up and accepting requests
+          # user-service: POST /users/login with bad creds returns 400/401 if service is up
           USER=$$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"username":"x","password":"x"}' "http://hm-gateway:8080/users/login" 2>/dev/null || echo "000")
-          if [ "$$ITEMS" = "200" ] && [ "$$CATS" = "200" ] && [ "$$NOTIFY" = "200" ] && [ "$$USER" != "000" ]; then
+          if [ "$$ITEMS" = "200" ] && [ "$$CATS" = "200" ] && [ "$$NOTIFY" = "200" ] && ([ "$$USER" = "400" ] || [ "$$USER" = "401" ]); then
             echo "All services ready, running smoke tests..."
             sh /smoke/smoke.sh http://hm-gateway:8080
             exit $$?
