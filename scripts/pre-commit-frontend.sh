@@ -51,7 +51,12 @@ for proj in "${PROJECT_DIRS[@]}"; do
 
   # ── Prettier ──────────────────────────────────────────────────────
   echo "[pre-commit] $proj: running Prettier..."
-  (cd "$proj_dir" && npx --no-install prettier --write --log-level error $all) || true
+  if ! (cd "$proj_dir" && npx --no-install prettier --write --log-level error $all); then
+    echo ""
+    echo "⚠️  Prettier failed on staged files in $proj."
+    echo "   Check that prettier is installed: cd $proj && npm ci"
+    HAD_ERROR=1
+  fi
   for pf in $all; do
     git add "$pf"
   done
@@ -68,12 +73,12 @@ for proj in "${PROJECT_DIRS[@]}"; do
     for lf in "${lint_files[@]}"; do
       rel_lint_files+=("${lf#$proj_dir/}")
     done
-    (cd "$proj_dir" && npx --no-install eslint --quiet "${rel_lint_files[@]}") || {
+    if ! (cd "$proj_dir" && npx --no-install eslint --quiet "${rel_lint_files[@]}"); then
       echo ""
       echo "⚠️  ESLint found errors in $proj. Fix them before committing."
       echo "   Run: cd $proj && npm run lint:fix"
       HAD_ERROR=1
-    }
+    fi
   fi
 done
 
