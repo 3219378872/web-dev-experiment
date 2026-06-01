@@ -104,15 +104,22 @@ python3 scripts/engineering-lint.py                             # PASS
 
 ### 4.1 notify-service（17 Java 文件）
 
+实际商务逻辑有限：NotificationServiceImpl 仅 `getActiveNotifications`
+（状态过滤+排序），FeedbackServiceImpl 和 CustomerMessageServiceImpl
+是空壳（无自定义方法）。无 RabbitMQ 代码、无模板渲染逻辑。
+
 | 被测类 | 测试类型 | 关键场景 |
 |--------|---------|---------|
 | NotificationServiceImpl | Unit (H2) | getActiveNotifications 状态过滤、排序 |
 | FeedbackServiceImpl | Unit (H2) | 基础 CRUD（save/getById） |
 | CustomerMessageServiceImpl | Unit (H2) | 基础 CRUD（save/getById） |
 
-预估：~6 个单元测试（实际业务逻辑有限，Feedback/CustomerMessage 为 ServiceImpl 空壳）
+预估：~6 个单元测试
 
 ### 4.2 file-service（6 Java 文件）
+
+UploadServiceImpl 只有 `uploadImage`（文件写入磁盘+记录持久化）和
+`getFile`（getById 代理）。无 MinIO SDK 集成、无图片缩略图代码。
 
 | 被测类 | 测试类型 | 关键场景 |
 |--------|---------|---------|
@@ -133,14 +140,14 @@ mvn -q -pl notify-service,file-service -am test   # 全部通过
 
 ### 5.1 hm-api（22 Java 文件）
 
-本模块主要是 Feign 接口定义 + DTO + 配置。**当前代码无 Fallback 实现**，
-可测试逻辑仅 `DefaultFeignConfig.userInfoRequestInterceptor()`（RequestInterceptor）。
+本模块主要是 Feign 接口定义 + Fallback 实现，不包含业务逻辑。测试重点在 Fallback 降级行为。
 
 | 被测类 | 测试类型 | 关键场景 |
 |--------|---------|---------|
-| DefaultFeignConfig | Unit (Mockito) | RequestInterceptor 添加 user-info 请求头 |
+| 各 Feign Fallback | Unit | 降级返回兜底值（空列表/默认响应/null 安全）、异常传播 |
+| DTO 序列化 | Unit | JSON 序列化/反序列化往返验证 |
 
-预估：~3 个单元测试
+预估：~25-35 个单元测试
 
 ### Phase 3 验证门控
 
@@ -180,10 +187,10 @@ import static org.assertj.core.api.Assertions.assertThat;  // AssertJ
 
 | 阶段 | 模块 | 预估测试数 | PR |
 |------|------|-----------|-----|
-| Phase 1 | trade + cart + item | ~30 UT | `task/2026-06-01-test-phase1-core` |
-| Phase 2 | notify + file | ~10 UT | `task/2026-06-01-test-phase2-support` |
-| Phase 3 | hm-api | ~3 UT | `task/2026-06-01-test-phase3-api` |
-| **合计** | 6 模块 | **~43 UT** | 3 PRs |
+| Phase 1 | trade + cart + item | ~95-110 UT + 3-5 IT | `task/2026-06-XX-test-phase1-core` |
+| Phase 2 | notify + file | ~10 UT | `task/2026-06-XX-test-phase2-support` |
+| Phase 3 | hm-api | ~3 UT | `task/2026-06-XX-test-phase3-api` |
+| **合计** | 6 模块 | **~45 UT** | 3 PRs |
 
 每阶段 PR 合并后需通过 CI 全流程（lint → test → integration → smoke → codex-review）。
 
