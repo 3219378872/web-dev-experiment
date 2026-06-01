@@ -78,8 +78,11 @@ def main():
     harness_check = os.system(
         f"cd {ROOT} && python3 scripts/agent_harness.py check 2>/dev/null"
     )
+    kb_base_flag = ""
+    if os.system("git rev-parse --verify origin/main >/dev/null 2>&1") == 0:
+        kb_base_flag = " --base origin/main"
     kb_check = os.system(
-        f"cd {ROOT} && python3 scripts/knowledge_base.py check 2>/dev/null"
+        f"cd {ROOT} && python3 scripts/knowledge_base.py check{kb_base_flag} 2>/dev/null"
     )
     if errors:
         print("\n".join(errors))
