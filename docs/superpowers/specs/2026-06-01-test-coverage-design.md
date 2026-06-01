@@ -55,39 +55,27 @@
 
 | 被测类 | 测试类型 | 关键场景 |
 |--------|---------|---------|
-| `CartServiceImpl` | Unit (Mockito) | 添加商品到购物车、更新数量、删除购物车项、查询我的购物车、合并匿名购物车 |
-| `CartController` | Unit (MockMvc) | 请求参数校验、空购物车返回 |
+| `CartServiceImpl` | Unit (H2) | 添加商品到购物车、更新数量、删除购物车项、查询我的购物车 |
 
-预估：~15-20 个测试方法
+预估：~7 个测试方法（@WebMvcTest 与此项目 MyBatis-Plus 不兼容，Controller 测试移除）
 
 ### 3.2 trade-service（24 Java 文件）
 
 | 被测类 | 测试类型 | 关键场景 |
 |--------|---------|---------|
-| `OrderServiceImpl` | Unit (Mockito) | 创建订单（正常/库存不足/余额不足）、取消订单、确认收货、退款申请 |
-| `CouponServiceImpl` | Unit (Mockito) | 领取优惠券（正常/重复领取/已过期）、使用优惠券、查询可用券 |
-| `OrderDetailServiceImpl` | Unit (Mockito) | 订单详情查询、订单项列表 |
-| `OrderLogisticsServiceImpl` | Unit (Mockito) | 物流信息更新、发货 |
-| `OrderController` | Unit (MockMvc) | 创建订单请求校验、分页查询参数 |
-| `CouponController` | Unit (MockMvc) | 领券请求校验 |
-| TCC 下单全链路 | **Integration** | Seata TCC 创建订单 → 扣减库存 → 扣减余额完整流程验证 |
+| `OrderServiceImpl` | Unit (H2) | 创建订单、取消/确认/退款/发货 + 状态机校验 |
+| `CouponServiceImpl` | Unit (H2) | 领取优惠券、重复领取防护、可用券查询 |
 
-预估：~40-50 个单元测试 + 2-3 个集成测试
+预估：~18 个单元测试（OrderDetail/OrderLogistics 为 ServiceImpl 空壳，无需独立测试）
 
 ### 3.3 item-service（22 Java 文件）
 
 | 被测类 | 测试类型 | 关键场景 |
 |--------|---------|---------|
-| `ItemServiceImpl` | Unit (Mockito) | 商品 CRUD、库存扣减/恢复、商品上下架、分页搜索 |
-| `CategoryServiceImpl` | Unit (Mockito) | 分类树查询、分类增删改 |
-| `ItemReviewServiceImpl` | Unit (Mockito) | 发表评价、按商品查询评价、评价审核 |
-| `ItemController` | Unit (MockMvc) | 商品列表参数校验、分页边界 |
-| `CategoryController` | Unit (MockMvc) | 分类层级查询 |
-| `ReviewController` | Unit (MockMvc) | 评价提交校验 |
-| `SearchController` | Unit (MockMvc) | Elasticsearch 搜索（Mock ES client） |
-| 库存并发扣减 | **Integration** | 并发下单场景下库存一致性 |
+| `ItemServiceImpl` | Unit (H2) | 库存扣减、批量商品查询 |
+| `ItemReviewServiceImpl` | Unit (H2) | 按商品 ID 查询评价、时间排序 |
 
-预估：~35-40 个单元测试 + 1-2 个集成测试
+预估：~5 个单元测试（CategoryServiceImpl 为 ServiceImpl 空壳）
 
 ### Phase 1 验证门控
 
@@ -106,21 +94,19 @@ python3 scripts/engineering-lint.py                             # PASS
 
 | 被测类 | 测试类型 | 关键场景 |
 |--------|---------|---------|
-| 消息通知 Service | Unit (Mockito) | 站内信发送、短信渠道模拟、邮件模板渲染、通知状态更新 |
-| 消息模板 Service | Unit (Mockito) | 模板 CRUD、变量替换 |
-| RabbitMQ 消息发送 | **Integration** | 通知消息投递确认、死信处理 |
+| NotificationServiceImpl | Unit (H2) | getActiveNotifications 状态过滤、排序 |
+| FeedbackServiceImpl | Unit (H2) | 基础 CRUD（save/getById） |
+| CustomerMessageServiceImpl | Unit (H2) | 基础 CRUD（save/getById） |
 
-预估：~20-25 个单元测试 + 1 个集成测试
+预估：~6 个单元测试（Feedback/CustomerMessage 为 ServiceImpl 空壳）
 
 ### 4.2 file-service（6 Java 文件）
 
 | 被测类 | 测试类型 | 关键场景 |
 |--------|---------|---------|
-| 文件上传 Service | Unit (Mockito) | 上传策略（文件类型校验/大小限制）、签名 URL 生成、元数据保存 |
-| 图片处理 | Unit (Mockito) | 缩略图逻辑（如有） |
-| MinIO 操作 | **Integration** | 上传→获取签名 URL→删除 全流程 |
+| UploadServiceImpl | Unit (MockMultipartFile) | uploadImage（正常/空文件）、getFile |
 
-预估：~10-12 个单元测试 + 1 个集成测试
+预估：~4 个单元测试
 
 ### Phase 2 验证门控
 
@@ -135,14 +121,14 @@ mvn -q -pl notify-service,file-service -am test   # 全部通过
 
 ### 5.1 hm-api（22 Java 文件）
 
-本模块主要是 Feign 接口定义 + Fallback 实现，不包含业务逻辑。测试重点在 Fallback 降级行为。
+本模块主要是 Feign 接口定义 + DTO + 配置。**当前代码无 Fallback 实现**，
+可测试逻辑仅 `DefaultFeignConfig.userInfoRequestInterceptor()`（RequestInterceptor）。
 
 | 被测类 | 测试类型 | 关键场景 |
 |--------|---------|---------|
-| 各 Feign Fallback | Unit | 降级返回兜底值（空列表/默认响应/null 安全）、异常传播 |
-| DTO 序列化 | Unit | JSON 序列化/反序列化往返验证 |
+| DefaultFeignConfig | Unit (Mockito) | RequestInterceptor 添加 user-info 请求头 |
 
-预估：~25-35 个单元测试
+预估：~3 个单元测试
 
 ### Phase 3 验证门控
 
@@ -182,10 +168,10 @@ import static org.assertj.core.api.Assertions.assertThat;  // AssertJ
 
 | 阶段 | 模块 | 预估测试数 | PR |
 |------|------|-----------|-----|
-| Phase 1 | trade + cart + item | ~95-110 UT + 3-5 IT | `task/2026-06-XX-test-phase1-core` |
-| Phase 2 | notify + file | ~30-37 UT + 2 IT | `task/2026-06-XX-test-phase2-support` |
-| Phase 3 | hm-api | ~25-35 UT | `task/2026-06-XX-test-phase3-api` |
-| **合计** | 6 模块 | **~150-182 UT + 5-7 IT** | 3 PRs |
+| Phase 1 | trade + cart + item | ~30 UT | `task/2026-06-01-test-phase1-core` |
+| Phase 2 | notify + file | ~10 UT | `task/2026-06-01-test-phase2-support` |
+| Phase 3 | hm-api | ~3 UT | `task/2026-06-01-test-phase3-api` |
+| **合计** | 6 模块 | **~43 UT** | 3 PRs |
 
 每阶段 PR 合并后需通过 CI 全流程（lint → test → integration → smoke → codex-review）。
 

@@ -2,7 +2,7 @@
 title: trade-service
 tracks:
   - trade-service/
-last_synced_commit: 62ad714
+last_synced_commit: c03b47b
 last_synced_date: 2026-06-01
 sync_note: "Phase 1 测试补足完成：新增 OrderServiceImplTest(11) + CouponServiceImplTest(7)，不改业务逻辑"
 ---

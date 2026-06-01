@@ -5,7 +5,7 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 62ad714
+last_synced_commit: c03b47b
 last_synced_date: 2026-06-01
 sync_note: "Phase 1 fix: item-service 测试修复，不改业务逻辑"
 ---
