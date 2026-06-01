@@ -55,8 +55,9 @@ for proj in "${PROJECT_DIRS[@]}"; do
   safe_files=()
   unsafe_files=()
   for pf in $all; do
-    rel="${pf#$proj_dir/}"
-    if git diff --quiet -- "$rel" 2>/dev/null; then
+    # repo-relative path for git operations (git diff works from repo root)
+    git_rel="${pf#$ROOT_DIR/}"
+    if git diff --quiet -- "$git_rel" 2>/dev/null; then
       safe_files+=("$pf")
     else
       unsafe_files+=("$pf")
