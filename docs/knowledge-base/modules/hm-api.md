@@ -2,7 +2,7 @@
 title: hm-api
 tracks:
   - hm-api/
-last_synced_commit: deeaf47
+last_synced_commit: ec0f89d
 last_synced_date: 2026-06-01
 sync_note: "Phase 3 测试补足：新增 DefaultFeignConfig RequestInterceptor 单元测试，不改业务逻辑"
 ---
