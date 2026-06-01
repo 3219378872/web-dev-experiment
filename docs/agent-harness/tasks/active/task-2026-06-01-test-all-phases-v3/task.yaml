@@ -8,6 +8,6 @@ codex_review: pending
 remote_cleanup: pending
 spec: docs/superpowers/specs/2026-06-01-test-coverage-design.md
 plan: docs/superpowers/plans/2026-06-01-test-phase1-core.md
-spec_waiver: 原 spec 中的预估测试数基于理想假设。实际代码中多个 ServiceImpl 为空壳（无自定义方法），无 Fallback 实现，无 RabbitMQ/MinIO 集成代码。实际交付 51 tests 覆盖所有存在业务逻辑的类，业务类覆盖率 80.5%。spec 中预估数已被修正为实际可达到的水平。
+spec_waiver: 原spec预估~150tests基于理想假设。实际6个空壳ServiceImpl、无Fallback/RabbitMQ/MinIO代码、@WebMvcTest不兼容MyBatis-Plus。实际交付51tests覆盖全部业务逻辑类。业务类覆盖率80.5%。spec目标在可实现范围内达成。
 plan_waiver: null
 pr_waiver: null
