@@ -1,0 +1,7 @@
+slug: 2026-06-01-testing-enhancements
+status: active
+task_branch: task/2026-06-01-testing-enhancements
+spec: null
+plan: null
+spec_waiver: "测试增强不需要独立 spec"
+plan_waiver: "改动明确，不需要独立 plan"

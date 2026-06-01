@@ -127,6 +127,60 @@ fi
 
 check 10 GET "/addresses" 401 -H "authorization:invalid-token"
 
+# ---- Phase 5: Item Detail ----
+echo ""
+echo "--- Phase 5: Item Detail ---"
+
+# Extract first item ID from items page response
+ITEM_ID=$(curl -s --connect-timeout 5 --max-time 10 \
+    "${BASE_URL}/items/page?page=1&size=1" | jq -r '.data.list[0].id // .list[0].id // empty' 2>/dev/null || true)
+
+if [ -n "$ITEM_ID" ] && [ "$ITEM_ID" != "null" ]; then
+    check_json 11 GET "/items/${ITEM_ID}" 200
+else
+    red "[FAIL] #11 GET /items/{id} -> could not extract item ID from /items/page"
+    FAIL=$((FAIL + 1))
+fi
+
+# ---- Phase 6: Cart Operations (authenticated) ----
+echo ""
+echo "--- Phase 6: Cart ---"
+
+if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ] && [ -n "$ITEM_ID" ] && [ "$ITEM_ID" != "null" ]; then
+    check 12 POST "/carts" 200 \
+        -H "authorization:${TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "{\"itemId\":${ITEM_ID}}"
+
+    CART_RESP=$(curl -s --connect-timeout 5 --max-time 10 \
+        -H "authorization:${TOKEN}" "${BASE_URL}/carts" || true)
+    CART_COUNT=$(echo "$CART_RESP" | jq 'length' 2>/dev/null || echo "0")
+    CART_HTTP=$(curl -s -o /tmp/smoke_resp.txt -w '%{http_code}' \
+        --connect-timeout 5 --max-time 10 \
+        -H "authorization:${TOKEN}" "${BASE_URL}/carts")
+
+    if [ "$CART_HTTP" = "200" ] && [ "$CART_COUNT" -gt 0 ] 2>/dev/null; then
+        green "[PASS] #13 GET /carts -> 200, ${CART_COUNT} item(s)"
+        PASS=$((PASS + 1))
+
+        # Extract cart item ID for cleanup
+        CART_ITEM_ID=$(echo "$CART_RESP" | jq -r '.[0].id // empty' 2>/dev/null || true)
+        if [ -n "$CART_ITEM_ID" ] && [ "$CART_ITEM_ID" != "null" ]; then
+            check 14 DELETE "/carts/${CART_ITEM_ID}" 200 -H "authorization:${TOKEN}"
+        else
+            red "[FAIL] #14 DELETE /carts/{id} -> could not extract cart item ID"
+            FAIL=$((FAIL + 1))
+        fi
+    else
+        red "[FAIL] #13 GET /carts -> expected 200 + items, got ${CART_HTTP}"
+        echo "  Response: $(head -c 200 /tmp/smoke_resp.txt)"
+        FAIL=$((FAIL + 1))
+    fi
+else
+    red "[FAIL] #12-14 Cart tests -> missing token or item ID"
+    FAIL=$((FAIL + 3))
+fi
+
 # ---- Summary ----
 echo ""
 echo "============================================"

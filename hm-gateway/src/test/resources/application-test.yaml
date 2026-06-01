@@ -1,0 +1,34 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+    gateway:
+      routes:
+        - id: test_public
+          uri: 'forward:/internal/test-public'
+          predicates:
+            - Path=/test-public
+        - id: test_read
+          uri: 'forward:/internal/test-read'
+          predicates:
+            - Path=/test-read
+        - id: test_protected
+          uri: 'forward:/internal/test-protected'
+          predicates:
+            - Path=/test-protected
+
+hm:
+  jwt:
+    location: classpath:hmall.jks
+    alias: hmall
+    password: hmall123
+    tokenTTL: 30m
+  auth:
+    excludePaths:
+      - /hi
+      - /test-public
+    excludeReadPaths:
+      - /test-read

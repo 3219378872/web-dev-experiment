@@ -2,9 +2,9 @@
 title: hmall-admin
 tracks:
   - hmall-admin/
-last_synced_commit: b045ce1
-last_synced_date: 2026-05-27
-sync_note: "PR #16 加 npm test 占位脚本（node -e 打印一行说明，exit 0），让 CI smoke 的 npm test --if-present 显式暴露无 vitest 缺口；不动 src/"
+last_synced_commit: 9ac1cc5
+last_synced_date: 2026-06-01
+sync_note: "2026-06-01: 占位脚本替换为 vitest + 真实单元测试（App mount + router）"
 ---
 
 # hmall-admin

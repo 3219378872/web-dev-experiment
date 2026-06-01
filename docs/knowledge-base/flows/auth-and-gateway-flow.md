@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: a434038
+last_synced_commit: 9ac1cc5
 last_synced_date: 2026-06-01
-sync_note: "2026-06-01: /items/** 从 excludePaths 移至 excludeReadPaths（仅 GET/HEAD/OPTIONS 放行，写操作需认证）"
+sync_note: "2026-06-01: 新增 AuthGlobalFilterTest + GatewayAuthIntegrationTest；excludeReadPaths 含 /items/** + /categories/**"
 ---
 
 # auth-and-gateway-flow
