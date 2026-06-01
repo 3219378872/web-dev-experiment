@@ -10,7 +10,7 @@
 | 6 | `cd hmall-web && npm ci && npm test --if-present && npm run build` | passed | placeholder test exit 0, build 4.76s |
 | 7 | `cd hmall-admin && npm ci && npm test --if-present && npm run build` | passed | placeholder test exit 0, build 9.21s |
 | 8 | `docker compose config -q` | passed | exit 0 |
-| 9 | `docker compose down -v && docker compose up -d` | passed | 清理数据卷后重新启动，16 容器全部启动 |
+| 9 | `docker compose down -v && rm -rf ./docker/mysql && docker compose up -d` | passed | 清理数据卷与 bind mount 后重新启动，16 容器全部启动 |
 | 10 | `docker compose ps` | passed | nacos-init exited(0)、smoke-test exited(0)，其余 14 服务 Up |
 | 11 | `docker compose logs smoke-test` | passed | 10/10 passed（smoke-test 服务自动运行，含多端点就绪检查） |
 | 12 | `docker compose exec hm-gateway curl -sf --max-time 5 http://localhost:8080/items/page?page=1&size=10` | passed | 200 + valid JSON |
@@ -27,5 +27,6 @@
 - Nacos 路由初始化已通过 `nacos-init` 服务自动化，不再需要手动运行 `init-nacos-routes.sh`。
 - `nacos-init` 使用 `curlimages/curl` 镜像 + `apk add python3`，挂载 `./scripts` 目录。
 - 所有 Java 服务依赖 `nacos-init` 的 `service_completed_successfully` 条件。
-- `mvn -B -ntp verify -Pintegration` 本地跳过：WSL2 宿主机无法访问 Docker MySQL（端口 3306 不可达）。CI integration job 已通过（run 26505386582，conclusion: success）。
+- `mvn -B -ntp verify -Pintegration` 本地跳过：WSL2 宿主机无法访问 Docker MySQL（端口 3306 不可达）。CI integration job 已通过（run 26728994593，conclusion: success）。
 - `npx --prefix e2e playwright test --list` 跳过：本 PR 不改 e2e spec。
+- MySQL 数据使用 host bind mount `./docker/mysql`。`docker compose down -v` 仅清理 Docker volumes，不清理 bind mount 目录。完整清理需额外执行 `rm -rf ./docker/mysql`。重新启动后可通过 `docker compose logs mysql` 确认 `init-all-tables.sql` 导入。
