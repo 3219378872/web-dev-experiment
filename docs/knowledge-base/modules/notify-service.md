@@ -2,7 +2,7 @@
 title: notify-service
 tracks:
   - notify-service/
-last_synced_commit: deeaf47
+last_synced_commit: 7bb0c3c
 last_synced_date: 2026-06-01
 sync_note: "Phase 2 测试补足：新增 NotificationServiceImpl/Feedback/CustomerMessage 单元测试，不改业务逻辑"
 ---
