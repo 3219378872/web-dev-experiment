@@ -2,9 +2,9 @@
 title: cart-service
 tracks:
   - cart-service/
-last_synced_commit: deeaf47
+last_synced_commit: ca90665
 last_synced_date: 2026-06-01
-sync_note: "添加 H2 测试基础设施 + CartServiceImpl/CartController 单元测试，不改业务逻辑"
+sync_note: "Phase 1 测试补足完成：新增 CartServiceImplTest(7) + CartControllerTest(2)，不改业务逻辑"
 ---
 
 # cart-service

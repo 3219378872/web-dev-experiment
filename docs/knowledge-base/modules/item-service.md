@@ -2,9 +2,9 @@
 title: item-service
 tracks:
   - item-service/
-last_synced_commit: deeaf47
+last_synced_commit: ca90665
 last_synced_date: 2026-06-01
-sync_note: "添加 H2 测试基础设施 + ItemServiceImpl/ItemReviewServiceImpl 单元测试，不改业务逻辑"
+sync_note: "Phase 1 测试补足完成：新增 ItemServiceImplTest(3) + ItemReviewServiceImplTest(2)，不改业务逻辑"
 ---
 
 # item-service

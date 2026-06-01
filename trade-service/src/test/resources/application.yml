@@ -1,4 +1,13 @@
 spring:
+  cloud:
+    bootstrap:
+      enabled: false
+    nacos:
+      server-addr: localhost:8848
+      discovery:
+        enabled: false
+      config:
+        enabled: false
   datasource:
     url: jdbc:h2:mem:trade_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true
     driver-class-name: org.h2.Driver
