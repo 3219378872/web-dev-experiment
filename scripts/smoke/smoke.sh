@@ -138,7 +138,8 @@ ITEM_ID=$(curl -s --connect-timeout 5 --max-time 10 \
 if [ -n "$ITEM_ID" ] && [ "$ITEM_ID" != "null" ]; then
     check_json 11 GET "/items/${ITEM_ID}" 200
 else
-    red "[SKIP] #11 GET /items/{id} -> could not extract item ID from /items/page"
+    red "[FAIL] #11 GET /items/{id} -> could not extract item ID from /items/page"
+    FAIL=$((FAIL + 1))
 fi
 
 # ---- Phase 6: Cart Operations (authenticated) ----
@@ -167,7 +168,8 @@ if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ] && [ -n "$ITEM_ID" ] && [ "$ITEM_ID
         if [ -n "$CART_ITEM_ID" ] && [ "$CART_ITEM_ID" != "null" ]; then
             check 14 DELETE "/carts/${CART_ITEM_ID}" 200 -H "authorization:${TOKEN}"
         else
-            red "[SKIP] #14 DELETE /carts/{id} -> could not extract cart item ID"
+            red "[FAIL] #14 DELETE /carts/{id} -> could not extract cart item ID"
+            FAIL=$((FAIL + 1))
         fi
     else
         red "[FAIL] #13 GET /carts -> expected 200 + items, got ${CART_HTTP}"
@@ -175,7 +177,8 @@ if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ] && [ -n "$ITEM_ID" ] && [ "$ITEM_ID
         FAIL=$((FAIL + 1))
     fi
 else
-    red "[SKIP] #12-14 Cart tests -> missing token or item ID"
+    red "[FAIL] #12-14 Cart tests -> missing token or item ID"
+    FAIL=$((FAIL + 3))
 fi
 
 # ---- Summary ----
