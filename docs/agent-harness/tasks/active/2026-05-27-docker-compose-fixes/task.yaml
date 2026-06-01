@@ -1,0 +1,14 @@
+slug: 2026-05-27-docker-compose-fixes
+status: pr-open
+base_branch: main
+task_branch: task/2026-05-27-docker-compose-fixes
+remote_branch: origin/task/2026-05-27-docker-compose-fixes
+pull_request: "https://github.com/3219378872/web-dev-experiment/pull/21"
+ci_status: pending
+codex_review: pending
+remote_cleanup: pending
+spec: null
+plan: null
+spec_waiver: "bug fix，不需要独立 spec"
+plan_waiver: "修复项明确，不需要独立 plan"
+pr_waiver: null
