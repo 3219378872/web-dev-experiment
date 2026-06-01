@@ -25,5 +25,4 @@ def render(repo_root: Path, file_name: str, *, slug: str, day: str) -> str:
         title=slug.replace("-", " ").title(),
         day=day,
         task_branch=task_branch,
-        remote_branch=f"origin/{task_branch}",
     )

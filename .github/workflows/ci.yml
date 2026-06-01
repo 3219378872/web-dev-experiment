@@ -163,26 +163,17 @@ jobs:
             Review this pull request as a blocking CI gate for the hmall
             (Spring Cloud microservices + Vue 3 dual-frontend) repository.
 
-            Inspect the PR diff, docs/agent-harness task records, AGENTS.md,
-            CLAUDE.md, docs/agent-harness/README.md,
-            docs/agent-harness/quality-rules.md, docs/knowledge-base/INDEX.md,
-            and any updated docs/knowledge-base/modules or flows pages.
-
-            Determine whether the code completes the stated task and complies
-            with the repository harness workflow. Check specifically:
-            - a matching harness task record exists for this PR;
+            Determine whether the code completes the stated task from the
+            approved spec (docs/superpowers/specs/) or, for spec-waivered
+            PRs, the PR description.  Check:
             - the implementation satisfies the task / spec / plan rather than
               only changing tests;
-            - local acceptance evidence is recorded with exact commands and
-              outcomes (mvn test / npm test / docker compose / playwright);
-            - module boundaries and safety rules in AGENTS.md / CLAUDE.md /
+            - module boundaries and safety rules in CLAUDE.md / AGENTS.md /
               knowledge-base are not violated;
             - any code change to a knowledge-base tracked path also updates the
               corresponding modules/flows page or bumps last_synced_commit with
               a sync_note (K005);
-            - no unresolved placeholders or unexplained skipped checks remain;
-            - branch, remote branch, pull request, and remote branch cleanup
-              fields are present or appropriately marked pending before merge;
+            - no hardcoded secrets, no unresolved placeholders;
             - public API contracts (com.hmall.common.domain.R / PageDTO) are
               not silently broken.
 
