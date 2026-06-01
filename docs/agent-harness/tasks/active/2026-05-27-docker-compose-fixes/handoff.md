@@ -40,10 +40,12 @@ Nacos 路由初始化已通过 `nacos-init` 服务自动化。
 
 ## Next Action
 
-Round 19 blocking findings (2 个):
-1. smoke-test curl -sf 探针在 400/401 时触发 fallback → 移除 -f，改用 "!= 000" 判断
-2. docker compose down -v 不清理 bind mount ./docker/mysql → 更新证据描述
-修复后重新推送，等待 CI codex-review 通过后合并。
+Round 20 修复已推送（`2538841`）：
+1. smoke-test 探针 bug 已修（curl -sf → curl -s, != "000"）
+2. MySQL bind mount 证据已更正（verification.md + handoff.md）
+3. CI codex-review 模型升级到 gpt-5.5（.github/workflows/ci.yml）
+
+等待 CI 全部通过（lint/test/integration/smoke/codex-review）后合并 PR。
 
 ## Worktree Or Branch
 
@@ -58,9 +60,9 @@ Round 19 blocking findings (2 个):
 
 ## CI And Review
 
-- CI status: round 17-19 — lint/test/integration/smoke passed; codex-review failed
-- Codex review round 16: smoke-test 未等待 user-service 就绪（已修）
-- Codex review round 17: 增加 user-service 就绪检查（POST /users/login 返回 400/401）
-- Codex review round 18: 误包含 archive-pr18-task 目录（已移除）；handoff 文本 stale（已更新）
-- Codex review round 19: curl -sf 探针 bug + MySQL bind mount 证据描述不准确（本次修复）
-- Next: push round 20 fix，等待 CI + codex-review 全部通过
+- Round 20 (gpt-5.4): lint/test/integration/smoke passed; codex-review failed — 1 blocking: handoff stale
+- Round 21 (gpt-5.5): 推送中（含 model bump + handoff 更新）
+- 修复详情：
+  - Round 19: curl -sf 探针 bug + MySQL bind mount 证据
+  - Round 20: handoff 文本 stale（本次修复）
+- 模型升级：`gpt-5.4` → `gpt-5.5`（更高吞吐量）
