@@ -9,3 +9,11 @@ repos:
         files: '\.(md|py|yaml|yml|java|vue|ts|js)$'
         pass_filenames: false
         always_run: true
+      - id: frontend-lint
+        name: Frontend Lint
+        description: Formats with Prettier and lints with ESLint on staged frontend files.
+        entry: bash scripts/pre-commit-frontend.sh
+        language: system
+        files: '\.(js|vue|ts|css)$'
+        pass_filenames: false
+        always_run: true

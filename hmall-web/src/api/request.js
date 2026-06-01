@@ -1,30 +1,30 @@
-import axios from 'axios'
-import { ElMessage } from 'element-plus'
-import router from '@/router'
+import axios from 'axios';
+import { ElMessage } from 'element-plus';
+import router from '@/router';
 
 const request = axios.create({
   baseURL: '/api',
-  timeout: 10000
-})
+  timeout: 10000,
+});
 
-request.interceptors.request.use(config => {
-  const token = localStorage.getItem('token')
+request.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
   if (token) {
-    config.headers.authorization = token
+    config.headers.authorization = token;
   }
-  return config
-})
+  return config;
+});
 
 request.interceptors.response.use(
-  response => response.data,
-  error => {
+  (response) => response.data,
+  (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      router.push('/login')
+      localStorage.removeItem('token');
+      router.push('/login');
     }
-    ElMessage.error(error.response?.data?.msg || '请求失败')
-    return Promise.reject(error)
+    ElMessage.error(error.response?.data?.msg || '请求失败');
+    return Promise.reject(error);
   }
-)
+);
 
-export default request
+export default request;

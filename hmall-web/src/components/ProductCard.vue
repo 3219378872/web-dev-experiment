@@ -9,15 +9,39 @@
   </el-card>
 </template>
 <script setup>
-import { useRouter } from 'vue-router'
-const props = defineProps({ item: Object })
-const router = useRouter()
-function goDetail() { router.push(`/item/${props.item.id}`) }
+import { useRouter } from 'vue-router';
+const props = defineProps({
+  item: { type: Object, default: () => ({}) },
+});
+const router = useRouter();
+function goDetail() {
+  router.push(`/item/${props.item.id}`);
+}
 </script>
 <style scoped>
-.product-card { cursor: pointer; margin-bottom: 16px; }
-.product-image { width: 100%; height: 200px; object-fit: cover; }
-.product-name { font-size: 14px; margin: 8px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.product-price { color: #f56c6c; font-size: 18px; font-weight: bold; }
-.product-sold { color: #999; font-size: 12px; }
+.product-card {
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+.product-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+.product-name {
+  font-size: 14px;
+  margin: 8px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.product-price {
+  color: #f56c6c;
+  font-size: 18px;
+  font-weight: bold;
+}
+.product-sold {
+  color: #999;
+  font-size: 12px;
+}
 </style>

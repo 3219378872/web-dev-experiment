@@ -4,5 +4,11 @@
   </el-footer>
 </template>
 <style scoped>
-.app-footer { text-align: center; padding: 20px; color: #999; background: #f5f5f5; margin-top: 40px; }
+.app-footer {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  background: #f5f5f5;
+  margin-top: 40px;
+}
 </style>

@@ -5,10 +5,19 @@
   "scripts": {
     "test": "npx playwright test",
     "test:web": "npx playwright test --project=hmall-web",
-    "test:admin": "npx playwright test --project=hmall-admin"
+    "test:admin": "npx playwright test --project=hmall-admin",
+    "lint": "eslint --ext .ts .",
+    "lint:fix": "eslint --ext .ts --fix .",
+    "format": "prettier --check \"**/*.ts\"",
+    "format:fix": "prettier --write \"**/*.ts\""
   },
   "devDependencies": {
     "@playwright/test": "^1.45.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.2",
+    "prettier": "^3.8.3",
     "typescript": "^5.3.0"
   }
 }
