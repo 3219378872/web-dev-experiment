@@ -2,9 +2,9 @@
 title: file-service
 tracks:
   - file-service/
-last_synced_commit: 7bb0c3c
+last_synced_commit: bd04dd7
 last_synced_date: 2026-06-01
-sync_note: "Phase 2 测试补足：新增 UploadServiceImpl 单元测试，不改业务逻辑"
+sync_note: "回滚过早合并的测试 PR（#28/#29/#30/#31），测试文件已移除待重新提交"
 ---
 
 # file-service

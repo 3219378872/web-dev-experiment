@@ -2,9 +2,9 @@
 title: item-service
 tracks:
   - item-service/
-last_synced_commit: 486821c
+last_synced_commit: bd04dd7
 last_synced_date: 2026-06-01
-sync_note: "Phase 1 fix: 修复 ItemServiceImplTest 空列表查询的 H2 兼容性问题，不改业务逻辑"
+sync_note: "回滚过早合并的测试 PR（#28/#29/#30/#31），测试文件已移除待重新提交"
 ---
 
 # item-service
