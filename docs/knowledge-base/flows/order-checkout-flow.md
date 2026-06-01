@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 33e9420
-last_synced_date: 2026-05-26
-sync_note: "trade-service/pay-service/cart-service/item-service 添加集成测试"
+last_synced_commit: bd04dd7
+last_synced_date: 2026-06-01
+sync_note: "回滚过早合并的测试 PR（#28/#29/#30/#31），测试文件已移除待重新提交"
 ---
 
 # order-checkout-flow

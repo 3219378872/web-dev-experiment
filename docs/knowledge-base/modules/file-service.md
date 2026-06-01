@@ -2,9 +2,9 @@
 title: file-service
 tracks:
   - file-service/
-last_synced_commit: bc09d0e
-last_synced_date: 2026-05-26
-sync_note: ""
+last_synced_commit: bd04dd7
+last_synced_date: 2026-06-01
+sync_note: "回滚过早合并的测试 PR（#28/#29/#30/#31），测试文件已移除待重新提交"
 ---
 
 # file-service

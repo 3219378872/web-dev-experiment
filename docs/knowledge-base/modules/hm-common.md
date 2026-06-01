@@ -2,9 +2,9 @@
 title: hm-common
 tracks:
   - hm-common/
-last_synced_commit: 883f5fb
-last_synced_date: 2026-05-27
-sync_note: "对齐文档与实际混合响应封装模式（不改 hm-common 代码）"
+last_synced_commit: bd04dd7
+last_synced_date: 2026-06-01
+sync_note: "回滚过早合并的测试 PR（#28/#29/#30/#31），测试文件已移除待重新提交"
 ---
 
 # hm-common
