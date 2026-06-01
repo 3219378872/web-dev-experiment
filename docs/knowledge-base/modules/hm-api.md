@@ -2,9 +2,9 @@
 title: hm-api
 tracks:
   - hm-api/
-last_synced_commit: bd04dd7
+last_synced_commit: 44e2d196f1eb7ddb2991e36f10ba095307a54094
 last_synced_date: 2026-06-01
-sync_note: "回滚过早合并的测试 PR（#28/#29/#30/#31），测试文件已移除待重新提交"
+sync_note: "v3 合并 PR：所有阶段测试补足共 51 tests，覆盖率 80.5%"
 ---
 
 # hm-api

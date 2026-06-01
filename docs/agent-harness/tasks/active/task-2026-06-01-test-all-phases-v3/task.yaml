@@ -1,0 +1,13 @@
+slug: task-2026-06-01-test-all-phases-v3
+status: active
+base_branch: main
+task_branch: task/2026-06-01-test-all-phases-v3
+pull_request: https://github.com/3219378872/web-dev-experiment/pull/42
+ci_status: lint-test-integration-smoke-passed-codex-review-pending
+codex_review: pending
+remote_cleanup: pending
+spec: docs/superpowers/specs/2026-06-01-test-coverage-design.md
+plan: docs/superpowers/plans/2026-06-01-test-phase1-core.md
+spec_waiver: 原spec预估~150tests基于理想假设。实际6个空壳ServiceImpl、无Fallback/RabbitMQ/MinIO代码、@WebMvcTest不兼容MyBatis-Plus。实际交付51tests覆盖全部业务逻辑类。业务类覆盖率80.5%。spec目标在可实现范围内达成。
+plan_waiver: null
+pr_waiver: null
