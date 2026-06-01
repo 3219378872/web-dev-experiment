@@ -2,9 +2,9 @@
 title: trade-service
 tracks:
   - trade-service/
-last_synced_commit: 33e9420
-last_synced_date: 2026-05-26
-sync_note: "添加集成测试（OrderServiceImplIT, CouponServiceImplIT）+ OrderLogistics @TableField 映射修复"
+last_synced_commit: deeaf47
+last_synced_date: 2026-06-01
+sync_note: "添加 H2 测试基础设施 + CouponServiceImpl/OrderServiceImpl 单元测试，不改业务逻辑"
 ---
 
 # trade-service
