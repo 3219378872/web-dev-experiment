@@ -1,28 +1,20 @@
 # Context: Testing Enhancements
 
 ## Objective
-Describe the task outcome in one sentence.
+新增单元测试、集成测试、增强冒烟测试，替换前端占位脚本为 vitest。
 
 ## Scope
-- In scope:
-- Out of scope:
+- In scope: AuthGlobalFilter unit (8), Gateway IT (5), smoke cart/order/pay (16 total), frontend vitest (4)
+- Out of scope: E2E purchase flow, 全模块 80% 覆盖率
 
 ## Related Artifacts
-- Spec: none - state the reason a separate spec is unnecessary.
-- Plan: none - state the reason a separate plan is unnecessary.
+- Spec: null - 测试增强不需要独立 spec
+- Plan: null - 改动明确
 
 ## Likely Files
-- `path/to/file`
-
-## Runtime Evidence To Inspect First
-- none
+- `hm-gateway/src/test/`
+- `scripts/smoke/smoke.sh`
+- `hmall-web/` `hmall-admin/` (vitest)
 
 ## Safety Constraints
-- Do not commit secrets to `docker-compose.yml`, application.yaml, or .env-style files.
-- Do not break public API response envelopes returned by `hm-common.dto.Result` / `PageDTO`.
-
-## Worktree Or Branch
-- `task/2026-06-01-testing-enhancements`
-
-## Open Questions
-- none
+- 不修改业务代码，不改 public API 契约
