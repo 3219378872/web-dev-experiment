@@ -183,13 +183,26 @@ def check_co_change(
 
 
 def _git_changed_files(repo_root: Path, base_ref: str) -> set[str]:
+    changed: set[str] = set()
+    # Committed changes since branching from base
     result = subprocess.run(
         ["git", "-C", str(repo_root), "diff", "--name-only", f"{base_ref}...HEAD"],
         capture_output=True,
         text=True,
         check=True,
     )
-    return {line.strip() for line in result.stdout.splitlines() if line.strip()}
+    changed.update(line.strip() for line in result.stdout.splitlines() if line.strip())
+    # Staged (but not yet committed) changes — relevant during pre-commit
+    staged = subprocess.run(
+        ["git", "-C", str(repo_root), "diff", "--cached", "--name-only"],
+        capture_output=True,
+        text=True,
+    )
+    if staged.returncode == 0:
+        changed.update(
+            line.strip() for line in staged.stdout.splitlines() if line.strip()
+        )
+    return changed
 
 
 def stale_pages(repo_root: Path) -> list[tuple[Page, str]]:
