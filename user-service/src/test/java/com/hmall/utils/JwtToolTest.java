@@ -68,4 +68,49 @@ class JwtToolTest {
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("token已经过期");
     }
+
+    @Test
+    @DisplayName("parseToken 用不同密钥签发 -> verify 失败 -> 无效的token")
+    void parseToken_wrongKey_throws() throws Exception {
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+        gen.initialize(2048);
+        KeyPair wrongPair = gen.generateKeyPair();
+
+        String token = cn.hutool.jwt.JWT.create()
+                .setPayload("user", 1L)
+                .setPayload("role", "user")
+                .setExpiresAt(new java.util.Date(System.currentTimeMillis() + 60_000))
+                .setSigner(cn.hutool.jwt.signers.JWTSignerUtil.createSigner("rs256", wrongPair))
+                .sign();
+        assertThatThrownBy(() -> jwtTool.parseToken(token))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("无效的token");
+    }
+
+    @Test
+    @DisplayName("parseToken 无 user 载荷 -> userPayload null -> 无效的token")
+    void parseToken_missingUserClaim_throws() {
+        String token = cn.hutool.jwt.JWT.create()
+                .setPayload("role", "user")
+                .setExpiresAt(new java.util.Date(System.currentTimeMillis() + 60_000))
+                .setSigner(cn.hutool.jwt.signers.JWTSignerUtil.createSigner("rs256", keyPair))
+                .sign();
+        assertThatThrownBy(() -> jwtTool.parseToken(token))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("无效的token");
+    }
+
+    @Test
+    @DisplayName("parseToken user 载荷非数字 -> Long.valueOf 失败 -> 无效的token")
+    void parseToken_nonNumericUserClaim_throws() {
+        String token = cn.hutool.jwt.JWT.create()
+                .setPayload("user", "not-a-number")
+                .setPayload("role", "user")
+                .setExpiresAt(new java.util.Date(System.currentTimeMillis() + 60_000))
+                .setSigner(cn.hutool.jwt.signers.JWTSignerUtil.createSigner("rs256", keyPair))
+                .sign();
+        assertThatThrownBy(() -> jwtTool.parseToken(token))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessage("无效的token");
+    }
 }

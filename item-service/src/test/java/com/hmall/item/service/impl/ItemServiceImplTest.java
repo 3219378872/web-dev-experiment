@@ -1,18 +1,24 @@
 package com.hmall.item.service.impl;
 
+import com.hmall.common.exception.BizIllegalException;
 import com.hmall.item.ItemServiceTestBase;
 import com.hmall.item.domain.dto.ItemDTO;
 import com.hmall.item.domain.dto.OrderDetailDTO;
 import com.hmall.item.domain.po.Item;
 import com.hmall.item.mapper.ItemMapper;
 import com.hmall.item.service.IItemService;
+import com.hmall.item.service.impl.ItemServiceImpl;
+import org.apache.ibatis.session.SqlSession;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ItemServiceImplTest extends ItemServiceTestBase {
 
@@ -42,6 +48,34 @@ class ItemServiceImplTest extends ItemServiceTestBase {
 
         Item updated = itemMapper.selectById(item.getId());
         assertThat(updated.getStock()).isEqualTo(7);
+    }
+
+    @Test
+    @DisplayName("deductStock: 空列表触发if(!r)抛出BizIllegalException")
+    void deductStock_emptyList_throwsBizIllegalException() {
+        List<OrderDetailDTO> items = List.of();
+        BizIllegalException ex = assertThrows(BizIllegalException.class, () -> itemService.deductStock(items));
+        assertThat(ex.getMessage()).contains("库存不足");
+    }
+
+    @Test
+    @DisplayName("deductStock: executeBatch抛出异常时被catch块包装")
+    void deductStock_executeBatchThrows_catchesAndWraps() {
+        ItemServiceImpl throwingService = new ItemServiceImpl() {
+            @Override
+            protected <E> boolean executeBatch(Collection<E> list, BiConsumer<SqlSession, E> consumer) {
+                throw new RuntimeException("simulated batch failure");
+            }
+        };
+
+        List<OrderDetailDTO> items = List.of(
+                new OrderDetailDTO().setItemId(1L).setNum(1)
+        );
+
+        BizIllegalException ex = assertThrows(BizIllegalException.class, () -> throwingService.deductStock(items));
+        assertThat(ex.getMessage()).contains("更新库存异常");
+        assertThat(ex.getCause()).isInstanceOf(RuntimeException.class);
+        assertThat(ex.getCause().getMessage()).isEqualTo("simulated batch failure");
     }
 
     // ---- queryItemByIds ----
