@@ -4,7 +4,7 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 8c38db8
+last_synced_commit: 196ddb3
 last_synced_date: 2026-06-01
 sync_note: "2026-06-01: 新增 AuthGlobalFilterTest + GatewayAuthIntegrationTest；excludeReadPaths 含 /items/** + /categories/**"
 ---
