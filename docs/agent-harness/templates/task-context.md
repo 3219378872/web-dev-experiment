@@ -21,11 +21,8 @@ Describe the task outcome in one sentence.
 - Do not commit secrets to `docker-compose.yml`, application.yaml, or .env-style files.
 - Do not break public API response envelopes returned by `hm-common.dto.Result` / `PageDTO`.
 
-## Branch And PR
-- Base branch: `main`
-- Task branch: `{task_branch}`
-- Remote branch: `{remote_branch}`
-- Pull request: none - create after local acceptance and push.
+## Worktree Or Branch
+- `{task_branch}`
 
 ## Open Questions
 - none
