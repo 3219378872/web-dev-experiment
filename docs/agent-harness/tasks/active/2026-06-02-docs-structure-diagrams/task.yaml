@@ -1,0 +1,7 @@
+slug: 2026-06-02-docs-structure-diagrams
+status: active
+task_branch: task/2026-06-02-docs-structure-diagrams
+spec: null
+plan: null
+spec_waiver: "纯文档任务（docs/structure 下新建 Mermaid 图），无 API/数据/行为变更，无需独立 spec。"
+plan_waiver: "已批准的实施计划为 plan-mode 产物，存放在仓库外、不入库。"
