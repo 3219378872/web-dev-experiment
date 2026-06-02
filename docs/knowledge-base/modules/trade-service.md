@@ -2,9 +2,9 @@
 title: trade-service
 tracks:
   - trade-service/
-last_synced_commit: a86d639a608a2272ede208732891ebb0b392f092
+last_synced_commit: 3f6e2651ebbd2e62e288f76cdb60f9bb67c5d80f
 last_synced_date: 2026-06-02
-sync_note: "RabbitMQ 异步清车、支付成功消费、状态通知与超时关单"
+sync_note: "仅补充延时关单分支覆盖率测试，运行时契约无变更"
 ---
 
 # trade-service

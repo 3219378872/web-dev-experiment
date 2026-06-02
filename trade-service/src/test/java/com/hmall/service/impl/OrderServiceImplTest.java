@@ -37,6 +37,9 @@ class OrderServiceImplTest extends TradeServiceTestBase {
     private IOrderService orderService;
 
     @Autowired
+    private OrderServiceImpl orderServiceImpl;
+
+    @Autowired
     private IOrderLogisticsService logisticsService;
 
     @Test
@@ -105,6 +108,38 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         Order updated = orderService.getById(orderId);
         assertThat(updated.getStatus()).isEqualTo(2);
         assertThat(updated.getPayTime()).isNotNull();
+    }
+
+    @Test
+    void handleOrderClose_pendingOrder_closes() {
+        Order order = new Order();
+        order.setUserId(1L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(1);
+        orderService.save(order);
+
+        orderServiceImpl.handleOrderClose(new OrderCreatedEvent(order.getId(), 1L, List.of(100L)));
+
+        Order updated = orderService.getById(order.getId());
+        assertThat(updated.getStatus()).isEqualTo(5);
+        assertThat(updated.getCloseTime()).isNotNull();
+    }
+
+    @Test
+    void handleOrderClose_paidOrder_ignores() {
+        Order order = new Order();
+        order.setUserId(1L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(2);
+        orderService.save(order);
+
+        orderServiceImpl.handleOrderClose(new OrderCreatedEvent(order.getId(), 1L, List.of(100L)));
+
+        Order updated = orderService.getById(order.getId());
+        assertThat(updated.getStatus()).isEqualTo(2);
+        assertThat(updated.getCloseTime()).isNull();
     }
 
     @Test
