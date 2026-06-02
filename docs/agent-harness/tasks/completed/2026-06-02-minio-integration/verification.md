@@ -13,8 +13,8 @@
 | `python3 scripts/agent_harness.py check` | PASS | agent harness check passed |
 | `python3 scripts/knowledge_base.py check --base main` | PASS | K001–K006 全过（file-service/hm-service 页共变） |
 | `python3 scripts/engineering-lint.py` | PASS | all checks passed |
-| `MINIO_ROOT_USER=test-minio-user MINIO_ROOT_PASSWORD=test-minio-pass docker compose config -q` | PASS | compose config OK；MinIO 凭据由环境变量显式注入 |
-| `docker compose config -q` | PASS | compose config OK；未设置 `MINIO_ROOT_*` 时 compose 只发出 blank-var warning，CI smoke 的 config 校验仍为 exit 0 |
+| `MINIO_ROOT_USER=test-minio-user MINIO_ROOT_PASSWORD=test-minio-pass docker compose config -q` | PASS | compose config OK；MinIO 凭据可由环境变量显式覆盖 |
+| `docker compose config -q` | PASS | compose config OK；未设置 `MINIO_ROOT_*` 时 compose 使用本地开发默认值，满足一键启动 |
 
 ## 端到端证据（节选）
 

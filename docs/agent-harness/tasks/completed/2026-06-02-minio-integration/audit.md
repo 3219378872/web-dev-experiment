@@ -6,7 +6,7 @@
 | Public image URL remains stable for frontend callers | pass | `FileController.uploadImage` returns `/files/{key}`; no frontend call-site changes required. |
 | `/files/**` proxies bytes from MinIO and keeps legacy fallback | pass | `FileController.downloadByKey` streams `MinioClient.getObject`; `/uploads/` paths still read local disk during transition. |
 | Legacy `/uploads/` fallback cannot traverse outside upload root | pass | `FileController.writeLegacyUpload` normalizes resolved paths under `file.upload-dir`; `FileControllerTest.getLegacyUploadPath_rejectsTraversalOutsideUploadDirectory` covers `/files/uploads/../secret.txt` returning 404. |
-| MinIO credentials are not hardcoded | pass | `application.yaml`, `MinioProperties`, and `docker-compose.yml` do not embed MinIO credential defaults; compose env and Testcontainers inject explicit credentials. |
+| MinIO credentials are not hardcoded in app config | pass | `application.yaml` resolves credentials from env placeholders and `MinioProperties` defaults are empty; compose injects credentials into `file-service` and keeps local-development defaults for the one-command stack contract. |
 | Docker Compose can provision MinIO | pass | `docker-compose.yml` adds `minio` + `minio-init`, creates public-download `hmall` bucket, and wires `file-service` env/depends_on. |
 | Unit tests do not require external MinIO | pass | `UploadServiceImplTest` / `FileControllerTest` use `@MockBean MinioClient` and `hm.minio.enabled=false`. |
 | Real MinIO integration is covered | pass | `MinioUploadIT` uses Testcontainers MinIO for upload -> fetch-by-key round trip. |
