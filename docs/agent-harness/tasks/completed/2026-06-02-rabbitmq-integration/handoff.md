@@ -1,7 +1,7 @@
 # Handoff: Rabbitmq Integration
 
 ## Status
-PR follow-up in progress. Branch `task/2026-06-02-rabbitmq-integration` contains RabbitMQ implementation, focused unit tests, focused RabbitMQ integration test, compose/schema changes, KB updates, and codex-review follow-up fixes for producer transaction boundaries, consumer retries, and payment-success idempotency. Local final verification after the latest edits is green; PR CI/review remains.
+PR follow-up in progress. Branch `task/2026-06-02-rabbitmq-integration` contains RabbitMQ implementation, focused unit tests, focused RabbitMQ integration test, compose/schema changes, KB updates, and codex-review follow-up fixes for producer transaction boundaries, consumer retries, payment-success idempotency, and delayed-close/payment race protection. Local final verification after the latest edits is green; PR CI/review remains.
 
 ## Files Changed
 - `docs/superpowers/plans/2026-06-02-rabbitmq-integration.md`
@@ -19,6 +19,9 @@ PR follow-up in progress. Branch `task/2026-06-02-rabbitmq-integration` contains
   - producer publish is deferred to transaction `afterCommit`;
   - consumer failures retry through dedicated retry queues before dead-letter;
   - `pay.success` only updates orders still in pending-payment status.
+- Third codex-review follow-up:
+  - delayed close uses an atomic conditional update on `id` + pending-payment status;
+  - delayed close no longer reads an order and then writes status back unconditionally.
 
 ## Commands Run
 - `git switch -c task/2026-06-02-rabbitmq-integration`
@@ -41,16 +44,19 @@ PR follow-up in progress. Branch `task/2026-06-02-rabbitmq-integration` contains
 - `python3 scripts/agent_harness.py check` — pass after second codex-review documentation updates.
 - `python3 scripts/knowledge_base.py check --base origin/main` — pass after second codex-review documentation updates.
 - `python3 scripts/engineering-lint.py` — pass after second codex-review documentation updates.
+- `mvn -B -ntp -q -pl trade-service -am -Dtest=OrderServiceImplTest -DfailIfNoTests=false test` — pass after third codex-review delayed-close race fix.
+- `mvn -B -ntp -q -pl hm-common,trade-service,cart-service,notify-service -am -Dtest=RabbitMqMessagePublisherTest,MqConsumerSupportTest,OrderServiceImplTest,OrderCreatedListenerTest,OrderEventListenerTest -DfailIfNoTests=false test` — pass after third codex-review delayed-close race fix.
 
 ## Known Risks
 - Reliable producer fallback is a lightweight `mq_outbox_message` insert for synchronous publish exceptions, publisher confirm nacks, and returned unroutable messages; no replay scheduler is included in this slice.
 - Producer publish now waits for transaction commit. If broker publish then fails, fallback outbox insert happens after commit and does not roll back the already-committed business transaction.
 - Consumer retry topology is bounded: failed messages are delayed in per-consumer retry queues and moved to `hmall.mq.dead.queue` after max retries.
+- Delayed close and payment success both use status-guarded updates; callers should keep any future order-state message handlers idempotent and conditional.
 - RabbitMQ IT logs include Testcontainers/Docker connection reset/refused during shutdown, but Maven exited 0.
 - Local Docker port publishing timed out for JVM MySQL connections to `127.0.0.1`; local full integration used Docker bridge host `172.17.0.1`. The GitHub Actions service-container workflow still uses `127.0.0.1`.
 
 ## Next Action
-Commit, push, open PR, and follow CI/codex-review to green.
+Commit, push, and follow CI/codex-review to green.
 
 ## Worktree Or Branch
 - `task/2026-06-02-rabbitmq-integration`

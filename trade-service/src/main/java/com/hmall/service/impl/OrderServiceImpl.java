@@ -136,13 +136,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     public void handleOrderClose(OrderCreatedEvent event) {
-        Order order = getById(event.getOrderId());
-        if (order == null || order.getStatus() != 1) {
-            return;
-        }
-        order.setStatus(5);
-        order.setCloseTime(LocalDateTime.now());
-        updateById(order);
+        lambdaUpdate()
+                .set(Order::getStatus, 5)
+                .set(Order::getCloseTime, LocalDateTime.now())
+                .eq(Order::getId, event.getOrderId())
+                .eq(Order::getStatus, 1)
+                .update();
     }
 
     @Override

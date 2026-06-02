@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: b25e21464938f9ce5f1cef682ae90224ca30f054
+last_synced_commit: 28f7eb1932138441a1258adde104aa6e62b70cac
 last_synced_date: 2026-06-02
-sync_note: "同步 RabbitMQ 事务后发布、消费重试和支付成功幂等语义"
+sync_note: "同步 RabbitMQ 事务后发布、消费重试、支付成功幂等和超时关单原子保护"
 ---
 
 # order-checkout-flow
@@ -31,7 +31,7 @@ C 端用户从加购到支付完成的端到端流程，跨 [cart-service](../mo
    - 事务提交后发布 `trade.topic/order.create`，由 cart-service 异步删除对应购物车项，
      notify-service 生成下单成功站内信。
    - 事务提交后发布 `delay.exchange/order.delay`，30 分钟后进入 `order.close.queue`
-     关闭仍处于待支付状态的订单。
+     通过带 `status = 待支付` 条件的原子更新关闭仍未支付的订单。
 4. **支付** —— hmall-web 跳支付页 → [pay-service](../modules/pay-service.md)
    `POST /pay-orders/{id}/pay`。模拟支付通道直接打标已支付。
 5. **支付回写** —— pay-service 支付事务提交后发布 `pay.topic/pay.success`，
@@ -45,6 +45,8 @@ C 端用户从加购到支付完成的端到端流程，跨 [cart-service](../mo
 - 库存扣减发生在订单创建事务内，绝不允许"先下单后异步扣库存"。
 - 支付成功回写是最终一致链路；trade-service 的消费逻辑必须可重复执行，重复/过期
   `pay.success` 不得改变已关闭、已取消或已退款订单。
+- 超时关单必须和支付成功回写一样带状态条件原子更新；延时消息与 `pay.success` 并发时，
+  只能有仍处于待支付状态的一方被推进。
 - 订单创建事件携带 `userId` 与 `itemIds`，cart-service listener 必须显式写入
   `UserContext` 后再清车。
 - 价格以服务端商品当前价为准；前端展示价仅作显示，提交时不信任。
@@ -55,7 +57,7 @@ C 端用户从加购到支付完成的端到端流程，跨 [cart-service](../mo
 - 库存不足：trade-service 返回 4xx，前端友好提示。
 - MQ 发送失败：`RabbitMqMessagePublisher` 尝试把消息写入 `mq_outbox_message`，
   作为后续重试/排查入口；业务事务内的消息在提交后才发送。
-- 支付超时：订单创建时投递延时消息，到期后仅关闭仍处于待支付状态的订单。
+- 支付超时：订单创建时投递延时消息，到期后用原子条件更新仅关闭仍处于待支付状态的订单。
 - 消费失败：manual nack 先进入专用 retry queue，TTL 到期后回到原队列；
   达到最大重试次数后转入 `hmall.mq.dead.queue`。
 - 支付回写丢失：依赖 outbox/死信排查与后续对账补偿。

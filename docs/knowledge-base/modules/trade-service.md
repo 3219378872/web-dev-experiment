@@ -2,9 +2,9 @@
 title: trade-service
 tracks:
   - trade-service/
-last_synced_commit: b25e21464938f9ce5f1cef682ae90224ca30f054
+last_synced_commit: 28f7eb1932138441a1258adde104aa6e62b70cac
 last_synced_date: 2026-06-02
-sync_note: "同步 RabbitMQ after-commit 发布、消费重试与支付成功幂等更新"
+sync_note: "同步 RabbitMQ after-commit 发布、消费重试、支付成功幂等与超时关单原子保护"
 ---
 
 # trade-service
@@ -61,6 +61,8 @@ sync_note: "同步 RabbitMQ after-commit 发布、消费重试与支付成功幂
   异步副作用链路，且订单创建事务提交后才发布。
 - `markOrderPaySuccess` 既被旧 Feign 入口使用，也被 `pay.success` listener 调用；
   只允许 `待支付` → `已支付`，重复/过期 `pay.success` 不得重开已关闭、已取消或已退款订单。
+- 延时关单只能原子更新仍处于 `待支付` 的订单；不得先读订单状态再无条件写回，
+  避免与 `pay.success` 并发时覆盖已支付状态。
 - RabbitMQ 消费失败交给 [hm-common](hm-common.md) `MqConsumerSupport`：先延迟重试，
   达到上限后进入死信队列。
 - 优惠券面额校验放服务端，前端传值仅作展示。

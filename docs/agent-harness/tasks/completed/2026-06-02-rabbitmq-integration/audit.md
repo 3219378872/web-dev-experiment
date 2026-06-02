@@ -11,7 +11,8 @@
 | Payment success async event | done | `PayOrderServiceImpl` publishes `pay.success`; `OrderServiceImpl` consumes it and updates order status. |
 | Payment success idempotency | done | `OrderServiceImpl.markOrderPaySuccess` updates only status `1`; `OrderServiceImplTest.handlePaySuccess_closedOrder_ignoresDuplicateOrStaleMessage` covers stale duplicate events. |
 | Order create async side effects | done | `OrderServiceImpl.createOrder` publishes `order.create`; cart and notify listener tests cover cleanup/notification. |
-| Delayed close unpaid order | done | `RabbitMqConfig` declares TTL delay queue and `OrderServiceImpl` consumes `order.close.queue`. |
+| Delayed close unpaid order | done | `RabbitMqConfig` declares TTL delay queue and `OrderServiceImpl` consumes `order.close.queue`; delayed close updates only rows where `id` matches and `status = 1`. |
+| Delayed close/payment race guard | done | `OrderServiceImplTest.handleOrderClose_usesAtomicPendingStatusGuard` verifies close handling does not use read-then-`updateById` and instead issues an atomic conditional update. |
 | Unit tests broker-free | done | Targeted unit suite passed with mocked `RabbitTemplate` and listener auto-start disabled in unit-test configs. |
 | Integration send/receive covered | done | `RabbitMqOrderEventIT` passed with Testcontainers RabbitMQ. |
 | KB synchronized | done | hm-common/trade/pay/cart/notify module pages and order checkout flow updated; `knowledge_base.py check` passed. |

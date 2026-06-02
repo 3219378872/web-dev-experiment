@@ -7,15 +7,20 @@ import com.hmall.api.dto.OrderFormDTO;
 import com.hmall.common.exception.BadRequestException;
 import com.hmall.common.exception.BizIllegalException;
 import com.hmall.common.mq.MqConstants;
+import com.hmall.common.mq.consumer.MqConsumerSupport;
 import com.hmall.common.mq.event.OrderCreatedEvent;
 import com.hmall.common.mq.event.OrderStatusChangedEvent;
+import com.hmall.common.mq.outbox.MqMessagePublisher;
 import com.hmall.domain.po.Order;
 import com.hmall.domain.po.OrderLogistics;
+import com.hmall.mapper.OrderMapper;
+import com.hmall.service.IOrderDetailService;
 import com.hmall.service.IOrderLogisticsService;
 import com.hmall.service.IOrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -30,6 +35,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +50,15 @@ class OrderServiceImplTest extends TradeServiceTestBase {
 
     @Autowired
     private IOrderLogisticsService logisticsService;
+
+    @Autowired
+    private IOrderDetailService detailService;
+
+    @Autowired
+    private MqMessagePublisher mqMessagePublisher;
+
+    @Autowired
+    private MqConsumerSupport mqConsumerSupport;
 
     @Test
     void createOrder_validOrder_success() {
@@ -163,6 +178,20 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         Order updated = orderService.getById(order.getId());
         assertThat(updated.getStatus()).isEqualTo(2);
         assertThat(updated.getCloseTime()).isNull();
+    }
+
+    @Test
+    void handleOrderClose_usesAtomicPendingStatusGuard() {
+        OrderMapper orderMapper = mock(OrderMapper.class);
+        OrderServiceImpl service = new OrderServiceImpl(
+                detailService, logisticsService, itemClient, mqMessagePublisher, mqConsumerSupport);
+        ReflectionTestUtils.setField(service, "baseMapper", orderMapper);
+
+        service.handleOrderClose(new OrderCreatedEvent(123L, 1L, List.of(100L)));
+
+        verify(orderMapper, never()).selectById(any());
+        verify(orderMapper, never()).updateById(any());
+        verify(orderMapper).update(any(), any());
     }
 
     @Test
