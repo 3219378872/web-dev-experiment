@@ -44,8 +44,8 @@ jobs:
           distribution: "temurin"
           java-version: "11"
           cache: maven
-      - name: Backend unit tests
-        run: mvn -B -ntp -q test
+      - name: Backend unit tests + coverage gate
+        run: mvn -B -ntp -q verify
 
   integration:
     runs-on: ubuntu-latest
