@@ -6,6 +6,9 @@ import com.hmall.api.dto.OrderDetailDTO;
 import com.hmall.api.dto.OrderFormDTO;
 import com.hmall.common.exception.BadRequestException;
 import com.hmall.common.exception.BizIllegalException;
+import com.hmall.common.mq.MqConstants;
+import com.hmall.common.mq.event.OrderCreatedEvent;
+import com.hmall.common.mq.event.OrderStatusChangedEvent;
 import com.hmall.domain.po.Order;
 import com.hmall.domain.po.OrderLogistics;
 import com.hmall.service.IOrderLogisticsService;
@@ -21,6 +24,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,7 +63,15 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         assertThat(order.getTotalFee()).isEqualTo(10000);
         assertThat(order.getStatus()).isEqualTo(1);
         verify(itemClient).deductStock(any());
-        verify(cartClient).deleteCartItemByIds(any());
+        verify(cartClient, never()).deleteCartItemByIds(any());
+        verify(rabbitTemplate).convertAndSend(
+                eq(MqConstants.TRADE_EXCHANGE),
+                eq(MqConstants.ORDER_CREATE_KEY),
+                isA(OrderCreatedEvent.class));
+        verify(rabbitTemplate).convertAndSend(
+                eq(MqConstants.DELAY_EXCHANGE),
+                eq(MqConstants.ORDER_DELAY_KEY),
+                isA(OrderCreatedEvent.class));
     }
 
     @Test
@@ -108,6 +122,10 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         Order updated = orderService.getById(orderId);
         assertThat(updated.getStatus()).isEqualTo(5);
         assertThat(updated.getCloseTime()).isNotNull();
+        verify(rabbitTemplate).convertAndSend(
+                eq(MqConstants.TRADE_EXCHANGE),
+                eq(MqConstants.orderStatusKey("cancel")),
+                isA(OrderStatusChangedEvent.class));
     }
 
     @Test
@@ -186,6 +204,10 @@ class OrderServiceImplTest extends TradeServiceTestBase {
 
         Order updated = orderService.getById(orderId);
         assertThat(updated.getStatus()).isEqualTo(6);
+        verify(rabbitTemplate).convertAndSend(
+                eq(MqConstants.TRADE_EXCHANGE),
+                eq(MqConstants.orderStatusKey("refund")),
+                isA(OrderStatusChangedEvent.class));
     }
 
     @Test
@@ -228,5 +250,9 @@ class OrderServiceImplTest extends TradeServiceTestBase {
                 .one();
         assertThat(updatedLogistics).isNotNull();
         assertThat(updatedLogistics.getLogisticsNumber()).isEqualTo("SF12345678");
+        verify(rabbitTemplate).convertAndSend(
+                eq(MqConstants.TRADE_EXCHANGE),
+                eq(MqConstants.orderStatusKey("shipped")),
+                isA(OrderStatusChangedEvent.class));
     }
 }

@@ -66,3 +66,14 @@ CREATE TABLE IF NOT EXISTS user_coupons (
     create_time DATETIME,
     INDEX idx_user_id (user_id)
 );
+
+CREATE TABLE IF NOT EXISTS mq_outbox_message (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    exchange_name VARCHAR(128) NOT NULL,
+    routing_key VARCHAR(128) NOT NULL,
+    payload TEXT NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    retry_count INT DEFAULT 0,
+    create_time DATETIME,
+    update_time DATETIME
+);

@@ -17,7 +17,13 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(properties = {"spring.cloud.bootstrap.enabled=false"})
+@SpringBootTest(properties = {
+        "spring.cloud.bootstrap.enabled=false",
+        "spring.datasource.url=jdbc:h2:mem:notify_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.datasource.driver-class-name=org.h2.Driver"
+})
 @ActiveProfiles("test")
 @Transactional
 @Sql(scripts = "/sql/data-notification.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)

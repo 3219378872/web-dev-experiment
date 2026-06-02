@@ -7,3 +7,23 @@ CREATE TABLE IF NOT EXISTS notifications (
     create_time DATETIME,
     update_time DATETIME
 );
+
+CREATE TABLE IF NOT EXISTS feedbacks (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    content TEXT,
+    reply TEXT,
+    status INT DEFAULT 0,
+    create_time DATETIME,
+    reply_time DATETIME
+);
+
+CREATE TABLE IF NOT EXISTS customer_messages (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    content TEXT,
+    reply TEXT,
+    status INT DEFAULT 0,
+    create_time DATETIME,
+    reply_time DATETIME
+);
