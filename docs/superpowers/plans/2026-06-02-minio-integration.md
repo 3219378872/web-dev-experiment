@@ -35,7 +35,7 @@
 - Modify: `file-service/pom.xml`
 - Modify: `file-service/src/main/resources/application.yaml`
 
-- [ ] **Step 1: 在 `file-service/pom.xml` 的 `<dependencies>` 末尾（`h2` 之前）加 minio 依赖**
+- [x] **Step 1: 在 `file-service/pom.xml` 的 `<dependencies>` 末尾（`h2` 之前）加 minio 依赖**
 
 ```xml
         <dependency>
@@ -45,7 +45,7 @@
         </dependency>
 ```
 
-- [ ] **Step 2: 在 `application.yaml` 末尾（`logging:` 之前）加 minio 配置，沿用 `hm.*` + 环境变量回退模式**
+- [x] **Step 2: 在 `application.yaml` 末尾（`logging:` 之前）加 minio 配置，沿用 `hm.*` + 环境变量回退模式**
 
 ```yaml
 hm:
@@ -57,12 +57,12 @@ hm:
     bucket: ${hm.minio.bucket:hmall}
 ```
 
-- [ ] **Step 3: 编译验证依赖可解析**
+- [x] **Step 3: 编译验证依赖可解析**
 
 Run: `mvn -q -pl file-service -am compile`
 Expected: BUILD SUCCESS（仅拉取 minio 依赖，无代码改动编译错误）
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add file-service/pom.xml file-service/src/main/resources/application.yaml
@@ -77,7 +77,7 @@ git commit -m "build(file-service): add minio dependency and hm.minio config"
 - Create: `file-service/src/main/java/com/hmall/file/config/MinioProperties.java`
 - Create: `file-service/src/main/java/com/hmall/file/config/MinioConfig.java`
 
-- [ ] **Step 1: 创建 `MinioProperties.java`**
+- [x] **Step 1: 创建 `MinioProperties.java`**
 
 ```java
 package com.hmall.file.config;
@@ -97,7 +97,7 @@ public class MinioProperties {
 }
 ```
 
-- [ ] **Step 2: 创建 `MinioConfig.java`**
+- [x] **Step 2: 创建 `MinioConfig.java`**
 
 ```java
 package com.hmall.file.config;
@@ -123,12 +123,12 @@ public class MinioConfig {
 }
 ```
 
-- [ ] **Step 3: 编译验证**
+- [x] **Step 3: 编译验证**
 
 Run: `mvn -q -pl file-service -am compile`
 Expected: BUILD SUCCESS
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add file-service/src/main/java/com/hmall/file/config/
@@ -143,7 +143,7 @@ git commit -m "feat(file-service): add MinioProperties and MinioClient bean"
 - Modify: `file-service/src/test/java/com/hmall/file/service/impl/UploadServiceImplTest.java`
 - Modify: `file-service/src/main/java/com/hmall/file/service/impl/UploadServiceImpl.java`
 
-- [ ] **Step 1: 改写单测——`@MockBean MinioClient`、`hm.minio.enabled=false`，断言 putObject 被调用且 filePath 存对象 key（不再带 `/uploads/`）**
+- [x] **Step 1: 改写单测——`@MockBean MinioClient`、`hm.minio.enabled=false`，断言 putObject 被调用且 filePath 存对象 key（不再带 `/uploads/`）**
 
 替换 `UploadServiceImplTest.java` 全文为：
 
@@ -238,12 +238,12 @@ class UploadServiceImplTest {
 }
 ```
 
-- [ ] **Step 2: 运行测试确认失败（实现仍写本地、filePath 仍带 `/uploads/`、未调用 minioClient）**
+- [x] **Step 2: 运行测试确认失败（实现仍写本地、filePath 仍带 `/uploads/`、未调用 minioClient）**
 
 Run: `mvn -q -pl file-service -am test -Dtest=UploadServiceImplTest`
 Expected: FAIL —— `uploadImage_validFile_putsObjectAndStoresKey` 因 `verify(minioClient).putObject(...)` 未发生 / filePath 断言不符而失败
 
-- [ ] **Step 3: 改写 `UploadServiceImpl.java` 用 MinIO**
+- [x] **Step 3: 改写 `UploadServiceImpl.java` 用 MinIO**
 
 替换全文为：
 
@@ -312,12 +312,12 @@ public class UploadServiceImpl extends ServiceImpl<UploadMapper, Upload>
 }
 ```
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 Run: `mvn -q -pl file-service -am test -Dtest=UploadServiceImplTest`
 Expected: PASS（4 tests）
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add file-service/src/main/java/com/hmall/file/service/impl/UploadServiceImpl.java \
@@ -333,7 +333,7 @@ git commit -m "feat(file-service): store uploads in MinIO instead of local FS"
 - Create: `file-service/src/test/java/com/hmall/file/web/FileControllerTest.java`
 - Modify: `file-service/src/main/java/com/hmall/file/controller/FileController.java`
 
-- [ ] **Step 1: 写 MockMvc 单测——上传返回 url=`/files/<key>`；`GET /files/<key>` 从 MinIO 代理出字节流**
+- [x] **Step 1: 写 MockMvc 单测——上传返回 url=`/files/<key>`；`GET /files/<key>` 从 MinIO 代理出字节流**
 
 创建 `FileControllerTest.java`：
 
@@ -404,12 +404,12 @@ class FileControllerTest {
 }
 ```
 
-- [ ] **Step 2: 运行确认失败（控制器尚未有 `/files/**` 代理、上传 url 仍是裸 filePath）**
+- [x] **Step 2: 运行确认失败（控制器尚未有 `/files/**` 代理、上传 url 仍是裸 filePath）**
 
 Run: `mvn -q -pl file-service -am test -Dtest=FileControllerTest`
 Expected: FAIL（`getByKey_proxiesBytesFromMinio` 404；`uploadImage` url 断言不符）
 
-- [ ] **Step 3: 改写 `FileController.java`——上传拼 `/files/{key}`，新增 `/files/**` 代理 + `/uploads/` 本地降级**
+- [x] **Step 3: 改写 `FileController.java`——上传拼 `/files/{key}`，新增 `/files/**` 代理 + `/uploads/` 本地降级**
 
 替换全文为：
 
@@ -499,17 +499,17 @@ public class FileController {
 
 注：`@WebMvcTest` 不加载 `MinioConfig`，故测试用 `@MockBean MinioClient` 注入；生产由 `MinioConfig` 提供。
 
-- [ ] **Step 4: 运行确认通过**
+- [x] **Step 4: 运行确认通过**
 
 Run: `mvn -q -pl file-service -am test -Dtest=FileControllerTest`
 Expected: PASS（2 tests）
 
-- [ ] **Step 5: 跑 file-service 全量单测确保无回归**
+- [x] **Step 5: 跑 file-service 全量单测确保无回归**
 
 Run: `mvn -q -pl file-service -am test`
 Expected: PASS（含原有 51 项相关测试不破）
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add file-service/src/main/java/com/hmall/file/controller/FileController.java \
@@ -524,7 +524,7 @@ git commit -m "feat(file-service): serve uploads via /files/** MinIO proxy with 
 **Files:**
 - Modify: `docker-compose.yml`
 
-- [ ] **Step 1: 在基础设施区（`redis:` 之后、`nacos-init:` 之前）加 `minio` 与 `minio-init` 服务**
+- [x] **Step 1: 在基础设施区（`redis:` 之后、`nacos-init:` 之前）加 `minio` 与 `minio-init` 服务**
 
 ```yaml
   minio:
@@ -560,7 +560,7 @@ git commit -m "feat(file-service): serve uploads via /files/** MinIO proxy with 
         echo "minio bucket hmall ready (public download)"
 ```
 
-- [ ] **Step 2: 给 `file-service` 注入 minio 环境变量并加 depends_on**
+- [x] **Step 2: 给 `file-service` 注入 minio 环境变量并加 depends_on**
 
 把 `file-service:` 块替换为（在既有 depends_on 中追加 minio，并在块内加 environment）：
 
@@ -589,17 +589,17 @@ git commit -m "feat(file-service): serve uploads via /files/** MinIO proxy with 
 
 注：若 `<<: *java-service` 锚点本身带 `environment`，YAML 合并时同名块会被覆盖——确认 file-service 需要的 `hm.*` 公共变量（db/nacos/redis）仍由锚点提供；若锚点 environment 被本块覆盖导致丢失，改用 `<<: [*java-service-env]` 合并或在本块补全公共变量。实施时先 `docker compose config` 验证最终 environment 完整。
 
-- [ ] **Step 3: 校验 compose 语法与最终配置**
+- [x] **Step 3: 校验 compose 语法与最终配置**
 
 Run: `docker compose config -q && docker compose config | grep -A15 "file-service:"`
 Expected: 无报错；输出中 file-service 的 environment 同时含 db/nacos/redis 公共变量与 `hm.minio.*`
 
-- [ ] **Step 4: 起 minio 单独验证桶就绪**
+- [x] **Step 4: 起 minio 单独验证桶就绪**
 
 Run: `docker compose up -d minio minio-init && docker compose logs minio-init`
 Expected: 日志含 `minio bucket hmall ready (public download)`
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docker-compose.yml
@@ -614,7 +614,7 @@ git commit -m "build(compose): add minio + minio-init, wire file-service to MinI
 - Modify: `file-service/pom.xml`
 - Create: `file-service/src/test/java/com/hmall/file/it/MinioUploadIT.java`
 
-- [ ] **Step 1: pom 加 testcontainers 依赖（test 作用域）**
+- [x] **Step 1: pom 加 testcontainers 依赖（test 作用域）**
 
 在 `file-service/pom.xml` 的 `h2` 依赖后追加：
 
@@ -633,7 +633,7 @@ git commit -m "build(compose): add minio + minio-init, wire file-service to MinI
         </dependency>
 ```
 
-- [ ] **Step 2: 写集成测试——真实 MinIO 容器，上传→按 key 取回闭环**
+- [x] **Step 2: 写集成测试——真实 MinIO 容器，上传→按 key 取回闭环**
 
 创建 `MinioUploadIT.java`（命名 `*IT` 走 `-Pintegration` 的 failsafe，与 notify-service 的 IT 一致）：
 
@@ -707,12 +707,12 @@ class MinioUploadIT {
 }
 ```
 
-- [ ] **Step 3: 运行集成测试（需本地 docker）**
+- [x] **Step 3: 运行集成测试（需本地 docker）**
 
-Run: `mvn -q -pl file-service -am verify -Pintegration -Dit.test=MinioUploadIT`
+Run: `mvn -q -pl file-service -am verify -Pintegration -DfailIfNoTests=false -Dit.test=MinioUploadIT`
 Expected: PASS（MinIO 容器拉起，上传后按 key 取回字节一致）
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add file-service/pom.xml file-service/src/test/java/com/hmall/file/it/MinioUploadIT.java
@@ -728,7 +728,7 @@ git commit -m "test(file-service): add Testcontainers MinIO upload integration t
 - Modify: `docs/knowledge-base/modules/file-service.md`
 - Modify: `.github/workflows/ci.yml`
 
-- [ ] **Step 1: 写冒烟脚本（针对运行中的 compose 栈）**
+- [x] **Step 1: 写冒烟脚本（针对运行中的 compose 栈）**
 
 创建 `scripts/smoke/minio_upload.sh`：
 
@@ -748,18 +748,23 @@ echo "SMOKE OK: upload+fetch via MinIO proxy"
 rm -f "$TMP"
 ```
 
-- [ ] **Step 2: 赋可执行位**
+- [x] **Step 2: 赋可执行位**
 
 Run: `chmod +x scripts/smoke/minio_upload.sh`
 Expected: 无输出
 
-- [ ] **Step 3: 更新知识库页 `docs/knowledge-base/modules/file-service.md`**
+- [x] **Step 3: 更新知识库页 `docs/knowledge-base/modules/file-service.md`**
 
 把 frontmatter 的 `last_synced_commit` bump 到当前 HEAD（`git rev-parse HEAD`），`last_synced_date` 改 `2026-06-02`，`sync_note` 改为 `"接入 MinIO：本地 FS -> 公开桶 hmall + /files/** 代理"`。在正文"## 职责"后补一段说明对象 key 存储与代理读取、历史 `/uploads/` 降级。
 
-- [ ] **Step 4: CI `integration` job 加 minio service container**
+- [x] **Step 4: CI `integration` job MinIO 验证决策**
 
-在 `.github/workflows/ci.yml` 的 `integration` job `services:` 下，仿照 mysql/redis 增加：
+实施结果：未在 `.github/workflows/ci.yml` 增加固定 MinIO service container；`MinioUploadIT`
+使用 Testcontainers 自带 MinIO 容器，避免 GitHub service container 需要自定义
+`minio server` command 的不稳定装配。`integration` job 继续运行 `mvn -B -ntp -q
+-Pintegration verify -DskipUnitTests=true`，由测试自身启动真实 MinIO。
+
+备选方案是在 `.github/workflows/ci.yml` 的 `integration` job `services:` 下，仿照 mysql/redis 增加：
 
 ```yaml
       minio:
@@ -776,12 +781,12 @@ Expected: 无输出
 
 注：GitHub service container 无法跑 `minio server` 自定义 command；若该镜像默认 entrypoint 不启动 server，改用 `bitnami/minio`（默认启动 server）或在 job step 里 `docker run` 起 MinIO。实施时先在分支 CI 验证容器健康，再定型。集成测试本身用 Testcontainers 自带容器，故 service container 仅为非 Testcontainers 场景；若全部 IT 走 Testcontainers，可不加此 service container，仅确保 runner 有 docker（默认有）。
 
-- [ ] **Step 5: 验证 lint/harness 门禁**
+- [x] **Step 5: 验证 lint/harness 门禁**
 
 Run: `python3 scripts/knowledge_base.py check && python3 scripts/agent_harness.py check && python3 scripts/engineering-lint.py`
 Expected: 全部 passed（K002/K003/K004/K006 通过，file-service 页已存在）
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/smoke/minio_upload.sh docs/knowledge-base/modules/file-service.md .github/workflows/ci.yml
@@ -795,22 +800,22 @@ git commit -m "test(smoke+ci): minio upload smoke script, KB sync, CI integratio
 **Files:**
 - Modify: harness 任务记录（`docs/agent-harness/tasks/active/2026-06-02-minio-integration/`）
 
-- [ ] **Step 1: 全量后端单测**
+- [x] **Step 1: 全量后端单测**
 
 Run: `mvn -B -ntp -q test`
 Expected: BUILD SUCCESS，无失败
 
-- [ ] **Step 2: 起全栈跑冒烟**
+- [x] **Step 2: 起全栈跑冒烟**
 
 Run: `docker compose up -d && sleep 30 && bash scripts/smoke/minio_upload.sh http://localhost:8080`
 Expected: `SMOKE OK: upload+fetch via MinIO proxy`
 
-- [ ] **Step 3: 三门禁 + compose 校验**
+- [x] **Step 3: 三门禁 + compose 校验**
 
 Run: `python3 scripts/agent_harness.py check && python3 scripts/knowledge_base.py check --base origin/main && python3 scripts/engineering-lint.py && docker compose config -q`
 Expected: 全部通过（含 K005 共变检查：改了 file-service/ 也改了其 KB 页）
 
-- [ ] **Step 4: harness 任务移至 completed、status: done**
+- [x] **Step 4: harness 任务移至 completed、status: done**
 
 按 `CLAUDE.md`：`python3 scripts/agent_harness.py complete 2026-06-02-minio-integration`，填好 verification/audit/handoff。
 
@@ -828,9 +833,9 @@ Expected: PR 创建，CI 5 个 job 触发；codex-review 需 `blocking findings:
 
 ## 验收标准（对应 spec §8）
 
-- [ ] `docker compose up -d` 后 minio healthy，上传+取图链路跑通（Task 8 Step 2）
-- [ ] 单元测试不依赖外部 MinIO（`@MockBean MinioClient` + `hm.minio.enabled=false`）（Task 3/4）
-- [ ] 集成测试用 Testcontainers 覆盖真实上传/取回（Task 6）
-- [ ] `docs/knowledge-base/modules/file-service.md` 已更新，K005 通过（Task 7）
-- [ ] harness/KB/engineering-lint 三门禁全过（Task 8 Step 3）
+- [x] `docker compose up -d` 后 minio healthy，上传+取图链路跑通（Task 8 Step 2）
+- [x] 单元测试不依赖外部 MinIO（`@MockBean MinioClient` + `hm.minio.enabled=false`）（Task 3/4）
+- [x] 集成测试用 Testcontainers 覆盖真实上传/取回（Task 6）
+- [x] `docs/knowledge-base/modules/file-service.md` 已更新，K005 通过（Task 7）
+- [x] harness/KB/engineering-lint 三门禁全过（Task 8 Step 3）
 - [ ] 走 branch → PR → CI → review → 合并 → 删远程分支

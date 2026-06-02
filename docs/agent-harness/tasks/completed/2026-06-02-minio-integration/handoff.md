@@ -16,7 +16,8 @@ Implemented & verified. Ready for PR.
 - `docs/knowledge-base/modules/{file-service,hm-service}.md` — 同步
 
 ## Commands Run
-见 verification.md（单测/集成/全栈 e2e/三门禁全过）。
+见 verification.md（单测/集成/全栈 e2e/三门禁全过）。收尾时已 rebase 到当前
+`main`，避免把已合入的 `docs/structure/*` 误显示为本 PR 删除。
 
 ## Known Risks
 - 历史 `/uploads/` 前缀记录走本地盘降级读取（过渡期逻辑，注释标注可移除条件）。
@@ -31,4 +32,4 @@ Implemented & verified. Ready for PR.
 推分支、开 PR、过 CI 与 codex-review、合并后删远程分支。
 
 ## Worktree Or Branch
-- worktree 分支 `worktree-task+2026-06-02-infra-integration`（从 origin/main 切出）
+- worktree 分支 `worktree-task+2026-06-02-infra-integration`（已 rebase 到 `main`）
