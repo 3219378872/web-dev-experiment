@@ -74,6 +74,10 @@ sequenceDiagram
 
 ## 3. 余额支付（pay-service `PayOrderServiceImpl.tryPayOrderByBalance`）
 
+`tryPayOrderByBalance` 标注 `@Transactional` 且**无 try/catch、OrderClient 无 fallback/熔断**。
+由于第 5 步的 `OrderClient` 指向未注册的 `order-service`（见 [02](02-module-dependencies.md)），
+**当前每次余额支付都会在该步抛异常**，进而触发下面的失败流程——这是仓库现状，而非偶发分支。
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -81,17 +85,22 @@ sequenceDiagram
     participant GW as hm-gateway
     participant PS as pay-service
     participant US as user-service
-    participant TS as trade-service
 
     U->>GW: POST /pay-orders/{id}（余额支付）
     GW->>PS: 转发
     activate PS
-    PS->>US: UserClient.deductMoney(pw, amount)
-    US-->>PS: 扣减成功
-    PS->>PS: markPayOrderSuccess(id)<br/>pay_order.status=成功, pay_success_time
-    PS--xTS: OrderClient.updateById(order) ✗ 失效<br/>意图 order.status=2, pay_time=now
-    Note over PS,TS: ⚠️ OrderClient 目标 order-service 未注册、路径 /users≠/orders，<br/>该回写当前命中不了（详见 02 文档）；故 pay_order 已成功、<br/>但 order 状态未被同步更新
-    PS-->>U: 支付成功
+    Note over PS: 开启本地 @Transactional（无 try/catch）
+    PS->>US: 步骤3 UserClient.deductMoney(pw, amount)
+    US-->>US: user-service 独立事务扣余额并提交
+    US-->>PS: 扣减成功（已落库，不受 PS 事务控制）
+    PS->>PS: 步骤4 markPayOrderSuccess()<br/>pay_order 置成功（仅本地、尚未提交）
+    PS-->PS: 步骤5 orderClient.updateById(order)<br/>目标 order-service 无实例 → 抛异常（无 fallback）
+    Note over PS,US: ⚠️ 异常向外传播 → PS 本地事务回滚：<br/>步骤4 的 pay_order 更新被撤销（仍未支付）；<br/>但步骤3 已提交的余额扣减无补偿（无 Seata）
+    PS-->>U: 错误响应（经 CommonExceptionAdvice 包成 R<Void>）
     deactivate PS
-    Note over PS,US: 同步 Feign 串行；无 Seata，无跨服务补偿
 ```
+
+> **结论（按真实代码）**：当前余额支付链路因 `OrderClient` 失效而无法正常完成——
+> 余额被扣、但支付单回滚为未支付、订单状态不更新、用户收到错误。这是"无分布式事务 +
+> 失效 Feign 客户端"叠加出的数据不一致缺陷，修复方向是修正 `OrderClient` 的服务名/路径
+> 并为跨服务写操作引入补偿或本地消息表。
