@@ -89,9 +89,9 @@ sequenceDiagram
     PS->>US: UserClient.deductMoney(pw, amount)
     US-->>PS: 扣减成功
     PS->>PS: markPayOrderSuccess(id)<br/>pay_order.status=成功, pay_success_time
-    PS->>TS: OrderClient.updateById(order)<br/>order.status=2(已支付), pay_time=now
-    TS-->>PS: ok
+    PS--xTS: OrderClient.updateById(order) ✗ 失效<br/>意图 order.status=2, pay_time=now
+    Note over PS,TS: ⚠️ OrderClient 目标 order-service 未注册、路径 /users≠/orders，<br/>该回写当前命中不了（详见 02 文档）；故 pay_order 已成功、<br/>但 order 状态未被同步更新
     PS-->>U: 支付成功
     deactivate PS
-    Note over PS,TS: 同步 Feign 串行；任一步失败由本地事务/异常处理，无跨服务补偿
+    Note over PS,US: 同步 Feign 串行；无 Seata，无跨服务补偿
 ```
