@@ -1,6 +1,7 @@
 package com.hmall.notify.mq;
 
 import com.hmall.common.mq.MqConstants;
+import com.hmall.common.mq.consumer.MqConsumerSupport;
 import com.hmall.common.mq.event.OrderCreatedEvent;
 import com.hmall.common.mq.event.OrderStatusChangedEvent;
 import com.hmall.notify.domain.po.CustomerMessage;
@@ -24,6 +25,7 @@ public class OrderEventListener {
             "cancel", "已取消");
 
     private final ICustomerMessageService messageService;
+    private final MqConsumerSupport mqConsumerSupport;
 
     @RabbitListener(queues = MqConstants.NOTIFY_ORDER_CREATE_QUEUE)
     public void onOrderCreated(OrderCreatedEvent event, Message message, Channel channel) throws Exception {
@@ -31,7 +33,7 @@ public class OrderEventListener {
             handleOrderCreated(event);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
-            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
+            mqConsumerSupport.reject(message, channel);
             throw e;
         }
     }
@@ -42,7 +44,7 @@ public class OrderEventListener {
             handleOrderStatusChanged(event);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
-            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
+            mqConsumerSupport.reject(message, channel);
             throw e;
         }
     }

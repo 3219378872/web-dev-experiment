@@ -12,6 +12,7 @@ import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -37,6 +38,32 @@ class RabbitMqMessagePublisherTest {
         ObjectProvider<JdbcTemplate> jdbcTemplateProvider = mock(ObjectProvider.class);
         when(jdbcTemplateProvider.getIfAvailable()).thenReturn(jdbcTemplate);
         publisher = new RabbitMqMessagePublisher(rabbitTemplate, jdbcTemplateProvider, new ObjectMapper());
+    }
+
+    @org.junit.jupiter.api.AfterEach
+    void tearDown() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.clearSynchronization();
+        }
+    }
+
+    @Test
+    void publish_insideTransactionSendsOnlyAfterCommit() {
+        Map<String, Object> payload = Map.of("orderId", 4L);
+        TransactionSynchronizationManager.initSynchronization();
+
+        publisher.publish("trade.topic", "order.create", payload);
+
+        org.mockito.Mockito.verify(rabbitTemplate, org.mockito.Mockito.never()).convertAndSend(
+                eq("trade.topic"), eq("order.create"), eq(payload), any(CorrelationData.class));
+
+        TransactionSynchronizationManager.getSynchronizations().forEach(synchronization -> synchronization.afterCommit());
+
+        verify(rabbitTemplate).convertAndSend(
+                eq("trade.topic"),
+                eq("order.create"),
+                eq(payload),
+                any(CorrelationData.class));
     }
 
     @Test

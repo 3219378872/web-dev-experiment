@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 4bf9c2298c9affd731d7595ce93a7ca7236e032f
+last_synced_commit: b25e21464938f9ce5f1cef682ae90224ca30f054
 last_synced_date: 2026-06-02
-sync_note: "仅同步 RabbitMQ producer 可靠性测试断言，业务契约无变更"
+sync_note: "同步 RabbitMQ 事务后发布、消费重试和支付成功幂等语义"
 ---
 
 # order-checkout-flow
@@ -28,14 +28,14 @@ C 端用户从加购到支付完成的端到端流程，跨 [cart-service](../mo
    - trade-service 查询商品并按服务端价格计算总价。
    - 写 `order` + `order_detail`。
    - 同步调 [item-service](../modules/item-service.md) 扣减库存；失败则本地订单事务回滚。
-   - 发布 `trade.topic/order.create`，由 cart-service 异步删除对应购物车项，
+   - 事务提交后发布 `trade.topic/order.create`，由 cart-service 异步删除对应购物车项，
      notify-service 生成下单成功站内信。
-   - 发布 `delay.exchange/order.delay`，30 分钟后进入 `order.close.queue`
+   - 事务提交后发布 `delay.exchange/order.delay`，30 分钟后进入 `order.close.queue`
      关闭仍处于待支付状态的订单。
 4. **支付** —— hmall-web 跳支付页 → [pay-service](../modules/pay-service.md)
    `POST /pay-orders/{id}/pay`。模拟支付通道直接打标已支付。
-5. **支付回写** —— pay-service 发布 `pay.topic/pay.success`，trade-service 消费后把订单状态
-   置为"已支付"并记录支付时间。
+5. **支付回写** —— pay-service 支付事务提交后发布 `pay.topic/pay.success`，
+   trade-service 消费后仅把待支付订单置为"已支付"并记录支付时间。
 6. **发货 / 退款** —— 管理端 [hmall-admin](../modules/hmall-admin.md) 操作发货或处理退款，
    对应订单状态机推进，并发布 `trade.topic/order.status.{shipped,refund,cancel}` 给
    [notify-service](../modules/notify-service.md)。
@@ -43,7 +43,8 @@ C 端用户从加购到支付完成的端到端流程，跨 [cart-service](../mo
 ## 关键不变量
 
 - 库存扣减发生在订单创建事务内，绝不允许"先下单后异步扣库存"。
-- 支付成功回写是最终一致链路；trade-service 的消费逻辑必须可重复执行。
+- 支付成功回写是最终一致链路；trade-service 的消费逻辑必须可重复执行，重复/过期
+  `pay.success` 不得改变已关闭、已取消或已退款订单。
 - 订单创建事件携带 `userId` 与 `itemIds`，cart-service listener 必须显式写入
   `UserContext` 后再清车。
 - 价格以服务端商品当前价为准；前端展示价仅作显示，提交时不信任。
@@ -53,9 +54,10 @@ C 端用户从加购到支付完成的端到端流程，跨 [cart-service](../mo
 
 - 库存不足：trade-service 返回 4xx，前端友好提示。
 - MQ 发送失败：`RabbitMqMessagePublisher` 尝试把消息写入 `mq_outbox_message`，
-  作为后续重试/排查入口。
+  作为后续重试/排查入口；业务事务内的消息在提交后才发送。
 - 支付超时：订单创建时投递延时消息，到期后仅关闭仍处于待支付状态的订单。
-- 消费失败：manual nack 不重回队列，消息经 DLX 进入 `hmall.mq.dead.queue`。
+- 消费失败：manual nack 先进入专用 retry queue，TTL 到期后回到原队列；
+  达到最大重试次数后转入 `hmall.mq.dead.queue`。
 - 支付回写丢失：依赖 outbox/死信排查与后续对账补偿。
 
 ## 测试策略

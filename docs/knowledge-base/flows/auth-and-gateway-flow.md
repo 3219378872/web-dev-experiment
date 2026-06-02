@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 4bf9c2298c9affd731d7595ce93a7ca7236e032f
+last_synced_commit: b25e21464938f9ce5f1cef682ae90224ca30f054
 last_synced_date: 2026-06-02
-sync_note: "仅同步 RabbitMQ producer 可靠性测试断言，业务契约无变更"
+sync_note: "hm-common RabbitMQ-only changes do not affect auth/gateway flow"
 ---
 
 # auth-and-gateway-flow

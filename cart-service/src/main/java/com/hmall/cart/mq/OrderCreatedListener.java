@@ -2,6 +2,7 @@ package com.hmall.cart.mq;
 
 import com.hmall.cart.service.ICartService;
 import com.hmall.common.mq.MqConstants;
+import com.hmall.common.mq.consumer.MqConsumerSupport;
 import com.hmall.common.mq.event.OrderCreatedEvent;
 import com.hmall.common.utils.UserContext;
 import com.rabbitmq.client.Channel;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class OrderCreatedListener {
 
     private final ICartService cartService;
+    private final MqConsumerSupport mqConsumerSupport;
 
     @RabbitListener(queues = MqConstants.CART_ORDER_CREATE_QUEUE)
     public void onOrderCreated(OrderCreatedEvent event, Message message, Channel channel) throws Exception {
@@ -22,7 +24,7 @@ public class OrderCreatedListener {
             handleOrderCreated(event);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
-            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
+            mqConsumerSupport.reject(message, channel);
             throw e;
         }
     }

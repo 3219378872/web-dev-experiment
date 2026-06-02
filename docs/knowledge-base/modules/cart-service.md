@@ -2,9 +2,9 @@
 title: cart-service
 tracks:
   - cart-service/
-last_synced_commit: a86d639a608a2272ede208732891ebb0b392f092
+last_synced_commit: b25e21464938f9ce5f1cef682ae90224ca30f054
 last_synced_date: 2026-06-02
-sync_note: "下单成功清车改为 RabbitMQ order.create 消费"
+sync_note: "同步 order.create 消费失败重试语义"
 ---
 
 # cart-service
@@ -48,3 +48,5 @@ sync_note: "下单成功清车改为 RabbitMQ order.create 消费"
 - 商品价格只在加购时记录"加购价"用于展示；真实下单价以 item-service 实时为准。
 - 下单成功后通过 MQ 异步删除对应勾选项；listener 必须显式设置 `UserContext`，
   避免 ThreadLocal 缺失或串用户。
+- `OrderCreatedListener` 失败时不直接进死信；先通过 [hm-common](hm-common.md)
+  `MqConsumerSupport` 进入专用 retry queue，超过上限后进入死信队列。

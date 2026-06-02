@@ -2,9 +2,9 @@
 title: notify-service
 tracks:
   - notify-service/
-last_synced_commit: a86d639a608a2272ede208732891ebb0b392f092
+last_synced_commit: b25e21464938f9ce5f1cef682ae90224ca30f054
 last_synced_date: 2026-06-02
-sync_note: "消费订单创建与订单状态 RabbitMQ 事件生成站内信"
+sync_note: "同步订单事件消费失败重试语义"
 ---
 
 # notify-service
@@ -45,3 +45,5 @@ sync_note: "消费订单创建与订单状态 RabbitMQ 事件生成站内信"
 - 已读/未读状态写入要走更新而非删除。
 - 客服消息需要会话上下文聚合，不要按单条独立返回。
 - MQ listener 保存的是 `CustomerMessage`；新增订单事件类型时要同时补充文案映射与测试。
+- `OrderEventListener` 失败时通过 [hm-common](hm-common.md) `MqConsumerSupport`
+  先延迟重试，超过上限后进入死信队列。

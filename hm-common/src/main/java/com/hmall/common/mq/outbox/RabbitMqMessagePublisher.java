@@ -7,6 +7,8 @@ import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -32,6 +34,19 @@ public class RabbitMqMessagePublisher implements MqMessagePublisher {
 
     @Override
     public void publish(String exchange, String routingKey, Object payload) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    doPublish(exchange, routingKey, payload);
+                }
+            });
+            return;
+        }
+        doPublish(exchange, routingKey, payload);
+    }
+
+    private void doPublish(String exchange, String routingKey, Object payload) {
         OutboxCorrelationData correlationData = new OutboxCorrelationData(exchange, routingKey, payload);
         try {
             rabbitTemplate.convertAndSend(exchange, routingKey, payload, correlationData);

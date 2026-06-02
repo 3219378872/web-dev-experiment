@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collections;
 import java.util.List;
@@ -68,6 +70,7 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         assertThat(order.getStatus()).isEqualTo(1);
         verify(itemClient).deductStock(any());
         verify(cartClient, never()).deleteCartItemByIds(any());
+        runAfterCommitCallbacks();
         verify(rabbitTemplate).convertAndSend(
                 eq(MqConstants.TRADE_EXCHANGE),
                 eq(MqConstants.ORDER_CREATE_KEY),
@@ -111,6 +114,23 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         Order updated = orderService.getById(orderId);
         assertThat(updated.getStatus()).isEqualTo(2);
         assertThat(updated.getPayTime()).isNotNull();
+    }
+
+    @Test
+    void handlePaySuccess_closedOrder_ignoresDuplicateOrStaleMessage() {
+        Order order = new Order();
+        order.setUserId(1L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(5);
+        orderService.save(order);
+
+        orderServiceImpl.handlePaySuccess(new com.hmall.common.mq.event.PaySuccessEvent(
+                10L, order.getId(), 1L, java.time.LocalDateTime.now()));
+
+        Order updated = orderService.getById(order.getId());
+        assertThat(updated.getStatus()).isEqualTo(5);
+        assertThat(updated.getPayTime()).isNull();
     }
 
     @Test
@@ -160,6 +180,7 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         Order updated = orderService.getById(orderId);
         assertThat(updated.getStatus()).isEqualTo(5);
         assertThat(updated.getCloseTime()).isNotNull();
+        runAfterCommitCallbacks();
         verify(rabbitTemplate).convertAndSend(
                 eq(MqConstants.TRADE_EXCHANGE),
                 eq(MqConstants.orderStatusKey("cancel")),
@@ -243,6 +264,7 @@ class OrderServiceImplTest extends TradeServiceTestBase {
 
         Order updated = orderService.getById(orderId);
         assertThat(updated.getStatus()).isEqualTo(6);
+        runAfterCommitCallbacks();
         verify(rabbitTemplate).convertAndSend(
                 eq(MqConstants.TRADE_EXCHANGE),
                 eq(MqConstants.orderStatusKey("refund")),
@@ -290,10 +312,18 @@ class OrderServiceImplTest extends TradeServiceTestBase {
                 .one();
         assertThat(updatedLogistics).isNotNull();
         assertThat(updatedLogistics.getLogisticsNumber()).isEqualTo("SF12345678");
+        runAfterCommitCallbacks();
         verify(rabbitTemplate).convertAndSend(
                 eq(MqConstants.TRADE_EXCHANGE),
                 eq(MqConstants.orderStatusKey("shipped")),
                 isA(OrderStatusChangedEvent.class),
                 any(CorrelationData.class));
+    }
+
+    private void runAfterCommitCallbacks() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.getSynchronizations()
+                    .forEach(TransactionSynchronization::afterCommit);
+        }
     }
 }

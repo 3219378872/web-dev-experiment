@@ -22,6 +22,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -98,6 +100,7 @@ class PayOrderServiceImplIT {
         PayOrder po = payOrderService.getById(3000L);
         assertThat(po.getStatus()).isEqualTo(PayStatus.TRADE_SUCCESS.getValue());
         assertThat(po.getPaySuccessTime()).isNotNull();
+        runAfterCommitCallbacks();
         verify(rabbitTemplate).convertAndSend(
                 eq(MqConstants.PAY_EXCHANGE),
                 eq(MqConstants.PAY_SUCCESS_KEY),
@@ -114,5 +117,12 @@ class PayOrderServiceImplIT {
         assertThatThrownBy(() -> payOrderService.tryPayOrderByBalance(form))
                 .isInstanceOf(BizIllegalException.class)
                 .hasMessageContaining("已支付或关闭");
+    }
+
+    private void runAfterCommitCallbacks() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.getSynchronizations()
+                    .forEach(TransactionSynchronization::afterCommit);
+        }
     }
 }

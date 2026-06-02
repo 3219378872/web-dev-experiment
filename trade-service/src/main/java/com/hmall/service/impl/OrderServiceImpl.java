@@ -8,6 +8,7 @@ import com.hmall.api.dto.OrderFormDTO;
 import com.hmall.common.exception.BadRequestException;
 import com.hmall.common.exception.BizIllegalException;
 import com.hmall.common.mq.MqConstants;
+import com.hmall.common.mq.consumer.MqConsumerSupport;
 import com.hmall.common.mq.event.OrderCreatedEvent;
 import com.hmall.common.mq.event.OrderStatusChangedEvent;
 import com.hmall.common.mq.event.PaySuccessEvent;
@@ -50,6 +51,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private final IOrderLogisticsService logisticsService;
     private final ItemClient itemClient;
     private final MqMessagePublisher mqMessagePublisher;
+    private final MqConsumerSupport mqConsumerSupport;
 
     @Override
     @Transactional
@@ -99,11 +101,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public void markOrderPaySuccess(Long orderId) {
-        Order order = new Order();
-        order.setId(orderId);
-        order.setStatus(2);
-        order.setPayTime(LocalDateTime.now());
-        updateById(order);
+        lambdaUpdate()
+                .set(Order::getStatus, 2)
+                .set(Order::getPayTime, LocalDateTime.now())
+                .eq(Order::getId, orderId)
+                .eq(Order::getStatus, 1)
+                .update();
     }
 
     @RabbitListener(queues = MqConstants.TRADE_PAY_SUCCESS_QUEUE)
@@ -112,7 +115,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             handlePaySuccess(event);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
-            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
+            mqConsumerSupport.reject(message, channel);
             throw e;
         }
     }
@@ -127,7 +130,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             handleOrderClose(event);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
-            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
+            mqConsumerSupport.reject(message, channel);
             throw e;
         }
     }
