@@ -2,9 +2,9 @@
 title: file-service
 tracks:
   - file-service/
-last_synced_commit: 3eb57ee2660e3da033855c29b36f6caf46181774
+last_synced_commit: 9a268fd360c655aff778d07d72ecb71240c1d165
 last_synced_date: 2026-06-02
-sync_note: "接入 MinIO：本地 FS -> 公开桶 hmall + /files/** 网关反代理"
+sync_note: "接入 MinIO：本地 FS -> 公开桶 hmall + /files/** 网关反代理；收紧 legacy fallback 与凭据注入"
 ---
 
 # file-service
@@ -46,7 +46,11 @@ sync_note: "接入 MinIO：本地 FS -> 公开桶 hmall + /files/** 网关反代
 - 上传必须校验文件类型与大小，拒绝可执行文件、超过阈值拒绝。
 - 对象访问走**公开桶 + 网关反向代理**（`/files/**` 经 file-service 代理到 MinIO），
   不直接暴露 MinIO 端口给前端。
-- 历史 `/uploads/` 前缀记录走本地盘降级读取（MinIO 全量迁移后可移除该分支）。
+- 历史 `/uploads/` 前缀记录走本地盘降级读取（MinIO 全量迁移后可移除该分支）；
+  读取前必须把相对路径 normalize 到 `file.upload-dir` 下，禁止 `../` 逃逸。
+- `hm.minio.access-key` / `hm.minio.secret-key` 不在应用配置里硬编码；运行时由
+  Docker Compose、环境变量或测试 `DynamicPropertySource` 显式注入。`docker compose`
+  启动 MinIO 前必须提供 `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD`。
 - `hm.minio.enabled=false` 用于单元测试跳过真实 `MinioClient` 创建。
 - `MinioUploadIT` 使用 Testcontainers MinIO，但 datasource 固定为 H2 测试库，避免 CI
   `SPRING_DATASOURCE_*` 环境变量把 driver/url 覆盖成 MySQL/H2 混搭。

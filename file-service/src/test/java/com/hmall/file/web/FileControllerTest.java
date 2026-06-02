@@ -16,6 +16,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.ByteArrayInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -27,7 +29,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(properties = "hm.minio.enabled=false")
+@TestPropertySource(properties = {
+        "hm.minio.enabled=false",
+        "file.upload-dir=${java.io.tmpdir}/hmall-file-controller/uploads"
+})
 class FileControllerTest {
 
     @Autowired
@@ -65,5 +70,17 @@ class FileControllerTest {
         mockMvc.perform(get("/files/2026-06-02/abc.jpg"))
                 .andExpect(status().isOk())
                 .andExpect(content().bytes(body));
+    }
+
+    @Test
+    void getLegacyUploadPath_rejectsTraversalOutsideUploadDirectory() throws Exception {
+        Path baseDir = Path.of(System.getProperty("java.io.tmpdir"), "hmall-file-controller");
+        Path uploadDir = baseDir.resolve("uploads");
+        Files.createDirectories(uploadDir);
+        Files.writeString(baseDir.resolve("secret.txt"), "outside-upload-root");
+
+        mockMvc.perform(get("/files/uploads/../secret.txt"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(""));
     }
 }

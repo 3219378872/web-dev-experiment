@@ -2,16 +2,19 @@
 
 | Command | Result | Evidence |
 | --- | --- | --- |
-| `mvn -pl file-service test` | PASS | 6 tests（UploadServiceImplTest 4 + FileControllerTest 2），0 失败 |
+| `mvn -B -ntp -q -pl file-service -am -Dtest=FileControllerTest -DfailIfNoTests=false test`（修复前） | FAIL | 新增 traversal regression 复现 review finding：`/files/uploads/../secret.txt` 返回 200，body 为 upload root 外部文件内容 |
+| `mvn -B -ntp -q -pl file-service -am -Dtest=FileControllerTest -DfailIfNoTests=false test`（修复后） | PASS | FileControllerTest 3 tests，legacy `/uploads/../secret.txt` 被 404 拒绝 |
+| `mvn -B -ntp -q -pl file-service -am test -DfailIfNoTests=false` | PASS | file-service unit tests 7 tests（UploadServiceImplTest 4 + FileControllerTest 3），0 失败 |
 | `mvn -B -ntp -q test`（全量） | PASS | 146 tests，27 报告，0 失败 0 错误 |
 | `mvn -B -ntp -q -pl file-service -am verify -Pintegration -DfailIfNoTests=false -Dit.test=MinioUploadIT` | PASS | MinioUploadIT 1 test：Testcontainers 真实 MinIO 上传→按 key 取回字节一致 |
-| `SPRING_DATASOURCE_URL=jdbc:mysql://127.0.0.1:3306/hm?... SPRING_DATASOURCE_USERNAME=root SPRING_DATASOURCE_PASSWORD=123 mvn -B -ntp -q -pl file-service -am verify -Pintegration -DfailIfNoTests=false -Dit.test=MinioUploadIT` | PASS | 覆盖 CI integration job 注入 MySQL datasource env 时，MinioUploadIT 仍固定使用 H2 测试库并通过 |
+| `SPRING_DATASOURCE_URL=jdbc:mysql://127.0.0.1:3306/hm?... SPRING_DATASOURCE_USERNAME=root SPRING_DATASOURCE_PASSWORD=123 mvn -B -ntp -q -pl file-service -am verify -Pintegration -DfailIfNoTests=false -Dit.test=MinioUploadIT` | PASS | 覆盖 CI integration job 注入 MySQL datasource env 时，MinioUploadIT 仍固定使用 H2 测试库并通过；Testcontainers MinIO 使用显式非默认测试凭据 |
 | `docker compose up -d minio minio-init` | PASS | minio healthy（`mc ready local`）；bucket `hmall` 公开下载就绪 |
 | 全栈 e2e（容器内网经 gateway） | PASS | `POST /upload/image` 返回 `{"id","url":"/files/<key>"}`；`GET /files/<key>` → 200 且字节与上传一致 |
 | `python3 scripts/agent_harness.py check` | PASS | agent harness check passed |
 | `python3 scripts/knowledge_base.py check --base main` | PASS | K001–K006 全过（file-service/hm-service 页共变） |
 | `python3 scripts/engineering-lint.py` | PASS | all checks passed |
-| `docker compose config -q` | PASS | compose config OK |
+| `MINIO_ROOT_USER=test-minio-user MINIO_ROOT_PASSWORD=test-minio-pass docker compose config -q` | PASS | compose config OK；MinIO 凭据由环境变量显式注入 |
+| `docker compose config -q` | PASS | compose config OK；未设置 `MINIO_ROOT_*` 时 compose 只发出 blank-var warning，CI smoke 的 config 校验仍为 exit 0 |
 
 ## 端到端证据（节选）
 

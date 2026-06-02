@@ -22,8 +22,8 @@ hm:
   minio:
     enabled: true
     endpoint: http://${hm.minio.host:localhost}:${hm.minio.port:9000}
-    access-key: minioadmin
-    secret-key: minioadmin
+    access-key: ${MINIO_ROOT_USER:}
+    secret-key: ${MINIO_ROOT_PASSWORD:}
     bucket: hmall
 logging:
   level:

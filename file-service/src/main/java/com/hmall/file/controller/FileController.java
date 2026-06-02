@@ -1,6 +1,5 @@
 package com.hmall.file.controller;
 
-import cn.hutool.core.io.FileUtil;
 import com.hmall.file.config.MinioProperties;
 import com.hmall.file.domain.po.Upload;
 import com.hmall.file.service.IUploadService;
@@ -17,6 +16,9 @@ import org.springframework.web.servlet.HandlerMapping;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,8 +66,7 @@ public class FileController {
         // 历史数据降级：旧记录 filePath 形如 /uploads/...，回退本地盘读取
         // （MinIO 全量迁移后可移除此分支）
         if (key.startsWith("/uploads/") || key.startsWith("uploads/")) {
-            byte[] bytes = FileUtil.readBytes(uploadDir + "/../" + (key.startsWith("/") ? key : "/" + key));
-            response.getOutputStream().write(bytes);
+            writeLegacyUpload(key, response);
             return;
         }
         try (InputStream in = minioClient.getObject(GetObjectArgs.builder()
@@ -77,5 +78,18 @@ public class FileController {
             }
             StreamUtils.copy(in, response.getOutputStream());
         }
+    }
+
+    private void writeLegacyUpload(String key, HttpServletResponse response) throws Exception {
+        String relativePath = key.startsWith("/") ? key.substring(1) : key;
+        relativePath = relativePath.substring("uploads/".length());
+
+        Path uploadRoot = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path localFile = uploadRoot.resolve(relativePath).normalize();
+        if (!localFile.startsWith(uploadRoot) || !Files.isRegularFile(localFile)) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        Files.copy(localFile, response.getOutputStream());
     }
 }
