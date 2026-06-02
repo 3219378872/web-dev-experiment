@@ -2,9 +2,9 @@ slug: 2026-06-01-service-branch-coverage-gate
 status: active
 base_branch: main
 task_branch: task/2026-06-01-service-branch-coverage-gate
-remote_branch: null
-pull_request: null
-ci_status: local-verified
+remote_branch: origin/task/2026-06-01-service-branch-coverage-gate
+pull_request: https://github.com/3219378872/web-dev-experiment/pull/43
+ci_status: pending
 codex_review: pending
 remote_cleanup: pending
 spec: docs/superpowers/specs/2026-06-01-service-branch-coverage-gate-design.md
