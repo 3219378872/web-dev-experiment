@@ -9,7 +9,7 @@
 
 ## Related Artifacts
 - Spec: none —— 纯文档任务，无 API/数据/行为变更，无需独立 spec。
-- Plan: `/home/dev/.claude/plans/docs-structure-compiled-scott.md`（已批准）。
+- Plan: 已批准的 plan-mode 实施计划（产物在仓库外、不入库，见 task.yaml plan_waiver）。
 
 ## Likely Files
 - `docs/structure/README.md`
