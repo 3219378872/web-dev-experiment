@@ -147,10 +147,11 @@
                                 <rule>
                                     <element>PACKAGE</element>
                                     <includes>
-                                        <include>**/service/impl</include>
+                                        <include>*.*.service.impl</include>
+                                        <include>*.*.*.service.impl</include>
                                     </includes>
                                     <excludes>
-                                        <exclude>**/notify/service/impl</exclude>
+                                        <exclude>*.*.notify.service.impl</exclude>
                                     </excludes>
                                     <limits>
                                         <limit>
