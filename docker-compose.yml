@@ -86,6 +86,9 @@ services:
   nacos-init:
     image: curlimages/curl:latest
     restart: "no"
+    # curlimages/curl 默认非 root（uid 100），apk add python3 会 Permission denied；
+    # 路由脚本需 python3 做 URL 编码，故以 root 运行该一次性 init 容器。
+    user: root
     depends_on:
       nacos:
         condition: service_healthy

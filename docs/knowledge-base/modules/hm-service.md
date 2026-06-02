@@ -2,9 +2,9 @@
 title: hm-service
 tracks:
   - hm-service/
-last_synced_commit: 6a683f990674a545d965018f2314e512b96d47a0
+last_synced_commit: 3e41bd9b25722b387867653eb857b81ad808eb40
 last_synced_date: 2026-06-02
-sync_note: "JaCoCo service.impl 70% branch coverage gate — POM ratchet override only, no API/content change"
+sync_note: "Dockerfile base 修复：openjdk:11.0-jre-buster(失效) -> eclipse-temurin:11-jre + COPY target/*.jar，对齐其它服务；无源码/API 改动"
 ---
 
 # hm-service
