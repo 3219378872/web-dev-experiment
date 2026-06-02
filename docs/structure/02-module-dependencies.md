@@ -28,40 +28,43 @@ flowchart BT
 
 ## 2. Feign 跨服务调用图
 
-`hm-api/.../client/` 下 8 个 Feign 客户端定义了服务间的实际调用契约。边上标注主要方法。
+`hm-api/.../client/` 下共 **9 个** Feign 客户端定义。但**只有 `cart-service`、`trade-service`、
+`pay-service` 标注了 `@EnableFeignClients` 并真正发起调用**；下图仅画**实际存在的调用边**（实线），
+边上标注被调用的方法。
 
 ```mermaid
 flowchart LR
+    CS[cart-service]
     TS[trade-service]
     PS[pay-service]
-    US[user-service]
     IS[item-service]
-    CS[cart-service]
-    NS[notify-service]
-    FS[file-service]
+    US[user-service]
 
+    CS -- "ItemClient.queryItemByIds" --> IS
     TS -- "ItemClient.queryItemByIds / deductStock" --> IS
     TS -- "CartClient.deleteCartItemByIds" --> CS
     PS -- "UserClient.deductMoney" --> US
     PS -- "OrderClient.updateById ⚠️" --> TS
-    US -- "ReviewClient（评价）" --> IS
-    US -- "FileClient.uploadImage（头像等）" --> FS
-    NS -. "NotificationClient.getActiveNotifications" .-> NS
 ```
 
-**客户端清单**
+**客户端清单（9 个）**
 
-| 客户端 | 目标服务 | 主要方法 | 用途 |
+| 客户端 | `@FeignClient` 目标 | 是否被调用 | 调用方 / 说明 |
 | --- | --- | --- | --- |
-| `ItemClient` | item-service | `queryItemByIds`、`deductStock` | 查商品价格、扣库存 |
-| `CartClient` | cart-service | `deleteCartItemByIds` | 下单后清购物车 |
-| `UserClient` | user-service | `deductMoney`、收藏增删 | 扣余额、收藏 |
-| `OrderClient` | trade-service | `updateById` | 支付成功回写订单状态 |
-| `CouponClient` | trade-service | 优惠券领取/查询 | 优惠券 |
-| `ReviewClient` | item-service | 评价增删查 | 商品评价 |
-| `NotificationClient` | notify-service | `getActiveNotifications` | 活跃公告 |
-| `FileClient` | file-service | `uploadImage`、下载 | 文件 |
+| `ItemClient` | item-service | ✅ 已用 | cart-service、trade-service：`queryItemByIds`、`deductStock` |
+| `CartClient` | cart-service | ✅ 已用 | trade-service：`deleteCartItemByIds`（下单后清购物车） |
+| `UserClient` | user-service | ✅ 已用 | pay-service：`deductMoney`（仅此一个方法，无收藏方法） |
+| `OrderClient` | order-service ⚠️ | ✅ 已用 | pay-service：`updateById`（支付成功回写订单状态） |
+| `CouponClient` | trade-service | ⬜ 已定义未调用 | 契约存在，当前无服务注入使用 |
+| `ReviewClient` | item-service | ⬜ 已定义未调用 | 同上 |
+| `FavoriteClient` | user-service | ⬜ 已定义未调用 | 同上 |
+| `FileClient` | file-service | ⬜ 已定义未调用 | 同上 |
+| `NotificationClient` | notify-service | ⬜ 已定义未调用 | 同上 |
 
 > ⚠️ **命名陷阱**：`OrderClient` 的 `@FeignClient` value 写作 `"order-service"`，
 > 但实际注册的服务名是 **`trade-service`**（见 `trade-service` 的 `bootstrap.yaml`）。
 > 阅读/排障时勿被名字误导——它指向的是 trade-service。
+>
+> ⚠️ 另 5 个客户端（Coupon/Review/Favorite/File/Notification）**仅有契约定义、当前无任何服务实际调用**
+> （仅 cart/trade/pay 启用了 `@EnableFeignClients`），故未画入调用图。对应业务多由各服务直接走
+> Controller→Service→DB 完成。

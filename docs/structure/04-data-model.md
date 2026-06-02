@@ -124,15 +124,36 @@ erDiagram
         bigint parent_id "0=顶级"
         int sort_order
     }
+    notifications {
+        bigint id PK
+        varchar title
+        datetime publish_time
+        tinyint status "1=活跃"
+    }
+    uploads {
+        bigint id PK
+        varchar original_name
+        varchar file_path
+        bigint file_size
+    }
+    banners {
+        bigint id PK
+        varchar image_url
+        varchar link_url
+        int sort_order
+    }
 ```
 
-## 独立表（无强关联，按业务读取）
+> 上图 18 个实体即全部 18 张表。`notifications`、`uploads`、`banners` 三表与其它表**无逻辑外键关联**
+> （独立读取），故在图中以无关系线的独立实体呈现。
+
+## 独立表说明（无强关联，按业务读取）
 
 | 表 | 归属服务 | 说明 |
 | --- | --- | --- |
 | `notifications` | notify-service | 站内公告，`/notifications/active` 取 `status=1` |
-| `customer_messages` | notify-service | 客服留言（已含于上图，user_id 关联） |
-| `feedbacks` | notify-service | 用户反馈（已含于上图） |
+| `customer_messages` | notify-service | 客服留言（与 user 关联，已含于上图） |
+| `feedbacks` | notify-service | 用户反馈（与 user 关联，已含于上图） |
 | `uploads` | file-service | 上传文件元数据（original_name / file_path / size） |
 | `banners` | item/admin | 首页轮播图 |
 

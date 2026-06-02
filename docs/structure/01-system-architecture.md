@@ -53,32 +53,40 @@ flowchart TB
 
 ## 2. 部署拓扑（docker-compose）
 
-`docker-compose.yml` **实际编排的容器**如下。业务微服务在开发期以本地 `mvn` 启动、
-**未容器化**（图中虚线框标注）。
+`docker-compose.yml` 将**整个后端栈容器化**：除基础设施外，`hm-gateway`、全部 8 个业务服务与
+`hm-service` 都通过 `build: ./<服务>` 构建镜像运行，另有一次性 `nacos-init`（发布路由配置）与
+`smoke-test`（依赖各服务就绪后跑冒烟）。仅 `:8080`（网关）、前端 `:80/:81` 与基础设施端口对外暴露，
+服务间在 compose 网络内以服务名互访。
 
 ```mermaid
 flowchart TB
-    subgraph Compose[docker-compose 编排的容器]
-        WebC["hmall-web<br/>nginx:alpine :80"]
-        AdminC["hmall-admin<br/>nginx:alpine :81"]
-        NacosC["nacos:v2.1.0<br/>:8848 / :9848"]
+    subgraph Infra[基础设施容器]
         MySQLC[("mysql:8.0<br/>:3306 库 hmall")]
+        NacosC["nacos:v2.1.0<br/>:8848 / :9848"]
         RedisC[("redis:7.0<br/>:6379")]
+        InitC["nacos-init<br/>(curl, 一次性发布路由)"]
     end
 
-    subgraph Local["本地 mvn 启动（未容器化）"]
-        direction LR
-        GWp[hm-gateway:8080]
-        Svc["8 个业务服务<br/>8081~8087 + hm-service"]
+    subgraph App[应用容器（build: ./服务）]
+        GWc["hm-gateway<br/>对外 :8080"]
+        SvcC["8 业务服务<br/>user/item/cart/trade<br/>pay/notify/file + hm-service"]
+        SmokeC["smoke-test<br/>(curl, 依赖各服务就绪)"]
     end
 
-    WebC --> GWp
-    AdminC --> GWp
-    GWp --> Svc
-    GWp -. 路由配置 .-> NacosC
-    Svc -. 注册/配置 .-> NacosC
-    Svc --> MySQLC
-    Svc --> RedisC
+    subgraph Front[前端容器（nginx）]
+        WebC["hmall-web :80"]
+        AdminC["hmall-admin :81"]
+    end
+
+    WebC --> GWc
+    AdminC --> GWc
+    GWc --> SvcC
+    InitC -.->|"发布 gateway-routes.json"| NacosC
+    GWc -.->|"拉路由"| NacosC
+    SvcC -.->|"注册/配置"| NacosC
+    SvcC --> MySQLC
+    SvcC --> RedisC
+    SmokeC -.->|"HTTP 探活"| GWc
 ```
 
 > 初始化：`docs/sql/init-all-tables.sql` 建表与种子数据；

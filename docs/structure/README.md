@@ -64,8 +64,10 @@ flowchart LR
 | **MinIO** | 文件上传/签名 URL | ❌ docker-compose 未编排；file-service 以本地实现为主 |
 | **Elasticsearch** | 商品搜索 | ❌ 未编排；搜索走 DB |
 
-`docker-compose.yml` 实际只编排：**MySQL 8.0、Nacos v2.1.0、Redis 7.0、hmall-web(nginx:80)、hmall-admin(nginx:81)**。
-业务微服务在开发期以本地 `mvn` 启动，未容器化。
+`docker-compose.yml` 编排的容器：基础设施 **MySQL 8.0、Nacos v2.1.0、Redis 7.0** + 一次性 `nacos-init`、
+**hm-gateway 与全部 8 个业务服务 + hm-service（均通过 `build: ./<服务>` 构建镜像运行）** + 冒烟容器 `smoke-test`
++ 前端 **hmall-web(nginx:80)、hmall-admin(nginx:81)**。即整个后端栈都已容器化（详见
+[01-system-architecture.md](01-system-architecture.md) 的部署拓扑）。
 
 ## 维护约定
 
