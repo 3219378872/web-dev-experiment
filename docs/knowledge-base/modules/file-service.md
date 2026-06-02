@@ -2,7 +2,7 @@
 title: file-service
 tracks:
   - file-service/
-last_synced_commit: 731e27d527f3914a293ec819b7afc080429ddd61
+last_synced_commit: 310ad45d7929078cf636c21188da2fcb650b4e01
 last_synced_date: 2026-06-02
 sync_note: "接入 MinIO：本地 FS -> 公开桶 hmall + /files/** 网关反代理"
 ---
