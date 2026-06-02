@@ -10,6 +10,12 @@ x-java-service: &java-service
     hm.nacos.port: "8848"
     hm.redis.host: redis
     hm.redis.port: "6379"
+    spring.rabbitmq.host: rabbitmq
+    spring.rabbitmq.port: "5672"
+    spring.rabbitmq.username: ${RABBITMQ_DEFAULT_USER:-hmall}
+    spring.rabbitmq.password: ${RABBITMQ_DEFAULT_PASS:-hmall}
+    spring.rabbitmq.publisher-confirm-type: correlated
+    spring.rabbitmq.publisher-returns: "true"
     spring.cloud.nacos.server-addr: nacos:8848
 
 services:
@@ -48,6 +54,22 @@ services:
     image: redis:7.0
     restart: unless-stopped
     ports: ["6379:6379"]
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-hmall}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-hmall}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
   minio:
     image: minio/minio:RELEASE.2024-01-16T16-07-38Z
@@ -155,6 +177,12 @@ services:
       hm.nacos.port: "8848"
       hm.redis.host: redis
       hm.redis.port: "6379"
+      spring.rabbitmq.host: rabbitmq
+      spring.rabbitmq.port: "5672"
+      spring.rabbitmq.username: ${RABBITMQ_DEFAULT_USER:-hmall}
+      spring.rabbitmq.password: ${RABBITMQ_DEFAULT_PASS:-hmall}
+      spring.rabbitmq.publisher-confirm-type: correlated
+      spring.rabbitmq.publisher-returns: "true"
       spring.cloud.nacos.server-addr: nacos:8848
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/hmall?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
     depends_on:
@@ -163,6 +191,8 @@ services:
       nacos-init:
         condition: service_completed_successfully
       mysql:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   trade-service:
@@ -175,6 +205,8 @@ services:
         condition: service_completed_successfully
       mysql:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   pay-service:
     <<: *java-service
@@ -186,6 +218,8 @@ services:
         condition: service_completed_successfully
       mysql:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   notify-service:
     <<: *java-service
@@ -196,6 +230,8 @@ services:
       nacos-init:
         condition: service_completed_successfully
       mysql:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   file-service:

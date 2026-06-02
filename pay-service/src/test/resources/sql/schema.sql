@@ -19,3 +19,14 @@ CREATE TABLE IF NOT EXISTS pay_order (
     updater BIGINT,
     is_delete TINYINT(1) DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS mq_outbox_message (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    exchange_name VARCHAR(128) NOT NULL,
+    routing_key VARCHAR(128) NOT NULL,
+    payload TEXT NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    retry_count INT DEFAULT 0,
+    create_time DATETIME,
+    update_time DATETIME
+);

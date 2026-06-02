@@ -1,13 +1,18 @@
 package com.hmall.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hmall.api.client.CartClient;
 import com.hmall.api.client.ItemClient;
 import com.hmall.api.dto.ItemDTO;
 import com.hmall.api.dto.OrderDetailDTO;
 import com.hmall.api.dto.OrderFormDTO;
 import com.hmall.common.exception.BadRequestException;
 import com.hmall.common.exception.BizIllegalException;
+import com.hmall.common.mq.MqConstants;
+import com.hmall.common.mq.consumer.MqConsumerSupport;
+import com.hmall.common.mq.event.OrderCreatedEvent;
+import com.hmall.common.mq.event.OrderStatusChangedEvent;
+import com.hmall.common.mq.event.PaySuccessEvent;
+import com.hmall.common.mq.outbox.MqMessagePublisher;
 import com.hmall.common.utils.UserContext;
 import com.hmall.domain.po.Order;
 import com.hmall.domain.po.OrderDetail;
@@ -17,8 +22,11 @@ import com.hmall.service.IOrderDetailService;
 import com.hmall.service.IOrderLogisticsService;
 import com.hmall.service.IOrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.rabbitmq.client.Channel;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,7 +50,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private final IOrderDetailService detailService;
     private final IOrderLogisticsService logisticsService;
     private final ItemClient itemClient;
-    private final CartClient cartClient;
+    private final MqMessagePublisher mqMessagePublisher;
+    private final MqConsumerSupport mqConsumerSupport;
 
     @Override
     @Transactional
@@ -77,25 +86,62 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         List<OrderDetail> details = buildDetails(order.getId(), items, itemNumMap);
         detailService.saveBatch(details);
 
-        // 3.清理购物车商品
-        cartClient.deleteCartItemByIds(itemIds);
-
-        // 4.扣减库存
+        // 3.扣减库存
         try {
             itemClient.deductStock(detailDTOS);
         } catch (Exception e) {
             throw new RuntimeException("库存不足！");
         }
+        // 4.发布下单后的副作用事件：清车、通知、延时关单。
+        OrderCreatedEvent event = new OrderCreatedEvent(order.getId(), order.getUserId(), new ArrayList<>(itemIds));
+        mqMessagePublisher.publish(MqConstants.TRADE_EXCHANGE, MqConstants.ORDER_CREATE_KEY, event);
+        mqMessagePublisher.publish(MqConstants.DELAY_EXCHANGE, MqConstants.ORDER_DELAY_KEY, event);
         return order.getId();
     }
 
     @Override
     public void markOrderPaySuccess(Long orderId) {
-        Order order = new Order();
-        order.setId(orderId);
-        order.setStatus(2);
-        order.setPayTime(LocalDateTime.now());
-        updateById(order);
+        lambdaUpdate()
+                .set(Order::getStatus, 2)
+                .set(Order::getPayTime, LocalDateTime.now())
+                .eq(Order::getId, orderId)
+                .eq(Order::getStatus, 1)
+                .update();
+    }
+
+    @RabbitListener(queues = MqConstants.TRADE_PAY_SUCCESS_QUEUE)
+    public void onPaySuccess(PaySuccessEvent event, Message message, Channel channel) throws Exception {
+        try {
+            handlePaySuccess(event);
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        } catch (Exception e) {
+            mqConsumerSupport.reject(message, channel);
+            throw e;
+        }
+    }
+
+    public void handlePaySuccess(PaySuccessEvent event) {
+        markOrderPaySuccess(event.getOrderId());
+    }
+
+    @RabbitListener(queues = MqConstants.ORDER_CLOSE_QUEUE)
+    public void onOrderClose(OrderCreatedEvent event, Message message, Channel channel) throws Exception {
+        try {
+            handleOrderClose(event);
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        } catch (Exception e) {
+            mqConsumerSupport.reject(message, channel);
+            throw e;
+        }
+    }
+
+    public void handleOrderClose(OrderCreatedEvent event) {
+        lambdaUpdate()
+                .set(Order::getStatus, 5)
+                .set(Order::getCloseTime, LocalDateTime.now())
+                .eq(Order::getId, event.getOrderId())
+                .eq(Order::getStatus, 1)
+                .update();
     }
 
     @Override
@@ -110,6 +156,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setStatus(5);
         order.setCloseTime(LocalDateTime.now());
         updateById(order);
+        publishStatusChanged(orderId, userId, "cancel");
     }
 
     @Override
@@ -138,6 +185,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setStatus(6);
         order.setUpdateTime(LocalDateTime.now());
         updateById(order);
+        publishStatusChanged(orderId, userId, "refund");
     }
 
     @Override
@@ -147,6 +195,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setStatus(3);
         order.setConsignTime(LocalDateTime.now());
         updateById(order);
+        publishStatusChanged(orderId, order.getUserId(), "shipped");
         OrderLogistics logistics = logisticsService.lambdaQuery()
                 .eq(OrderLogistics::getOrderId, orderId).one();
         if (logistics != null) {
@@ -169,5 +218,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             details.add(detail);
         }
         return details;
+    }
+
+    private void publishStatusChanged(Long orderId, Long userId, String status) {
+        mqMessagePublisher.publish(
+                MqConstants.TRADE_EXCHANGE,
+                MqConstants.orderStatusKey(status),
+                new OrderStatusChangedEvent(orderId, userId, status));
     }
 }

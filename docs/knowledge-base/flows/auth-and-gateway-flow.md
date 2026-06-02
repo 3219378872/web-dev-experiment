@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 6a683f990674a545d965018f2314e512b96d47a0
+last_synced_commit: b25e21464938f9ce5f1cef682ae90224ca30f054
 last_synced_date: 2026-06-02
-sync_note: "JaCoCo service.impl 70% branch coverage gate — POM ratchet override only, no API/content change"
+sync_note: "hm-common RabbitMQ-only changes do not affect auth/gateway flow"
 ---
 
 # auth-and-gateway-flow
@@ -31,6 +31,8 @@ sync_note: "JaCoCo service.impl 70% branch coverage gate — POM ratchet overrid
 5. **下游用户上下文** —— 业务服务通过 [hm-common](../modules/hm-common.md)
    `UserInfoInterceptor` 把 header 写入 `UserContext`（ThreadLocal），controller/service
    通过 `UserContext.getUser()` 拿当前用户 ID。
+   异步消费者（如 RabbitMQ listener）不经过 Gateway/header 拦截器；若业务逻辑需要用户上下文，
+   必须从事件载荷显式设置 `UserContext` 并在 `finally` 中清理。
 6. **管理端额外校验** —— 管理端路由（`/admin/**`）在 Gateway 或下游服务侧再判
    role 是否管理员；非管理员返回 403。
 

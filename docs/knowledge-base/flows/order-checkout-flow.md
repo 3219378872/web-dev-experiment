@@ -5,16 +5,17 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 6a683f990674a545d965018f2314e512b96d47a0
+last_synced_commit: 28f7eb1932138441a1258adde104aa6e62b70cac
 last_synced_date: 2026-06-02
-sync_note: "JaCoCo service.impl 70% branch coverage gate — POM ratchet override only, no API/content change"
+sync_note: "同步 RabbitMQ 事务后发布、消费重试、支付成功幂等和超时关单原子保护"
 ---
 
 # order-checkout-flow
 
 C 端用户从加购到支付完成的端到端流程，跨 [cart-service](../modules/cart-service.md)、
 [item-service](../modules/item-service.md)、[trade-service](../modules/trade-service.md)、
-[pay-service](../modules/pay-service.md)，由 Seata 协调分布式事务。
+[pay-service](../modules/pay-service.md)，RabbitMQ 负责下单后清车、支付成功回写、
+订单状态通知与超时关单副作用。
 
 ## 流程
 
@@ -24,37 +25,47 @@ C 端用户从加购到支付完成的端到端流程，跨 [cart-service](../mo
 2. **进入结算** —— hmall-web 取购物车勾选项 + 用户地址（user-service）+ 可用券
    （trade-service）合并展示。前端持有订单草稿（仅前端态）。
 3. **创建订单（核心）** —— `POST /orders`：
-   - trade-service 开启 Seata 全局事务（TM）。
-   - 调 [item-service](../modules/item-service.md) `扣减库存`（RM, 失败即回滚）。
+   - trade-service 查询商品并按服务端价格计算总价。
    - 写 `order` + `order_detail`。
-   - 调 [cart-service](../modules/cart-service.md) 删除勾选项。
-   - 调 [pay-service](../modules/pay-service.md) 创建 `pay_order`（未支付）。
-   - 全部成功 → 全局提交；任一失败 → 全局回滚，库存回滚、订单/支付单/购物车回滚。
+   - 同步调 [item-service](../modules/item-service.md) 扣减库存；失败则本地订单事务回滚。
+   - 事务提交后发布 `trade.topic/order.create`，由 cart-service 异步删除对应购物车项，
+     notify-service 生成下单成功站内信。
+   - 事务提交后发布 `delay.exchange/order.delay`，30 分钟后进入 `order.close.queue`
+     通过带 `status = 待支付` 条件的原子更新关闭仍未支付的订单。
 4. **支付** —— hmall-web 跳支付页 → [pay-service](../modules/pay-service.md)
    `POST /pay-orders/{id}/pay`。模拟支付通道直接打标已支付。
-5. **支付回写** —— pay-service 通过 Feign 或 MQ 通知 trade-service 把订单状态
-   置为"已支付"。trade-service 触发后续通知（[notify-service](../modules/notify-service.md)）。
+5. **支付回写** —— pay-service 支付事务提交后发布 `pay.topic/pay.success`，
+   trade-service 消费后仅把待支付订单置为"已支付"并记录支付时间。
 6. **发货 / 退款** —— 管理端 [hmall-admin](../modules/hmall-admin.md) 操作发货或处理退款，
-   对应订单状态机推进。
+   对应订单状态机推进，并发布 `trade.topic/order.status.{shipped,refund,cancel}` 给
+   [notify-service](../modules/notify-service.md)。
 
 ## 关键不变量
 
 - 库存扣减发生在订单创建事务内，绝不允许"先下单后异步扣库存"。
-- 订单与支付单一对一；订单号 ≠ 支付单号；前端只显示订单号。
-- Seata TCC 的 Try/Confirm/Cancel 必须幂等。
+- 支付成功回写是最终一致链路；trade-service 的消费逻辑必须可重复执行，重复/过期
+  `pay.success` 不得改变已关闭、已取消或已退款订单。
+- 超时关单必须和支付成功回写一样带状态条件原子更新；延时消息与 `pay.success` 并发时，
+  只能有仍处于待支付状态的一方被推进。
+- 订单创建事件携带 `userId` 与 `itemIds`，cart-service listener 必须显式写入
+  `UserContext` 后再清车。
 - 价格以服务端商品当前价为准；前端展示价仅作显示，提交时不信任。
 - 金额单位全链路用分（long），不允许 double。
 
 ## 失败与恢复
 
 - 库存不足：trade-service 返回 4xx，前端友好提示。
-- Seata 回滚：所有副作用（库存、订单、支付单、购物车）原子撤销。
-- 支付超时：定时任务扫描"未支付且超时"订单，回滚库存与订单。
-- 支付回调丢失：定时对账（pay-service ↔ 支付通道）兜底。
+- MQ 发送失败：`RabbitMqMessagePublisher` 尝试把消息写入 `mq_outbox_message`，
+  作为后续重试/排查入口；业务事务内的消息在提交后才发送。
+- 支付超时：订单创建时投递延时消息，到期后用原子条件更新仅关闭仍处于待支付状态的订单。
+- 消费失败：manual nack 先进入专用 retry queue，TTL 到期后回到原队列；
+  达到最大重试次数后转入 `hmall.mq.dead.queue`。
+- 支付回写丢失：依赖 outbox/死信排查与后续对账补偿。
 
 ## 测试策略
 
 - 单元测试：service 层各方法（库存扣减、订单写入、状态机）。
-- 集成测试：Testcontainers 起 MySQL + Seata，断言事务回滚正确性。
+- 集成测试：Testcontainers RabbitMQ 发 `pay.success`，断言 trade-service listener
+  更新订单状态。
 - E2E（Playwright）：从加购到模拟支付完成，断言订单状态变迁与 UI 提示。
 - 冒烟：docker compose 起栈后 HTTP 验证整条流程能跑通。

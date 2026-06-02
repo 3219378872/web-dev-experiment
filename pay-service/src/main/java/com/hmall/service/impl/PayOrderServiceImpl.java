@@ -3,12 +3,13 @@ package com.hmall.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hmall.api.client.OrderClient;
 import com.hmall.api.client.UserClient;
-import com.hmall.api.dto.OrderDTO;
 import com.hmall.api.dto.PayApplyDTO;
 import com.hmall.api.dto.PayOrderFormDTO;
 import com.hmall.common.exception.BizIllegalException;
+import com.hmall.common.mq.MqConstants;
+import com.hmall.common.mq.event.PaySuccessEvent;
+import com.hmall.common.mq.outbox.MqMessagePublisher;
 import com.hmall.common.utils.BeanUtils;
 import com.hmall.common.utils.UserContext;
 import com.hmall.domain.po.PayOrder;
@@ -32,8 +33,8 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> implements IPayOrderService {
-    private final OrderClient orderClient;
     private final UserClient userClient;
+    private final MqMessagePublisher mqMessagePublisher;
 
     @Override
     public String applyPayOrder(PayApplyDTO applyDTO) {
@@ -60,12 +61,11 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
         if (!success) {
             throw new BizIllegalException("交易已支付或关闭！");
         }
-        // 5.修改订单状态
-        OrderDTO order = new OrderDTO();
-        order.setId(po.getBizOrderNo());
-        order.setStatus(2);
-        order.setPayTime(LocalDateTime.now());
-        orderClient.updateById(order);
+        // 5.发布支付成功事件，由 trade-service 异步修改订单状态
+        mqMessagePublisher.publish(
+                MqConstants.PAY_EXCHANGE,
+                MqConstants.PAY_SUCCESS_KEY,
+                new PaySuccessEvent(po.getId(), po.getBizOrderNo(), po.getBizUserId(), LocalDateTime.now()));
     }
 
     public boolean markPayOrderSuccess(Long id, LocalDateTime successTime) {

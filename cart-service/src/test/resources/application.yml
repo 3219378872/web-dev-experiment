@@ -19,6 +19,12 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false
+      direct:
+        auto-startup: false
 
 mybatis-plus:
   global-config:

@@ -13,6 +13,7 @@ import com.hmall.service.IOrderService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -47,6 +48,9 @@ class OrderServiceImplIT {
 
     @MockBean
     private CartClient cartClient;
+
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
 
     @BeforeEach
     void setUp() { UserContext.setUser(1L); }
