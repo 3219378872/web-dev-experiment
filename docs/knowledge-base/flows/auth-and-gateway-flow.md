@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: a86d639a608a2272ede208732891ebb0b392f092
+last_synced_commit: 4bf9c2298c9affd731d7595ce93a7ca7236e032f
 last_synced_date: 2026-06-02
-sync_note: "RabbitMQ listeners add an async UserContext boundary note"
+sync_note: "仅同步 RabbitMQ producer 可靠性测试断言，业务契约无变更"
 ---
 
 # auth-and-gateway-flow

@@ -14,6 +14,7 @@ import com.hmall.domain.po.OrderLogistics;
 import com.hmall.service.IOrderLogisticsService;
 import com.hmall.service.IOrderService;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,11 +71,13 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         verify(rabbitTemplate).convertAndSend(
                 eq(MqConstants.TRADE_EXCHANGE),
                 eq(MqConstants.ORDER_CREATE_KEY),
-                isA(OrderCreatedEvent.class));
+                isA(OrderCreatedEvent.class),
+                any(CorrelationData.class));
         verify(rabbitTemplate).convertAndSend(
                 eq(MqConstants.DELAY_EXCHANGE),
                 eq(MqConstants.ORDER_DELAY_KEY),
-                isA(OrderCreatedEvent.class));
+                isA(OrderCreatedEvent.class),
+                any(CorrelationData.class));
     }
 
     @Test
@@ -160,7 +163,8 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         verify(rabbitTemplate).convertAndSend(
                 eq(MqConstants.TRADE_EXCHANGE),
                 eq(MqConstants.orderStatusKey("cancel")),
-                isA(OrderStatusChangedEvent.class));
+                isA(OrderStatusChangedEvent.class),
+                any(CorrelationData.class));
     }
 
     @Test
@@ -242,7 +246,8 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         verify(rabbitTemplate).convertAndSend(
                 eq(MqConstants.TRADE_EXCHANGE),
                 eq(MqConstants.orderStatusKey("refund")),
-                isA(OrderStatusChangedEvent.class));
+                isA(OrderStatusChangedEvent.class),
+                any(CorrelationData.class));
     }
 
     @Test
@@ -288,6 +293,7 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         verify(rabbitTemplate).convertAndSend(
                 eq(MqConstants.TRADE_EXCHANGE),
                 eq(MqConstants.orderStatusKey("shipped")),
-                isA(OrderStatusChangedEvent.class));
+                isA(OrderStatusChangedEvent.class),
+                any(CorrelationData.class));
     }
 }

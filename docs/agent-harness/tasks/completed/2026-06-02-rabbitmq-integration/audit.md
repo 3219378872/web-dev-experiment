@@ -5,6 +5,7 @@
 | Harness task exists before implementation | done | `docs/agent-harness/tasks/active/2026-06-02-rabbitmq-integration/task.yaml` status active. |
 | RabbitMQ broker in compose | done | `docker-compose.yml` adds `rabbitmq:3.13-management` and broker env/dependencies for trade/pay/cart/notify services. |
 | Shared topology and event contracts | done | `hm-common/src/main/java/com/hmall/common/mq/**` defines constants, events, Rabbit config, manual ack listener factory, outbox publisher. |
+| Producer failure capture | done | `RabbitMqMessagePublisherTest` covers synchronous `convertAndSend` exception, publisher confirm nack, and returned unroutable message outbox inserts. |
 | Payment success async event | done | `PayOrderServiceImpl` publishes `pay.success`; `OrderServiceImpl` consumes it and updates order status. |
 | Order create async side effects | done | `OrderServiceImpl.createOrder` publishes `order.create`; cart and notify listener tests cover cleanup/notification. |
 | Delayed close unpaid order | done | `RabbitMqConfig` declares TTL delay queue and `OrderServiceImpl` consumes `order.close.queue`. |

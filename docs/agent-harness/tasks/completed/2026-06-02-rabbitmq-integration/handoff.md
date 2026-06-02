@@ -31,7 +31,7 @@ Done. Branch `task/2026-06-02-rabbitmq-integration` contains RabbitMQ implementa
 - `mvn -B -ntp -q test` — pass after final notify IT datasource hardening.
 
 ## Known Risks
-- Reliable producer fallback is a lightweight `mq_outbox_message` insert on publish exception; no replay scheduler is included in this slice.
+- Reliable producer fallback is a lightweight `mq_outbox_message` insert for synchronous publish exceptions, publisher confirm nacks, and returned unroutable messages; no replay scheduler is included in this slice.
 - RabbitMQ IT logs include Testcontainers/Docker connection reset/refused during shutdown, but Maven exited 0.
 - Local Docker port publishing timed out for JVM MySQL connections to `127.0.0.1`; local full integration used Docker bridge host `172.17.0.1`. The GitHub Actions service-container workflow still uses `127.0.0.1`.
 

@@ -2,9 +2,9 @@
 title: hm-common
 tracks:
   - hm-common/
-last_synced_commit: a86d639a608a2272ede208732891ebb0b392f092
+last_synced_commit: 4bf9c2298c9affd731d7595ce93a7ca7236e032f
 last_synced_date: 2026-06-02
-sync_note: "RabbitMQ 共享拓扑、事件契约与 outbox publisher"
+sync_note: "RabbitMQ producer confirm/return/outbox reliability hardening"
 ---
 
 # hm-common
@@ -29,9 +29,9 @@ sync_note: "RabbitMQ 共享拓扑、事件契约与 outbox publisher"
   `delay.exchange`、死信 exchange、queue、routing key、延时关单 TTL 常量。
 - `com.hmall.common.mq.event.*` —— 订单创建、支付成功、订单状态变更事件 DTO。
 - `RabbitMqConfig` —— Jackson 消息转换、手动 ack listener factory、队列/交换机/绑定、
-  TTL + DLX 延时关单和死信队列声明。
-- `MqMessagePublisher` / `RabbitMqMessagePublisher` —— 统一发送入口；发送失败时尝试
-  写入 `mq_outbox_message`。
+  TTL + DLX 延时关单、死信队列声明，以及 mandatory producer 发送配置。
+- `MqMessagePublisher` / `RabbitMqMessagePublisher` —— 统一发送入口；同步发送异常、
+  publisher confirm nack、publisher return 都会尝试写入 `mq_outbox_message`。
 
 ## 上游
 
@@ -52,7 +52,7 @@ sync_note: "RabbitMQ 共享拓扑、事件契约与 outbox publisher"
 - `mq/MqConstants.java` —— MQ 拓扑命名。
 - `mq/config/RabbitMqConfig.java` —— RabbitMQ 自动装配。
 - `mq/event/*.java` —— 共享事件 DTO。
-- `mq/outbox/*.java` —— 发布失败落表入口。
+- `mq/outbox/*.java` —— 发布失败落表入口，覆盖同步异常、confirm nack 与 return。
 
 ## 注意事项与陷阱
 
@@ -67,5 +67,7 @@ sync_note: "RabbitMQ 共享拓扑、事件契约与 outbox publisher"
 - 修改 `R` 字段顺序或名称会破坏前端解析。
 - RabbitMQ 自动装配默认开启，可用 `hm.rabbitmq.enabled=false` 关闭；单元测试通过
   mock `RabbitTemplate` 保持 broker-free。
+- RabbitMQ producer 失败落表是本 PR 的轻量恢复入口；同步发送异常只记录 outbox
+  并保留调用方本地事务继续提交，避免 outbox 行随业务事务回滚丢失。
 - 消费者使用 manual ack；监听方法必须在业务成功后 `basicAck`，失败 `basicNack`
   且不重回队列，避免无界重试。

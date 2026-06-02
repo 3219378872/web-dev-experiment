@@ -2,6 +2,8 @@
 
 | Command | Result | Evidence |
 | --- | --- | --- |
+| `mvn -B -ntp -q -pl hm-common -Dtest=RabbitMqMessagePublisherTest test` | pass | Exit 0 on 2026-06-02 after codex-review reliability fix; tests cover synchronous publish exception, confirm nack, and return fallback outbox writes. |
+| `mvn -B -ntp -q verify` | pass | Exit 0 on 2026-06-02 after codex-review reliability fix and updated MQ send assertions. Existing Nacos connection noise appeared in some tests but Maven exited 0. |
 | `mvn -B -ntp -q -pl trade-service,pay-service,cart-service,notify-service -am test -DskipITs` | pass | Exit 0 on 2026-06-02 after manual ack and cleanup edits; unit tests use mocked `RabbitTemplate` and no live broker. |
 | `mvn -B -ntp -q -pl trade-service -am -Pintegration verify -DskipUnitTests=true -Dit.test=RabbitMqOrderEventIT -DfailIfNoTests=false` | pass | Exit 0 on 2026-06-02; Testcontainers RabbitMQ delivered `pay.success` and trade listener updated order status. |
 | `python3 scripts/knowledge_base.py check` | pass | Exit 0 on 2026-06-02 after KB updates; K005 skipped because no `--base` argument. |
