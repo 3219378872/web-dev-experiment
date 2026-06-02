@@ -18,6 +18,13 @@ mybatis-plus:
   type-aliases-package: com.hmall.file.domain.po
 file:
   upload-dir: ./uploads
+hm:
+  minio:
+    enabled: ${hm.minio.enabled:true}
+    endpoint: http://${hm.minio.host:localhost}:${hm.minio.port:9000}
+    access-key: ${hm.minio.access-key:minioadmin}
+    secret-key: ${hm.minio.secret-key:minioadmin}
+    bucket: ${hm.minio.bucket:hmall}
 logging:
   level:
     com.hmall: debug
