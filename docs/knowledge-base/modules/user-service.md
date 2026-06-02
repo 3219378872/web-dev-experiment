@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: 44e2d196f1eb7ddb2991e36f10ba095307a54094
-last_synced_date: 2026-05-26
-sync_note: "v3 合并 PR：所有阶段测试补足共 51 tests，覆盖率 80.5%"
+last_synced_commit: 6a683f990674a545d965018f2314e512b96d47a0
+last_synced_date: 2026-06-02
+sync_note: "JaCoCo service.impl 70% branch coverage gate — POM ratchet override only, no API/content change"
 ---
 
 # user-service

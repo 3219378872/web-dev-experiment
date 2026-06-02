@@ -2,9 +2,9 @@
 title: hm-service
 tracks:
   - hm-service/
-last_synced_commit: 33e9420
-last_synced_date: 2026-05-26
-sync_note: "删除旧 ItemServiceImplTest（迁移至 item-service IT）"
+last_synced_commit: 6a683f990674a545d965018f2314e512b96d47a0
+last_synced_date: 2026-06-02
+sync_note: "JaCoCo service.impl 70% branch coverage gate — POM ratchet override only, no API/content change"
 ---
 
 # hm-service
