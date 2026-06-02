@@ -48,4 +48,6 @@ sync_note: "接入 MinIO：本地 FS -> 公开桶 hmall + /files/** 网关反代
   不直接暴露 MinIO 端口给前端。
 - 历史 `/uploads/` 前缀记录走本地盘降级读取（MinIO 全量迁移后可移除该分支）。
 - `hm.minio.enabled=false` 用于单元测试跳过真实 `MinioClient` 创建。
+- `MinioUploadIT` 使用 Testcontainers MinIO，但 datasource 固定为 H2 测试库，避免 CI
+  `SPRING_DATASOURCE_*` 环境变量把 driver/url 覆盖成 MySQL/H2 混搭。
 - 元数据表是审计追踪入口，不允许直接删除记录（软删）。

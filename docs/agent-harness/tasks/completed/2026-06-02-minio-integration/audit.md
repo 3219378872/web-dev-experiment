@@ -8,6 +8,7 @@
 | Docker Compose can provision MinIO | pass | `docker-compose.yml` adds `minio` + `minio-init`, creates public-download `hmall` bucket, and wires `file-service` env/depends_on. |
 | Unit tests do not require external MinIO | pass | `UploadServiceImplTest` / `FileControllerTest` use `@MockBean MinioClient` and `hm.minio.enabled=false`. |
 | Real MinIO integration is covered | pass | `MinioUploadIT` uses Testcontainers MinIO for upload -> fetch-by-key round trip. |
+| CI datasource environment cannot break MinIO IT | pass | `MinioUploadIT` explicitly sets H2 datasource properties via `DynamicPropertySource`; local rerun with CI `SPRING_DATASOURCE_*` env passed. |
 | Knowledge base co-change is present | pass | `docs/knowledge-base/modules/file-service.md` documents MinIO storage; `hm-service.md` documents Dockerfile fix. |
 | Harness and engineering gates pass | pass | `agent_harness.py check`, `knowledge_base.py check --base main`, `engineering-lint.py`, and `docker compose config -q` passed after rebase onto `main`. |
 | Branch is based on current main | pass | Rebased onto `main` commit `8ce6b23`, eliminating stale `docs/structure/*` deletion from the PR diff. |

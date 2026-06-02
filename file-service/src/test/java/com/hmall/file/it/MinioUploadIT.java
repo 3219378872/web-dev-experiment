@@ -40,6 +40,11 @@ class MinioUploadIT {
 
     @DynamicPropertySource
     static void minioProps(DynamicPropertyRegistry r) {
+        r.add("spring.datasource.url",
+                () -> "jdbc:h2:mem:file_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true");
+        r.add("spring.datasource.driver-class-name", () -> "org.h2.Driver");
+        r.add("spring.datasource.username", () -> "sa");
+        r.add("spring.datasource.password", () -> "");
         r.add("hm.minio.enabled", () -> "true");
         r.add("hm.minio.endpoint", minio::getS3URL);
         r.add("hm.minio.access-key", minio::getUserName);
