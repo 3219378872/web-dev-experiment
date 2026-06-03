@@ -50,7 +50,8 @@ flowchart TB
 
     TS & PS -. "Seata AT 事务协调" .-> Seata
     TS & PS -. "发布订单/支付事件" .-> RabbitMQ
-    CS & NS -. "消费事件" .-> RabbitMQ
+    CS & NS -. "消费订单事件" .-> RabbitMQ
+    TS -. "消费支付事件" .-> RabbitMQ
     FS --> MinIO
 ```
 
