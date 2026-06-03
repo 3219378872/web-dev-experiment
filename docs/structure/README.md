@@ -52,8 +52,7 @@ flowchart LR
     GW -.动态路由.-> Nacos
     TS & PS -.Seata AT.-> Seata
     TS & PS -.发布事件.-> RabbitMQ
-    CS & NS -.消费订单事件.-> RabbitMQ
-    TS -.消费支付事件.-> RabbitMQ
+    CS & NS -.消费事件.-> RabbitMQ
     FS --> MinIO
 ```
 

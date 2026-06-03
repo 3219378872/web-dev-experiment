@@ -23,7 +23,7 @@ flowchart TB
         US["user-service :8083<br/>/users /addresses /favorites"]
         TS["trade-service :8084<br/>/orders /coupons /my-coupons<br/>/admin/coupons /admin/orders<br/>@GlobalTransactional 下单"]
         PS["pay-service :8085<br/>/pay-orders<br/>@GlobalTransactional 支付"]
-        NS["notify-service :8086<br/>/notifications /messages<br/>/feedbacks /admin/*<br/>@RabbitListener 消费订单事件"]
+        NS["notify-service :8086<br/>/notifications /messages<br/>/feedbacks /admin/*<br/>@RabbitListener 消费支付事件"]
         FS["file-service :8087<br/>/upload /files<br/>MinIO 存储"]
     end
 
@@ -50,8 +50,7 @@ flowchart TB
 
     TS & PS -. "Seata AT 事务协调" .-> Seata
     TS & PS -. "发布订单/支付事件" .-> RabbitMQ
-    CS & NS -. "消费订单事件" .-> RabbitMQ
-    TS -. "消费支付事件" .-> RabbitMQ
+    CS & NS -. "消费事件" .-> RabbitMQ
     FS --> MinIO
 ```
 

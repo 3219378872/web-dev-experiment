@@ -94,7 +94,8 @@ sequenceDiagram
 ## 3. 余额支付（pay-service `PayOrderServiceImpl.tryPayOrderByBalance`）
 
 `tryPayOrderByBalance` 标注 `@GlobalTransactional` + `@Transactional`，
-通过 Seata AT 协调跨服务事务。支付成功后发布 RabbitMQ 事件，由 trade-service 异步更新订单状态。
+通过 Seata AT 协调跨服务事务。支付成功后发布 RabbitMQ 事件，由 trade-service 异步更新订单状态，
+notify-service 发送支付成功通知。
 
 ```mermaid
 sequenceDiagram
@@ -106,6 +107,7 @@ sequenceDiagram
     participant Seata as Seata Server
     participant RMQ as RabbitMQ
     participant TS as trade-service
+    participant NS as notify-service
 
     U->>GW: POST /pay-orders/{id}（余额支付）
     GW->>PS: 转发
@@ -127,12 +129,15 @@ sequenceDiagram
     end
     deactivate PS
 
-    Note over RMQ,TS: 异步更新订单状态（事务提交后消费）
-    RMQ->>TS: 消费 PaySuccessEvent
-    TS->>TS: markOrderPaySuccess(orderId)
+    Note over RMQ,NS: 异步更新订单状态（事务提交后消费）
+    par 更新订单状态
+        RMQ->>TS: 消费 PaySuccessEvent
+        TS->>TS: markOrderPaySuccess(orderId)
+    and 发送支付成功通知
+        RMQ->>NS: 消费 PaySuccessEvent
+        NS->>NS: 保存"支付成功"消息
+    end
 ```
 
 > **架构改进**：原 `OrderClient` 失效问题已通过 **RabbitMQ 事件驱动** 解决——pay-service 发布
 > `PaySuccessEvent`，trade-service 消费后异步更新订单状态。Seata AT 确保支付与余额扣减的原子性。
->
-> **注意**：notify-service 当前不监听支付成功事件，仅监听订单创建和状态变更事件。
