@@ -17,6 +17,7 @@ x-java-service: &java-service
     spring.rabbitmq.publisher-confirm-type: correlated
     spring.rabbitmq.publisher-returns: "true"
     spring.cloud.nacos.server-addr: nacos:8848
+    hm.seata.host: seata-server
 
 services:
   mysql:
@@ -70,6 +71,36 @@ services:
       timeout: 5s
       retries: 10
       start_period: 20s
+
+  seata-server:
+    image: seataio/seata-server:1.8.0
+    restart: unless-stopped
+    environment:
+      SEATA_IP: seata-server
+      SEATA_PORT: "8091"
+      STORE_MODE: file
+      # 以 Nacos 作注册中心，store 用 file（样例项目，无需额外 DB 表）
+      registry.type: nacos
+      registry.nacos.server-addr: nacos:8848
+      registry.nacos.namespace: ""
+      registry.nacos.group: SEATA_GROUP
+      registry.nacos.application: seata-server
+      registry.nacos.username: nacos
+      registry.nacos.password: nacos
+    ports:
+      - "7091:7091"
+      - "8091:8091"
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:7091/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
   minio:
     image: minio/minio:RELEASE.2024-01-16T16-07-38Z
@@ -145,23 +176,33 @@ services:
   user-service:
     <<: *java-service
     build: ./user-service
+    environment:
+      <<: *java-env
+      SEATA_ENABLED: "true"
     depends_on:
       nacos:
         condition: service_healthy
       nacos-init:
         condition: service_completed_successfully
       mysql:
+        condition: service_healthy
+      seata-server:
         condition: service_healthy
 
   item-service:
     <<: *java-service
     build: ./item-service
+    environment:
+      <<: *java-env
+      SEATA_ENABLED: "true"
     depends_on:
       nacos:
         condition: service_healthy
       nacos-init:
         condition: service_completed_successfully
       mysql:
+        condition: service_healthy
+      seata-server:
         condition: service_healthy
 
   cart-service:
@@ -198,6 +239,9 @@ services:
   trade-service:
     <<: *java-service
     build: ./trade-service
+    environment:
+      <<: *java-env
+      SEATA_ENABLED: "true"
     depends_on:
       nacos:
         condition: service_healthy
@@ -206,11 +250,16 @@ services:
       mysql:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      seata-server:
         condition: service_healthy
 
   pay-service:
     <<: *java-service
     build: ./pay-service
+    environment:
+      <<: *java-env
+      SEATA_ENABLED: "true"
     depends_on:
       nacos:
         condition: service_healthy
@@ -219,6 +268,8 @@ services:
       mysql:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      seata-server:
         condition: service_healthy
 
   notify-service:
