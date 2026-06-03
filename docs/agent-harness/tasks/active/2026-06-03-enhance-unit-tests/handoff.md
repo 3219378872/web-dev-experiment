@@ -6,36 +6,44 @@
 
 ## Files Changed
 
-- `user-service/pom.xml` — JaCoCo 门控 0.00 → 0.70，移除 coverage-ratchet 注释
-- `user-service/src/test/java/com/hmall/UserServiceTestBase.java` — 新增测试基类
-- `user-service/src/test/java/com/hmall/service/impl/UserServiceImplTest.java` — 新增 21 个测试
-- `user-service/src/test/java/com/hmall/service/impl/AddressServiceImplTest.java` — 新增 4 个测试
-- `user-service/src/test/java/com/hmall/service/impl/FavoriteServiceImplTest.java` — 新增 6 个测试
-- `user-service/src/test/resources/application.yml` — H2 测试配置
-- `user-service/src/test/resources/sql/schema.sql` — H2 兼容（user 表名加反引号）
-- `pay-service/pom.xml` — JaCoCo 门控 0.00 → 0.70，移除 coverage-ratchet 注释，新增 H2 依赖
-- `pay-service/src/test/java/com/hmall/PayServiceTestBase.java` — 新增测试基类
-- `pay-service/src/test/java/com/hmall/service/impl/PayOrderServiceImplTest.java` — 新增 15 个测试
-- `pay-service/src/test/resources/application.yml` — H2 测试配置
-- `docs/knowledge-base/modules/user-service.md` — 同步更新
-- `docs/knowledge-base/modules/pay-service.md` — 同步更新
-- `docs/knowledge-base/flows/auth-and-gateway-flow.md` — 同步更新
-- `docs/knowledge-base/flows/order-checkout-flow.md` — 同步更新
+### 门控提升（70% → 80%）
+- `pom.xml` — 根 JaCoCo 门控 0.70 → 0.80
+- `user-service/pom.xml` — JaCoCo 门控 0.70 → 0.80
+- `pay-service/pom.xml` — JaCoCo 门控 0.70 → 0.80
+
+### trade-service 测试增强
+- `trade-service/src/test/java/com/hmall/service/impl/CouponServiceImplTest.java` — 新增 1 个测试（claimCoupon_disabled_throwsBadRequest）
+- `trade-service/src/test/java/com/hmall/service/impl/OrderServiceImplTest.java` — 新增 5 个测试（null 订单检查 + 已发货退款）
+
+### Harness Task 更新
+- `docs/agent-harness/tasks/active/2026-06-03-enhance-unit-tests/context.md`
+- `docs/agent-harness/tasks/active/2026-06-03-enhance-unit-tests/verification.md`
+- `docs/agent-harness/tasks/active/2026-06-03-enhance-unit-tests/handoff.md`
 
 ## Commands Run
 
-- `mvn -B -ntp -pl user-service verify` — BUILD SUCCESS
-- `mvn -B -ntp -pl pay-service verify` — BUILD SUCCESS
-- `mvn -B -ntp verify` — 全模块 BUILD SUCCESS
+- `mvn -B -ntp -pl trade-service test` — 28 tests, 0 failures, BUILD SUCCESS
+- `mvn -B -ntp -pl trade-service verify -DskipIntegrationTests` — BUILD SUCCESS (JaCoCo 90.5%)
+- `mvn -B -ntp verify -DskipIntegrationTests` — 全模块 BUILD SUCCESS (80% 门控全部满足)
+
+## Coverage Results
+
+| 模块 | 分支覆盖率 | 状态 |
+|------|-----------|------|
+| trade-service | 90.5% (38/42) | ✓ |
+| item-service | 100.0% (2/2) | ✓ |
+| cart-service | 91.7% (11/12) | ✓ |
+| user-service | 97.1% (33/34) | ✓ |
+| pay-service | 91.7% (11/12) | ✓ |
+| file-service | 100.0% (2/2) | ✓ |
 
 ## Known Risks
 
-- notify-service 的测试因 Nacos 连接问题失败（已有问题，非本次变更引入）
-- notify-service 已被根 POM 排除在 JaCoCo 检查外
+- 无新增风险
 
 ## Next Action
 
-等待 CI 门控通过后合并 PR。
+提交 PR，等待 CI 门控通过后合并。
 
 ## Worktree Or Branch
 
