@@ -1,0 +1,116 @@
+/* ===========================================================
+   好集 HAOJI — 综合百货电商 · 设计系统
+   橙红促销 · 热闹明快 · 暖中性底
+   =========================================================== */
+
+:root {
+  /* Brand */
+  --brand: #ff4d2e; /* 主橙红 */
+  --brand-600: #f23b1b;
+  --brand-700: #d62e10;
+  --brand-soft: #ffede7; /* 浅底 */
+  --brand-softer: #fff6f2;
+  --price: #fa2c19; /* 价格红 */
+  --gold: #ffb020; /* 促销金 */
+  --gold-soft: #fff3dc;
+
+  /* Status */
+  --success: #1fa85a;
+  --success-soft: #e7f6ee;
+  --warn: #f59a12;
+  --warn-soft: #fff3df;
+  --danger: #f5320c;
+  --info: #2d7ff9;
+  --info-soft: #e9f1ff;
+
+  /* Warm neutrals */
+  --bg: #f5f4f2;
+  --bg-2: #efedea;
+  --surface: #ffffff;
+  --ink: #221b17;
+  --ink-2: #5c544e;
+  --ink-3: #938a83;
+  --line: #ece8e4;
+  --line-2: #e0dad4;
+
+  /* Product block palette (色块占位) */
+  --p1: #e8917b;
+  --p2: #e9b775;
+  --p3: #a7b58a;
+  --p4: #88a6b8;
+  --p5: #b79cc4;
+  --p6: #d98c8c;
+  --p7: #7fb6a6;
+  --p8: #c9a66b;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 18px;
+  --shadow-1: 0 1px 2px rgba(60, 40, 30, 0.05), 0 1px 3px rgba(60, 40, 30, 0.06);
+  --shadow-2: 0 6px 18px rgba(70, 45, 30, 0.08), 0 2px 6px rgba(70, 45, 30, 0.05);
+  --shadow-3: 0 18px 48px rgba(60, 35, 20, 0.14);
+  --maxw: 1200px;
+  --header-h: 72px;
+  --font:
+    'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --mono: 'SFMono-Regular', ui-monospace, Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-size: 14px;
+  line-height: 1.55;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+img {
+  display: block;
+  max-width: 100%;
+}
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+::selection {
+  background: var(--brand);
+  color: #fff;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.muted {
+  color: var(--ink-2);
+}
+.dim {
+  color: var(--ink-3);
+}
+.mono {
+  font-family: var(--mono);
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
+}

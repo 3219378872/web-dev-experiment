@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集后台 · 订单管理</title>
+<link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/admin.css">
+</head>
+<body class="admin" data-adm="orders">
+<div class="adm">
+  <aside id="adm-side"></aside>
+  <div class="adm-main">
+    <header id="adm-top" data-crumb="订单管理"></header>
+    <div class="adm-body">
+      <div class="adm-ph">
+        <div><h1>订单管理</h1><p>今日新增 1,286 单 · 待发货 28 · 待处理售后 6</p></div>
+        <div class="acts"><a class="btn btn-ghost">导出订单</a><a class="btn btn-ghost">批量发货</a></div>
+      </div>
+
+      <div class="acard" style="margin-bottom:16px">
+        <div class="tabs" style="padding:0 16px">
+          <button class="active">全部订单</button><button>待付款 (12)</button><button>待发货 <span style="color:var(--warn)">(28)</span></button>
+          <button>待收货 (156)</button><button>已完成 (1042)</button><button>退款/售后 <span style="color:var(--danger)">(6)</span></button><button>已关闭 (42)</button>
+        </div>
+      </div>
+
+      <div class="adm-filter">
+        <div class="field-inline">订单号 <input class="input" placeholder="输入订单号"></div>
+        <div class="field-inline">客户 <input class="input" placeholder="用户名 / 手机"></div>
+        <div class="field-inline">支付方式 <select class="select"><option>全部</option><option>微信</option><option>支付宝</option><option>余额</option></select></div>
+        <div class="field-inline">下单时间 <input class="input" placeholder="2026-05-01 ~ 2026-05-28"></div>
+        <div class="grow"></div>
+        <a class="btn btn-primary btn-sm">查询</a><a class="btn btn-ghost btn-sm">重置</a>
+      </div>
+
+      <div class="acard">
+        <table class="atable">
+          <thead><tr><th style="width:30px"><span class="checkbox"></span></th><th>订单号</th><th>客户</th><th>商品</th><th>金额</th><th>支付方式</th><th>下单时间</th><th>状态</th><th>操作</th></tr></thead>
+          <tbody id="order-rows"></tbody>
+        </table>
+        <div class="adm-pager"><span>共 28,640 条 · 每页 10 条</span>
+          <div class="pgs"><a>‹</a><a class="on">1</a><a>2</a><a>3</a><a>4</a><a>…</a><a>2864</a><a>›</a></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/admin.js"></script>
+<script>
+var orders=[
+ ['202605281588001','林晓','#88A6B8',[1,23],817,'微信','05-28 14:32','待付款','orange',['付款提醒','取消']],
+ ['202605281587044','陈一鸣','#DE9696',[2],269,'支付宝','05-28 14:28','待发货','orange',['发货','详情']],
+ ['202605281586018','王悦','#B0BE92',[5,24,13],444,'余额','05-28 14:15','待发货','orange',['发货','详情']],
+ ['202605281585077','刘洋','#C9A66B',[14,17],928,'银行卡','05-28 13:58','待收货','blue',['详情','物流']],
+ ['202605281584036','赵敏','#B79CC4',[12],129,'微信','05-28 13:42','已完成','green',['详情']],
+ ['202605281583092','孙浩','#7FB6A6',[16],129,'支付宝','05-28 13:30','退款中','red',['处理','详情']],
+ ['202605281582011','周婷','#E9B775',[19,21],447,'微信','05-28 13:12','已完成','green',['详情']],
+ ['202605281581055','吴磊','#92ADBD',[8],349,'余额','05-28 12:50','已发货','blue',['详情','物流']],
+ ['202605281580023','郑爽','#A7906B',[4,12],198,'支付宝','05-28 12:30','已关闭','gray',['详情']],
+ ['202605281579088','黄强','#9d7fb0',[9],1299,'微信','05-28 12:08','待发货','orange',['发货','详情']]
+];
+document.getElementById('order-rows').innerHTML = orders.map(function(o){
+  var names=o[3].map(function(id){return HAOJI.byId(id).n;});
+  var goodsTxt=names[0].slice(0,12)+(o[3].length>1?'… 等'+o[3].length+'件':'');
+  return '<tr><td><span class="checkbox"></span></td>'+
+    '<td class="mono" style="font-size:11.5px">'+o[0]+'</td>'+
+    '<td><span class="u-cell"><span class="u-av" style="background:'+o[2]+'">'+o[1][0]+'</span><span class="nm">'+o[1]+'</span></span></td>'+
+    '<td class="dim">'+goodsTxt+'</td><td class="amount">¥'+o[4].toLocaleString()+'</td>'+
+    '<td>'+o[5]+'</td><td class="dim">'+o[6]+'</td>'+
+    '<td><span class="sdot '+o[8]+'">'+o[7]+'</span></td>'+
+    '<td class="actions">'+o[9].map(function(a){return '<a class="lk'+(a==='发货'?'':' ')+'" href="order-detail.html">'+a+'</a>';}).join('')+'</td></tr>';
+}).join('');
+</script>
+</body>
+</html>

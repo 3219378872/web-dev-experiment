@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集 · 商品详情</title>
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  .pd{display:grid;grid-template-columns:440px 1fr;gap:30px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin:8px 0 20px;}
+  .gallery .main{aspect-ratio:1;border-radius:12px;overflow:hidden;}
+  .gallery .main .ph{width:100%;height:100%;}
+  .gallery .main .glyph{font-size:90px;}
+  .thumbs{display:flex;gap:9px;margin-top:12px;}
+  .thumbs .ph{width:64px;height:64px;border-radius:8px;cursor:pointer;border:2px solid transparent;}
+  .thumbs .ph.on{border-color:var(--brand);}
+  .gallery .acts{display:flex;gap:18px;margin-top:16px;justify-content:center;font-size:13px;color:var(--ink-2);}
+  .gallery .acts a{display:flex;align-items:center;gap:6px;}
+  .gallery .acts a:hover{color:var(--brand);}
+
+  .pinfo h1{font-size:24px;font-weight:700;line-height:1.4;letter-spacing:-.3px;}
+  .pinfo .promo-tag{display:inline-block;background:var(--brand);color:#fff;font-size:12px;font-weight:700;padding:1px 7px;border-radius:4px;margin-right:6px;vertical-align:middle;}
+  .pinfo .subtitle{color:var(--price);font-size:13.5px;margin-top:8px;font-weight:500;}
+  .pinfo .rate-row{display:flex;gap:20px;margin-top:14px;font-size:12.5px;color:var(--ink-3);}
+  .pinfo .rate-row b{color:var(--ink);font-size:15px;}
+
+  .price-box{background:linear-gradient(100deg,#FFF1EB,#FFE6DC);border-radius:12px;padding:18px 20px;margin-top:16px;position:relative;overflow:hidden;}
+  .price-box .lab{font-size:12px;color:var(--price);}
+  .price-box .now{color:var(--price);font-weight:900;font-size:36px;letter-spacing:-1px;}
+  .price-box .now .cur{font-size:18px;}
+  .price-box .old{color:var(--ink-3);text-decoration:line-through;margin-left:10px;font-size:14px;}
+  .price-box .coupon{position:absolute;right:18px;top:16px;display:flex;gap:8px;}
+  .price-box .coupon .c{background:#fff;border:1px dashed var(--brand);color:var(--price);font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;}
+
+  .spec{margin-top:18px;}
+  .spec .line{display:grid;grid-template-columns:64px 1fr;gap:14px;padding:11px 0;align-items:center;}
+  .spec .line .k{color:var(--ink-3);font-size:13px;}
+  .spec .opts{display:flex;flex-wrap:wrap;gap:9px;}
+  .spec .opt{border:1px solid var(--line-2);border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;background:#fff;display:flex;align-items:center;gap:7px;}
+  .spec .opt.on{border-color:var(--brand);background:var(--brand-softer);color:var(--brand-700);font-weight:700;}
+  .spec .opt .sw{width:16px;height:16px;border-radius:4px;}
+
+  .buy-row{display:flex;gap:12px;margin-top:24px;}
+  .buy-row .btn{flex:1;}
+  .svc-row{display:flex;gap:20px;margin-top:16px;font-size:12.5px;color:var(--ink-2);flex-wrap:wrap;}
+  .svc-row span{display:flex;align-items:center;gap:6px;}
+  .svc-row span::before{content:'✓';color:var(--success);font-weight:900;}
+
+  /* shop card */
+  .shopbar{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;}
+  .shopbar .logo2{width:46px;height:46px;border-radius:11px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-size:22px;font-weight:900;}
+  .shopbar .meta b{font-size:15px;}
+  .shopbar .meta .st{font-size:12px;color:var(--ink-3);display:flex;gap:12px;margin-top:3px;}
+  .shopbar .acts{margin-left:auto;display:flex;gap:10px;}
+
+  /* detail tabs */
+  .dlayout{display:grid;grid-template-columns:1fr 280px;gap:20px;}
+  .dtabs{position:sticky;top:118px;z-index:20;background:#fff;border:1px solid var(--line);border-radius:var(--radius) var(--radius) 0 0;border-bottom:0;}
+  .ptable{width:100%;border-collapse:collapse;}
+  .ptable td{border:1px solid var(--line);padding:11px 16px;font-size:13px;}
+  .ptable td.k{background:var(--bg);color:var(--ink-3);width:130px;font-weight:500;}
+  .detail-imgs .ph{width:100%;aspect-ratio:16/7;border-radius:10px;margin-bottom:12px;}
+  .detail-imgs .ph .glyph{font-size:60px;}
+
+  /* reviews */
+  .rev-summary{display:grid;grid-template-columns:200px 1fr;gap:24px;padding:20px 4px;align-items:center;}
+  .rev-score{text-align:center;}
+  .rev-score .big{font-size:46px;font-weight:900;color:var(--gold);line-height:1;}
+  .rev-bars{display:flex;flex-direction:column;gap:7px;}
+  .rev-bars .rb{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink-3);}
+  .rev-bars .rb .track{flex:1;height:7px;background:var(--bg-2);border-radius:999px;overflow:hidden;}
+  .rev-bars .rb .track i{display:block;height:100%;background:var(--gold);}
+  .rev-filters{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 16px;}
+  .review{display:flex;gap:14px;padding:18px 0;border-top:1px solid var(--line);}
+  .review .av{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;color:#fff;font-weight:700;}
+  .review .who{display:flex;align-items:center;gap:10px;}
+  .review .who b{font-size:13.5px;}
+  .review .body{font-size:13.5px;color:var(--ink);margin:7px 0;line-height:1.6;}
+  .review .imgs{display:flex;gap:8px;}
+  .review .imgs .ph{width:74px;height:74px;border-radius:8px;}
+  .review .spec-buy{font-size:12px;color:var(--ink-3);margin-top:8px;}
+
+  /* right rail */
+  .rail-box{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:14px;}
+  .rail-box h4{font-size:13px;font-weight:700;margin-bottom:12px;}
+  .rail-prod{display:flex;gap:10px;margin-bottom:12px;}
+  .rail-prod .ph{width:60px;height:60px;border-radius:8px;flex-shrink:0;}
+  .rail-prod .nm{font-size:12px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .rail-prod .pr{color:var(--price);font-weight:900;font-size:14px;margin-top:4px;}
+</style>
+</head>
+<body data-cart="3">
+<div id="app-topbar"></div>
+<div id="app-header"></div>
+<div id="app-catnav"></div>
+
+<div class="wrap">
+  <div class="crumb"><a href="index.html">首页</a><span class="s">/</span><a href="category.html">手机数码</a><span class="s">/</span><a href="category.html">影音娱乐</a><span class="s">/</span><b style="color:var(--ink)">蓝牙耳机</b></div>
+
+  <!-- 主信息 -->
+  <section class="pd">
+    <div class="gallery">
+      <div class="main"><div class="ph s4" data-label="product · 1200×1200"><span class="glyph">▣</span></div></div>
+      <div class="thumbs">
+        <div class="ph s4 on" data-label=""></div>
+        <div class="ph s7" data-label=""></div>
+        <div class="ph s1" data-label=""></div>
+        <div class="ph s5" data-label=""></div>
+        <div class="ph s3" data-label=""></div>
+      </div>
+      <div class="acts">
+        <a id="fav-btn">♡ 收藏商品</a>
+        <a>⤴ 分享</a>
+        <a>⚖ 对比</a>
+      </div>
+    </div>
+
+    <div class="pinfo">
+      <h1><span class="promo-tag">自营</span>TWS 主动降噪蓝牙耳机 入耳式 长续航 游戏低延迟 通用版</h1>
+      <div class="subtitle">🔥 好集 618 直降 200，前 100 名加赠充电仓保护套</div>
+      <div class="rate-row">
+        <span><b>4.9</b> 综合评分</span>
+        <span><b>1.2万</b> 累计评价</span>
+        <span><b>8421</b> 件已售</span>
+        <span><b>98%</b> 好评率</span>
+      </div>
+
+      <div class="price-box">
+        <div class="coupon"><span class="c">满300减50</span><span class="c">9折券</span></div>
+        <div class="lab">好集价</div>
+        <div><span class="now"><span class="cur">¥</span>299</span><span class="old">¥499</span></div>
+      </div>
+
+      <div class="spec">
+        <div class="line"><span class="k">颜色</span>
+          <div class="opts">
+            <span class="opt on"><span class="sw" style="background:#221B17"></span>曜石黑</span>
+            <span class="opt"><span class="sw" style="background:#F2F0EC;border:1px solid #ddd"></span>云母白</span>
+            <span class="opt"><span class="sw" style="background:#88A6B8"></span>雾霾蓝</span>
+          </div>
+        </div>
+        <div class="line"><span class="k">版本</span>
+          <div class="opts">
+            <span class="opt on">标准版</span>
+            <span class="opt">降噪增强版 +¥80</span>
+            <span class="opt">游戏专业版 +¥150</span>
+          </div>
+        </div>
+        <div class="line"><span class="k">数量</span>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="qty"><button>−</button><input value="1"><button>+</button></div>
+            <span class="dim" style="font-size:12.5px">库存 <b style="color:var(--ink-2)">238</b> 件 · 上海仓 现货</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="buy-row">
+        <a class="btn btn-hot btn-lg" href="cart.html">🛒 加入购物车</a>
+        <a class="btn btn-gold btn-lg" href="checkout.html">⚡ 立即购买</a>
+      </div>
+      <div class="svc-row">
+        <span>好集自营</span><span>当日发货</span><span>七天无理由</span><span>假一赔十</span><span>全国联保</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 店铺 -->
+  <div class="shopbar">
+    <div class="logo2">集</div>
+    <div class="meta"><b>好集数码官方旗舰店</b>
+      <div class="st"><span>商品 1240</span><span>关注 86万</span><span>评分 4.9 / 5.0</span></div>
+    </div>
+    <div class="acts"><a class="btn btn-outline btn-sm" href="#">进入店铺</a><a class="btn btn-ghost btn-sm" href="service.html">联系客服</a></div>
+  </div>
+
+  <!-- 详情区 -->
+  <div class="dlayout">
+    <div>
+      <div class="dtabs tabs">
+        <a class="active">商品详情</a><a>规格参数</a><a href="#reviews">用户评价 (1.2万)</a><a>售后保障</a>
+      </div>
+      <div class="panel" style="border-radius:0 0 var(--radius) var(--radius);border-top:0;padding:24px">
+
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:14px">规格参数</h3>
+        <table class="ptable">
+          <tr><td class="k">品牌</td><td>好集严选 HAOJI</td><td class="k">型号</td><td>HJ-Air Pro</td></tr>
+          <tr><td class="k">蓝牙版本</td><td>蓝牙 5.3</td><td class="k">续航</td><td>单次 8h / 总 32h</td></tr>
+          <tr><td class="k">降噪深度</td><td>-42dB 主动降噪</td><td class="k">防水等级</td><td>IPX5 生活防水</td></tr>
+          <tr><td class="k">充电接口</td><td>Type-C</td><td class="k">适用</td><td>iOS / Android 通用</td></tr>
+          <tr><td class="k">单耳重量</td><td>4.3g</td><td class="k">包装清单</td><td>耳机×2 充电仓 耳帽×3 数据线 说明书</td></tr>
+        </table>
+
+        <h3 style="font-size:16px;font-weight:700;margin:26px 0 14px">商品介绍</h3>
+        <div class="detail-imgs">
+          <div class="ph s4" data-label="detail · 1200×520"><span class="glyph">▣</span></div>
+          <p class="muted" style="font-size:13.5px;line-height:1.8;margin:10px 0">采用第三代主动降噪芯片，深度可达 -42dB，有效隔绝地铁、飞机等低频噪声。入耳式人体工学设计，佩戴稳固舒适，长时间使用不易疲劳。游戏模式下端到端延迟低至 60ms，听声辨位更精准。</p>
+          <div class="ph s7" data-label="detail · 1200×520"><span class="glyph">◐</span></div>
+          <div class="ph s1" data-label="detail · 1200×520" style="margin-top:12px"><span class="glyph">✦</span></div>
+        </div>
+
+        <!-- 评价 -->
+        <h3 id="reviews" style="font-size:16px;font-weight:700;margin:30px 0 0;scroll-margin-top:130px">用户评价</h3>
+        <div class="rev-summary">
+          <div class="rev-score">
+            <div class="big">4.9</div>
+            <div class="stars" style="font-size:16px;justify-content:center;margin-top:6px">★★★★★</div>
+            <div class="muted" style="font-size:12px;margin-top:6px">98% 好评 · 共 12,043 条</div>
+          </div>
+          <div class="rev-bars">
+            <div class="rb"><span>5星</span><div class="track"><i style="width:92%"></i></div><span>11080</span></div>
+            <div class="rb"><span>4星</span><div class="track"><i style="width:6%"></i></div><span>720</span></div>
+            <div class="rb"><span>3星</span><div class="track"><i style="width:1.5%"></i></div><span>180</span></div>
+            <div class="rb"><span>2星</span><div class="track"><i style="width:0.4%"></i></div><span>48</span></div>
+            <div class="rb"><span>1星</span><div class="track"><i style="width:0.1%"></i></div><span>15</span></div>
+          </div>
+        </div>
+        <div class="rev-filters">
+          <span class="chip on">全部 12043</span><span class="chip">有图 3204</span>
+          <span class="chip">好评 11800</span><span class="chip">中评 198</span>
+          <span class="chip">差评 45</span><span class="chip">降噪效果好 2310</span>
+          <span class="chip">续航持久 1880</span><span class="chip">音质不错 1542</span>
+        </div>
+
+        <div id="rev-list"></div>
+
+        <div style="text-align:center;margin-top:18px">
+          <a class="btn btn-ghost" href="#">查看全部 12,043 条评价 ›</a>
+        </div>
+
+        <!-- 写评价 -->
+        <div class="panel" style="background:var(--bg);border:1px dashed var(--line-2);padding:18px;margin-top:22px">
+          <h4 style="font-size:14px;font-weight:700;margin-bottom:12px">✍ 发表评价</h4>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:13px">
+            <span class="muted">评分</span><span class="stars" style="font-size:20px">★★★★★</span><span class="muted">非常满意</span>
+          </div>
+          <textarea class="input" rows="3" placeholder="说说这件商品怎么样，分享给想买的小伙伴～"></textarea>
+          <div style="display:flex;gap:10px;margin-top:12px">
+            <div class="ph" style="width:70px;height:70px;border:2px dashed var(--line-2);background:#fff;color:var(--ink-3)" data-label=""><span style="font-size:24px;color:var(--ink-3)">＋</span></div>
+            <div class="ph" style="width:70px;height:70px;border:2px dashed var(--line-2);background:#fff" data-label=""><span style="font-size:11px;color:var(--ink-3);font-family:var(--mono)">上传图</span></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+            <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2)"><span class="checkbox on">✓</span>匿名评价</label>
+            <button class="btn btn-primary">提交评价</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 右栏推荐 -->
+    <aside>
+      <div class="rail-box">
+        <h4>🔥 看了又看</h4>
+        <div id="rail-rec"></div>
+      </div>
+      <div class="rail-box" style="background:linear-gradient(135deg,#FFF3DC,#FFE2C0);border-color:#F3D9A0">
+        <h4 style="color:#8a5d00">🎟 本店优惠券</h4>
+        <div class="mini-coupon" style="display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:8px;padding:9px 12px;margin-bottom:8px">
+          <span><b style="color:var(--price);font-size:17px">¥20</b> <small class="dim">满199</small></span>
+          <button class="btn btn-primary btn-sm">领取</button></div>
+        <div class="mini-coupon" style="display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:8px;padding:9px 12px">
+          <span><b style="color:var(--price);font-size:17px">¥50</b> <small class="dim">满399</small></span>
+          <button class="btn btn-primary btn-sm">领取</button></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div id="app-footer"></div>
+<script src="../assets/data.js"></script>
+<script src="../assets/shared.js"></script>
+<script>
+  // 评价
+  var revs=[
+    {n:'数码控**朋',av:'#88A6B8',s:5,t:'降噪效果真的绝了，地铁上几乎听不到外界声音，戴一天耳朵也不胀。续航很顶，一周才充一次电。',spec:'曜石黑 · 标准版',imgs:['s4','s7'],date:'2026-05-28',tag:'追评'},
+    {n:'爱生活的**子',av:'#DE9696',s:5,t:'颜值在线，磨砂手感很高级。连接很快，切换设备无缝。这个价位性价比拉满！',spec:'云母白 · 降噪增强版',imgs:['s1'],date:'2026-05-26'},
+    {n:'l***9',av:'#B0BE92',s:4,t:'整体不错，音质偏流行调，低音有点轰头但可以接受。游戏延迟确实很低。',spec:'雾霾蓝 · 游戏专业版',imgs:[],date:'2026-05-22'}
+  ];
+  document.getElementById('rev-list').innerHTML = revs.map(function(r){
+    var st='★★★★★'.slice(0,r.s)+'<span class="off">'+'★★★★★'.slice(r.s)+'</span>';
+    return '<div class="review"><div class="av" style="background:'+r.av+'">'+r.n[0]+'</div>'+
+      '<div style="flex:1"><div class="who"><b>'+r.n+'</b><span class="stars">'+st+'</span>'+
+        (r.tag?'<span class="tag tag-brand">'+r.tag+'</span>':'')+'<span class="dim" style="margin-left:auto;font-size:12px">'+r.date+'</span></div>'+
+      '<div class="body">'+r.t+'</div>'+
+      (r.imgs.length?'<div class="imgs">'+r.imgs.map(function(s){return '<div class="ph '+s+'" data-label=""></div>';}).join('')+'</div>':'')+
+      '<div class="spec-buy">已购：'+r.spec+'</div></div></div>';
+  }).join('');
+
+  // 推荐
+  var rec = HAOJI.P.filter(function(x){return x.cat=='手机数码';}).slice(0,4);
+  document.getElementById('rail-rec').innerHTML = rec.map(function(p){
+    return '<a class="rail-prod" href="product.html?id='+p.id+'">'+HAOJI.phBlock(p)+
+      '<div><div class="nm">'+p.n+'</div><div class="pr">¥'+p.p+'</div></div></a>';
+  }).join('');
+
+  // 收藏切换
+  document.getElementById('fav-btn').onclick=function(){
+    var on=this.textContent.indexOf('已收藏')>-1;
+    this.textContent=on?'♡ 收藏商品':'♥ 已收藏';
+    this.style.color=on?'':'var(--brand)';
+  };
+</script>
+</body>
+</html>

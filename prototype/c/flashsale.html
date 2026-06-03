@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集 · 限时秒杀</title>
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  body{background:#2A1410;}
+  .fs-hero{background:radial-gradient(120% 100% at 50% 0,#5A271C,#2A1410);color:#fff;padding:30px 0 0;}
+  .fs-hero .wrap{text-align:center;}
+  .fs-hero .lg{font-size:46px;font-weight:900;letter-spacing:-1px;}
+  .fs-hero .lg span{color:var(--gold);}
+  .fs-hero .sub{opacity:.8;margin-top:6px;}
+  .fs-timeline{display:flex;gap:0;justify-content:center;margin:28px 0 0;background:rgba(0,0,0,.25);border-radius:14px 14px 0 0;overflow:hidden;}
+  .fs-slot{padding:14px 30px;text-align:center;color:rgba(255,255,255,.65);border-bottom:3px solid transparent;cursor:pointer;}
+  .fs-slot.on{color:#fff;border-bottom-color:var(--gold);background:rgba(255,176,32,.08);}
+  .fs-slot .t{font-size:20px;font-weight:900;}
+  .fs-slot .s{font-size:12px;margin-top:2px;}
+  .fs-slot.on .s{color:var(--gold);font-weight:700;}
+  .cd-bar{display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;color:#fff;}
+  .cd-bar b{background:var(--gold);color:#5a2c00;width:38px;height:38px;border-radius:8px;display:grid;place-items:center;font-size:20px;font-weight:900;}
+  .cd-bar i{color:var(--gold);font-style:normal;font-weight:900;font-size:18px;}
+  .fs-body{background:var(--bg);padding:24px 0 50px;}
+  .fs-card{background:#fff;border-radius:12px;overflow:hidden;transition:.15s;}
+  .fs-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-2);}
+  .fs-card .ph{aspect-ratio:1;}
+  .fs-card .b{padding:12px;}
+  .fs-card .nm{font-size:13px;line-height:1.4;height:36px;overflow:hidden;color:var(--ink);}
+  .fs-card .pr{display:flex;align-items:baseline;gap:6px;margin-top:8px;}
+  .fs-card .pr .now{color:var(--price);font-weight:900;font-size:20px;}
+  .fs-card .pr .old{color:var(--ink-3);text-decoration:line-through;font-size:12px;}
+  .fs-card .bar{height:18px;border-radius:999px;background:var(--brand-soft);margin-top:10px;position:relative;overflow:hidden;}
+  .fs-card .bar i{display:block;height:100%;background:linear-gradient(90deg,#FF7A45,var(--brand));}
+  .fs-card .bar span{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;color:#fff;font-weight:700;}
+  .fs-card .btn{margin:10px 12px 12px;}
+</style>
+</head>
+<body data-cart="3">
+<div id="app-topbar"></div>
+<div id="app-header"></div>
+
+<div class="fs-hero">
+  <div class="wrap">
+    <div class="lg">⚡ 限时<span>秒杀</span> FLASH SALE</div>
+    <div class="sub">整点开抢 · 限量特价 · 抢完即止</div>
+    <div class="fs-timeline">
+      <div class="fs-slot on"><div class="t">12:00</div><div class="s">疯抢中</div></div>
+      <div class="fs-slot"><div class="t">14:00</div><div class="s">即将开始</div></div>
+      <div class="fs-slot"><div class="t">16:00</div><div class="s">即将开始</div></div>
+      <div class="fs-slot"><div class="t">18:00</div><div class="s">敬请期待</div></div>
+      <div class="fs-slot"><div class="t">20:00</div><div class="s">敬请期待</div></div>
+      <div class="fs-slot"><div class="t">22:00</div><div class="s">敬请期待</div></div>
+    </div>
+    <div class="cd-bar"><span style="opacity:.8">本场距结束</span><b>01</b><i>:</i><b>48</b><i>:</i><b>13</b></div>
+  </div>
+</div>
+
+<div class="fs-body">
+  <div class="wrap">
+    <div class="grid g5" id="fs-grid"></div>
+    <div class="pager"><a class="cur">1</a><a>2</a><a>3</a><a>4</a><a>›</a></div>
+  </div>
+</div>
+
+<div id="app-footer"></div>
+<script src="../assets/data.js"></script>
+<script src="../assets/shared.js"></script>
+<script>
+  var list = HAOJI.P.concat(HAOJI.P).slice(0,15);
+  var pcts=[88,72,95,45,60,82,38,90,55,78,42,68,93,50,75];
+  document.getElementById('fs-grid').innerHTML = list.map(function(p,i){
+    var pct=pcts[i], fp=Math.round(p.p*0.7);
+    return '<a class="fs-card" href="product.html?id='+p.id+'">'+HAOJI.phBlock(p)+
+      '<div class="b"><div class="nm">'+p.n+'</div>'+
+      '<div class="pr"><span class="now">¥'+fp+'</span><span class="old">¥'+p.o+'</span></div>'+
+      '<div class="bar"><i style="width:'+pct+'%"></i><span>已抢 '+pct+'%</span></div></div>'+
+      '<button class="btn '+(pct>=95?'btn-ghost':'btn-hot')+' btn-block">'+(pct>=95?'即将抢光':'立即抢购')+'</button></a>';
+  }).join('');
+</script>
+</body>
+</html>

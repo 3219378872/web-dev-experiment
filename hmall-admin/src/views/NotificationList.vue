@@ -1,39 +1,142 @@
 <template>
   <div>
-    <h2>公告管理</h2>
-    <el-button type="primary" style="margin: 16px 0" @click="showDialog(null)">发布公告</el-button
-    ><el-table :data="notifications"
-      ><el-table-column prop="title" label="标题" /><el-table-column
-        prop="publishTime"
-        label="发布时间"
-        width="180"
-      /><el-table-column label="状态" width="80"
-        ><template #default="{ row }"
-          ><el-tag :type="row.status === 1 ? 'success' : 'info'">{{
-            row.status === 1 ? '发布' : '下架'
-          }}</el-tag></template
-        ></el-table-column
-      ><el-table-column label="操作" width="200"
-        ><template #default="{ row }"
-          ><el-button size="small" @click="showDialog(row)">编辑</el-button
-          ><el-button size="small" type="danger" @click="del(row.id)">删除</el-button></template
-        ></el-table-column
-      ></el-table
-    >
-    <el-dialog v-model="dialogVisible" :title="editing ? '编辑公告' : '发布公告'"
-      ><el-form :model="form" label-width="80px"
-        ><el-form-item label="标题"><el-input v-model="form.title" /></el-form-item
-        ><el-form-item label="内容"
-          ><el-input v-model="form.content" type="textarea" :rows="4" /></el-form-item
-        ><template #footer
-          ><el-button type="primary" @click="save">保存</el-button></template
-        ></el-form
-      ></el-dialog
-    >
+    <div class="adm-ph">
+      <div>
+        <h1>公告管理</h1>
+        <p>共 {{ total }} 条公告</p>
+      </div>
+    </div>
+
+    <div class="ann-grid">
+      <div class="acard">
+        <div class="ah">
+          <h3>公告列表</h3>
+          <div style="display: flex; gap: 8px">
+            <el-select
+              v-model="categoryFilter"
+              placeholder="全部分类"
+              size="small"
+              style="width: 120px"
+            >
+              <el-option label="全部分类" value="" />
+              <el-option label="活动促销" value="promo" />
+              <el-option label="系统通知" value="system" />
+            </el-select>
+          </div>
+        </div>
+        <table class="atable">
+          <thead>
+            <tr>
+              <th>标题</th>
+              <th>分类</th>
+              <th>状态</th>
+              <th>发布时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in filteredNotifications" :key="row.id">
+              <td>
+                <div style="font-weight: 600; max-width: 260px">
+                  <span v-if="row.pinned" class="tag tag-price" style="margin-right: 6px">顶</span>
+                  {{ row.title }}
+                </div>
+              </td>
+              <td>
+                <span class="tag" :class="categoryTag(row.category)">{{
+                  row.category || '系统通知'
+                }}</span>
+              </td>
+              <td>
+                <span class="sdot" :class="row.status === 1 ? 'green' : 'gray'">{{
+                  row.status === 1 ? '已发布' : '草稿'
+                }}</span>
+              </td>
+              <td class="dim">{{ row.publishTime?.slice(0, 16) || '—' }}</td>
+              <td class="actions">
+                <span class="lk" @click="showDialog(row)">编辑</span>
+                <span class="lk" @click="toggleStatus(row)">{{
+                  row.status === 1 ? '下线' : '发布'
+                }}</span>
+                <span class="lk danger" @click="del(row.id)">删除</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="adm-pager">
+          <span>共 {{ total }} 条</span>
+          <el-pagination
+            v-model:current-page="page"
+            :page-size="pageSize"
+            :total="total"
+            background
+            layout="prev, pager, next"
+            @current-change="fetch"
+          />
+        </div>
+      </div>
+
+      <aside class="acard">
+        <div class="ah"><h3>＋ 发布公告</h3></div>
+        <div class="ab" style="display: flex; flex-direction: column; gap: 16px">
+          <div class="field">
+            <label>公告标题</label>
+            <el-input v-model="form.title" placeholder="请输入公告标题" />
+          </div>
+          <div class="field">
+            <label>公告分类</label>
+            <el-select v-model="form.category" placeholder="请选择" style="width: 100%">
+              <el-option label="活动促销" value="promo" />
+              <el-option label="系统通知" value="system" />
+              <el-option label="规则更新" value="rule" />
+              <el-option label="安全公告" value="security" />
+              <el-option label="维护通知" value="maint" />
+            </el-select>
+          </div>
+          <div class="field">
+            <label>公告内容</label>
+            <el-input
+              v-model="form.content"
+              type="textarea"
+              :rows="5"
+              placeholder="请输入公告正文…"
+            />
+          </div>
+          <div style="display: flex; gap: 18px">
+            <label style="display: flex; gap: 8px; align-items: center; font-size: 13px">
+              <el-checkbox v-model="form.pinned" />
+              置顶
+            </label>
+            <label style="display: flex; gap: 8px; align-items: center; font-size: 13px">
+              <el-checkbox v-model="form.popup" />
+              弹窗提醒
+            </label>
+          </div>
+          <div style="display: flex; gap: 10px">
+            <el-button type="primary" style="flex: 1" @click="save">立即发布</el-button>
+            <el-button class="btn-ghost" @click="saveDraft">存草稿</el-button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <el-dialog v-model="dialogVisible" :title="editing ? '编辑公告' : '发布公告'" width="520px">
+      <el-form :model="editForm" label-width="80px">
+        <el-form-item label="标题"><el-input v-model="editForm.title" /></el-form-item>
+        <el-form-item label="内容"
+          ><el-input v-model="editForm.content" type="textarea" :rows="4"
+        /></el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="doEditSave">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
+
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import {
   getNotifications,
   saveNotification,
@@ -41,34 +144,59 @@ import {
   deleteNotification,
 } from '@/api/system';
 import { ElMessage } from 'element-plus';
+
 const notifications = ref([]);
+const page = ref(1);
+const pageSize = ref(10);
+const total = ref(0);
+const categoryFilter = ref('');
 const dialogVisible = ref(false);
 const editing = ref(null);
-const form = reactive({ title: '', content: '', publishTime: '' });
+const form = reactive({ title: '', content: '', category: 'promo', pinned: false, popup: false });
+const editForm = reactive({ title: '', content: '' });
+
+const filteredNotifications = computed(() => {
+  if (!categoryFilter.value) return notifications.value;
+  return notifications.value.filter((n) => n.category === categoryFilter.value);
+});
+
+function categoryTag(cat) {
+  const map = {
+    promo: 'tag-gold',
+    system: 'tag-new',
+    rule: 'tag-ghost',
+    security: 'tag-warn',
+    maint: 'tag-ghost',
+  };
+  return map[cat] || 'tag-ghost';
+}
+
 async function fetch() {
   try {
     const r = await getNotifications();
     notifications.value = r.list || [];
+    total.value = r.total || notifications.value.length;
   } catch (err) {
     console.error(err);
   }
 }
+
 function showDialog(row) {
   if (row) {
     editing.value = row;
-    Object.assign(form, row);
+    Object.assign(editForm, row);
   } else {
     editing.value = null;
-    form.title = '';
-    form.content = '';
-    form.publishTime = new Date().toISOString();
+    editForm.title = '';
+    editForm.content = '';
   }
   dialogVisible.value = true;
 }
-async function save() {
+
+async function doEditSave() {
   try {
-    if (editing.value) await updateNotification(editing.value.id, form);
-    else await saveNotification(form);
+    if (editing.value) await updateNotification(editing.value.id, editForm);
+    else await saveNotification(editForm);
     dialogVisible.value = false;
     fetch();
     ElMessage.success('已保存');
@@ -76,6 +204,45 @@ async function save() {
     console.error(err);
   }
 }
+
+async function save() {
+  try {
+    await saveNotification({ ...form, status: 1, publishTime: new Date().toISOString() });
+    form.title = '';
+    form.content = '';
+    form.pinned = false;
+    form.popup = false;
+    fetch();
+    ElMessage.success('已发布');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function saveDraft() {
+  try {
+    await saveNotification({ ...form, status: 0 });
+    form.title = '';
+    form.content = '';
+    form.pinned = false;
+    form.popup = false;
+    fetch();
+    ElMessage.success('已存草稿');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function toggleStatus(row) {
+  try {
+    await updateNotification(row.id, { ...row, status: row.status === 1 ? 0 : 1 });
+    fetch();
+    ElMessage.success('已更新');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 async function del(id) {
   try {
     await deleteNotification(id);
@@ -85,5 +252,170 @@ async function del(id) {
     console.error(err);
   }
 }
+
 fetch();
 </script>
+
+<style scoped>
+.adm-ph {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.adm-ph h1 {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.adm-ph p {
+  color: var(--ink-3);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.ann-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 16px;
+  align-items: start;
+}
+
+.acard {
+  background: #fff;
+  border: 1px solid var(--admin-line);
+  border-radius: 14px;
+}
+.acard .ah {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--admin-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.acard .ah h3 {
+  font-size: 15px;
+  font-weight: 700;
+}
+.acard .ab {
+  padding: 20px;
+}
+
+.atable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.atable thead th {
+  background: var(--admin-bg);
+  color: var(--ink-3);
+  font-weight: 700;
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--admin-line);
+}
+.atable tbody td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--admin-line);
+  vertical-align: middle;
+}
+.atable tbody tr:hover {
+  background: #fbfbfc;
+}
+.atable tbody tr:last-child td {
+  border-bottom: 0;
+}
+.atable .actions {
+  display: flex;
+  gap: 10px;
+}
+.atable .lk {
+  color: var(--info);
+  cursor: pointer;
+  font-size: 12.5px;
+}
+.atable .lk:hover {
+  text-decoration: underline;
+}
+.atable .lk.danger {
+  color: var(--danger);
+}
+
+.adm-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid var(--admin-line);
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+.tag-price {
+  background: var(--price);
+  color: #fff;
+}
+.tag-gold {
+  background: var(--gold-soft);
+  color: #9a6a00;
+}
+.tag-new {
+  background: var(--info-soft);
+  color: #1257c4;
+}
+.tag-warn {
+  background: var(--warn-soft);
+  color: #9a5e00;
+}
+.tag-ghost {
+  background: var(--bg-2);
+  color: var(--ink-2);
+}
+
+.sdot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+}
+.sdot::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.sdot.green {
+  color: var(--success);
+}
+.sdot.gray {
+  color: var(--ink-3);
+}
+
+.dim {
+  color: var(--ink-3);
+}
+</style>

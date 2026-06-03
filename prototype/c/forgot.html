@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集 · 找回密码</title>
+<link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/auth.css">
+<style>
+  .fp-steps{display:flex;align-items:center;margin-bottom:26px;}
+</style>
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-top"><a class="logo" href="index.html"><span class="mark">集</span><span class="name">好集<small>HAOJI MALL</small></span></a></div>
+  <div class="auth-wrap">
+    <div class="auth-promo">
+      <div class="eyebrow">账户安全</div>
+      <h1>找回密码<br>三步重置登录密码</h1>
+      <p>通过注册邮箱或手机号验证身份，安全便捷地重置您的登录密码。</p>
+      <div class="auth-feats">
+        <div class="f"><span class="d">📧</span>邮箱验证</div>
+        <div class="f"><span class="d">🔐</span>身份核验</div>
+        <div class="f"><span class="d">✓</span>重置完成</div>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <h2>找回密码</h2>
+      <div class="sub">记起密码了？<a href="login.html" style="color:var(--brand);font-weight:700">返回登录 ›</a></div>
+
+      <div class="steps fp-steps">
+        <div class="st on"><span class="n">1</span>验证身份</div><div class="line"></div>
+        <div class="st"><span class="n">2</span>设置新密码</div><div class="line"></div>
+        <div class="st"><span class="n">3</span>完成</div>
+      </div>
+
+      <div class="field"><label>注册邮箱 / 手机号</label>
+        <input class="input" placeholder="请输入注册时的邮箱或手机号"></div>
+      <div class="field"><label>图形验证码</label>
+        <div class="code-row"><input class="input" placeholder="请输入右侧字符">
+          <span style="width:96px;border-radius:8px;background:linear-gradient(110deg,#88A6B8,#B79CC4);display:grid;place-items:center;color:#fff;font-weight:900;letter-spacing:4px;font-style:italic;font-size:18px">8 K 2 d</span></div></div>
+      <div class="field"><label>短信/邮箱验证码</label>
+        <div class="code-row"><input class="input" placeholder="6 位验证码"><button class="btn btn-outline">获取验证码</button></div></div>
+
+      <a class="btn btn-hot btn-lg btn-block" style="margin-top:8px">下一步</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集 · 收货地址</title>
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  .addr-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  .ad{border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;position:relative;background:#fff;}
+  .ad.def{border-color:var(--brand);}
+  .ad .who{font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px;}
+  .ad .who .tel{color:var(--ink-2);font-weight:400;font-size:13.5px;}
+  .ad .det{font-size:13px;color:var(--ink-2);margin-top:10px;line-height:1.6;}
+  .ad .tags{margin-top:12px;display:flex;gap:6px;}
+  .ad .acts{display:flex;gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid var(--bg);font-size:12.5px;}
+  .ad .acts a{color:var(--ink-3);}
+  .ad .acts a:hover{color:var(--brand);}
+  .ad .acts .set{color:var(--brand);}
+  .ad.add{border-style:dashed;display:grid;place-items:center;color:var(--ink-3);cursor:pointer;min-height:170px;}
+  .ad.add:hover{border-color:var(--brand);color:var(--brand);}
+
+  .addr-form{border:1px solid var(--line);border-radius:var(--radius);padding:22px;background:var(--bg);margin-bottom:18px;}
+  .addr-form h4{font-size:15px;font-weight:700;margin-bottom:16px;}
+  .ff-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .ff-grid .full{grid-column:1/-1;}
+</style>
+</head>
+<body data-cart="3" data-acct="address.html">
+<div id="app-topbar"></div>
+<div id="app-header"></div>
+<div id="app-catnav"></div>
+
+<div class="wrap">
+  <div class="crumb"><a href="index.html">首页</a><span class="s">/</span>个人中心<span class="s">/</span><b style="color:var(--ink)">收货地址</b></div>
+
+  <div class="acct-layout">
+    <div id="app-account"></div>
+
+    <main>
+      <div class="panel">
+        <div class="panel-head"><h3>收货地址管理 <span class="dim" style="font-weight:400;font-size:13px">最多可保存 20 个地址</span></h3>
+          <button class="btn btn-primary btn-sm" onclick="document.getElementById('af').style.display='block'">＋ 新增收货地址</button></div>
+        <div class="panel-pad">
+
+          <!-- 新增表单 -->
+          <div class="addr-form" id="af">
+            <h4>＋ 新增收货地址</h4>
+            <div class="ff-grid">
+              <div class="field"><label>收货人</label><input class="input" placeholder="请输入收货人姓名"></div>
+              <div class="field"><label>手机号码</label><input class="input" placeholder="请输入手机号"></div>
+              <div class="field full"><label>所在地区</label>
+                <div style="display:flex;gap:10px">
+                  <select class="select"><option>上海市</option><option>北京市</option></select>
+                  <select class="select"><option>浦东新区</option><option>黄浦区</option></select>
+                  <select class="select"><option>张江镇</option><option>陆家嘴街道</option></select>
+                </div></div>
+              <div class="field full"><label>详细地址</label><textarea class="input" rows="2" placeholder="街道、门牌号、楼栋、房间号等"></textarea></div>
+              <div class="field"><label>邮政编码</label><input class="input" placeholder="选填"></div>
+              <div class="field"><label>地址标签</label>
+                <div style="display:flex;gap:8px;padding-top:6px"><span class="chip on">家</span><span class="chip">公司</span><span class="chip">学校</span></div></div>
+            </div>
+            <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2);margin:16px 0"><span class="checkbox on">✓</span>设为默认收货地址</label>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-primary">保存地址</button>
+              <button class="btn btn-ghost" onclick="document.getElementById('af').style.display='none'">取消</button>
+            </div>
+          </div>
+
+          <!-- 地址列表 -->
+          <div class="addr-grid">
+            <div class="ad def">
+              <div class="who">林晓 <span class="tel">138****8866</span></div>
+              <div class="det">上海市 浦东新区 张江镇 科苑路 88 号 好集科技园 A 座 1208 室</div>
+              <div class="tags"><span class="tag tag-brand">默认</span><span class="tag tag-ghost">家</span></div>
+              <div class="acts"><a class="set">默认地址</a><a>编辑</a><a>删除</a></div>
+            </div>
+            <div class="ad">
+              <div class="who">林晓 <span class="tel">138****8866</span></div>
+              <div class="det">上海市 黄浦区 南京东路 100 号 商务中心 22 楼 2208 室</div>
+              <div class="tags"><span class="tag tag-ghost">公司</span></div>
+              <div class="acts"><a>设为默认</a><a>编辑</a><a>删除</a></div>
+            </div>
+            <div class="ad">
+              <div class="who">林父 <span class="tel">139****1234</span></div>
+              <div class="det">浙江省 杭州市 西湖区 文三路 套 478 号 东方苑 3 幢 502 室</div>
+              <div class="tags"><span class="tag tag-ghost">家</span></div>
+              <div class="acts"><a>设为默认</a><a>编辑</a><a>删除</a></div>
+            </div>
+            <div class="ad add" onclick="document.getElementById('af').style.display='block'"><div style="text-align:center"><div style="font-size:30px">＋</div>新增收货地址</div></div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="app-footer"></div>
+<script src="../assets/data.js"></script>
+<script src="../assets/shared.js"></script>
+<script>document.getElementById('af').style.display='none';</script>
+</body>
+</html>

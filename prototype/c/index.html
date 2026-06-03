@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集 HAOJI · 首页</title>
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  /* ---- 首页专属 ---- */
+  .hero{display:grid;grid-template-columns:210px 1fr 240px;gap:14px;margin:14px 0;}
+  .catmenu{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  .catmenu .it{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;font-size:13px;border-bottom:1px solid var(--bg);}
+  .catmenu .it:last-child{border-bottom:0;}
+  .catmenu .it:hover{background:var(--brand-softer);color:var(--brand);}
+  .catmenu .it b{font-weight:700;}
+  .catmenu .it .sub{color:var(--ink-3);font-size:11px;font-weight:400;}
+  .catmenu .it:hover .sub{color:var(--brand);}
+
+  .carousel{position:relative;border-radius:var(--radius);overflow:hidden;color:#fff;
+    background:linear-gradient(120deg,#FF7A45 0%,var(--brand) 45%,var(--brand-700) 100%);
+    display:flex;flex-direction:column;justify-content:center;padding:46px;min-height:340px;}
+  .carousel .eyebrow{font-size:13px;font-weight:700;letter-spacing:3px;opacity:.9;}
+  .carousel h1{font-size:46px;font-weight:900;letter-spacing:-1px;line-height:1.1;margin:14px 0;text-shadow:0 2px 16px rgba(120,30,0,.3);}
+  .carousel p{font-size:16px;opacity:.92;max-width:380px;}
+  .carousel .cta{margin-top:24px;display:flex;gap:12px;}
+  .carousel .blob{position:absolute;border-radius:50%;background:rgba(255,255,255,.13);}
+  .carousel .b1{width:300px;height:300px;right:-80px;top:-90px;}
+  .carousel .b2{width:180px;height:180px;right:120px;bottom:-70px;}
+  .dots{position:absolute;bottom:18px;left:46px;display:flex;gap:7px;}
+  .dots i{width:9px;height:9px;border-radius:999px;background:rgba(255,255,255,.5);display:block;}
+  .dots i.on{width:24px;background:#fff;}
+  .carousel .price-burst{position:absolute;right:50px;top:50%;transform:translateY(-50%);
+    width:150px;height:150px;border-radius:50%;background:var(--gold);color:#7a3b00;display:grid;place-items:center;
+    text-align:center;font-weight:900;box-shadow:0 12px 30px rgba(0,0,0,.2);}
+  .carousel .price-burst .big{font-size:40px;line-height:1;}
+
+  .side-stack{display:flex;flex-direction:column;gap:14px;}
+  .login-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;text-align:center;}
+  .login-card .av{width:54px;height:54px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-size:24px;margin:0 auto 10px;}
+  .coupon-card{background:linear-gradient(135deg,#FFF3DC,#FFE2C0);border:1px solid #F3D9A0;border-radius:var(--radius);padding:16px;}
+  .coupon-card h4{font-size:14px;color:#8a5d00;margin-bottom:10px;}
+  .mini-coupon{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:8px;padding:8px 12px;margin-bottom:7px;}
+  .mini-coupon .v{color:var(--price);font-weight:900;font-size:17px;}
+  .mini-coupon .v small{font-size:11px;}
+
+  .services{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:6px 0 0;}
+  .svc{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:13px;}
+  .svc .d{width:42px;height:42px;border-radius:11px;background:var(--brand-softer);color:var(--brand);display:grid;place-items:center;font-size:21px;}
+  .svc b{font-size:14px;display:block;}
+  .svc span{font-size:12px;color:var(--ink-3);}
+
+  /* 秒杀 */
+  .flash{background:linear-gradient(100deg,#2A1410,#46201A);border-radius:var(--radius);overflow:hidden;color:#fff;}
+  .flash-head{display:flex;align-items:center;gap:16px;padding:18px 24px;}
+  .flash-head .lg{font-size:26px;font-weight:900;letter-spacing:-.5px;}
+  .flash-head .lg span{color:var(--gold);}
+  .flash-head .cd{display:flex;align-items:center;gap:6px;margin-left:6px;}
+  .flash-head .cd b{background:#fff;color:var(--ink);width:30px;height:30px;border-radius:7px;display:grid;place-items:center;font-size:15px;font-weight:900;}
+  .flash-head .cd i{color:var(--gold);font-style:normal;font-weight:900;}
+  .flash-head .more{margin-left:auto;color:rgba(255,255,255,.7);font-size:13px;}
+  .flash-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:0;background:#fff;border-radius:0 0 var(--radius) var(--radius);}
+  .flash-item{padding:14px;border-right:1px solid var(--line);text-align:center;}
+  .flash-item:last-child{border-right:0;}
+  .flash-item .ph{aspect-ratio:1;border-radius:10px;margin-bottom:10px;}
+  .flash-item .nm{font-size:12.5px;color:var(--ink);height:36px;overflow:hidden;line-height:1.4;}
+  .flash-item .pr{color:var(--price);font-weight:900;font-size:18px;margin-top:6px;}
+  .flash-item .bar{height:6px;border-radius:999px;background:var(--brand-soft);margin-top:8px;overflow:hidden;}
+  .flash-item .bar i{display:block;height:100%;background:var(--brand);}
+  .flash-item .sold{font-size:10.5px;color:var(--ink-3);margin-top:4px;}
+
+  /* 金刚区 */
+  .kingkong{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px 12px;}
+  .kk{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 4px;border-radius:10px;}
+  .kk:hover{background:var(--brand-softer);}
+  .kk .d{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:22px;color:#fff;}
+  .kk span{font-size:12px;color:var(--ink-2);}
+
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .ad-banner{border-radius:var(--radius);min-height:150px;padding:26px 30px;color:#fff;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
+  .ad-banner h3{font-size:24px;font-weight:900;}
+  .ad-banner p{opacity:.9;font-size:14px;margin-top:4px;}
+  .ad-banner .b{position:absolute;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.12);right:-40px;bottom:-50px;}
+</style>
+</head>
+<body data-cart="3" data-page="home">
+<div id="app-topbar"></div>
+<div id="app-header"></div>
+<div id="app-catnav"></div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="catmenu">
+      <div class="it"><b>手机数码</b> <span class="sub">手机/电脑/影音 ›</span></div>
+      <div class="it"><b>家用电器</b> <span class="sub">大家电/厨房 ›</span></div>
+      <div class="it"><b>服饰鞋包</b> <span class="sub">男装/女装/箱包 ›</span></div>
+      <div class="it"><b>美妆个护</b> <span class="sub">护肤/彩妆/洗护 ›</span></div>
+      <div class="it"><b>食品生鲜</b> <span class="sub">零食/水果/肉禽 ›</span></div>
+      <div class="it"><b>家居家装</b> <span class="sub">家具/家纺/收纳 ›</span></div>
+      <div class="it"><b>母婴玩具</b> <span class="sub">奶粉/玩具/童装 ›</span></div>
+      <div class="it"><b>运动户外</b> <span class="sub">运动鞋/健身 ›</span></div>
+      <div class="it"><b>图书文娱</b> <span class="sub">图书/乐器 ›</span></div>
+      <div class="it"><b>汽车用品</b> <span class="sub">配件/养护 ›</span></div>
+    </div>
+
+    <div class="carousel">
+      <span class="blob b1"></span><span class="blob b2"></span>
+      <span class="eyebrow">好集 618 年中狂欢</span>
+      <h1>万物好集<br>低价开抢</h1>
+      <p>全场最高直降 60%，每满 300 减 50，叠加平台券更划算。</p>
+      <div class="cta">
+        <a class="btn btn-gold btn-lg" href="flashsale.html">⚡ 进入会场</a>
+        <a class="btn btn-lg" style="background:rgba(255,255,255,.18);color:#fff" href="coupons.html">领券中心</a>
+      </div>
+      <div class="price-burst"><div><div style="font-size:12px">立减</div><div class="big">¥50</div><div style="font-size:11px">满300可用</div></div></div>
+      <div class="dots"><i class="on"></i><i></i><i></i><i></i></div>
+    </div>
+
+    <div class="side-stack">
+      <div class="login-card">
+        <div class="av">◍</div>
+        <div style="font-weight:700;font-size:15px">Hi，林晓</div>
+        <div class="muted" style="font-size:12px;margin:3px 0 12px">普通会员 · 积分 1280</div>
+        <div style="display:flex;gap:8px">
+          <a class="btn btn-primary btn-sm btn-block" href="orders.html">我的订单</a>
+          <a class="btn btn-ghost btn-sm btn-block" href="coupons.html">我的券</a>
+        </div>
+      </div>
+      <div class="coupon-card">
+        <h4>🎟 新人专享券</h4>
+        <div class="mini-coupon"><span class="v"><small>¥</small>20</span><a class="btn btn-primary btn-sm" href="coupons.html">领取</a></div>
+        <div class="mini-coupon"><span class="v"><small>¥</small>50</span><a class="btn btn-primary btn-sm" href="coupons.html">领取</a></div>
+        <div class="mini-coupon"><span class="v">9<small>折</small></span><a class="btn btn-primary btn-sm" href="coupons.html">领取</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 服务保障 -->
+  <section class="services">
+    <div class="svc"><span class="d">✓</span><div><b>正品保障</b><span>假一赔十</span></div></div>
+    <div class="svc"><span class="d">⚡</span><div><b>极速发货</b><span>当日达/次日达</span></div></div>
+    <div class="svc"><span class="d">↺</span><div><b>七天退换</b><span>无理由退货</span></div></div>
+    <div class="svc"><span class="d">🛡</span><div><b>安全支付</b><span>多重加密</span></div></div>
+  </section>
+
+  <!-- 限时秒杀 -->
+  <section style="margin-top:30px" class="flash">
+    <div class="flash-head">
+      <div class="lg">⚡ 限时<span>秒杀</span></div>
+      <div class="cd"><span style="font-size:13px;opacity:.8">距结束</span><b>02</b><i>:</i><b>48</b><i>:</i><b>13</b></div>
+      <a class="more" href="flashsale.html">查看全部 ›</a>
+    </div>
+    <div class="flash-grid" id="flash-grid"></div>
+  </section>
+
+  <!-- 金刚区 -->
+  <div class="sec-head"><div class="t"><span class="bar"></span><h2>热门分类</h2><span class="sub">逛遍全场好物</span></div></div>
+  <div class="kingkong" id="kingkong"></div>
+
+  <!-- 双广告 -->
+  <div class="twocol" style="margin-top:14px">
+    <div class="ad-banner" style="background:linear-gradient(120deg,#88A6B8,#5d7f93)"><span class="b"></span>
+      <h3>数码焕新季</h3><p>耳机 / 投影 / 键盘 低至 5 折</p>
+      <a class="btn btn-sm" style="background:#fff;color:var(--ink);margin-top:14px;width:fit-content" href="category.html">立即选购 ›</a></div>
+    <div class="ad-banner" style="background:linear-gradient(120deg,#B0BE92,#8aa05f)"><span class="b"></span>
+      <h3>食品生鲜节</h3><p>坚果 / 牛排 / 水果 产地直发</p>
+      <a class="btn btn-sm" style="background:#fff;color:var(--ink);margin-top:14px;width:fit-content" href="category.html">立即选购 ›</a></div>
+  </div>
+
+  <!-- 热门商品 -->
+  <div class="sec-head"><div class="t"><span class="bar"></span><h2>热门好物</h2><span class="sub">大家都在买</span></div><a class="more" href="search.html">查看更多 ›</a></div>
+  <div class="grid g5" id="grid-hot"></div>
+
+  <!-- 新品推荐 -->
+  <div class="sec-head"><div class="t"><span class="bar" style="background:var(--info)"></span><h2>新品推荐</h2><span class="sub">抢先体验上新</span></div><a class="more" href="search.html">查看更多 ›</a></div>
+  <div class="grid g5" id="grid-new"></div>
+
+  <!-- 促销专区 -->
+  <div class="sec-head"><div class="t"><span class="bar" style="background:var(--gold)"></span><h2>促销专区</h2><span class="sub">省钱就现在</span></div><a class="more" href="search.html">查看更多 ›</a></div>
+  <div class="grid g5" id="grid-promo"></div>
+
+</div>
+
+<div id="app-footer"></div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/shared.js"></script>
+<script>
+  var P = HAOJI.P;
+  HAOJI.renderGrid('#grid-hot', P.filter(function(x){return x.tag=='热卖'||x.tag=='回购';}).slice(0,5));
+  HAOJI.renderGrid('#grid-new', P.filter(function(x){return x.tag=='新品';}).slice(0,5));
+  HAOJI.renderGrid('#grid-promo', P.filter(function(x){return x.tag=='促销'||x.tag=='秒杀';}).slice(0,5));
+
+  // 秒杀
+  var fl = P.filter(function(x){return x.tag=='秒杀';}).concat(P.slice(8,14)).slice(0,6);
+  document.getElementById('flash-grid').innerHTML = fl.map(function(p,i){
+    var pct=[78,64,90,45,82,58][i];
+    return '<a class="flash-item" href="product.html?id='+p.id+'">'+
+      HAOJI.phBlock(p)+
+      '<div class="nm">'+p.n+'</div>'+
+      '<div class="pr"><small style="font-size:12px">¥</small>'+p.p+' <span class="price-old" style="font-size:11px">¥'+p.o+'</span></div>'+
+      '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+      '<div class="sold">已抢 '+pct+'%</div></a>';
+  }).join('');
+
+  // 金刚区
+  var kk=[['手机数码','▣','#FF6A45'],['家用电器','▤','#88A6B8'],['服饰鞋包','◈','#B79CC4'],['美妆个护','✿','#DE9696'],['食品生鲜','◉','#B0BE92'],['家居家装','▦','#C9A66B'],['母婴玩具','❀','#E9B775'],['运动户外','◐','#7FB6A6'],['图书文娱','▥','#92ADBD'],['汽车用品','◆','#A7906B']];
+  document.getElementById('kingkong').innerHTML = kk.map(function(k){
+    return '<a class="kk" href="category.html"><span class="d" style="background:'+k[2]+'">'+k[1]+'</span><span>'+k[0]+'</span></a>';
+  }).join('');
+</script>
+</body>
+</html>

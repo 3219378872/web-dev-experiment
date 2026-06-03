@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集后台 · 用户管理</title>
+<link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/admin.css">
+</head>
+<body class="admin" data-adm="users">
+<div class="adm">
+  <aside id="adm-side"></aside>
+  <div class="adm-main">
+    <header id="adm-top" data-crumb="用户管理"></header>
+    <div class="adm-body">
+      <div class="adm-ph">
+        <div><h1>用户管理</h1><p>共 186,420 名注册用户 · 今日新增 486</p></div>
+        <div class="acts"><a class="btn btn-ghost">导出用户</a><a class="btn btn-primary">＋ 新增用户</a></div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat" style="padding:16px"><div class="lab">总用户数</div><div class="val" style="font-size:24px">186,420</div></div>
+        <div class="stat" style="padding:16px"><div class="lab">活跃用户(30天)</div><div class="val" style="font-size:24px">92,180</div></div>
+        <div class="stat" style="padding:16px"><div class="lab">付费会员</div><div class="val" style="font-size:24px">34,560</div></div>
+        <div class="stat" style="padding:16px"><div class="lab">已禁用</div><div class="val" style="font-size:24px;color:var(--danger)">128</div></div>
+      </div>
+
+      <div class="adm-filter">
+        <div class="field-inline">关键词 <input class="input" placeholder="用户名 / 手机 / 邮箱"></div>
+        <div class="field-inline">会员等级 <select class="select"><option>全部</option><option>普通会员</option><option>黄金会员</option><option>铂金会员</option></select></div>
+        <div class="field-inline">状态 <select class="select"><option>全部</option><option>正常</option><option>已禁用</option></select></div>
+        <div class="field-inline">注册时间 <input class="input" placeholder="2026-01-01 ~ 2026-05-28"></div>
+        <div class="grow"></div>
+        <a class="btn btn-primary btn-sm">查询</a><a class="btn btn-ghost btn-sm">重置</a>
+      </div>
+
+      <div class="acard">
+        <table class="atable">
+          <thead><tr><th style="width:30px"><span class="checkbox"></span></th><th>用户</th><th>手机号</th><th>会员等级</th><th>积分</th><th>订单数</th><th>累计消费</th><th>注册时间</th><th>状态</th><th>操作</th></tr></thead>
+          <tbody id="user-rows"></tbody>
+        </table>
+        <div class="adm-pager">
+          <span>共 186,420 条 · 每页 10 条</span>
+          <div class="pgs"><a>‹</a><a class="on">1</a><a>2</a><a>3</a><a>4</a><a>…</a><a>18642</a><a>›</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/admin.js"></script>
+<script>
+var users=[
+ ['林晓','linxiao@haoji.com','138****8866','黄金会员','gold',1280,42,'¥18,640','2024-03-12','正常','green'],
+ ['陈一鸣','chenym@163.com','139****1024','铂金会员','plat',3860,128,'¥56,200','2023-08-20','正常','green'],
+ ['王悦','wangyue@qq.com','137****5588','普通会员','norm',320,8,'¥2,180','2025-11-02','正常','green'],
+ ['刘洋','liuyang@gmail.com','135****6677','黄金会员','gold',1640,56,'¥24,300','2024-06-15','正常','green'],
+ ['赵敏','zhaomin@haoji.com','136****2233','普通会员','norm',180,3,'¥860','2026-01-08','正常','green'],
+ ['孙浩','sunhao@126.com','138****9900','普通会员','norm',0,1,'¥129','2026-05-20','已禁用','red'],
+ ['周婷','zhouting@qq.com','137****3344','铂金会员','plat',5120,210,'¥88,600','2022-12-01','正常','green'],
+ ['吴磊','wulei@163.com','139****7788','黄金会员','gold',980,34,'¥15,400','2024-09-28','正常','green'],
+ ['郑爽','zhengshuang@haoji.com','135****1122','普通会员','norm',60,2,'¥420','2026-04-15','正常','green'],
+ ['黄强','huangqiang@qq.com','136****4455','普通会员','norm',0,0,'¥0','2026-05-26','已禁用','red']
+];
+var avc=['#88A6B8','#DE9696','#B0BE92','#C9A66B','#B79CC4','#7FB6A6','#E9B775','#92ADBD','#A7906B','#9d7fb0'];
+var lvtag={gold:['tag-gold','黄金会员'],plat:['tag-brand','铂金会员'],norm:['tag-ghost','普通会员']};
+document.getElementById('user-rows').innerHTML = users.map(function(u,i){
+  var lv=lvtag[u[4]];
+  return '<tr><td><span class="checkbox"></span></td>'+
+    '<td><span class="u-cell"><span class="u-av" style="background:'+avc[i]+'">'+u[0][0]+'</span>'+
+      '<span><div class="nm">'+u[0]+'</div><div class="sub">'+u[1]+'</div></span></span></td>'+
+    '<td>'+u[2]+'</td><td><span class="tag '+lv[0]+'">'+lv[1]+'</span></td>'+
+    '<td>'+u[5]+'</td><td>'+u[6]+'</td><td class="amount">'+u[7]+'</td><td class="dim">'+u[8]+'</td>'+
+    '<td><span class="sdot '+u[10]+'">'+u[9]+'</span></td>'+
+    '<td class="actions"><span class="lk">详情</span><span class="lk">'+(u[9]==='已禁用'?'启用':'禁用')+'</span></td></tr>';
+}).join('');
+</script>
+</body>
+</html>

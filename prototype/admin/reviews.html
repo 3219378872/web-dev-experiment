@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集后台 · 评价管理</title>
+<link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/admin.css">
+<style>
+  .rev-row{display:flex;gap:14px;padding:18px 0;border-bottom:1px solid var(--admin-line);}
+  .rev-row:last-child{border-bottom:0;}
+  .rev-row .av{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;color:#fff;font-weight:700;}
+  .rev-row .main{flex:1;}
+  .rev-row .who{display:flex;align-items:center;gap:10px;font-size:13px;}
+  .rev-row .who b{font-weight:700;}
+  .rev-row .txt{font-size:13.5px;margin:8px 0;line-height:1.6;}
+  .rev-row .prod{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);background:var(--bg);padding:6px 10px;border-radius:8px;width:fit-content;}
+  .rev-row .prod .ph{width:28px;height:28px;border-radius:5px;}
+  .rev-row .imgs{display:flex;gap:6px;margin-top:8px;}
+  .rev-row .imgs .ph{width:54px;height:54px;border-radius:7px;}
+  .rev-row .side{width:130px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+  .flag{background:var(--danger);color:#fff;font-size:11px;padding:1px 8px;border-radius:5px;font-weight:600;}
+</style>
+</head>
+<body class="admin" data-adm="reviews">
+<div class="adm">
+  <aside id="adm-side"></aside>
+  <div class="adm-main">
+    <header id="adm-top" data-crumb="评价管理"></header>
+    <div class="adm-body">
+      <div class="adm-ph">
+        <div><h1>评价管理</h1><p>共 86,420 条评价 · 待审核 14 · 疑似违规 2</p></div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat" style="padding:16px"><div class="lab">总评价数</div><div class="val" style="font-size:24px">86,420</div></div>
+        <div class="stat" style="padding:16px"><div class="lab">平均评分</div><div class="val" style="font-size:24px;color:var(--gold)">4.8 ★</div></div>
+        <div class="stat" style="padding:16px"><div class="lab">好评率</div><div class="val" style="font-size:24px;color:var(--success)">96.2%</div></div>
+        <div class="stat" style="padding:16px"><div class="lab">待处理</div><div class="val" style="font-size:24px;color:var(--danger)">14</div></div>
+      </div>
+
+      <div class="acard" style="margin-bottom:16px">
+        <div class="tabs" style="padding:0 16px">
+          <button class="active">全部</button><button>好评 (83120)</button><button>中评 (2180)</button>
+          <button>差评 (1120)</button><button>有图 (24300)</button><button>疑似违规 <span style="color:var(--danger)">(2)</span></button>
+        </div>
+      </div>
+
+      <div class="acard">
+        <div class="ab" id="rev-rows"></div>
+        <div class="adm-pager"><span>共 86,420 条</span>
+          <div class="pgs"><a>‹</a><a class="on">1</a><a>2</a><a>3</a><a>…</a><a>8642</a><a>›</a></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/admin.js"></script>
+<script>
+var revs=[
+ ['数码控小朋','#88A6B8',5,'降噪效果真的绝了，地铁上几乎听不到外界声音，戴一天耳朵也不胀。续航很顶！',HAOJI.byId(1),['s4','s7'],'2026-05-28 10:24',0,'normal'],
+ ['爱生活的橙子','#DE9696',5,'颜值在线，磨砂手感很高级。连接很快，切换设备无缝。性价比拉满！',HAOJI.byId(12),['s5'],'2026-05-27 18:40',0,'normal'],
+ ['匿名用户','#999',1,'【此处为广告/违规内容，包含外部联系方式与导流信息……】加微信 xxx 有优惠',HAOJI.byId(2),[],'2026-05-27 09:12',1,'flag'],
+ ['l***9','#B0BE92',4,'整体不错，音质偏流行调，低音有点轰头但可以接受。游戏延迟确实很低。',HAOJI.byId(1),[],'2026-05-26 21:05',0,'normal'],
+ ['王女士','#C9A66B',2,'收到货发现有点小瑕疵，客服处理还算及时，希望品控再加强。',HAOJI.byId(11),['s1'],'2026-05-26 14:30',0,'normal']
+];
+document.getElementById('rev-rows').innerHTML = revs.map(function(r){
+  var st='★★★★★'.slice(0,r[2])+'<span class="off">'+'★★★★★'.slice(r[2])+'</span>';
+  var flagged=r[7]===1;
+  return '<div class="rev-row"><div class="av" style="background:'+r[1]+'">'+r[0][0]+'</div>'+
+    '<div class="main"><div class="who"><b>'+r[0]+'</b><span class="stars">'+st+'</span>'+
+      (flagged?'<span class="flag">⚠ 疑似违规</span>':'')+'<span class="dim" style="margin-left:6px;font-size:12px">'+r[6]+'</span></div>'+
+    '<div class="txt" '+(flagged?'style="color:var(--danger)"':'')+'>'+r[3]+'</div>'+
+    (r[5].length?'<div class="imgs">'+r[5].map(function(s){return '<div class="ph '+s+'" data-label=""></div>';}).join('')+'</div>':'')+
+    '<div class="prod" style="margin-top:8px">'+HAOJI.phBlock(r[4])+''+r[4].n.slice(0,20)+'…</div></div>'+
+    '<div class="side">'+(flagged?'<span class="tag tag-warn">待审核</span>':'<span class="sdot green">已通过</span>')+
+      '<a class="btn btn-ghost btn-sm">回复</a>'+
+      (flagged?'<a class="btn btn-outline btn-sm">通过</a><a class="btn btn-sm" style="background:var(--danger);color:#fff">删除</a>':'<a class="btn btn-sm" style="background:#fff;border:1px solid var(--line-2);color:var(--danger)">删除</a>')+
+    '</div></div>';
+}).join('');
+</script>
+</body>
+</html>

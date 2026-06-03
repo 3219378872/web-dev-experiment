@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集后台 · 数据看板</title>
+<link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/admin.css">
+<style>
+  .dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .quick-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .qa{border:1px solid var(--admin-line);border-radius:10px;padding:14px;display:flex;align-items:center;gap:11px;font-size:13px;font-weight:600;}
+  .qa .d{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;color:#fff;font-size:18px;}
+  .qa:hover{border-color:var(--brand);background:var(--brand-softer);}
+</style>
+</head>
+<body class="admin" data-adm="dashboard">
+<div class="adm">
+  <aside id="adm-side"></aside>
+  <div class="adm-main">
+    <header id="adm-top" data-crumb="数据看板"></header>
+    <div class="adm-body">
+
+      <div class="adm-ph">
+        <div><h1>数据看板</h1><p>欢迎回来，管理员 · 今天是 2026 年 5 月 28 日，星期四</p></div>
+        <div class="acts">
+          <select class="select" style="width:130px"><option>今日</option><option>近 7 天</option><option>近 30 天</option></select>
+          <a class="btn btn-ghost">导出报表</a>
+          <a class="btn btn-primary" href="product-edit.html">＋ 发布商品</a>
+        </div>
+      </div>
+
+      <!-- 核心指标 -->
+      <div class="stat-row">
+        <div class="stat"><div class="ic" style="background:linear-gradient(135deg,#FF7A45,var(--brand))">💰</div>
+          <div class="lab">今日成交额</div><div class="val"><small>¥</small>128,640</div>
+          <div class="delta up">▲ 12.4% <span class="dim" style="color:var(--ink-3)">较昨日</span></div></div>
+        <div class="stat"><div class="ic" style="background:linear-gradient(135deg,#3B82F6,#1257c4)">▤</div>
+          <div class="lab">今日订单数</div><div class="val">1,286</div>
+          <div class="delta up">▲ 8.2% <span class="dim" style="color:var(--ink-3)">较昨日</span></div></div>
+        <div class="stat"><div class="ic" style="background:linear-gradient(135deg,#10B981,#137a40)">👥</div>
+          <div class="lab">今日新增用户</div><div class="val">486</div>
+          <div class="delta up">▲ 5.6% <span class="dim" style="color:var(--ink-3)">较昨日</span></div></div>
+        <div class="stat"><div class="ic" style="background:linear-gradient(135deg,#F59E0B,var(--gold))">👁</div>
+          <div class="lab">今日访客量</div><div class="val">42,180</div>
+          <div class="delta down">▼ 2.1% <span class="dim" style="color:var(--ink-3)">较昨日</span></div></div>
+      </div>
+
+      <!-- 销量趋势 + 分类占比 -->
+      <div class="dash-grid">
+        <div class="acard">
+          <div class="ah"><h3>销售趋势 <span class="sub">近 7 日成交额（元）</span></h3>
+            <div style="display:flex;gap:8px"><span class="chip on" style="padding:5px 12px;font-size:12px">成交额</span><span class="chip" style="padding:5px 12px;font-size:12px">订单数</span></div></div>
+          <div class="ab">
+            <div class="bars">
+              <div class="b"><div class="col" data-v="¥9.8万" style="height:55%"></div><span class="lb">05-22</span></div>
+              <div class="b"><div class="col" data-v="¥11.2万" style="height:64%"></div><span class="lb">05-23</span></div>
+              <div class="b"><div class="col" data-v="¥8.6万" style="height:48%"></div><span class="lb">05-24</span></div>
+              <div class="b"><div class="col" data-v="¥13.5万" style="height:77%"></div><span class="lb">05-25</span></div>
+              <div class="b"><div class="col" data-v="¥12.1万" style="height:69%"></div><span class="lb">05-26</span></div>
+              <div class="b"><div class="col" data-v="¥10.4万" style="height:60%"></div><span class="lb">05-27</span></div>
+              <div class="b"><div class="col" data-v="¥12.9万" style="height:88%"></div><span class="lb">今日</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="acard">
+          <div class="ah"><h3>品类销售占比</h3></div>
+          <div class="ab" style="display:flex;align-items:center;gap:22px">
+            <div class="donut" style="background:conic-gradient(#FF4D2E 0 32%,#3B82F6 32% 54%,#10B981 54% 72%,#F59E0B 72% 86%,#B79CC4 86% 100%);position:relative">
+              <div style="position:absolute;inset:30px;background:#fff;border-radius:50%;display:grid;place-items:center;text-align:center">
+                <div><div style="font-size:20px;font-weight:900">2.4万</div><div style="font-size:10px;color:var(--ink-3)">在售SKU</div></div></div>
+            </div>
+            <div class="legend" style="flex:1">
+              <div class="l"><span class="sw" style="background:#FF4D2E"></span><span class="nm">手机数码</span><span class="v">32%</span></div>
+              <div class="l"><span class="sw" style="background:#3B82F6"></span><span class="nm">家用电器</span><span class="v">22%</span></div>
+              <div class="l"><span class="sw" style="background:#10B981"></span><span class="nm">食品生鲜</span><span class="v">18%</span></div>
+              <div class="l"><span class="sw" style="background:#F59E0B"></span><span class="nm">服饰美妆</span><span class="v">14%</span></div>
+              <div class="l"><span class="sw" style="background:#B79CC4"></span><span class="nm">其他品类</span><span class="v">14%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 热销榜 + 待办 -->
+      <div class="dash-grid">
+        <div class="acard">
+          <div class="ah"><h3>热销商品 TOP 5</h3><a class="lk" href="products.html" style="font-size:12.5px;color:var(--info)">查看全部 ›</a></div>
+          <div class="ab rank" id="rank"></div>
+        </div>
+        <div class="acard">
+          <div class="ah"><h3>待办事项</h3></div>
+          <div class="ab" style="display:flex;flex-direction:column;gap:0">
+            <a class="qa" style="margin-bottom:10px" href="orders.html"><span class="d" style="background:var(--warn)">▤</span><div style="flex:1"><div>待发货订单</div><span class="dim" style="font-size:11.5px;font-weight:400">需尽快处理</span></div><b style="color:var(--warn);font-size:20px">28</b></a>
+            <a class="qa" style="margin-bottom:10px" href="orders.html"><span class="d" style="background:var(--danger)">↺</span><div style="flex:1"><div>退款/售后申请</div><span class="dim" style="font-size:11.5px;font-weight:400">待审核</span></div><b style="color:var(--danger);font-size:20px">6</b></a>
+            <a class="qa" style="margin-bottom:10px" href="reviews.html"><span class="d" style="background:var(--info)">★</span><div style="flex:1"><div>待审核评价</div><span class="dim" style="font-size:11.5px;font-weight:400">含 2 条疑似违规</span></div><b style="color:var(--info);font-size:20px">14</b></a>
+            <a class="qa" href="products.html"><span class="d" style="background:#B79CC4">📦</span><div style="flex:1"><div>库存预警商品</div><span class="dim" style="font-size:11.5px;font-weight:400">库存低于 10 件</span></div><b style="color:#9d7fb0;font-size:20px">9</b></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 最新订单 -->
+      <div class="acard">
+        <div class="ah"><h3>最新订单</h3><a class="lk" href="orders.html" style="font-size:12.5px;color:var(--info)">查看全部 ›</a></div>
+        <table class="atable">
+          <thead><tr><th>订单号</th><th>客户</th><th>商品</th><th>金额</th><th>支付方式</th><th>下单时间</th><th>状态</th></tr></thead>
+          <tbody id="recent-orders"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/admin.js"></script>
+<script>
+  // 热销榜
+  var topProds = HAOJI.P.slice().sort(function(a,b){return b.sales-a.sales;}).slice(0,5);
+  document.getElementById('rank').innerHTML = topProds.map(function(p,i){
+    return '<div class="r"><span class="no">'+(i+1)+'</span>'+HAOJI.phBlock(p)+
+      '<span class="nm">'+p.n+'</span>'+
+      '<span class="v">'+(p.sales/10000).toFixed(1)+'万<small> 销量</small></span></div>';
+  }).join('');
+  // 最新订单
+  var orders=[
+    ['202605281588','林晓','#88A6B8','TWS蓝牙耳机 等2件','¥817','微信','14:32','待付款','orange'],
+    ['202605281587','陈一鸣','#DE9696','空气炸锅6L','¥269','支付宝','14:28','待发货','blue'],
+    ['202605281586','王悦','#B0BE92','每日坚果礼盒 等3件','¥356','余额','14:15','已发货','blue'],
+    ['202605281585','刘洋','#C9A66B','办公椅 等2件','¥1,198','银行卡','13:58','已完成','green'],
+    ['202605281584','赵敏','#B79CC4','烟酰胺精华','¥129','微信','13:42','已完成','green'],
+    ['202605281583','孙浩','#7FB6A6','登山徒步杖','¥129','支付宝','13:30','已取消','gray']
+  ];
+  document.getElementById('recent-orders').innerHTML = orders.map(function(o){
+    var smap={orange:'待付款',blue:o[7],green:'已完成',gray:'已取消'};
+    return '<tr><td class="mono" style="font-size:12px">'+o[0]+'</td>'+
+      '<td><span class="u-cell"><span class="u-av" style="background:'+o[2]+'">'+o[1][0]+'</span><span class="nm">'+o[1]+'</span></span></td>'+
+      '<td class="dim">'+o[3]+'</td><td class="amount">'+o[4]+'</td><td>'+o[5]+'</td><td class="dim">'+o[6]+'</td>'+
+      '<td><span class="sdot '+o[8]+'">'+o[7]+'</span></td></tr>';
+  }).join('');
+</script>
+</body>
+</html>

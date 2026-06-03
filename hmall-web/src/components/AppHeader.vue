@@ -1,32 +1,87 @@
 <template>
-  <el-header class="app-header">
-    <div class="header-inner">
-      <router-link to="/" class="logo">hmall 电商平台</router-link>
-      <el-input v-model="keyword" placeholder="搜索商品" class="search-input" @keyup.enter="search">
-        <template #append
-          ><el-button @click="search"
-            ><el-icon><Search /></el-icon></el-button
-        ></template>
-      </el-input>
-      <div class="header-actions">
-        <template v-if="userStore.isLoggedIn">
-          <router-link to="/cart">
-            <el-badge :value="cartStore.totalCount" :hidden="cartStore.totalCount === 0">
-              <el-button text
-                ><el-icon><ShoppingCart /></el-icon>购物车</el-button
-              >
-            </el-badge>
-          </router-link>
-          <router-link to="/orders"><el-button text>我的订单</el-button></router-link>
-          <router-link to="/profile"><el-button text>个人中心</el-button></router-link>
-          <el-button text @click="userStore.logout()">退出</el-button>
-        </template>
-        <template v-else>
-          <router-link to="/login"><el-button type="primary">登录</el-button></router-link>
-        </template>
+  <div>
+    <!-- topbar -->
+    <div class="topbar">
+      <div class="wrap">
+        <div>
+          <span>好集 HAOJI — 综合百货电商平台</span>
+        </div>
+        <div>
+          <template v-if="userStore.isLoggedIn">
+            <router-link to="/profile"
+              >Hi，{{
+                userStore.userInfo?.nickname || userStore.userInfo?.username || '用户'
+              }}</router-link
+            >
+            <span class="sep">|</span>
+            <router-link to="/orders">我的订单</router-link>
+            <span class="sep">|</span>
+            <a href="#" @click.prevent="userStore.logout()">退出</a>
+          </template>
+          <template v-else>
+            <router-link to="/login">登录</router-link>
+            <span class="sep">|</span>
+            <router-link to="/login">注册</router-link>
+          </template>
+        </div>
       </div>
     </div>
-  </el-header>
+
+    <!-- header -->
+    <header class="header">
+      <div class="wrap">
+        <router-link to="/" class="logo">
+          <span class="mark">集</span>
+          <span class="name">好集<small>HAOJI MALL</small></span>
+        </router-link>
+
+        <div style="flex: 1; max-width: 560px">
+          <div class="searchbar">
+            <input v-model="keyword" placeholder="搜索商品、品牌" @keyup.enter="search" />
+            <button @click="search">搜索</button>
+          </div>
+          <div class="hot-words">
+            <a href="/search?q=手机">手机</a>
+            <a href="/search?q=耳机">耳机</a>
+            <a href="/search?q=零食">零食</a>
+            <a href="/search?q=护肤">护肤</a>
+            <a href="/search?q=运动鞋">运动鞋</a>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <router-link to="/cart" class="icon-btn cart-btn">
+            <span class="ic">🛒</span>
+            <span>购物车</span>
+            <span v-if="cartStore.totalCount > 0" class="badge">{{ cartStore.totalCount }}</span>
+          </router-link>
+          <router-link v-if="userStore.isLoggedIn" to="/favorites" class="icon-btn">
+            <span class="ic">♡</span>
+            <span>收藏</span>
+          </router-link>
+          <router-link v-if="userStore.isLoggedIn" to="/profile" class="icon-btn">
+            <span class="ic">◍</span>
+            <span>我的</span>
+          </router-link>
+        </div>
+      </div>
+    </header>
+
+    <!-- catnav -->
+    <nav class="catnav">
+      <div class="wrap">
+        <span class="all">▦ 全部分类</span>
+        <router-link to="/">首页</router-link>
+        <router-link to="/search?q=">热门</router-link>
+        <router-link to="/search?q=">新品</router-link>
+        <router-link to="/category">分类</router-link>
+        <router-link to="/flashsale" class="promo">⚡ 限时秒杀</router-link>
+        <router-link to="/coupons" class="promo">🎟 领券中心</router-link>
+        <span class="spacer"></span>
+        <router-link to="/service">在线客服</router-link>
+      </div>
+    </nav>
+  </div>
 </template>
 
 <script setup>
@@ -34,48 +89,218 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useCartStore } from '@/stores/cart';
+
 const router = useRouter();
 const userStore = useUserStore();
 const cartStore = useCartStore();
 const keyword = ref('');
+
 function search() {
-  if (keyword.value.trim()) router.push({ path: '/search', query: { q: keyword.value.trim() } });
+  if (keyword.value.trim()) {
+    router.push({ path: '/search', query: { q: keyword.value.trim() } });
+  }
 }
 </script>
 
 <style scoped>
-.app-header {
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+.topbar {
+  background: var(--ink);
+  color: #cfc7c1;
+  font-size: 12.5px;
+}
+.topbar .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 34px;
+}
+.topbar a {
+  color: #cfc7c1;
+  opacity: 0.85;
+}
+.topbar a:hover {
+  opacity: 1;
+  color: #fff;
+}
+.topbar .sep {
+  margin: 0 10px;
+  color: #5a534e;
+}
+
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 40;
 }
-.header-inner {
-  max-width: 1280px;
-  margin: 0 auto;
+.header .wrap {
   display: flex;
   align-items: center;
-  gap: 20px;
-  height: 60px;
+  gap: 28px;
+  height: var(--header-h);
 }
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.logo .mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--brand), var(--brand-700));
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 900;
   font-size: 20px;
-  font-weight: bold;
-  color: #409eff;
-  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(255, 77, 46, 0.35);
 }
-.search-input {
-  width: 360px;
+.logo .name {
+  font-weight: 900;
+  font-size: 21px;
+  letter-spacing: -0.5px;
+  color: var(--ink);
 }
+.logo .name small {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink-3);
+  letter-spacing: 3px;
+}
+
+.searchbar {
+  flex: 1;
+  max-width: 560px;
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--brand);
+  border-radius: 999px;
+  overflow: hidden;
+  background: #fff;
+}
+.searchbar input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  padding: 11px 18px;
+  font-size: 14px;
+  background: transparent;
+  font-family: inherit;
+}
+.searchbar button {
+  border: 0;
+  background: var(--brand);
+  color: #fff;
+  padding: 0 26px;
+  align-self: stretch;
+  font-weight: 700;
+  font-size: 14px;
+}
+.searchbar button:hover {
+  background: var(--brand-600);
+}
+
+.hot-words {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 6px;
+}
+.hot-words a:hover {
+  color: var(--brand);
+}
+
 .header-actions {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
   margin-left: auto;
 }
-a.router-link-active {
-  color: #409eff;
-  font-weight: bold;
+.icon-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  color: var(--ink-2);
+  font-size: 11.5px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.icon-btn:hover {
+  background: var(--brand-softer);
+  color: var(--brand);
+}
+.icon-btn .ic {
+  font-size: 19px;
+  line-height: 1;
+}
+.cart-btn {
+  position: relative;
+}
+.cart-btn .badge {
+  position: absolute;
+  top: 0;
+  right: 6px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  padding: 0 4px;
+  font-weight: 700;
+}
+
+.catnav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.catnav .wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 46px;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.catnav .all {
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  padding: 0 18px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 0;
+}
+.catnav a {
+  padding: 0 14px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  color: var(--ink);
+}
+.catnav a:hover {
+  color: var(--brand);
+}
+.catnav .spacer {
+  flex: 1;
+}
+.catnav .promo {
+  color: var(--price);
+  font-weight: 700;
 }
 </style>

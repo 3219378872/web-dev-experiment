@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集后台 · 编辑商品</title>
+<link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/admin.css">
+<style>
+  .edit-grid{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start;}
+  .stick{position:sticky;top:76px;}
+</style>
+</head>
+<body class="admin" data-adm="products">
+<div class="adm">
+  <aside id="adm-side"></aside>
+  <div class="adm-main">
+    <header id="adm-top" data-crumb="商品管理 / 编辑商品"></header>
+    <div class="adm-body">
+      <div class="adm-ph">
+        <div><h1>编辑商品</h1><p>SKU: HJ100001 · 最后更新 2026-05-26 14:30</p></div>
+        <div class="acts"><a class="btn btn-ghost" href="products.html">← 返回列表</a><a class="btn btn-ghost">预览</a><a class="btn btn-primary">保存并上架</a></div>
+      </div>
+
+      <div class="edit-grid">
+        <div>
+          <div class="acard" style="margin-bottom:16px">
+            <div class="ah"><h3>基本信息</h3></div>
+            <div class="ab">
+              <div class="form-grid">
+                <div class="field full"><label>商品名称</label><input class="input" value="TWS 主动降噪蓝牙耳机 入耳式 长续航 游戏低延迟 通用版"></div>
+                <div class="field"><label>商品分类</label><select class="select"><option>手机数码 / 影音娱乐 / 蓝牙耳机</option></select></div>
+                <div class="field"><label>品牌</label><select class="select"><option>好集严选 HAOJI</option></select></div>
+                <div class="field full"><label>商品卖点（副标题）</label><input class="input" value="好集 618 直降 200，前 100 名加赠充电仓保护套"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="acard" style="margin-bottom:16px">
+            <div class="ah"><h3>价格与库存</h3></div>
+            <div class="ab">
+              <div class="form-grid">
+                <div class="field"><label>销售价（¥）</label><input class="input" value="299.00"></div>
+                <div class="field"><label>市场价（¥）</label><input class="input" value="499.00"></div>
+                <div class="field"><label>总库存</label><input class="input" value="238"></div>
+                <div class="field"><label>库存预警值</label><input class="input" value="20"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="acard" style="margin-bottom:16px">
+            <div class="ah"><h3>规格设置 <span class="sub">SKU 多规格</span></h3><a class="btn btn-ghost btn-sm">＋ 添加规格</a></div>
+            <div class="ab">
+              <div style="margin-bottom:14px"><div class="dim" style="font-size:12px;margin-bottom:8px">颜色</div>
+                <div style="display:flex;gap:8px"><span class="chip on">曜石黑</span><span class="chip on">云母白</span><span class="chip on">雾霾蓝</span><span class="chip">＋</span></div></div>
+              <div><div class="dim" style="font-size:12px;margin-bottom:8px">版本</div>
+                <div style="display:flex;gap:8px"><span class="chip on">标准版</span><span class="chip on">降噪增强版</span><span class="chip on">游戏专业版</span><span class="chip">＋</span></div></div>
+            </div>
+          </div>
+
+          <div class="acard">
+            <div class="ah"><h3>商品详情</h3></div>
+            <div class="ab">
+              <div style="border:1px solid var(--line);border-radius:8px;overflow:hidden">
+                <div style="background:var(--bg);padding:8px 12px;display:flex;gap:14px;font-size:14px;color:var(--ink-2);border-bottom:1px solid var(--line)">
+                  <b>B</b><i>I</i><span>U</span><span>🖼</span><span>🔗</span><span>≡</span><span>表格</span></div>
+                <textarea class="input" style="border:0;border-radius:0" rows="6">采用第三代主动降噪芯片，深度可达 -42dB，有效隔绝地铁、飞机等低频噪声。入耳式人体工学设计，佩戴稳固舒适。游戏模式端到端延迟低至 60ms…</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右栏 -->
+        <aside class="stick">
+          <div class="acard" style="margin-bottom:16px">
+            <div class="ah"><h3>商品图片</h3></div>
+            <div class="ab">
+              <div class="dim" style="font-size:12px;margin-bottom:10px">主图（首张为封面）</div>
+              <div class="upload-grid">
+                <div class="ph s4" data-label=""><span class="x">✕</span></div>
+                <div class="ph s7" data-label=""><span class="x">✕</span></div>
+                <div class="ph s1" data-label=""><span class="x">✕</span></div>
+                <div class="add"><div style="text-align:center">＋<small>上传</small></div></div>
+              </div>
+              <p class="dim" style="font-size:11px;margin-top:10px">建议 800×800，支持 JPG/PNG，最多 8 张</p>
+            </div>
+          </div>
+          <div class="acard">
+            <div class="ah"><h3>发布设置</h3></div>
+            <div class="ab" style="display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span>立即上架</span><span class="switch on"></span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span>加入秒杀</span><span class="switch"></span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span>推荐到首页</span><span class="switch on"></span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span>支持七天无理由</span><span class="switch on"></span></div>
+              <hr class="divider">
+              <div class="field"><label>运费模板</label><select class="select"><option>全国包邮</option><option>满99包邮</option></select></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/admin.js"></script>
+</body>
+</html>

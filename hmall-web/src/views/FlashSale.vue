@@ -1,0 +1,324 @@
+<template>
+  <div>
+    <div class="fs-hero">
+      <div class="wrap" style="text-align: center">
+        <div class="lg">⚡ 限时<span>秒杀</span> FLASH SALE</div>
+        <div class="sub">整点开抢 · 限量特价 · 抢完即止</div>
+        <div class="fs-timeline">
+          <div
+            v-for="slot in timeSlots"
+            :key="slot.time"
+            :class="['fs-slot', slot.active ? 'on' : '']"
+            @click="slot.onClick ? slot.onClick() : null"
+          >
+            <div class="t">{{ slot.time }}</div>
+            <div class="s">{{ slot.status }}</div>
+          </div>
+        </div>
+        <div class="cd-bar">
+          <span style="opacity: 0.8">本场距结束</span>
+          <b>{{ countdown.h }}</b
+          ><i>:</i><b>{{ countdown.m }}</b
+          ><i>:</i><b>{{ countdown.s }}</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="fs-body">
+      <div class="wrap">
+        <div class="grid g5">
+          <router-link
+            v-for="(p, i) in flashItems"
+            :key="p.id"
+            class="fs-card"
+            :to="`/item/${p.id}`"
+          >
+            <div class="ph" :class="`s${(p.id % 8) + 1}`">
+              <div class="shape round"></div>
+            </div>
+            <div class="b">
+              <div class="nm">{{ p.name }}</div>
+              <div class="pr">
+                <span class="now">¥{{ flashPrice(p) }}</span>
+                <span class="old">¥{{ originalPrice(p) }}</span>
+              </div>
+              <div class="bar">
+                <i :style="`width:${flashPct[i % flashPct.length]}%`"></i>
+                <span>已抢 {{ flashPct[i % flashPct.length] }}%</span>
+              </div>
+            </div>
+            <button
+              :class="[
+                'btn',
+                flashPct[i % flashPct.length] >= 95 ? 'btn-ghost' : 'btn-hot',
+                'btn-block',
+              ]"
+              @click.prevent="handleBuy(p)"
+            >
+              {{ flashPct[i % flashPct.length] >= 95 ? '即将抢光' : '立即抢购' }}
+            </button>
+          </router-link>
+        </div>
+        <div class="pager">
+          <a
+            v-for="n in totalPages"
+            :key="n"
+            :class="{ cur: page === n }"
+            @click.prevent="page = n"
+            >{{ n }}</a
+          >
+          <a v-if="page < totalPages" @click.prevent="page++">›</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ElMessage } from 'element-plus';
+import { getItems } from '@/api/item';
+
+const flashItems = ref([]);
+const countdown = ref({ h: '01', m: '48', s: '13' });
+const flashPct = [88, 72, 95, 45, 60, 82, 38, 90, 55, 78, 42, 68, 93, 50, 75];
+const page = ref(1);
+const totalPages = ref(4);
+
+const timeSlots = [
+  { time: '12:00', status: '疯抢中', active: true },
+  { time: '14:00', status: '即将开始', active: false },
+  { time: '16:00', status: '即将开始', active: false },
+  { time: '18:00', status: '敬请期待', active: false },
+  { time: '20:00', status: '敬请期待', active: false },
+  { time: '22:00', status: '敬请期待', active: false },
+];
+
+let timer = null;
+function startCountdown() {
+  let total = 1 * 3600 + 48 * 60 + 13;
+  timer = setInterval(() => {
+    total--;
+    if (total <= 0) total = 2 * 3600;
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    countdown.value = {
+      h: String(h).padStart(2, '0'),
+      m: String(m).padStart(2, '0'),
+      s: String(s).padStart(2, '0'),
+    };
+  }, 1000);
+}
+
+function flashPrice(p) {
+  return Math.round(((p.price || 0) * 0.7) / 100);
+}
+
+function originalPrice(p) {
+  return Math.round((p.originalPrice || p.price || 0) / 100);
+}
+
+function handleBuy() {
+  // TODO: integrate with flash-sale API when available
+  ElMessage.info('秒杀商品即将上架，敬请期待');
+}
+
+async function loadItems() {
+  try {
+    const data = await getItems({ page: page.value, size: 15 });
+    const list = data?.list || [];
+    flashItems.value = list.map((x) => ({ ...x, originalPrice: Math.round((x.price || 0) * 1.5) }));
+    totalPages.value = Math.max(1, Math.ceil((data?.total || list.length) / 15));
+  } catch (err) {
+    // fallback placeholder
+    flashItems.value = Array.from({ length: 15 }, (_, i) => ({
+      id: i + 1,
+      name: `秒杀商品 ${i + 1} 限时特价`,
+      price: 9900 + i * 1000,
+      originalPrice: 14900 + i * 1500,
+    }));
+  }
+}
+
+watch(page, loadItems);
+
+onMounted(() => {
+  startCountdown();
+  loadItems();
+});
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
+});
+</script>
+
+<style scoped>
+.fs-hero {
+  background: radial-gradient(120% 100% at 50% 0, #5a271c, #2a1410);
+  color: #fff;
+  padding: 30px 0 0;
+}
+.fs-hero .lg {
+  font-size: 46px;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+.fs-hero .lg span {
+  color: var(--gold);
+}
+.fs-hero .sub {
+  opacity: 0.8;
+  margin-top: 6px;
+}
+.fs-timeline {
+  display: flex;
+  gap: 0;
+  justify-content: center;
+  margin: 28px 0 0;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 14px 14px 0 0;
+  overflow: hidden;
+}
+.fs-slot {
+  padding: 14px 30px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.65);
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+}
+.fs-slot.on {
+  color: #fff;
+  border-bottom-color: var(--gold);
+  background: rgba(255, 176, 32, 0.08);
+}
+.fs-slot .t {
+  font-size: 20px;
+  font-weight: 900;
+}
+.fs-slot .s {
+  font-size: 12px;
+  margin-top: 2px;
+}
+.fs-slot.on .s {
+  color: var(--gold);
+  font-weight: 700;
+}
+.cd-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px;
+  color: #fff;
+}
+.cd-bar b {
+  background: var(--gold);
+  color: #5a2c00;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 900;
+}
+.cd-bar i {
+  color: var(--gold);
+  font-style: normal;
+  font-weight: 900;
+  font-size: 18px;
+}
+.fs-body {
+  background: var(--bg);
+  padding: 24px 0 50px;
+}
+.fs-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: 0.15s;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+.fs-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2);
+}
+.fs-card .ph {
+  aspect-ratio: 1;
+}
+.fs-card .b {
+  padding: 12px;
+}
+.fs-card .nm {
+  font-size: 13px;
+  line-height: 1.4;
+  height: 36px;
+  overflow: hidden;
+  color: var(--ink);
+}
+.fs-card .pr {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 8px;
+}
+.fs-card .pr .now {
+  color: var(--price);
+  font-weight: 900;
+  font-size: 20px;
+}
+.fs-card .pr .old {
+  color: var(--ink-3);
+  text-decoration: line-through;
+  font-size: 12px;
+}
+.fs-card .bar {
+  height: 18px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  margin-top: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.fs-card .bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ff7a45, var(--brand));
+}
+.fs-card .bar span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: #fff;
+  font-weight: 700;
+}
+.fs-card .btn {
+  margin: 10px 12px 12px;
+}
+
+@media (max-width: 1024px) {
+  .g5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .g5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .fs-hero .lg {
+    font-size: 28px;
+  }
+  .fs-slot {
+    padding: 10px 14px;
+  }
+  .fs-slot .t {
+    font-size: 16px;
+  }
+}
+</style>

@@ -1,45 +1,157 @@
 <template>
-  <div>
-    <h2>收货地址</h2>
-    <el-button type="primary" @click="dialogVisible = true">新增地址</el-button>
-    <el-row :gutter="16" style="margin-top: 16px">
-      <el-col v-for="addr in addresses" :key="addr.id" :span="8">
-        <el-card
-          ><p>
-            <strong>{{ addr.receiverName }}</strong> {{ addr.phone }}
-          </p>
-          <p>{{ addr.province }}{{ addr.city }}{{ addr.district }} {{ addr.detail }}</p>
-          <el-tag v-if="addr.isDefault" size="small" type="danger">默认</el-tag>
-          <div style="margin-top: 8px">
-            <el-button size="small" @click="setDefault(addr.id)">设为默认</el-button
-            ><el-button size="small" @click="deleteAddr(addr.id)">删除</el-button>
+  <div class="wrap" style="padding: 20px 0">
+    <div class="crumb">
+      <router-link to="/">首页</router-link><span class="s">/</span>个人中心<span class="s">/</span
+      ><b style="color: var(--ink)">收货地址</b>
+    </div>
+
+    <div class="acct-layout">
+      <AccountSidebar active="addresses" />
+
+      <main>
+        <div class="panel">
+          <div class="panel-head">
+            <h3>
+              收货地址管理
+              <span class="dim" style="font-weight: 400; font-size: 13px"
+                >最多可保存 20 个地址</span
+              >
+            </h3>
+            <button class="btn btn-primary btn-sm" @click="showForm = true">＋ 新增收货地址</button>
           </div>
-        </el-card>
-      </el-col>
-    </el-row>
-    <el-dialog v-model="dialogVisible" title="新增地址"
-      ><el-form :model="form" label-width="80px">
-        <el-form-item label="收货人"><el-input v-model="form.receiverName" /></el-form-item>
-        <el-form-item label="手机号"><el-input v-model="form.phone" /></el-form-item>
-        <el-form-item label="省市区"
-          ><el-input v-model="form.province" style="width: 100px" /><el-input
-            v-model="form.city"
-            style="width: 100px; margin-left: 8px" /><el-input
-            v-model="form.district"
-            style="width: 100px; margin-left: 8px"
-        /></el-form-item>
-        <el-form-item label="详细地址"><el-input v-model="form.detail" /></el-form-item>
-        <el-form-item><el-button type="primary" @click="saveAddr">保存</el-button></el-form-item>
-      </el-form></el-dialog
-    >
+          <div class="panel-pad">
+            <!-- 新增/编辑表单 -->
+            <div v-if="showForm" class="addr-form">
+              <h4>{{ editingId ? '编辑收货地址' : '＋ 新增收货地址' }}</h4>
+              <div class="ff-grid">
+                <div class="field">
+                  <label>收货人</label>
+                  <input v-model="form.receiverName" class="input" placeholder="请输入收货人姓名" />
+                </div>
+                <div class="field">
+                  <label>手机号码</label>
+                  <input v-model="form.phone" class="input" placeholder="请输入手机号" />
+                </div>
+                <div class="field full">
+                  <label>所在地区</label>
+                  <div style="display: flex; gap: 10px">
+                    <input v-model="form.province" class="input" placeholder="省" style="flex: 1" />
+                    <input v-model="form.city" class="input" placeholder="市" style="flex: 1" />
+                    <input v-model="form.district" class="input" placeholder="区" style="flex: 1" />
+                  </div>
+                </div>
+                <div class="field full">
+                  <label>详细地址</label>
+                  <textarea
+                    v-model="form.detail"
+                    class="input"
+                    rows="2"
+                    placeholder="街道、门牌号、楼栋、房间号等"
+                  ></textarea>
+                </div>
+                <div class="field">
+                  <label>邮政编码</label>
+                  <input v-model="form.zipCode" class="input" placeholder="选填" />
+                </div>
+                <div class="field">
+                  <label>地址标签</label>
+                  <div style="display: flex; gap: 8px; padding-top: 6px">
+                    <span class="chip" :class="{ on: form.tag === '家' }" @click="form.tag = '家'"
+                      >家</span
+                    >
+                    <span
+                      class="chip"
+                      :class="{ on: form.tag === '公司' }"
+                      @click="form.tag = '公司'"
+                      >公司</span
+                    >
+                    <span
+                      class="chip"
+                      :class="{ on: form.tag === '学校' }"
+                      @click="form.tag = '学校'"
+                      >学校</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <label
+                style="
+                  display: flex;
+                  gap: 8px;
+                  align-items: center;
+                  font-size: 13px;
+                  color: var(--ink-2);
+                  margin: 16px 0;
+                "
+              >
+                <span
+                  class="checkbox"
+                  :class="{ on: form.isDefault }"
+                  @click="form.isDefault = !form.isDefault"
+                  >{{ form.isDefault ? '✓' : '' }}</span
+                >
+                设为默认收货地址
+              </label>
+              <div style="display: flex; gap: 10px">
+                <button class="btn btn-primary" @click="saveAddr">保存地址</button>
+                <button class="btn btn-ghost" @click="cancelForm">取消</button>
+              </div>
+            </div>
+
+            <!-- 地址列表 -->
+            <div class="addr-grid">
+              <div
+                v-for="addr in addresses"
+                :key="addr.id"
+                class="ad"
+                :class="{ def: addr.isDefault }"
+              >
+                <div class="who">
+                  {{ addr.receiverName }} <span class="tel">{{ maskPhone(addr.phone) }}</span>
+                </div>
+                <div class="det">
+                  {{ addr.province }} {{ addr.city }} {{ addr.district }} {{ addr.detail }}
+                </div>
+                <div class="tags">
+                  <span v-if="addr.isDefault" class="tag tag-brand">默认</span>
+                  <span v-if="addr.tag" class="tag tag-ghost">{{ addr.tag }}</span>
+                </div>
+                <div class="acts">
+                  <a v-if="!addr.isDefault" class="set" @click="setDefault(addr.id)">设为默认</a>
+                  <a v-else class="set">默认地址</a>
+                  <a @click="editAddr(addr)">编辑</a>
+                  <a @click="deleteAddr(addr.id)">删除</a>
+                </div>
+              </div>
+              <div class="ad add" @click="showForm = true">
+                <div style="text-align: center">
+                  <div style="font-size: 30px">＋</div>
+                  新增收货地址
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   </div>
 </template>
+
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-import { getAddresses, saveAddress, deleteAddress, setDefaultAddress } from '@/api/address';
-import { ElMessage } from 'element-plus';
+import {
+  getAddresses,
+  saveAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
+} from '@/api/address';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import AccountSidebar from '@/components/AccountSidebar.vue';
+
 const addresses = ref([]);
-const dialogVisible = ref(false);
+const showForm = ref(false);
+const editingId = ref(null);
 const form = reactive({
   receiverName: '',
   phone: '',
@@ -47,7 +159,11 @@ const form = reactive({
   city: '',
   district: '',
   detail: '',
+  zipCode: '',
+  tag: '',
+  isDefault: false,
 });
+
 async function fetch() {
   try {
     addresses.value = await getAddresses();
@@ -55,24 +171,69 @@ async function fetch() {
     console.error(err);
   }
 }
+
+function resetForm() {
+  form.receiverName = '';
+  form.phone = '';
+  form.province = '';
+  form.city = '';
+  form.district = '';
+  form.detail = '';
+  form.zipCode = '';
+  form.tag = '';
+  form.isDefault = false;
+  editingId.value = null;
+}
+
+function cancelForm() {
+  resetForm();
+  showForm.value = false;
+}
+
+function editAddr(addr) {
+  editingId.value = addr.id;
+  form.receiverName = addr.receiverName;
+  form.phone = addr.phone;
+  form.province = addr.province;
+  form.city = addr.city;
+  form.district = addr.district;
+  form.detail = addr.detail;
+  form.zipCode = addr.zipCode || '';
+  form.tag = addr.tag || '';
+  form.isDefault = addr.isDefault;
+  showForm.value = true;
+}
+
 async function saveAddr() {
   try {
-    await saveAddress(form);
-    dialogVisible.value = false;
+    if (editingId.value) {
+      await updateAddress(editingId.value, form);
+    } else {
+      await saveAddress(form);
+    }
+    showForm.value = false;
+    resetForm();
     fetch();
     ElMessage.success('已保存');
   } catch (err) {
     console.error(err);
   }
 }
+
 async function deleteAddr(id) {
   try {
+    await ElMessageBox.confirm('确定删除该地址吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    });
     await deleteAddress(id);
     fetch();
   } catch (err) {
-    console.error(err);
+    if (err !== 'cancel') console.error(err);
   }
 }
+
 async function setDefault(id) {
   try {
     await setDefaultAddress(id);
@@ -81,5 +242,112 @@ async function setDefault(id) {
     console.error(err);
   }
 }
+
+function maskPhone(phone) {
+  if (!phone) return '';
+  return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
+}
+
 onMounted(fetch);
 </script>
+
+<style scoped>
+.addr-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.ad {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  position: relative;
+  background: #fff;
+}
+.ad.def {
+  border-color: var(--brand);
+}
+.ad .who {
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ad .who .tel {
+  color: var(--ink-2);
+  font-weight: 400;
+  font-size: 13.5px;
+}
+.ad .det {
+  font-size: 13px;
+  color: var(--ink-2);
+  margin-top: 10px;
+  line-height: 1.6;
+}
+.ad .tags {
+  margin-top: 12px;
+  display: flex;
+  gap: 6px;
+}
+.ad .acts {
+  display: flex;
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--bg);
+  font-size: 12.5px;
+}
+.ad .acts a {
+  color: var(--ink-3);
+  cursor: pointer;
+}
+.ad .acts a:hover {
+  color: var(--brand);
+}
+.ad .acts .set {
+  color: var(--brand);
+}
+.ad.add {
+  border-style: dashed;
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+  cursor: pointer;
+  min-height: 170px;
+}
+.ad.add:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.addr-form {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+  background: var(--bg);
+  margin-bottom: 18px;
+}
+.addr-form h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.ff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.ff-grid .full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+  .addr-grid {
+    grid-template-columns: 1fr;
+  }
+  .ff-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 7aae71e
-last_synced_date: 2026-06-01
-sync_note: "添加 ESLint + Prettier + pre-commit hooks；新增 .eslintrc.cjs、.prettierrc 与 lint/format scripts；单元测试已迁移到 vitest"
+last_synced_commit: 18961ae
+last_synced_date: 2026-06-03
+sync_note: "修复 Home.vue 未使用变量导致的 ESLint 错误，保持 lint 通过"
 ---
 
 # hmall-web

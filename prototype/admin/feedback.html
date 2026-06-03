@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集后台 · 反馈管理</title>
+<link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/admin.css">
+<style>
+  .fb-layout{display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start;}
+  .fb-item{padding:16px 18px;border-bottom:1px solid var(--admin-line);cursor:pointer;}
+  .fb-item:hover{background:#FBFBFC;}
+  .fb-item.on{background:var(--brand-softer);border-left:3px solid var(--brand);}
+  .fb-item .top{display:flex;align-items:center;gap:10px;}
+  .fb-item .top .u-av{width:30px;height:30px;font-size:12px;}
+  .fb-item .top b{font-size:13px;}
+  .fb-item .q{font-size:13px;margin-top:8px;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .fb-item .bt{font-size:11.5px;color:var(--ink-3);margin-top:8px;display:flex;gap:10px;}
+  .detail-msg{background:var(--bg);border-radius:10px;padding:14px;font-size:13.5px;line-height:1.7;}
+  .reply-box{margin-top:16px;}
+</style>
+</head>
+<body class="admin" data-adm="feedback">
+<div class="adm">
+  <aside id="adm-side"></aside>
+  <div class="adm-main">
+    <header id="adm-top" data-crumb="反馈管理"></header>
+    <div class="adm-body">
+      <div class="adm-ph">
+        <div><h1>用户反馈管理</h1><p>共 1,248 条 · 待处理 3 · 处理中 12 · 已处理 1,233</p></div>
+      </div>
+
+      <div class="fb-layout">
+        <div class="acard">
+          <div class="ah"><h3>反馈列表</h3>
+            <div class="tabs" style="border:0"><button class="active" style="padding:6px 12px;font-size:12.5px">全部</button><button style="padding:6px 12px;font-size:12.5px">待处理 (3)</button><button style="padding:6px 12px;font-size:12.5px">处理中</button><button style="padding:6px 12px;font-size:12.5px">已处理</button></div></div>
+          <div id="fb-list"></div>
+          <div class="adm-pager"><span>共 1,248 条</span><div class="pgs"><a class="on">1</a><a>2</a><a>3</a><a>›</a></div></div>
+        </div>
+
+        <aside class="acard">
+          <div class="ah"><h3>反馈详情</h3><span class="tag tag-warn">待处理</span></div>
+          <div class="ab">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+              <span class="u-av" style="background:#88A6B8">林</span>
+              <div><div style="font-weight:700;font-size:14px">林晓</div><div class="dim" style="font-size:12px">138****8866 · 黄金会员</div></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:12px"><span class="tag tag-new">🐞 功能异常</span><span class="dim" style="font-size:12px;align-self:center">2026-05-28 11:24</span></div>
+            <div class="detail-msg">购物车里的优惠券无法叠加使用，我有一张平台券和一张品类券，结算时只能用一张，是不是 bug？另外希望能支持查看可用券列表。</div>
+            <div style="display:flex;gap:8px;margin-top:12px">
+              <div class="ph s4" style="width:64px;height:64px;border-radius:8px" data-label=""></div>
+              <div class="ph s7" style="width:64px;height:64px;border-radius:8px" data-label=""></div>
+            </div>
+
+            <div class="reply-box">
+              <div class="field"><label>处理状态</label>
+                <div style="display:flex;gap:8px"><span class="chip">待处理</span><span class="chip on">处理中</span><span class="chip">已解决</span><span class="chip">已关闭</span></div></div>
+              <div class="field" style="margin-top:14px"><label>回复用户</label>
+                <textarea class="input" rows="4" placeholder="输入回复内容，将通过站内信通知用户…">感谢反馈！该问题已确认，技术团队正在修复，预计本周内上线券叠加功能，给您带来不便敬请谅解～</textarea></div>
+              <div style="display:flex;gap:10px;margin-top:14px">
+                <button class="btn btn-primary btn-block">提交回复</button>
+                <button class="btn btn-ghost">转技术</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/admin.js"></script>
+<script>
+var fbs=[
+ ['林晓','#88A6B8','🐞 功能异常','购物车里的优惠券无法叠加使用，结算时只能用一张…','2026-05-28 11:24','待处理','warn',1],
+ ['陈一鸣','#DE9696','💡 体验建议','建议增加商品到货提醒功能，缺货商品到货能通知我','2026-05-26 16:40','处理中','blue',0],
+ ['王悦','#B0BE92','🚚 物流配送','下单3天还没发货，希望能加快处理速度','2026-05-26 09:15','待处理','warn',0],
+ ['刘洋','#C9A66B','📦 商品问题','收到的牛排包装有破损，已申请售后','2026-05-25 20:30','已处理','green',0],
+ ['赵敏','#B79CC4','💬 其他','App 首页加载有点慢，能否优化一下','2026-05-24 14:10','已处理','green',0]
+];
+document.getElementById('fb-list').innerHTML = fbs.map(function(f,i){
+  return '<div class="fb-item '+(i===0?'on':'')+'"><div class="top"><span class="u-av" style="background:'+f[1]+'">'+f[0][0]+'</span>'+
+    '<b>'+f[0]+'</b><span class="tag tag-ghost" style="font-size:11px">'+f[2]+'</span>'+
+    '<span class="sdot '+f[6]+'" style="margin-left:auto">'+f[5]+'</span></div>'+
+    '<div class="q">'+f[3]+'</div><div class="bt"><span>'+f[4]+'</span></div></div>';
+}).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集后台 · 分类管理</title>
+<link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/admin.css">
+<style>
+  .cat-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;}
+  .ctree .lv1{border:1px solid var(--admin-line);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+  .ctree .lv1 > .row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;font-weight:700;}
+  .ctree .lv1 > .row .d{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:#fff;font-size:16px;}
+  .ctree .lv2{padding:4px 16px 12px 62px;display:flex;flex-wrap:wrap;gap:8px;background:#FBFBFC;border-top:1px solid var(--admin-line);}
+  .ctree .lv2 .c{background:#fff;border:1px solid var(--admin-line);border-radius:8px;padding:6px 12px;font-size:12.5px;display:flex;align-items:center;gap:8px;}
+  .ctree .lv2 .c .cnt{color:var(--ink-3);font-size:11px;}
+  .ctree .lv2 .c .e{color:var(--info);cursor:pointer;font-size:11px;}
+  .ctree .lv1 .row .acts{margin-left:auto;display:flex;gap:14px;font-size:12.5px;font-weight:400;}
+  .ctree .lv1 .row .acts a{color:var(--ink-3);}
+  .ctree .lv1 .row .acts a:hover{color:var(--brand);}
+  .ctree .lv1 .row .handle{color:var(--line-2);cursor:grab;font-size:16px;}
+  .ctree .lv1 .row .cnt{color:var(--ink-3);font-weight:400;font-size:12px;}
+</style>
+</head>
+<body class="admin" data-adm="categories">
+<div class="adm">
+  <aside id="adm-side"></aside>
+  <div class="adm-main">
+    <header id="adm-top" data-crumb="分类管理"></header>
+    <div class="adm-body">
+      <div class="adm-ph">
+        <div><h1>分类管理</h1><p>共 10 个一级分类 · 68 个二级分类 · 拖拽 ⠿ 可调整排序</p></div>
+      </div>
+
+      <div class="cat-grid">
+        <div class="acard">
+          <div class="ah"><h3>商品分类树</h3><a class="btn btn-ghost btn-sm">全部展开</a></div>
+          <div class="ab ctree" id="ctree"></div>
+        </div>
+
+        <aside class="acard">
+          <div class="ah"><h3>＋ 新增分类</h3></div>
+          <div class="ab" style="display:flex;flex-direction:column;gap:16px">
+            <div class="field"><label>上级分类</label><select class="select"><option>作为一级分类</option><option>手机数码</option><option>家用电器</option></select></div>
+            <div class="field"><label>分类名称</label><input class="input" placeholder="如：智能穿戴"></div>
+            <div class="field"><label>分类图标</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <span class="chip on">▣</span><span class="chip">▤</span><span class="chip">◈</span><span class="chip">✿</span><span class="chip">◉</span><span class="chip">▦</span></div></div>
+            <div class="field"><label>排序权重</label><input class="input" value="0" placeholder="数字越大越靠前"></div>
+            <div class="field"><label>分类图片</label>
+              <div class="upload-grid"><div class="add"><div style="text-align:center">＋<small>上传</small></div></div></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span>是否显示</span><span class="switch on"></span></div>
+            <button class="btn btn-primary btn-block">保存分类</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/admin.js"></script>
+<script>
+var cats=[
+ ['手机数码','▣','#FF6A45',2480,['手机通讯','电脑办公','影音娱乐','智能穿戴','摄影摄像','数码配件']],
+ ['家用电器','▤','#88A6B8',1860,['大家电','厨房电器','生活电器','个护健康','视听影音']],
+ ['服饰鞋包','◈','#B79CC4',3240,['男装','女装','内衣','箱包','鞋靴','配饰']],
+ ['美妆个护','✿','#DE9696',1520,['护肤','彩妆','香水','洗护','美容工具']],
+ ['食品生鲜','◉','#B0BE92',2180,['休闲零食','粮油调味','水果蔬菜','肉禽蛋品','酒水饮料']],
+ ['家居家装','▦','#C9A66B',1940,['家具','家纺','收纳','厨具','灯具','装饰']],
+ ['母婴玩具','❀','#E9B775',1280,['奶粉辅食','纸尿裤','童装童鞋','玩具','孕产用品']],
+ ['运动户外','◐','#7FB6A6',980,['运动鞋','运动服','健身器材','户外装备','骑行']]
+];
+document.getElementById('ctree').innerHTML = cats.map(function(c){
+  return '<div class="lv1"><div class="row"><span class="handle">⠿</span>'+
+    '<span class="d" style="background:'+c[2]+'">'+c[1]+'</span>'+c[0]+
+    ' <span class="cnt">'+c[3]+' 件商品 · '+c[4].length+' 个子类</span>'+
+    '<span class="acts"><a>＋ 子类</a><a>编辑</a><a>删除</a></span></div>'+
+    '<div class="lv2">'+c[4].map(function(s){return '<span class="c">'+s+' <span class="cnt">'+(Math.floor(Math.random()*400)+50)+'</span> <span class="e">✎</span></span>';}).join('')+'</div></div>';
+}).join('');
+</script>
+</body>
+</html>

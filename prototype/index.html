@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集 HAOJI · 高保真原型 · 站点导航</title>
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  body{background:var(--bg);}
+  .nav-hero{background:linear-gradient(125deg,#FF7A45,var(--brand) 50%,var(--brand-700));color:#fff;padding:54px 0 60px;position:relative;overflow:hidden;}
+  .nav-hero .blob{position:absolute;border-radius:50%;background:rgba(255,255,255,.1);}
+  .nav-hero .b1{width:420px;height:420px;right:-120px;top:-160px;}
+  .nav-hero .b2{width:240px;height:240px;right:280px;bottom:-160px;}
+  .nav-hero .logo .mark{width:56px;height:56px;font-size:28px;}
+  .nav-hero .logo .name{font-size:30px;color:#fff;}
+  .nav-hero .logo .name small{color:rgba(255,255,255,.8);}
+  .nav-hero h1{font-size:42px;font-weight:900;letter-spacing:-1px;margin:22px 0 12px;}
+  .nav-hero p{font-size:16px;opacity:.93;max-width:640px;}
+  .hero-meta{display:flex;gap:30px;margin-top:26px;}
+  .hero-meta .m b{font-size:28px;font-weight:900;display:block;}
+  .hero-meta .m span{font-size:13px;opacity:.85;}
+
+  .ds-bar{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px 24px;display:flex;gap:34px;align-items:center;margin-top:-32px;position:relative;box-shadow:var(--shadow-2);flex-wrap:wrap;}
+  .ds-bar .grp{display:flex;flex-direction:column;gap:8px;}
+  .ds-bar .lab{font-size:12px;color:var(--ink-3);font-weight:700;letter-spacing:1px;}
+  .swatches{display:flex;gap:7px;}
+  .sw{width:32px;height:32px;border-radius:8px;border:1px solid rgba(0,0,0,.06);}
+  .typ{font-size:13px;color:var(--ink-2);}
+  .typ b{font-size:20px;color:var(--ink);font-weight:900;}
+
+  .group{margin-top:40px;}
+  .group .gh{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .group .gh .ix{width:30px;height:30px;border-radius:9px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;}
+  .group .gh.b .ix{background:var(--brand);}
+  .group .gh h2{font-size:20px;font-weight:900;}
+  .group .gh .cnt{margin-left:auto;font-size:12.5px;color:var(--ink-3);}
+
+  .pages{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .pcell{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;display:flex;flex-direction:column;gap:7px;transition:.15s;position:relative;overflow:hidden;}
+  .pcell:hover{box-shadow:var(--shadow-2);transform:translateY(-3px);border-color:var(--brand);}
+  .pcell .top{display:flex;align-items:center;justify-content:space-between;}
+  .pcell .ic{width:38px;height:38px;border-radius:10px;background:var(--brand-softer);color:var(--brand);display:grid;place-items:center;font-size:19px;}
+  .pcell .star{font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;}
+  .pcell .star.req{background:var(--brand-soft);color:var(--brand-700);}
+  .pcell .star.adv{background:var(--info-soft);color:#1257c4;}
+  .pcell h3{font-size:15px;font-weight:700;}
+  .pcell p{font-size:12px;color:var(--ink-3);line-height:1.5;}
+  .pcell .arrow{position:absolute;right:14px;bottom:14px;color:var(--line-2);font-size:18px;transition:.15s;}
+  .pcell:hover .arrow{color:var(--brand);transform:translateX(3px);}
+  .soon{opacity:.55;pointer-events:none;}
+  .footnote{text-align:center;color:var(--ink-3);font-size:12.5px;padding:40px 0;}
+</style>
+</head>
+<body>
+<section class="nav-hero">
+  <span class="blob b1"></span><span class="blob b2"></span>
+  <div class="wrap">
+    <div class="logo"><span class="mark">集</span><span class="name">好集<small>HAOJI MALL</small></span></div>
+    <h1>综合百货电商平台 · 高保真原型</h1>
+    <p>按《电商平台前端规格》全量实现 C 端购物全流程与 B 端管理后台。橙红促销视觉，暖中性底色，统一设计系统。商品图以色块占位。</p>
+    <div class="hero-meta">
+      <div class="m"><b>32+</b><span>页面</span></div>
+      <div class="m"><b>C 端</b><span>客户端购物</span></div>
+      <div class="m"><b>B 端</b><span>管理后台</span></div>
+      <div class="m"><b>PC + H5</b><span>双端适配</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="ds-bar">
+    <div class="grp"><span class="lab">品牌主色</span>
+      <div class="swatches">
+        <span class="sw" style="background:#FF4D2E" title="主橙红 #FF4D2E"></span>
+        <span class="sw" style="background:#FA2C19" title="价格红"></span>
+        <span class="sw" style="background:#FFB020" title="促销金"></span>
+        <span class="sw" style="background:#1FA85A" title="成功绿"></span>
+        <span class="sw" style="background:#221B17" title="墨黑"></span>
+        <span class="sw" style="background:#F5F4F2;border-color:#ddd" title="暖底"></span>
+      </div>
+    </div>
+    <div class="grp"><span class="lab">字体</span><div class="typ"><b>Noto Sans SC</b> · 400 / 500 / 700 / 900</div></div>
+    <div class="grp"><span class="lab">设计语言</span><div class="typ">圆角 12 · 暖中性 · 促销橙红强调 · 色块占位图</div></div>
+    <a class="btn btn-primary" style="margin-left:auto" href="c/index.html">进入 C 端首页 →</a>
+  </div>
+
+  <!-- C 端 -->
+  <div class="group">
+    <div class="gh b"><span class="ix">C</span><h2>客户端 · C 端购物</h2><span class="cnt">商品 · 购物车 · 订单 · 用户 · 营销</span></div>
+    <div class="pages" id="c-pages"></div>
+  </div>
+
+  <!-- B 端 -->
+  <div class="group">
+    <div class="gh"><span class="ix">B</span><h2>管理后台 · B 端</h2><span class="cnt">看板 · 用户 · 商品 · 订单 · 系统</span></div>
+    <div class="pages" id="b-pages"></div>
+  </div>
+
+  <div class="footnote">好集 HAOJI · 高保真设计原型 · 仅用于课程实验演示 · 所有数据与商品图均为占位</div>
+</div>
+
+<script>
+var cPages=[
+ ['首页','c/index.html','🏠','adv','轮播·分类导航·热门/新品/促销·搜索'],
+ ['分类浏览','c/category.html','▦','req','按分类筛选商品列表·多维筛选'],
+ ['搜索结果','c/search.html','🔍','req','精准/模糊搜索·价格/销量/新品排序'],
+ ['商品详情','c/product.html','▣','req','图文·规格选择·参数·评价'],
+ ['收藏夹','c/favorites.html','♡','req','收藏/取消·收藏列表'],
+ ['购物车','c/cart.html','🛒','req','改数量·删除·勾选·全选反选·小计'],
+ ['订单确认','c/checkout.html','✓','req','收货地址·清单·总价计算·支付方式'],
+ ['我的订单','c/orders.html','▤','req','状态Tab·取消/确认/退款/物流'],
+ ['订单详情','c/order-detail.html','📦','req','商品·地址·支付·物流时间轴'],
+ ['登录','c/login.html','◍','adv','账号密码·记住密码'],
+ ['注册','c/register.html','✚','adv','邮箱注册·验证码'],
+ ['找回密码','c/forgot.html','🔑','adv','邮箱验证·重置密码'],
+ ['个人信息','c/profile.html','◐','adv','头像·昵称·邮箱·密码'],
+ ['收货地址','c/address.html','📍','adv','新增·列表·默认·增删改'],
+ ['优惠券','c/coupons.html','🎟','adv','领取与使用'],
+ ['限时秒杀','c/flashsale.html','⚡','adv','活动会场·倒计时'],
+ ['在线客服','c/service.html','💬','adv','留言/在线聊天'],
+ ['系统公告','c/announcements.html','📢','adv','活动通知展示'],
+ ['用户反馈','c/feedback.html','✍','adv','提交问题/建议'],
+ ['手机端 H5','c/mobile.html','📱','adv','核心购物流程·设备框展示']
+];
+var bPages=[
+ ['管理员登录','admin/login.html','🔒','req','账号密码·权限验证'],
+ ['数据看板','admin/dashboard.html','📊','req','核心统计·销量趋势·热销排行'],
+ ['用户管理','admin/users.html','👥','req','列表·搜索·禁用/启用·详情'],
+ ['分类管理','admin/categories.html','🗂','req','增删改·排序分类'],
+ ['商品列表','admin/products.html','📦','req','列表·搜索·筛选·上下架'],
+ ['商品编辑','admin/product-edit.html','✚','req','图片·名称/价格/库存/详情'],
+ ['评价管理','admin/reviews.html','★','req','查看·删除违规评价'],
+ ['订单列表','admin/orders.html','▤','req','按单号/用户/状态筛选'],
+ ['订单详情','admin/order-detail.html','🧾','req','发货·退款·改状态·导出'],
+ ['轮播管理','admin/banners.html','🖼','adv','轮播图CRUD·排序·链接'],
+ ['公告管理','admin/announcements.html','📢','adv','发布/编辑/删除公告'],
+ ['反馈管理','admin/feedback.html','💬','adv','查看·回复·标记已处理'],
+ ['个人中心','admin/settings.html','⚙','adv','修改密码·个人信息·角色权限']
+];
+function cell(p){
+  return '<a class="pcell" href="'+p[1]+'"><div class="top"><span class="ic">'+p[2]+'</span>'+
+    '<span class="star '+p[3]+'">'+(p[3]=='req'?'★ 基本':'☆ 进阶')+'</span></div>'+
+    '<h3>'+p[0]+'</h3><p>'+p[4]+'</p><span class="arrow">→</span></a>';
+}
+document.getElementById('c-pages').innerHTML=cPages.map(cell).join('');
+document.getElementById('b-pages').innerHTML=bPages.map(cell).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集后台 · 商品管理</title>
+<link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/admin.css">
+</head>
+<body class="admin" data-adm="products">
+<div class="adm">
+  <aside id="adm-side"></aside>
+  <div class="adm-main">
+    <header id="adm-top" data-crumb="商品管理"></header>
+    <div class="adm-body">
+      <div class="adm-ph">
+        <div><h1>商品管理</h1><p>共 24,186 件商品 · 在售 22,940 · 已下架 1,246</p></div>
+        <div class="acts"><a class="btn btn-ghost">批量导入</a><a class="btn btn-primary" href="product-edit.html">＋ 发布商品</a></div>
+      </div>
+
+      <div class="acard" style="margin-bottom:16px">
+        <div class="tabs" style="padding:0 16px">
+          <button class="active">全部 (24186)</button><button>在售中 (22940)</button>
+          <button>已下架 (1246)</button><button>库存预警 (9)</button><button>待审核 (12)</button>
+        </div>
+      </div>
+
+      <div class="adm-filter">
+        <div class="field-inline">商品名 <input class="input" placeholder="输入商品名称 / 编号"></div>
+        <div class="field-inline">分类 <select class="select"><option>全部分类</option><option>手机数码</option><option>家用电器</option><option>食品生鲜</option></select></div>
+        <div class="field-inline">价格 <input class="input" style="min-width:80px" placeholder="¥最低"><span>-</span><input class="input" style="min-width:80px" placeholder="¥最高"></div>
+        <div class="grow"></div>
+        <a class="btn btn-primary btn-sm">查询</a><a class="btn btn-ghost btn-sm">重置</a>
+      </div>
+
+      <div class="acard">
+        <div class="ah"><h3>商品列表</h3>
+          <div style="display:flex;gap:8px"><a class="btn btn-ghost btn-sm">批量上架</a><a class="btn btn-ghost btn-sm">批量下架</a><a class="btn btn-ghost btn-sm" style="color:var(--danger)">批量删除</a></div></div>
+        <table class="atable">
+          <thead><tr><th style="width:30px"><span class="checkbox"></span></th><th>商品</th><th>分类</th><th>价格</th><th>库存</th><th>销量</th><th>状态</th><th>操作</th></tr></thead>
+          <tbody id="prod-rows"></tbody>
+        </table>
+        <div class="adm-pager">
+          <span>共 24,186 条 · 每页 12 条</span>
+          <div class="pgs"><a>‹</a><a class="on">1</a><a>2</a><a>3</a><a>4</a><a>…</a><a>2016</a><a>›</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/admin.js"></script>
+<script>
+var stocks=[238,12,540,1820,330,86,420,156,8,640,210,95];
+document.getElementById('prod-rows').innerHTML = HAOJI.P.slice(0,12).map(function(p,i){
+  var stk=stocks[i], low=stk<20, off=i===5;
+  return '<tr><td><span class="checkbox"></span></td>'+
+    '<td><span class="prod-cell">'+HAOJI.phBlock(p)+
+      '<span><div class="nm">'+p.n+'</div><div class="id">SKU: HJ'+(100000+p.id)+'</div></span></span></td>'+
+    '<td class="dim">'+p.cat+'</td>'+
+    '<td><span class="amount">¥'+p.p+'</span><div class="dim" style="font-size:11px;text-decoration:line-through">¥'+p.o+'</div></td>'+
+    '<td>'+(low?'<span style="color:var(--danger);font-weight:700">'+stk+' ⚠</span>':stk)+'</td>'+
+    '<td>'+(p.sales>9999?(p.sales/10000).toFixed(1)+'万':p.sales)+'</td>'+
+    '<td><span class="switch '+(off?'':'on')+'"></span><div class="dim" style="font-size:11px;margin-top:3px">'+(off?'已下架':'在售')+'</div></td>'+
+    '<td class="actions"><a class="lk" href="product-edit.html">编辑</a><span class="lk">'+(off?'上架':'下架')+'</span><span class="lk danger">删除</span></td></tr>';
+}).join('');
+</script>
+</body>
+</html>
