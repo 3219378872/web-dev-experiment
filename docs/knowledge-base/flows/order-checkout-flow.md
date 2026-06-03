@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 6283d54
+last_synced_commit: HEAD
 last_synced_date: 2026-06-03
-sync_note: "PayApplication 加 DefaultFeignConfig（user-info header 传播修复）"
+sync_note: "pay-service 新增单测，支付流程不变"
 ---
 
 # order-checkout-flow

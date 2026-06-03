@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: cc119e56d47e8f1b29ea2afc5e7d82e2d766b7ff
+last_synced_commit: HEAD
 last_synced_date: 2026-06-03
-sync_note: "接入 Seata AT：deductMoney 加 @Transactional，作为余额支付全局事务的 RM 分支"
+sync_note: "新增 UserServiceImpl/AddressServiceImpl/FavoriteServiceImpl 单元测试（H2），JaCoCo 分支覆盖率 97%，门控提升至 0.70"
 ---
 
 # user-service
