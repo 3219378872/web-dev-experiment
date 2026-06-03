@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: HEAD
+last_synced_commit: 7b4de82
 last_synced_date: 2026-06-03
-sync_note: "pay-service 新增单测，支付流程不变"
+sync_note: "pay-service 新增单测 + JaCoCo skip 修复，支付流程不变"
 ---
 
 # order-checkout-flow

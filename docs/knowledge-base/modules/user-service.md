@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: HEAD
+last_synced_commit: 7b4de82
 last_synced_date: 2026-06-03
-sync_note: "新增 UserServiceImpl/AddressServiceImpl/FavoriteServiceImpl 单元测试（H2），JaCoCo 分支覆盖率 97%，门控提升至 0.70"
+sync_note: "新增单元测试 + JaCoCo skip 属性修复"
 ---
 
 # user-service

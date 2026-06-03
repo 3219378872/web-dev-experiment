@@ -110,6 +110,7 @@
                     <execution>
                         <id>check</id>
                         <configuration combine.self="override">
+                            <skip>${jacoco.check.skip}</skip>
                             <haltOnFailure>true</haltOnFailure>
                             <rules>
                                 <rule>
