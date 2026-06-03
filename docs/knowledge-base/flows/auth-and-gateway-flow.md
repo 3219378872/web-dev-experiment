@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 460ad91
+last_synced_commit: 7b4de82
 last_synced_date: 2026-06-03
-sync_note: "user-service 加 Seata starter + seata.enabled 配置（仅依赖/配置改动，鉴权流程不变）"
+sync_note: "user-service 新增单测 + JaCoCo skip 修复，鉴权流程不变"
 ---
 
 # auth-and-gateway-flow

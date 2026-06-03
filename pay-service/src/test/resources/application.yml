@@ -1,0 +1,33 @@
+spring:
+  cloud:
+    bootstrap:
+      enabled: false
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+  autoconfigure:
+    exclude:
+      - com.alibaba.cloud.nacos.NacosConfigAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+  datasource:
+    url: jdbc:h2:mem:pay_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/schema.sql
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false
+      direct:
+        auto-startup: false
+
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: assign_id
