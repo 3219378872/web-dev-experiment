@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 7a8e832
+last_synced_commit: 9c25528
 last_synced_date: 2026-06-03
-sync_note: "对齐全部客户端页至高保真原型视觉：全局样式/组件、Home/Category/Search/ItemDetail/Cart/OrderConfirm/OrderList/OrderDetail/Login/Profile/AddressList/FavoriteList/Feedback/Notifications/Coupons/FlashSale/Service；保持 API 与数据逻辑不变。本次额外更新 Login.vue 注册/找回密码模式专属 promo 文案。"
+sync_note: "对齐全部客户端页至高保真原型视觉：全局样式/组件、Home/Category/Search/ItemDetail/Cart/OrderConfirm/OrderList/OrderDetail/Login/Profile/AddressList/FavoriteList/Feedback/Notifications/Coupons/FlashSale/Service；保持 API 与数据逻辑不变。额外更新：Login.vue 注册/找回密码模式结构对齐原型、App.vue 认证页隐藏布局头尾。"
 ---
 
 # hmall-web

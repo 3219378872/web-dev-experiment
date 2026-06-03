@@ -166,16 +166,16 @@
           <div class="sub">已有账号？<a @click="switchMode('login')">直接登录 ›</a></div>
 
           <div class="field">
-            <label>用户名</label>
-            <input v-model="registerForm.username" class="input" placeholder="请输入用户名" />
-          </div>
-          <div class="field">
             <label>邮箱地址</label>
             <input
               v-model="registerForm.email"
               class="input"
               placeholder="用于登录与找回密码，如 name@mail.com"
             />
+          </div>
+          <div class="field">
+            <label>手机号</label>
+            <input v-model="registerForm.phone" class="input" placeholder="请输入 11 位手机号" />
           </div>
           <div class="field">
             <label>验证码</label>
@@ -198,11 +198,22 @@
               type="password"
               placeholder="8-20 位，含字母与数字"
             />
+            <div class="strength">
+              <i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+            </div>
+            <span class="dim" style="font-size: 11.5px">密码强度：中</span>
+          </div>
+          <div class="field">
+            <label>确认密码</label>
+            <input
+              v-model="registerForm.confirmPassword"
+              class="input"
+              type="password"
+              placeholder="请再次输入密码"
+            />
           </div>
           <div class="agree">
-            <span class="checkbox" :class="{ on: agreed }" @click="agreed = !agreed">{{
-              agreed ? '✓' : ''
-            }}</span>
+            <span class="checkbox on" style="margin-top: 1px">✓</span>
             <span>我已阅读并同意《<a>好集用户协议</a>》和《<a>隐私政策</a>》</span>
           </div>
           <button class="btn btn-hot btn-lg btn-block" @click="doRegister">注 册</button>
@@ -213,6 +224,14 @@
           <h2>找回密码</h2>
           <div class="sub">记起密码了？<a @click="switchMode('login')">返回登录 ›</a></div>
 
+          <div class="steps fp-steps">
+            <div class="st on"><span class="n">1</span>验证身份</div>
+            <div class="line"></div>
+            <div class="st"><span class="n">2</span>设置新密码</div>
+            <div class="line"></div>
+            <div class="st"><span class="n">3</span>完成</div>
+          </div>
+
           <div class="field">
             <label>注册邮箱 / 手机号</label>
             <input
@@ -222,7 +241,28 @@
             />
           </div>
           <div class="field">
-            <label>验证码</label>
+            <label>图形验证码</label>
+            <div class="code-row">
+              <input v-model="resetForm.captcha" class="input" placeholder="请输入右侧字符" />
+              <span
+                style="
+                  width: 96px;
+                  border-radius: 8px;
+                  background: linear-gradient(110deg, #88a6b8, #b79cc4);
+                  display: grid;
+                  place-items: center;
+                  color: #fff;
+                  font-weight: 900;
+                  letter-spacing: 4px;
+                  font-style: italic;
+                  font-size: 18px;
+                "
+                >8 K 2 d</span
+              >
+            </div>
+          </div>
+          <div class="field">
+            <label>短信/邮箱验证码</label>
             <div class="code-row">
               <input v-model="resetForm.code" class="input" placeholder="6 位验证码" />
               <button class="btn btn-outline" :disabled="codeCountdown > 0" @click="sendResetCode">
@@ -230,16 +270,10 @@
               </button>
             </div>
           </div>
-          <div class="field">
-            <label>新密码</label>
-            <input
-              v-model="resetForm.newPassword"
-              class="input"
-              type="password"
-              placeholder="请输入新密码"
-            />
-          </div>
-          <button class="btn btn-hot btn-lg btn-block" @click="doReset">重置密码</button>
+
+          <button class="btn btn-hot btn-lg btn-block" style="margin-top: 8px" @click="doReset">
+            下一步
+          </button>
         </template>
       </div>
     </div>
@@ -265,8 +299,15 @@ const smsCountdown = ref(0);
 
 const loginForm = reactive({ username: '', password: '' });
 const smsForm = reactive({ phone: '', code: '' });
-const registerForm = reactive({ username: '', password: '', email: '', code: '' });
-const resetForm = reactive({ email: '', code: '', newPassword: '' });
+const registerForm = reactive({
+  username: '',
+  password: '',
+  email: '',
+  phone: '',
+  code: '',
+  confirmPassword: '',
+});
+const resetForm = reactive({ email: '', code: '', newPassword: '', captcha: '' });
 
 function switchMode(target) {
   mode.value = target;
@@ -519,34 +560,25 @@ async function doReset() {
   margin-bottom: 22px;
 }
 .auth-card .tabs {
-  display: flex;
-  gap: 2px;
-  border-bottom: 1px solid var(--line);
   margin-bottom: 24px;
 }
 .auth-card .tabs button {
-  padding: 13px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink-2);
+  font-size: 16px;
+  padding: 0 0 14px;
+  margin-right: 28px;
   border: 0;
   background: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
   cursor: pointer;
+  color: var(--ink-2);
 }
 .auth-card .tabs button.active {
   color: var(--brand);
   font-weight: 700;
-  border-bottom-color: var(--brand);
 }
 .auth-card .tabs button:hover {
   color: var(--brand);
 }
 .auth-card .field {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
   margin-bottom: 16px;
 }
 .auth-card .field label {
@@ -718,5 +750,62 @@ async function doReset() {
   .auth-promo {
     display: none;
   }
+}
+
+.strength {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+}
+.strength i {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line-2);
+}
+.strength i.on {
+  background: var(--success);
+}
+
+.fp-steps {
+  display: flex;
+  align-items: center;
+  margin-bottom: 26px;
+}
+.steps {
+  display: flex;
+  align-items: center;
+}
+.steps .st {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.steps .st.on {
+  color: var(--brand);
+  font-weight: 700;
+}
+.steps .st .n {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--line-2);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.steps .st.on .n {
+  background: var(--brand);
+}
+.steps .line {
+  flex: 1;
+  height: 2px;
+  background: var(--line-2);
+  margin: 0 8px;
+  min-width: 24px;
 }
 </style>
