@@ -172,7 +172,7 @@ erDiagram
 | `feedbacks` | notify-service | 用户反馈（与 user 关联，已含于上图） |
 | `uploads` | file-service | 上传文件元数据（original_name / file_path / size） |
 | `banners` | item/admin | 首页轮播图 |
-| `mq_outbox_message` | 基础设施 | RabbitMQ Outbox 模式消息表，确保消息可靠投递 |
+| `mq_outbox_message` | 基础设施 | RabbitMQ 发布失败记录表，用于诊断和手动恢复（无自动重放） |
 | `undo_log` | 基础设施 | Seata AT 模式回滚日志表，所有 RM 共用 |
 
 > **关键关联说明**
