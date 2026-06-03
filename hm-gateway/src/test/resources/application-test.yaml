@@ -28,7 +28,6 @@ hm:
     tokenTTL: 30m
   auth:
     excludePaths:
-      - /hi
       - /test-public
     excludeReadPaths:
       - /test-read

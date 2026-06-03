@@ -66,11 +66,6 @@ echo " target: ${BASE_URL}"
 echo "============================================"
 echo ""
 
-# ---- Phase 1: Health Check ----
-echo "--- Phase 1: Health ---"
-
-check 1 GET "/hi" 200
-
 # ---- Phase 2: Public Item Endpoints ----
 echo ""
 echo "--- Phase 2: Public APIs ---"

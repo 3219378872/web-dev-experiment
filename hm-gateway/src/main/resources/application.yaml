@@ -13,7 +13,6 @@ hm:
       - /users/register
       - /users/send-code
       - /users/reset-password
-      - /hi
       - /notifications/active
       - /upload/**
       - /files/**
