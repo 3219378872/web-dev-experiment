@@ -7,26 +7,48 @@
       </router-link>
     </div>
     <div class="auth-wrap">
+      <!-- 左侧 promo 区域：根据当前 mode 展示不同文案 -->
       <div class="auth-promo">
-        <div class="eyebrow">欢迎回来</div>
-        <h1>万物好集<br />登录即享会员价</h1>
-        <p>登录后可享受会员专属折扣、积分商城、收藏夹同步与订单全程跟踪。</p>
-        <div class="auth-feats">
-          <div class="f"><span class="d">🎟</span>专属优惠券</div>
-          <div class="f"><span class="d">⚡</span>限时秒杀提醒</div>
-          <div class="f"><span class="d">🛡</span>账户安全保障</div>
-        </div>
+        <template v-if="mode === 'login' || mode === 'sms'">
+          <div class="eyebrow">欢迎回来</div>
+          <h1>万物好集<br />登录即享会员价</h1>
+          <p>登录后可享受会员专属折扣、积分商城、收藏夹同步与订单全程跟踪。</p>
+          <div class="auth-feats">
+            <div class="f"><span class="d">🎟</span>专属优惠券</div>
+            <div class="f"><span class="d">⚡</span>限时秒杀提醒</div>
+            <div class="f"><span class="d">🛡</span>账户安全保障</div>
+          </div>
+        </template>
+        <template v-else-if="mode === 'register'">
+          <div class="eyebrow">新人专享</div>
+          <h1>注册好集<br />立得 90 元新人礼包</h1>
+          <p>注册即送 ¥20 + ¥50 + 9折券组合，首单再享会员价，下单更省心。</p>
+          <div class="auth-feats">
+            <div class="f"><span class="d">🎁</span>90元新人礼包</div>
+            <div class="f"><span class="d">🚚</span>新人免邮券</div>
+            <div class="f"><span class="d">💎</span>会员成长体系</div>
+          </div>
+        </template>
+        <template v-else>
+          <div class="eyebrow">账户安全</div>
+          <h1>找回密码<br />三步重置登录密码</h1>
+          <p>通过注册邮箱或手机号验证身份，安全便捷地重置您的登录密码。</p>
+          <div class="auth-feats">
+            <div class="f"><span class="d">📧</span>邮箱验证</div>
+            <div class="f"><span class="d">🔐</span>身份核验</div>
+            <div class="f"><span class="d">✓</span>重置完成</div>
+          </div>
+        </template>
       </div>
 
       <div class="auth-card">
-        <div class="tabs">
-          <button :class="{ active: mode === 'login' }" @click="mode = 'login'">账号登录</button>
-          <button :class="{ active: mode === 'register' }" @click="mode = 'register'">注册</button>
-          <button :class="{ active: mode === 'reset' }" @click="mode = 'reset'">找回密码</button>
-        </div>
-
         <!-- 登录 -->
         <template v-if="mode === 'login'">
+          <div class="tabs">
+            <button class="active">账号登录</button>
+            <button @click="switchMode('sms')">短信登录</button>
+          </div>
+
           <div class="field">
             <label>账号 / 邮箱 / 手机号</label>
             <input
@@ -53,68 +75,158 @@
                 align-items: center;
                 color: var(--ink-2);
                 font-size: 13px;
+                cursor: pointer;
               "
             >
-              <span class="checkbox" :class="{ on: remember }" @click="remember = !remember">{{
+              <span class="checkbox" :class="{ on: remember }" @click.stop="remember = !remember">{{
                 remember ? '✓' : ''
               }}</span
               >记住密码
             </label>
+            <a style="color: var(--brand); cursor: pointer" @click="switchMode('reset')"
+              >忘记密码？</a
+            >
           </div>
           <button class="btn btn-hot btn-lg btn-block" :disabled="loading" @click="doLogin">
             {{ loading ? '登录中...' : '登 录' }}
           </button>
+          <div class="other">还没有账号？<a @click="switchMode('register')">立即注册 ›</a></div>
+          <div class="other" style="margin-top: 18px; position: relative">
+            <span style="background: #fff; padding: 0 12px; position: relative; z-index: 2"
+              >其他登录方式</span
+            >
+            <span
+              style="
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 50%;
+                height: 1px;
+                background: var(--line);
+              "
+            ></span>
+          </div>
+          <div class="socials">
+            <a class="s">微</a><a class="s">支</a><a class="s">Q</a><a class="s">微博</a>
+          </div>
+        </template>
+
+        <!-- 短信登录 -->
+        <template v-else-if="mode === 'sms'">
+          <div class="tabs">
+            <button @click="switchMode('login')">账号登录</button>
+            <button class="active">短信登录</button>
+          </div>
+
+          <div class="field">
+            <label>手机号</label>
+            <input v-model="smsForm.phone" class="input" placeholder="请输入手机号" />
+          </div>
+          <div class="field">
+            <label>验证码</label>
+            <div class="code-row">
+              <input
+                v-model="smsForm.code"
+                class="input"
+                placeholder="请输入验证码"
+                @keyup.enter="doSmsLogin"
+              />
+              <button class="btn btn-ghost" :disabled="smsCountdown > 0" @click="sendSmsCode">
+                {{ smsCountdown > 0 ? smsCountdown + 's' : '获取验证码' }}
+              </button>
+            </div>
+          </div>
+          <button class="btn btn-hot btn-lg btn-block" :disabled="loading" @click="doSmsLogin">
+            {{ loading ? '登录中...' : '登 录' }}
+          </button>
+          <div class="other">还没有账号？<a @click="switchMode('register')">立即注册 ›</a></div>
+          <div class="other" style="margin-top: 18px; position: relative">
+            <span style="background: #fff; padding: 0 12px; position: relative; z-index: 2"
+              >其他登录方式</span
+            >
+            <span
+              style="
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 50%;
+                height: 1px;
+                background: var(--line);
+              "
+            ></span>
+          </div>
+          <div class="socials">
+            <a class="s">微</a><a class="s">支</a><a class="s">Q</a><a class="s">微博</a>
+          </div>
         </template>
 
         <!-- 注册 -->
-        <template v-if="mode === 'register'">
+        <template v-else-if="mode === 'register'">
+          <h2>创建账号</h2>
+          <div class="sub">已有账号？<a @click="switchMode('login')">直接登录 ›</a></div>
+
           <div class="field">
             <label>用户名</label>
             <input v-model="registerForm.username" class="input" placeholder="请输入用户名" />
           </div>
           <div class="field">
-            <label>密码</label>
+            <label>邮箱地址</label>
             <input
-              v-model="registerForm.password"
+              v-model="registerForm.email"
               class="input"
-              type="password"
-              placeholder="请输入密码"
+              placeholder="用于登录与找回密码，如 name@mail.com"
             />
-          </div>
-          <div class="field">
-            <label>邮箱</label>
-            <input v-model="registerForm.email" class="input" placeholder="请输入邮箱" />
           </div>
           <div class="field">
             <label>验证码</label>
             <div class="code-row">
-              <input v-model="registerForm.code" class="input" placeholder="请输入验证码" />
-              <button class="btn btn-ghost" :disabled="codeCountdown > 0" @click="sendRegisterCode">
-                {{ codeCountdown > 0 ? codeCountdown + 's' : '发送验证码' }}
+              <input v-model="registerForm.code" class="input" placeholder="6 位验证码" />
+              <button
+                class="btn btn-outline"
+                :disabled="codeCountdown > 0"
+                @click="sendRegisterCode"
+              >
+                {{ codeCountdown > 0 ? codeCountdown + 's' : '获取验证码' }}
               </button>
             </div>
+          </div>
+          <div class="field">
+            <label>设置密码</label>
+            <input
+              v-model="registerForm.password"
+              class="input"
+              type="password"
+              placeholder="8-20 位，含字母与数字"
+            />
           </div>
           <div class="agree">
             <span class="checkbox" :class="{ on: agreed }" @click="agreed = !agreed">{{
               agreed ? '✓' : ''
             }}</span>
-            <span>我已阅读并同意 <a href="#">用户协议</a> 和 <a href="#">隐私政策</a></span>
+            <span>我已阅读并同意《<a>好集用户协议</a>》和《<a>隐私政策</a>》</span>
           </div>
           <button class="btn btn-hot btn-lg btn-block" @click="doRegister">注 册</button>
         </template>
 
         <!-- 找回密码 -->
-        <template v-if="mode === 'reset'">
+        <template v-else-if="mode === 'reset'">
+          <h2>找回密码</h2>
+          <div class="sub">记起密码了？<a @click="switchMode('login')">返回登录 ›</a></div>
+
           <div class="field">
-            <label>邮箱</label>
-            <input v-model="resetForm.email" class="input" placeholder="请输入邮箱" />
+            <label>注册邮箱 / 手机号</label>
+            <input
+              v-model="resetForm.email"
+              class="input"
+              placeholder="请输入注册时的邮箱或手机号"
+            />
           </div>
           <div class="field">
             <label>验证码</label>
             <div class="code-row">
-              <input v-model="resetForm.code" class="input" placeholder="请输入验证码" />
-              <button class="btn btn-ghost" :disabled="codeCountdown > 0" @click="sendResetCode">
-                {{ codeCountdown > 0 ? codeCountdown + 's' : '发送验证码' }}
+              <input v-model="resetForm.code" class="input" placeholder="6 位验证码" />
+              <button class="btn btn-outline" :disabled="codeCountdown > 0" @click="sendResetCode">
+                {{ codeCountdown > 0 ? codeCountdown + 's' : '获取验证码' }}
               </button>
             </div>
           </div>
@@ -129,56 +241,67 @@
           </div>
           <button class="btn btn-hot btn-lg btn-block" @click="doReset">重置密码</button>
         </template>
-
-        <div class="other">还没有账号？<a @click="mode = 'register'">立即注册 ›</a></div>
-        <div class="other" style="margin-top: 18px; position: relative">
-          <span style="background: #fff; padding: 0 12px; position: relative; z-index: 2"
-            >其他登录方式</span
-          >
-          <span
-            style="
-              position: absolute;
-              left: 0;
-              right: 0;
-              top: 50%;
-              height: 1px;
-              background: var(--line);
-            "
-          ></span>
-        </div>
-        <div class="socials">
-          <a class="s">微</a><a class="s">支</a><a class="s">Q</a><a class="s">微博</a>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, reactive, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { ElMessage } from 'element-plus';
 import { register, sendCode, resetPassword } from '@/api/user';
 
 const router = useRouter();
+const route = useRoute();
 const userStore = useUserStore();
 const mode = ref('login');
 const loading = ref(false);
 const remember = ref(false);
 const agreed = ref(false);
 const codeCountdown = ref(0);
+const smsCountdown = ref(0);
 
 const loginForm = reactive({ username: '', password: '' });
+const smsForm = reactive({ phone: '', code: '' });
 const registerForm = reactive({ username: '', password: '', email: '', code: '' });
 const resetForm = reactive({ email: '', code: '', newPassword: '' });
 
-function startCountdown() {
-  codeCountdown.value = 60;
-  const timer = setInterval(() => {
-    codeCountdown.value--;
-    if (codeCountdown.value <= 0) clearInterval(timer);
-  }, 1000);
+function switchMode(target) {
+  mode.value = target;
+}
+
+onMounted(() => {
+  const path = route.path;
+  if (path === '/register') {
+    mode.value = 'register';
+  } else if (path === '/forgot') {
+    mode.value = 'reset';
+  } else {
+    // /login 或默认
+    const tab = route.query.tab;
+    if (tab === 'register') mode.value = 'register';
+    else if (tab === 'forgot') mode.value = 'reset';
+    else if (tab === 'sms') mode.value = 'sms';
+    else mode.value = 'login';
+  }
+});
+
+function startCountdown(type = 'code') {
+  if (type === 'sms') {
+    smsCountdown.value = 60;
+    const timer = setInterval(() => {
+      smsCountdown.value--;
+      if (smsCountdown.value <= 0) clearInterval(timer);
+    }, 1000);
+  } else {
+    codeCountdown.value = 60;
+    const timer = setInterval(() => {
+      codeCountdown.value--;
+      if (codeCountdown.value <= 0) clearInterval(timer);
+    }, 1000);
+  }
 }
 
 async function doLogin() {
@@ -198,7 +321,43 @@ async function doLogin() {
   }
 }
 
+async function doSmsLogin() {
+  if (!smsForm.phone || !smsForm.code) {
+    ElMessage.warning('请填写手机号和验证码');
+    return;
+  }
+  loading.value = true;
+  try {
+    // 复用 login API，phone 映射到 username，code 映射到 password
+    await userStore.login({ username: smsForm.phone, password: smsForm.code });
+    router.push('/');
+    ElMessage.success('登录成功');
+  } catch (err) {
+    console.error('短信登录失败:', err);
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function sendSmsCode() {
+  if (!smsForm.phone) {
+    ElMessage.warning('请输入手机号');
+    return;
+  }
+  try {
+    await sendCode(smsForm.phone);
+    startCountdown('sms');
+    ElMessage.success('验证码已发送');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 async function sendRegisterCode() {
+  if (!registerForm.email) {
+    ElMessage.warning('请输入邮箱');
+    return;
+  }
   try {
     await sendCode(registerForm.email);
     startCountdown();
@@ -209,6 +368,10 @@ async function sendRegisterCode() {
 }
 
 async function sendResetCode() {
+  if (!resetForm.email) {
+    ElMessage.warning('请输入邮箱');
+    return;
+  }
   try {
     await sendCode(resetForm.email);
     startCountdown();
@@ -226,7 +389,7 @@ async function doRegister() {
   try {
     await register(registerForm);
     ElMessage.success('注册成功，请登录');
-    mode.value = 'login';
+    switchMode('login');
   } catch (err) {
     console.error(err);
   }
@@ -236,7 +399,7 @@ async function doReset() {
   try {
     await resetPassword(resetForm);
     ElMessage.success('密码重置成功，请登录');
-    mode.value = 'login';
+    switchMode('login');
   } catch (err) {
     console.error(err);
   }
@@ -343,7 +506,17 @@ async function doReset() {
   background: #fff;
   border-radius: 18px;
   padding: 36px 34px;
-  box-shadow: 0 18px 48px rgba(60, 35, 20, 0.14);
+  box-shadow: var(--shadow-3);
+}
+.auth-card h2 {
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+.auth-card .sub {
+  color: var(--ink-3);
+  font-size: 13px;
+  margin-bottom: 22px;
 }
 .auth-card .tabs {
   display: flex;
@@ -493,6 +666,14 @@ async function doReset() {
 .btn-ghost:hover {
   border-color: var(--brand);
   color: var(--brand);
+}
+.btn-outline {
+  background: #fff;
+  border-color: var(--brand);
+  color: var(--brand);
+}
+.btn-outline:hover {
+  background: var(--brand-softer);
 }
 .btn-lg {
   padding: 14px 30px;

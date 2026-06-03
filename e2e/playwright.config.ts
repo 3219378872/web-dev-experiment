@@ -8,8 +8,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: '.',
-  timeout: 30000,
-  expect: { timeout: 10000 },
+  timeout: 60000,
+  expect: { timeout: 15000 },
   fullyParallel: false,
   retries: 0,
   workers: 1,
@@ -32,6 +32,12 @@ export default defineConfig({
       reuseExistingServer: true,
       timeout: 120_000,
     },
+    {
+      command: 'python3 -m http.server 8888 --directory ../prototype',
+      url: 'http://localhost:8888',
+      reuseExistingServer: true,
+      timeout: 30_000,
+    },
   ],
   projects: [
     {
@@ -48,6 +54,14 @@ export default defineConfig({
       use: {
         baseURL: 'http://localhost:5174',
         ...devices['Desktop Chrome'],
+      },
+    },
+    {
+      name: 'visual-regression',
+      testMatch: 'visual/regression.spec.ts',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 900 },
       },
     },
   ],
