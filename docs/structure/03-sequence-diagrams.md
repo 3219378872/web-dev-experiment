@@ -1,7 +1,7 @@
 # 核心业务时序图
 
-三条最关键的链路：JWT 登录与鉴权透传、下单、余额支付。所有跨服务调用均为**同步 Feign**，
-**无 Seata 分布式事务**，仅依赖各服务本地 `@Transactional`。
+三条最关键的链路：JWT 登录与鉴权透传、下单、余额支付。跨服务事务由 **Seata AT** 协调，
+异步副作用（清车、通知、延时关单、订单状态更新）通过 **RabbitMQ** 事件驱动。
 
 ## 1. JWT 登录与鉴权透传
 
@@ -48,35 +48,54 @@ sequenceDiagram
     participant GW as hm-gateway
     participant TS as trade-service
     participant IS as item-service
+    participant Seata as Seata Server
+    participant RMQ as RabbitMQ
     participant CS as cart-service
+    participant NS as notify-service
 
     U->>GW: POST /orders (OrderFormDTO)
     GW->>TS: 转发（已注入 user-info）
     activate TS
-    Note over TS: 开启本地 @Transactional
+    Note over TS: 开启 @GlobalTransactional（Seata AT）
+
     TS->>IS: ItemClient.queryItemByIds(itemIds)
     IS-->>TS: 商品价格/信息
     TS->>TS: 保存 order + order_detail（本地库）
-    TS->>CS: CartClient.deleteCartItemByIds(itemIds)
-    CS-->>TS: ok
+    TS->>Seata: 注册分支事务（undo_log）
     TS->>IS: ItemClient.deductStock(details)
+    IS->>Seata: 注册分支事务（undo_log）
     alt 扣库存失败
         IS-->>TS: 抛异常
-        TS->>TS: 本地事务回滚（order 撤销）
-        Note right of TS: ⚠️ 无 Seata：已清的购物车 / 已扣的库存<br/>不会被自动补偿，存在最终不一致风险
+        TS->>Seata: 触发全局回滚
+        Seata->>TS: 回滚 order（undo_log 补偿）
+        Seata->>IS: 回滚库存（undo_log 补偿）
         TS-->>U: 错误（CommonExceptionAdvice 包成 R<Void>）
     else 成功
         IS-->>TS: ok
+        TS->>RMQ: 发布 OrderCreatedEvent
+        TS->>Seata: 提交全局事务
         TS-->>U: 订单创建成功（orderId）
     end
     deactivate TS
+
+    Note over RMQ,NS: 异步副作用（事务提交后消费）
+    par 清空购物车
+        RMQ->>CS: 消费 OrderCreatedEvent
+        CS->>CS: removeByItemIds(itemIds)
+    and 发送站内信
+        RMQ->>NS: 消费 OrderCreatedEvent
+        NS->>NS: 保存"下单成功"消息
+    and 延时关单（30分钟）
+        RMQ->>RMQ: 延时队列（TTL 30min）
+        RMQ->>TS: 消费延时消息 → 关闭未支付订单
+    end
 ```
 
 ## 3. 余额支付（pay-service `PayOrderServiceImpl.tryPayOrderByBalance`）
 
-`tryPayOrderByBalance` 标注 `@Transactional` 且**无 try/catch、OrderClient 无 fallback/熔断**。
-由于第 5 步的 `OrderClient` 指向未注册的 `order-service`（见 [02](02-module-dependencies.md)），
-**当前每次余额支付都会在该步抛异常**，进而触发下面的失败流程——这是仓库现状，而非偶发分支。
+`tryPayOrderByBalance` 标注 `@GlobalTransactional` + `@Transactional`，
+通过 Seata AT 协调跨服务事务。支付成功后发布 RabbitMQ 事件，由 trade-service 异步更新订单状态，
+notify-service 发送支付成功通知。
 
 ```mermaid
 sequenceDiagram
@@ -85,22 +104,40 @@ sequenceDiagram
     participant GW as hm-gateway
     participant PS as pay-service
     participant US as user-service
+    participant Seata as Seata Server
+    participant RMQ as RabbitMQ
+    participant TS as trade-service
+    participant NS as notify-service
 
     U->>GW: POST /pay-orders/{id}（余额支付）
     GW->>PS: 转发
     activate PS
-    Note over PS: 开启本地 @Transactional（无 try/catch）
-    PS->>US: 步骤3 UserClient.deductMoney(pw, amount)
-    US-->>US: user-service 独立事务扣余额并提交
-    US-->>PS: 扣减成功（已落库，不受 PS 事务控制）
-    PS->>PS: 步骤4 markPayOrderSuccess()<br/>pay_order 置成功（仅本地、尚未提交）
-    PS-->PS: 步骤5 orderClient.updateById(order)<br/>目标 order-service 无实例 → 抛异常（无 fallback）
-    Note over PS,US: ⚠️ 异常向外传播 → PS 本地事务回滚：<br/>步骤4 的 pay_order 更新被撤销（仍未支付）；<br/>但步骤3 已提交的余额扣减无补偿（无 Seata）
-    PS-->>U: 错误响应（经 CommonExceptionAdvice 包成 R<Void>）
+    Note over PS: 开启 @GlobalTransactional（Seata AT）
+    PS->>US: UserClient.deductMoney(pw, amount)
+    US->>Seata: 注册分支事务（undo_log）
+    US-->>PS: 扣减成功
+    PS->>PS: markPayOrderSuccess()<br/>pay_order 置成功
+    PS->>Seata: 注册分支事务（undo_log）
+    alt 全局事务提交
+        PS->>Seata: 提交全局事务
+        PS->>RMQ: 发布 PaySuccessEvent
+        PS-->>U: 支付成功
+    else 全局事务回滚
+        Seata->>PS: 回滚 pay_order（undo_log 补偿）
+        Seata->>US: 回滚余额（undo_log 补偿）
+        PS-->>U: 错误响应
+    end
     deactivate PS
+
+    Note over RMQ,NS: 异步更新订单状态（事务提交后消费）
+    par 更新订单状态
+        RMQ->>TS: 消费 PaySuccessEvent
+        TS->>TS: markOrderPaySuccess(orderId)
+    and 发送支付成功通知
+        RMQ->>NS: 消费 PaySuccessEvent
+        NS->>NS: 保存"支付成功"消息
+    end
 ```
 
-> **结论（按真实代码）**：当前余额支付链路因 `OrderClient` 失效而无法正常完成——
-> 余额被扣、但支付单回滚为未支付、订单状态不更新、用户收到错误。这是"无分布式事务 +
-> 失效 Feign 客户端"叠加出的数据不一致缺陷，修复方向是修正 `OrderClient` 的服务名/路径
-> 并为跨服务写操作引入补偿或本地消息表。
+> **架构改进**：原 `OrderClient` 失效问题已通过 **RabbitMQ 事件驱动** 解决——pay-service 发布
+> `PaySuccessEvent`，trade-service 消费后异步更新订单状态。Seata AT 确保支付与余额扣减的原子性。

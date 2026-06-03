@@ -1,6 +1,6 @@
 # 数据模型 E-R 概览
 
-源自 `docs/sql/init-all-tables.sql`，**单库 `hmall`**，18 张表，所有服务共享同一数据库。
+源自 `docs/sql/init-all-tables.sql`，**单库 `hmall`**，20 张表，所有服务共享同一数据库。
 表间**无物理外键约束**，全部靠 `*_id` 字段做**逻辑关联**（下图关系线为业务语义，非 DB 级 FK）。
 金额字段（`price`/`total_fee`/`amount`/`balance`）均以**整数分**存储。
 
@@ -142,10 +142,26 @@ erDiagram
         varchar link_url
         int sort_order
     }
+    mq_outbox_message {
+        bigint id PK
+        varchar exchange_name
+        varchar routing_key
+        text payload
+        varchar status
+        int retry_count
+    }
+    undo_log {
+        bigint branch_id PK
+        varchar xid PK
+        varchar context
+        blob rollback_info
+        int log_status
+    }
 ```
 
-> 上图 18 个实体即全部 18 张表。`notifications`、`uploads`、`banners` 三表与其它表**无逻辑外键关联**
-> （独立读取），故在图中以无关系线的独立实体呈现。
+> 上图 20 个实体即全部 20 张表。`notifications`、`uploads`、`banners` 三表与其它表**无逻辑外键关联**
+> （独立读取），故在图中以无关系线的独立实体呈现。`mq_outbox_message` 和 `undo_log` 为基础设施表，
+> 分别用于 RabbitMQ Outbox 模式和 Seata AT 回滚日志。
 
 ## 独立表说明（无强关联，按业务读取）
 
@@ -156,6 +172,8 @@ erDiagram
 | `feedbacks` | notify-service | 用户反馈（与 user 关联，已含于上图） |
 | `uploads` | file-service | 上传文件元数据（original_name / file_path / size） |
 | `banners` | item/admin | 首页轮播图 |
+| `mq_outbox_message` | 基础设施 | RabbitMQ Outbox 模式消息表，确保消息可靠投递 |
+| `undo_log` | 基础设施 | Seata AT 模式回滚日志表，所有 RM 共用 |
 
 > **关键关联说明**
 > - `order` ↔ `pay_order` 通过 `pay_order.biz_order_no = order.id` 关联（一单一支付单）。
