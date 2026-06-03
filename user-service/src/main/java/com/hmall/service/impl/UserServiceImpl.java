@@ -24,6 +24,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.time.Duration;
@@ -86,6 +87,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
+    @Transactional
     public void deductMoney(String pw, Integer totalFee) {
         log.info("开始扣款");
         // 1.校验密码

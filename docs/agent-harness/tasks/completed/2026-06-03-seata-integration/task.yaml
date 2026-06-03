@@ -1,0 +1,7 @@
+slug: 2026-06-03-seata-integration
+status: done
+task_branch: task/2026-06-03-seata-integration
+spec: docs/superpowers/specs/2026-06-02-infra-integration-design.md
+plan: docs/superpowers/plans/2026-06-03-seata-integration.md
+spec_waiver: null
+plan_waiver: null

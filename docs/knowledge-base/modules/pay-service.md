@@ -2,9 +2,9 @@
 title: pay-service
 tracks:
   - pay-service/
-last_synced_commit: b25e21464938f9ce5f1cef682ae90224ca30f054
-last_synced_date: 2026-06-02
-sync_note: "同步支付成功事件事务提交后发布语义"
+last_synced_commit: 6283d54
+last_synced_date: 2026-06-03
+sync_note: "PayApplication 加 DefaultFeignConfig（user-info header 传播修复）"
 ---
 
 # pay-service
@@ -41,6 +41,10 @@ sync_note: "同步支付成功事件事务提交后发布语义"
 
 ## 注意事项与陷阱
 
+- `tryPayOrderByBalance` 是 Seata AT 全局事务入口（`@GlobalTransactional` + `@Transactional`），
+  作为 TM 协调 user 的 `deductMoney`（RM）+ 本地改支付单。扣款失败时余额与支付单一致回滚。
+  改订单状态走 `pay.success` MQ 异步，落在全局事务之外。Seata 客户端默认
+  `seata.enabled=false`，单测不依赖 Seata Server。
 - 支付回调必须幂等：同一支付单多次回调要返回同样结果。
 - 状态机：`未支付` → `已支付` 单向；不允许逆向。
 - `tryPayOrderByBalance` 不再直接调用 `OrderClient.updateById`；订单状态由

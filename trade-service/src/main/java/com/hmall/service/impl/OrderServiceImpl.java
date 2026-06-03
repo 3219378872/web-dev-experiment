@@ -21,6 +21,7 @@ import com.hmall.mapper.OrderMapper;
 import com.hmall.service.IOrderDetailService;
 import com.hmall.service.IOrderLogisticsService;
 import com.hmall.service.IOrderService;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -54,6 +55,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private final MqConsumerSupport mqConsumerSupport;
 
     @Override
+    @GlobalTransactional(name = "createOrder", rollbackFor = Exception.class)
     @Transactional
     public Long createOrder(OrderFormDTO orderFormDTO) {
         // 1.订单数据

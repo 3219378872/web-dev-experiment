@@ -77,3 +77,15 @@ CREATE TABLE IF NOT EXISTS mq_outbox_message (
     create_time DATETIME,
     update_time DATETIME
 );
+
+-- Seata AT undo_log（便携写法，兼容 H2 MySQL 模式与真实 MySQL）
+CREATE TABLE IF NOT EXISTS undo_log (
+    branch_id BIGINT NOT NULL,
+    xid VARCHAR(128) NOT NULL,
+    context VARCHAR(128) NOT NULL,
+    rollback_info LONGBLOB NOT NULL,
+    log_status INT NOT NULL,
+    log_created DATETIME(6) NOT NULL,
+    log_modified DATETIME(6) NOT NULL,
+    UNIQUE KEY ux_undo_log (xid, branch_id)
+);

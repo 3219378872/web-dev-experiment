@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 497554c
+last_synced_commit: 6283d54
 last_synced_date: 2026-06-03
-sync_note: "2026-06-03: 移除 /hi 配置残留（hm-service 清理）"
+sync_note: "PayApplication 加 DefaultFeignConfig（user-info header 传播修复）"
 ---
 
 # order-checkout-flow
@@ -24,18 +24,22 @@ C 端用户从加购到支付完成的端到端流程，跨 [cart-service](../mo
    写入 `cart` 表；不校验库存（库存仅在下单时校验）。
 2. **进入结算** —— hmall-web 取购物车勾选项 + 用户地址（user-service）+ 可用券
    （trade-service）合并展示。前端持有订单草稿（仅前端态）。
-3. **创建订单（核心）** —— `POST /orders`：
+3. **创建订单（核心，Seata AT 全局事务）** —— `POST /orders`：
+   - `createOrder` 标 `@GlobalTransactional`，trade-service 作为 TM 开启全局事务。
    - trade-service 查询商品并按服务端价格计算总价。
-   - 写 `order` + `order_detail`。
-   - 同步调 [item-service](../modules/item-service.md) 扣减库存；失败则本地订单事务回滚。
-   - 事务提交后发布 `trade.topic/order.create`，由 cart-service 异步删除对应购物车项，
-     notify-service 生成下单成功站内信。
+   - 写 `order` + `order_detail`（trade 本地 RM 分支）。
+   - 同步调 [item-service](../modules/item-service.md) 扣减库存（item RM 分支，XID 经
+     Feign 头传播）；**任一分支失败，AT 用各库 `undo_log` 反向补偿**：恢复库存、回滚订单。
+   - 全局事务提交后发布 `trade.topic/order.create`，由 cart-service 异步删除对应购物车项，
+     notify-service 生成下单成功站内信。清车/通知是 MQ 异步副作用，**不入全局事务**。
    - 事务提交后发布 `delay.exchange/order.delay`，30 分钟后进入 `order.close.queue`
      通过带 `status = 待支付` 条件的原子更新关闭仍未支付的订单。
 4. **支付** —— hmall-web 跳支付页 → [pay-service](../modules/pay-service.md)
    `POST /pay-orders/{id}/pay`。模拟支付通道直接打标已支付。
-5. **支付回写** —— pay-service 支付事务提交后发布 `pay.topic/pay.success`，
-   trade-service 消费后仅把待支付订单置为"已支付"并记录支付时间。
+   余额支付（`tryPayOrderByBalance`）同样标 `@GlobalTransactional`：pay-service 作为 TM
+   协调 user 的 `deductMoney`（RM）+ 本地改支付单，扣款失败则余额与支付单一致回滚。
+5. **支付回写** —— pay-service 支付全局事务提交后发布 `pay.topic/pay.success`，
+   trade-service 消费后仅把待支付订单置为"已支付"并记录支付时间（MQ 异步，全局事务外）。
 6. **发货 / 退款** —— 管理端 [hmall-admin](../modules/hmall-admin.md) 操作发货或处理退款，
    对应订单状态机推进，并发布 `trade.topic/order.status.{shipped,refund,cancel}` 给
    [notify-service](../modules/notify-service.md)。
