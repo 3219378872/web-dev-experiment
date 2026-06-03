@@ -2,9 +2,9 @@
 title: hmall-admin
 tracks:
   - hmall-admin/
-last_synced_commit: 18961ae
+last_synced_commit: d29005a
 last_synced_date: 2026-06-03
-sync_note: "对齐 5 个管理后台页面（ItemList/ItemEdit/CategoryList/OrderList/OrderDetail）至高保真原型视觉；保持 API 与数据逻辑不变"
+sync_note: "对齐全部管理后台页至高保真原型视觉：全局样式/AdminLayout、Dashboard/Login/ItemList/ItemEdit/CategoryList/OrderList/OrderDetail/UserList/ReviewList/BannerList/NotificationList/FeedbackList/Profile；保持 API 与数据逻辑不变"
 ---
 
 # hmall-admin

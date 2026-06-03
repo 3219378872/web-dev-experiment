@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 18961ae
+last_synced_commit: d29005a
 last_synced_date: 2026-06-03
-sync_note: "修复 Home.vue 未使用变量导致的 ESLint 错误，保持 lint 通过"
+sync_note: "对齐全部客户端页至高保真原型视觉：全局样式/组件、Home/Category/Search/ItemDetail/Cart/OrderConfirm/OrderList/OrderDetail/Login/Profile/AddressList/FavoriteList/Feedback/Notifications/Coupons/FlashSale/Service；保持 API 与数据逻辑不变"
 ---
 
 # hmall-web
@@ -12,7 +12,7 @@ sync_note: "修复 Home.vue 未使用变量导致的 ESLint 错误，保持 lint
 ## 职责
 
 客户端前端。Vue 3 + Element Plus + Pinia + Vue Router + Vite，
-覆盖商品浏览、详情、加购、结算、订单、用户中心、优惠券、评价共 13 页面。
+覆盖商品浏览、详情、加购、结算、订单、用户中心、优惠券、评价共 16 页面。
 
 ## 公开接口与契约
 
