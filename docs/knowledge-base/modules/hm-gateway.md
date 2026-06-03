@@ -2,9 +2,9 @@
 title: hm-gateway
 tracks:
   - hm-gateway/
-last_synced_commit: 9ac1cc5
-last_synced_date: 2026-06-01
-sync_note: "2026-06-01: 新增 AuthGlobalFilterTest + GatewayAuthIntegrationTest"
+last_synced_commit: c26c9eb
+last_synced_date: 2026-06-03
+sync_note: "2026-06-03: 移除 /hi 鉴权白名单（hm-service 清理）"
 ---
 
 # hm-gateway
@@ -21,7 +21,7 @@ Spring Cloud Gateway 反向代理：路由分发、JWT 鉴权、CORS、限流、
 - 通过 header `user-info` 把解析后的 userId 传给下游；下游用
   `hm-common.interceptor.UserInfoInterceptor` 写入 `UserContext`。
 - 白名单（`auth.excludePaths`，全方法放行）：`/search/**`, `/users/login`, `/users/register`,
-    `/users/send-code`, `/users/reset-password`, `/hi`, `/notifications/active`, `/upload/**`, `/files/**`。
+    `/users/send-code`, `/users/reset-password`, `/notifications/active`, `/upload/**`, `/files/**`。
 - 读白名单（`auth.excludeReadPaths`，仅 GET/HEAD/OPTIONS 放行）：`/categories/**`, `/items/**`。
 - `DynamicRouteLoader` 监听 Nacos `gateway-routes.json` 实现动态路由。
 

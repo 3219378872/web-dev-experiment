@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: b25e21464938f9ce5f1cef682ae90224ca30f054
-last_synced_date: 2026-06-02
-sync_note: "hm-common RabbitMQ-only changes do not affect auth/gateway flow"
+last_synced_commit: c26c9eb
+last_synced_date: 2026-06-03
+sync_note: "2026-06-03: 移除 /hi 鉴权白名单（hm-service 清理）"
 ---
 
 # auth-and-gateway-flow

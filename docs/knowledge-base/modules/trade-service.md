@@ -2,9 +2,9 @@
 title: trade-service
 tracks:
   - trade-service/
-last_synced_commit: 28f7eb1932138441a1258adde104aa6e62b70cac
-last_synced_date: 2026-06-02
-sync_note: "同步 RabbitMQ after-commit 发布、消费重试、支付成功幂等与超时关单原子保护"
+last_synced_commit: 497554c
+last_synced_date: 2026-06-03
+sync_note: "2026-06-03: 移除 /hi 配置残留（hm-service 清理）"
 ---
 
 # trade-service

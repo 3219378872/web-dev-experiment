@@ -1,0 +1,7 @@
+slug: 2026-06-03-remove-hm-service
+status: active
+task_branch: task/2026-06-03-remove-hm-service
+spec: null
+plan: null
+spec_waiver: "Dead code removal — no design decisions, no behavioral changes"
+plan_waiver: "Straightforward deletion of inactive module with no downstream dependents"
