@@ -66,8 +66,14 @@ echo " target: ${BASE_URL}"
 echo "============================================"
 echo ""
 
-# ---- Phase 2: Public Item Endpoints ----
+# ---- Phase 1: Health Check ----
+echo "--- Phase 1: Health ---"
+
+check 1 GET "/items/page?page=1&size=1" 200
+
 echo ""
+
+# ---- Phase 2: Public Item Endpoints ----
 echo "--- Phase 2: Public APIs ---"
 
 check_json 2 GET "/items/page?page=1&size=10" 200
