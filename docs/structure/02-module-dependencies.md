@@ -41,33 +41,35 @@ flowchart LR
 
     CS -- "ItemClient.queryItemByIds" --> IS
     TS -- "ItemClient.queryItemByIds / deductStock" --> IS
-    TS -- "CartClient.deleteCartItemByIds" --> CS
     PS -- "UserClient.deductMoney" --> US
-    PS -.->|"OrderClient.updateById ✗ 失效"| TS
-
-    linkStyle 4 stroke:#d33,stroke-dasharray:5 5
 ```
+
+> **重要变更**：pay-service 的 `tryPayOrderByBalance` 方法已改用 **RabbitMQ 发布支付成功事件**
+> （`PaySuccessEvent`），由 trade-service 异步消费来更新订单状态，不再直接调用失效的 `OrderClient`。
+> `OrderClient` 虽仍存在于 `@EnableFeignClients` 配置中，但已不被业务代码使用。
 
 **客户端清单（9 个）**
 
 | 客户端 | `@FeignClient` 目标 | 运行时状态 | 调用方 / 说明 |
 | --- | --- | --- | --- |
 | `ItemClient` | item-service | ✅ 可命中 | cart-service、trade-service：`GET /items`、`PUT /items/stock/deduct` |
-| `CartClient` | cart-service | ✅ 可命中 | trade-service：`DELETE /carts`（下单后清购物车） |
+| `CartClient` | cart-service | ✅ 可命中 | 原 trade-service 调 `DELETE /carts`，**现已改用 RabbitMQ `OrderCreatedEvent` 异步清车**；该客户端仍在 `@EnableFeignClients` 中但不再被业务代码使用 |
 | `UserClient` | user-service | ✅ 可命中 | pay-service：`PUT /money/deduct`（仅此一个方法，无收藏方法） |
-| `OrderClient` | **order-service** | ❌ 失效 | pay-service 调 `updateById`，但**无服务注册为 `order-service`**，且其路径 `PUT /users` 也不匹配 trade 的 `PUT /orders` —— 运行时命中不了 |
+| `OrderClient` | **order-service** | ❌ 失效 | 原 pay-service 调 `updateById`，**现已改用 RabbitMQ `PaySuccessEvent` 异步更新订单**；该客户端虽仍在 `@EnableFeignClients` 中但不再被业务代码使用 |
 | `CouponClient` | trade-service | ⬜ 已定义未调用 | 契约存在，当前无服务注入使用 |
 | `ReviewClient` | item-service | ⬜ 已定义未调用 | 同上 |
 | `FavoriteClient` | user-service | ⬜ 已定义未调用 | 同上 |
 | `FileClient` | file-service | ⬜ 已定义未调用 | 同上 |
 | `NotificationClient` | notify-service | ⬜ 已定义未调用 | 同上 |
 
-> ⚠️ **OrderClient 是一条失效调用**：`@FeignClient("order-service")`，但全仓**没有任何服务的
-> `spring.application.name` 是 `order-service`**（订单服务注册名为 `trade-service`）；其声明的
-> `@PutMapping("/users")` 与 trade-service 实际的订单更新端点 `@PutMapping("/orders")` 也不一致。
-> 因此 pay-service 的 `orderClient.updateById(order)` 在当前配置下**无法真正回写订单状态**——
-> 属遗留/未接通代码，排障时需留意。
+> ⚠️ **OrderClient 已失效但不再影响业务**：`@FeignClient("order-service")` 指向未注册的服务名，
+> 路径 `PUT /users` 也不匹配 trade-service 的 `PUT /orders`。但 pay-service 已改用 **RabbitMQ 发布
+> `PaySuccessEvent`**，由 trade-service 异步消费更新订单状态，不再依赖此 Feign 客户端。
 >
 > ⚠️ 另 5 个客户端（Coupon/Review/Favorite/File/Notification）**仅有契约定义、当前无任何服务实际调用**
 > （仅 cart/trade/pay 启用了 `@EnableFeignClients`），故未画入调用图。对应业务多由各服务直接走
 > Controller→Service→DB 完成。
+>
+> **RabbitMQ 事件流**：trade-service 发布 `OrderCreatedEvent`（下单）和 `OrderStatusChangedEvent`（状态变更），
+> pay-service 发布 `PaySuccessEvent`（支付成功）。消费者：cart-service（清车）、notify-service（站内信）、
+> trade-service 自身（延时关单、订单状态更新）。详见 [03-sequence-diagrams.md](03-sequence-diagrams.md)。
