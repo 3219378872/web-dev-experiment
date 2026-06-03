@@ -57,8 +57,13 @@ sync_note: "2026-06-03: 移除 /hi 配置残留（hm-service 清理）"
 
 ## 注意事项与陷阱
 
-- 库存扣减仍是创建订单的同步关键路径；清车、下单通知、超时关单进入 RabbitMQ
-  异步副作用链路，且订单创建事务提交后才发布。
+- `createOrder` 是 Seata AT 全局事务入口（`@GlobalTransactional` + `@Transactional`），
+  作为 TM 协调 trade 本地存单 + item 的 `deductStock`（RM）。任一参与方失败时 AT 用
+  `undo_log` 自动反向补偿。库存扣减仍是事务内同步关键路径；清车、下单通知、超时关单
+  是 RabbitMQ 异步副作用，经 `MqMessagePublisher` 在事务提交后发布，**落在全局事务之外**，
+  不被回滚——这是 Seata 管强一致 DB、MQ 管最终一致副作用的职责划分。
+- Seata 客户端默认 `seata.enabled=false`，单测/`test` job 不依赖 Seata Server；
+  compose 中四服务注入 `SEATA_ENABLED=true`。`undo_log` 为单 `hmall` 库一张（共享）。
 - `markOrderPaySuccess` 既被旧 Feign 入口使用，也被 `pay.success` listener 调用；
   只允许 `待支付` → `已支付`，重复/过期 `pay.success` 不得重开已关闭、已取消或已退款订单。
 - 延时关单只能原子更新仍处于 `待支付` 的订单；不得先读订单状态再无条件写回，

@@ -33,4 +33,24 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.hmall.controller
+seata:
+  enabled: ${SEATA_ENABLED:false}
+  application-id: pay-service
+  tx-service-group: hmall-tx-group
+  data-source-proxy-mode: AT
+  service:
+    vgroup-mapping:
+      hmall-tx-group: default
+    grouplist:
+      default: ${hm.seata.host:127.0.0.1}:8091
+  config:
+    type: file
+  registry:
+    type: nacos
+    nacos:
+      server-addr: ${spring.cloud.nacos.server-addr:127.0.0.1:8848}
+      group: SEATA_GROUP
+      application: seata-server
+      username: nacos
+      password: nacos
 # keytool -genkeypair -alias hmall -keyalg RSA -keypass hmall123 -keystore hmall.jks -storepass hmall123

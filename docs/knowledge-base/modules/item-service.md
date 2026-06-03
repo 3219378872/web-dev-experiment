@@ -2,9 +2,9 @@
 title: item-service
 tracks:
   - item-service/
-last_synced_commit: 44e2d196f1eb7ddb2991e36f10ba095307a54094
-last_synced_date: 2026-06-01
-sync_note: "v3 合并 PR：所有阶段测试补足共 51 tests，覆盖率 80.5%"
+last_synced_commit: cc119e56d47e8f1b29ea2afc5e7d82e2d766b7ff
+last_synced_date: 2026-06-03
+sync_note: "接入 Seata AT：deductStock 加 @Transactional，作为下单全局事务的 RM 分支"
 ---
 
 # item-service
@@ -41,6 +41,9 @@ sync_note: "v3 合并 PR：所有阶段测试补足共 51 tests，覆盖率 80.5
 ## 注意事项与陷阱
 
 - 库存扣减必须基于 `update ... where stock >= n` 乐观锁或行锁，禁止先查后扣。
+- `deductStock` 加 `@Transactional`，作为下单 Seata AT 全局事务的 RM 分支：当
+  [trade-service](trade-service.md) 的 `createOrder` 全局回滚时，本服务的库存扣减经
+  `undo_log` 自动反向补偿。XID 经 Feign 头传播，需 `seata-spring-boot-starter`（默认关）。
 - 商品状态机：草稿 → 上架 → 下架，不允许跳跃。
 - 搜索字段若启用 ES，写入要走双写或 binlog 同步，保持一致性。
 - 评价均分按需异步重算，避免每次写评价同步聚合。

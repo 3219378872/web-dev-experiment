@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: 6a683f990674a545d965018f2314e512b96d47a0
-last_synced_date: 2026-06-02
-sync_note: "JaCoCo service.impl 70% branch coverage gate — POM ratchet override only, no API/content change"
+last_synced_commit: cc119e56d47e8f1b29ea2afc5e7d82e2d766b7ff
+last_synced_date: 2026-06-03
+sync_note: "接入 Seata AT：deductMoney 加 @Transactional，作为余额支付全局事务的 RM 分支"
 ---
 
 # user-service
@@ -40,6 +40,9 @@ sync_note: "JaCoCo service.impl 70% branch coverage gate — POM ratchet overrid
 
 ## 注意事项与陷阱
 
+- `deductMoney` 加 `@Transactional`，作为余额支付 Seata AT 全局事务的 RM 分支：当
+  [pay-service](pay-service.md) 的 `tryPayOrderByBalance` 全局回滚时，余额扣减经
+  `undo_log` 自动恢复。需 `seata-spring-boot-starter`（默认 `seata.enabled=false`）。
 - 密码必须 BCrypt 加盐存储，不允许明文。
 - 登录失败次数限流，避免暴力破解。
 - 修改 JWT claim 名称/过期策略会破坏 [hm-gateway](hm-gateway.md) 解析。
