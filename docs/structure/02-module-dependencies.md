@@ -41,11 +41,10 @@ flowchart LR
 
     CS -- "ItemClient.queryItemByIds" --> IS
     TS -- "ItemClient.queryItemByIds / deductStock" --> IS
-    TS -- "CartClient.deleteCartItemByIds" --> CS
     PS -- "UserClient.deductMoney" --> US
     PS -.->|"OrderClient.updateById ✗ 失效"| TS
 
-    linkStyle 4 stroke:#d33,stroke-dasharray:5 5
+    linkStyle 3 stroke:#d33,stroke-dasharray:5 5
 ```
 
 > **重要变更**：pay-service 的 `tryPayOrderByBalance` 方法已改用 **RabbitMQ 发布支付成功事件**
@@ -57,7 +56,7 @@ flowchart LR
 | 客户端 | `@FeignClient` 目标 | 运行时状态 | 调用方 / 说明 |
 | --- | --- | --- | --- |
 | `ItemClient` | item-service | ✅ 可命中 | cart-service、trade-service：`GET /items`、`PUT /items/stock/deduct` |
-| `CartClient` | cart-service | ✅ 可命中 | trade-service：`DELETE /carts`（下单后清购物车） |
+| `CartClient` | cart-service | ✅ 可命中 | 原 trade-service 调 `DELETE /carts`，**现已改用 RabbitMQ `OrderCreatedEvent` 异步清车**；该客户端仍在 `@EnableFeignClients` 中但不再被业务代码使用 |
 | `UserClient` | user-service | ✅ 可命中 | pay-service：`PUT /money/deduct`（仅此一个方法，无收藏方法） |
 | `OrderClient` | **order-service** | ❌ 失效 | 原 pay-service 调 `updateById`，**现已改用 RabbitMQ 事件异步更新订单**；该客户端虽仍在 `@EnableFeignClients` 中但不再被业务代码使用 |
 | `CouponClient` | trade-service | ⬜ 已定义未调用 | 契约存在，当前无服务注入使用 |
