@@ -115,6 +115,17 @@ class CouponServiceImplTest {
     }
 
     @Test
+    void claimCoupon_disabled_throwsBadRequest() {
+        LocalDateTime now = LocalDateTime.now();
+        Coupon c = coupon("已禁用券", 1000, 10, 2, now.minusDays(1), now.plusDays(1));
+        couponMapper.insert(c);
+
+        assertThatThrownBy(() -> couponService.claimCoupon(TEST_USER_ID, c.getId()))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("不存在");
+    }
+
+    @Test
     void claimCoupon_soldOut_throwsBizIllegal() {
         LocalDateTime now = LocalDateTime.now();
         Coupon c = coupon("已抢光", 1000, 0, 1, now.minusDays(1), now.plusDays(1));

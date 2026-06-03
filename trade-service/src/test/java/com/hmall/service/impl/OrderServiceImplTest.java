@@ -233,6 +233,13 @@ class OrderServiceImplTest extends TradeServiceTestBase {
     }
 
     @Test
+    void cancelOrder_nonExistentOrder_throwsBadRequest() {
+        assertThatThrownBy(() -> orderService.cancelOrder(999999L, 1L))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("不存在");
+    }
+
+    @Test
     void cancelOrder_nonPending_throwsBizIllegal() {
         Order order = new Order();
         order.setUserId(1L);
@@ -262,6 +269,13 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         Order updated = orderService.getById(orderId);
         assertThat(updated.getStatus()).isEqualTo(4);
         assertThat(updated.getEndTime()).isNotNull();
+    }
+
+    @Test
+    void confirmReceive_nonExistentOrder_throwsBadRequest() {
+        assertThatThrownBy(() -> orderService.confirmReceive(999999L, 1L))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("不存在");
     }
 
     @Test
@@ -302,6 +316,35 @@ class OrderServiceImplTest extends TradeServiceTestBase {
     }
 
     @Test
+    void refund_nonExistentOrder_throwsBadRequest() {
+        assertThatThrownBy(() -> orderService.refund(999999L, 1L))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("不存在");
+    }
+
+    @Test
+    void refund_shippedOrder_refunds() {
+        Order order = new Order();
+        order.setUserId(1L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(3);
+        orderService.save(order);
+        Long orderId = order.getId();
+
+        orderService.refund(orderId, 1L);
+
+        Order updated = orderService.getById(orderId);
+        assertThat(updated.getStatus()).isEqualTo(6);
+        runAfterCommitCallbacks();
+        verify(rabbitTemplate).convertAndSend(
+                eq(MqConstants.TRADE_EXCHANGE),
+                eq(MqConstants.orderStatusKey("refund")),
+                isA(OrderStatusChangedEvent.class),
+                any(CorrelationData.class));
+    }
+
+    @Test
     void refund_pendingOrder_throwsBizIllegal() {
         Order order = new Order();
         order.setUserId(1L);
@@ -314,6 +357,13 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         assertThatThrownBy(() -> orderService.refund(orderId, 1L))
                 .isInstanceOf(BizIllegalException.class)
                 .hasMessageContaining("不可申请退款");
+    }
+
+    @Test
+    void ship_nonExistentOrder_throwsBadRequest() {
+        assertThatThrownBy(() -> orderService.ship(999999L, "SF12345678"))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("不存在");
     }
 
     @Test
