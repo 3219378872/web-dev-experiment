@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 497554c
+last_synced_commit: f5a70187a64f11d2259432b72d715636dfb564e2
 last_synced_date: 2026-06-03
-sync_note: "2026-06-03: 移除 /hi 配置残留（hm-service 清理）"
+sync_note: "SeataOrderRollbackIT 补充 createOrder 回滚验收用例（仅测试改动，KB 内容不变）"
 ---
 
 # order-checkout-flow

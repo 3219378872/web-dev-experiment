@@ -1,9 +1,15 @@
 package com.hmall.it;
 
 import com.hmall.api.client.ItemClient;
+import com.hmall.api.dto.ItemDTO;
+import com.hmall.api.dto.OrderDetailDTO;
+import com.hmall.api.dto.OrderFormDTO;
+import com.hmall.common.utils.UserContext;
 import com.hmall.domain.po.Order;
 import com.hmall.service.IOrderService;
 import io.seata.spring.annotation.GlobalTransactional;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,9 +29,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 /**
  * Seata AT 端到端集成测试：在真实 seata-server + MySQL 下，验证 {@code @GlobalTransactional}
@@ -78,6 +89,16 @@ class SeataOrderRollbackIT {
     @MockBean
     private ItemClient itemClient;
 
+    @BeforeEach
+    void setUp() {
+        UserContext.setUser(1L);
+    }
+
+    @AfterEach
+    void tearDown() {
+        UserContext.removeUser();
+    }
+
     @Test
     void globalCommit_persists_then_globalRollback_undoes() {
         long before = orderService.count();
@@ -92,6 +113,41 @@ class SeataOrderRollbackIT {
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("force global rollback");
         assertThat(orderService.count()).isEqualTo(afterCommit);
+    }
+
+    /**
+     * 核心验收用例：调用真正的 createOrder，mock 扣库存失败，
+     * 验证 @GlobalTransactional 触发 undo_log 回滚，订单不落库。
+     */
+    @Test
+    void createOrder_stockDeductionFailure_rollsBack() {
+        // 准备 mock：queryItemByIds 返回商品，deductStock 抛异常
+        ItemDTO item = new ItemDTO();
+        item.setId(100L);
+        item.setName("测试商品");
+        item.setPrice(25000);
+        item.setSpec("标准");
+        item.setImage("/img/test.png");
+        when(itemClient.queryItemByIds(anySet())).thenReturn(List.of(item));
+        doThrow(new RuntimeException("库存不足")).when(itemClient).deductStock(anyList());
+
+        // 构造下单请求
+        OrderFormDTO form = new OrderFormDTO();
+        form.setPaymentType(1);
+        OrderDetailDTO detail = new OrderDetailDTO();
+        detail.setItemId(100L);
+        detail.setNum(2);
+        form.setDetails(List.of(detail));
+
+        long before = orderService.count();
+
+        // 调用 createOrder，期望因 deductStock 失败触发全局回滚
+        assertThatThrownBy(() -> orderService.createOrder(form))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("库存不足");
+
+        // 验证：订单未落库（AT undo_log 已撤销）
+        assertThat(orderService.count()).isEqualTo(before);
     }
 
     @TestConfiguration
