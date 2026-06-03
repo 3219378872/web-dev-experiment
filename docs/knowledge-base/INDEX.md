@@ -17,7 +17,6 @@ hmall 项目知识库。维护方式见 [README](README.md)。
 - [pay-service](modules/pay-service.md) — 支付单、模拟支付、对账。
 - [notify-service](modules/notify-service.md) — 站内信、客服消息、反馈。
 - [file-service](modules/file-service.md) — MinIO 文件上传。
-- [hm-service](modules/hm-service.md) — 聚合演示服务。
 
 ### 前端
 - [hmall-web](modules/hmall-web.md) — 客户端 Vue 3 + Element Plus + Pinia。

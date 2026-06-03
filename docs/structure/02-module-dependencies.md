@@ -2,7 +2,7 @@
 
 ## 1. Maven 模块依赖图
 
-聚合 pom 下 11 个模块。依赖方向统一为：**业务服务 → `hm-api` → `hm-common`**。
+聚合 pom 下 10 个模块。依赖方向统一为：**业务服务 → `hm-api` → `hm-common`**。
 `hm-common` 提供契约类型（`R<T>`/`PageDTO`）、`UserContext`、拦截器、工具与基础配置；
 `hm-api` 在其之上定义 Feign 客户端与共享 DTO。
 
@@ -21,7 +21,6 @@ flowchart BT
     PS[pay-service] --> Api
     NS[notify-service] --> Api
     FS[file-service] --> Api
-    HM[hm-service] --> Api
 ```
 
 > `hm-gateway` 仅依赖 `hm-common`（不经 Feign 做业务调用，自身用 `JwtTool` 解析 JWT）。

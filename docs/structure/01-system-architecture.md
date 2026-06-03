@@ -24,7 +24,6 @@ flowchart TB
         PS["pay-service :8085<br/>/pay-orders"]
         NS["notify-service :8086<br/>/notifications /messages<br/>/feedbacks /admin/*"]
         FS["file-service :8087<br/>/upload /files"]
-        HM["hm-service :8080<br/>聚合演示 /hi"]
     end
 
     subgraph L4[基础设施层]
@@ -38,7 +37,7 @@ flowchart TB
     WebNginx -- "/api 反代" --> GW
     AdminNginx -- "/api 反代" --> GW
 
-    GW --> IS & CS & US & TS & PS & NS & FS & HM
+    GW --> IS & CS & US & TS & PS & NS & FS
 
     IS & CS & US & TS & PS & NS & FS --> DB
     IS & CS & US & TS --> Redis
@@ -47,14 +46,14 @@ flowchart TB
 ```
 
 **鉴权要点**：网关对部分路径放行（`/search`、`/users/login`、`/users/register`、
-`/users/send-code`、`/notifications/active`、`/upload`、`/files`、`/hi`），其余请求需携带
+`/users/send-code`、`/notifications/active`、`/upload`、`/files`），其余请求需携带
 合法 JWT；`/admin/**` 额外要求 `admin` 角色。详见
 [03-sequence-diagrams.md](03-sequence-diagrams.md) 的鉴权时序。
 
 ## 2. 部署拓扑（docker-compose）
 
-`docker-compose.yml` 将**整个后端栈容器化**：除基础设施外，`hm-gateway`、全部 8 个业务服务与
-`hm-service` 都通过 `build: ./<服务>` 构建镜像运行，另有一次性 `nacos-init`（发布路由配置）与
+`docker-compose.yml` 将**整个后端栈容器化**：除基础设施外，`hm-gateway`、全部 7 个业务服务
+都通过 `build: ./<服务>` 构建镜像运行，另有一次性 `nacos-init`（发布路由配置）与
 `smoke-test`（依赖各服务就绪后跑冒烟）。仅 `:8080`（网关）、前端 `:80/:81` 与基础设施端口对外暴露，
 服务间在 compose 网络内以服务名互访。
 
@@ -69,7 +68,7 @@ flowchart TB
 
     subgraph App[应用容器（build: ./服务）]
         GWc["hm-gateway<br/>对外 :8080"]
-        SvcC["8 业务服务<br/>user/item/cart/trade<br/>pay/notify/file + hm-service"]
+        SvcC["7 业务服务<br/>user/item/cart/trade<br/>pay/notify/file"]
         SmokeC["smoke-test<br/>(curl, 依赖各服务就绪)"]
     end
 
