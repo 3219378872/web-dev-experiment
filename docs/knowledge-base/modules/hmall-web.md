@@ -2,7 +2,7 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 660479828aa692fab2f27e7dc83329c8984f01d5
+last_synced_commit: a3a2b5c5f54f7834ad1f554495eefc43238d21f2
 last_synced_date: 2026-06-04
 sync_note: "Fix #60: request.js 拦截器 401 仅在本地有 token 时跳登录；ItemDetail.vue 游客免调 checkFavorite；Home.vue/AppHeader.vue 分类改为动态从 /categories 获取，消除硬编码与口径漂移。"
 ---
