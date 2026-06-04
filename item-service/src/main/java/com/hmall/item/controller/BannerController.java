@@ -30,9 +30,8 @@ public class BannerController {
     @ApiOperation("前台查询广告位列表")
     @GetMapping("/ads")
     public List<BannerVO> listAds(
-            @ApiParam("类型") @RequestParam(required = false) String type,
             @ApiParam("位置") @RequestParam(required = false) String position) {
-        return bannerService.listActiveAds(type, position);
+        return bannerService.listActiveAds("ad", position);
     }
 
     @ApiOperation("管理端分页查询轮播图/广告位列表")

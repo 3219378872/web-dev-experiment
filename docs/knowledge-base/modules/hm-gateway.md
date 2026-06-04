@@ -22,7 +22,7 @@ Spring Cloud Gateway 反向代理：路由分发、JWT 鉴权、CORS、限流、
   `hm-common.interceptor.UserInfoInterceptor` 写入 `UserContext`。
 - 白名单（`auth.excludePaths`，全方法放行）：`/search/**`, `/users/login`, `/users/register`,
     `/users/send-code`, `/users/reset-password`, `/notifications/active`, `/upload/**`, `/files/**`。
-- 读白名单（`auth.excludeReadPaths`，仅 GET/HEAD/OPTIONS 放行）：`/categories/**`, `/items/**`。
+- 读白名单（`auth.excludeReadPaths`，仅 GET/HEAD/OPTIONS 放行）：`/categories/**`, `/items/**`, `/banners/**`, `/ads/**`, `/seckill/**`。
 - `DynamicRouteLoader` 监听 Nacos `gateway-routes.json` 实现动态路由。
 
 ## 上游
