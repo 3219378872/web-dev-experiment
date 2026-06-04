@@ -2,7 +2,7 @@
 
 ## Status
 
-开始实现。
+已完成。PR #54 已提交，等待 codex-review 通过后合并。
 
 ## Objective
 
@@ -51,17 +51,7 @@
 
 ## Next Action
 
-1. 创建 SQL 迁移脚本（banner、seckill 表）
-2. 创建 PO 类（Banner、Seckill）
-3. 创建 Mapper 接口
-4. 创建 VO 类（ReviewVO、ItemVO、BannerVO、SeckillVO）
-5. 创建 Service 接口和实现
-6. 创建 Controller（BannerController、SeckillController）
-7. 扩展现有 Controller（ReviewController、ItemController）
-8. 编写单元测试
-9. 运行测试验证
-10. 更新 knowledge base
-11. 提交 PR
+所有实现已完成，等待 CI codex-review 通过后合并 PR。
 
 ## Worktree Or Branch
 
