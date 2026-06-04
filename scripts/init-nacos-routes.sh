@@ -66,8 +66,7 @@ ROUTES='[
           "_genkey_1": "/coupons/**",
           "_genkey_2": "/my-coupons/**",
           "_genkey_3": "/admin/coupons/**",
-          "_genkey_4": "/admin/orders/**",
-          "_genkey_5": "/admin/dashboard/**"
+          "_genkey_4": "/admin/orders/**"
         }
       }
     ]
@@ -95,8 +94,7 @@ ROUTES='[
           "_genkey_3": "/admin/messages/**",
           "_genkey_4": "/feedbacks/**",
           "_genkey_5": "/my-feedbacks/**",
-          "_genkey_6": "/admin/feedbacks/**",
-          "_genkey_7": "/faqs/**"
+          "_genkey_6": "/admin/feedbacks/**"
         }
       }
     ]
