@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 7fbdea0734907e62cccf35d274363d7bc391706e
+last_synced_commit: 8cf14d8116ab2c563e5c51858da3fb2d533d2897
 last_synced_date: 2026-06-04
-sync_note: "Phase 3: user-service 新增 /users/count-new 端点，已在 /users/** 路由中"
+sync_note: "Fix #57: login 异常类型调整（Assert.notNull → BadRequestException），无需文档更新"
 ---
 
 # auth-and-gateway-flow

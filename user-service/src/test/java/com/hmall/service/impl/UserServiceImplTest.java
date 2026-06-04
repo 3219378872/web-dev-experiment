@@ -89,10 +89,11 @@ class UserServiceImplTest extends UserServiceTestBase {
         }
 
         @Test
-        @DisplayName("用户名不存在 → IllegalArgumentException")
+        @DisplayName("用户名不存在 → BadRequestException")
         void userNotFound_throws() {
             assertThatThrownBy(() -> userService.login(loginForm("ghost", "admin123")))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("用户名或密码错误");
         }
 
         @Test
