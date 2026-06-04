@@ -7,6 +7,8 @@ import com.hmall.common.domain.PageQuery;
 import com.hmall.common.domain.R;
 import com.hmall.common.utils.BeanUtils;
 import com.hmall.item.domain.dto.ItemDTO;
+import com.hmall.item.domain.dto.ItemIdsDTO;
+import com.hmall.item.domain.dto.ItemStatusDTO;
 import com.hmall.item.domain.dto.OrderDetailDTO;
 import com.hmall.item.domain.po.Item;
 import com.hmall.item.domain.vo.ItemVO;
@@ -100,24 +102,22 @@ public class ItemController {
 
     @ApiOperation("批量更新商品状态")
     @PutMapping("/admin/items/status")
-    public R<Void> batchUpdateItemStatus(
-            @ApiParam("商品ID列表") @RequestBody List<Long> ids,
-            @ApiParam("状态") @RequestParam("status") Integer status) {
-        itemService.batchUpdateStatus(ids, status);
+    public R<Void> batchUpdateItemStatus(@RequestBody ItemStatusDTO dto) {
+        itemService.batchUpdateStatus(dto.getIds(), dto.getStatus());
         return R.ok();
     }
 
-    @ApiOperation("删除商品")
+    @ApiOperation("删除商品（逻辑删除）")
     @DeleteMapping("/admin/items/{id}")
     public R<Void> deleteItemById(@PathVariable("id") Long id) {
-        itemService.removeById(id);
+        itemService.batchUpdateStatus(List.of(id), 3);
         return R.ok();
     }
 
-    @ApiOperation("批量删除商品")
+    @ApiOperation("批量删除商品（逻辑删除）")
     @DeleteMapping("/admin/items")
-    public R<Void> batchDeleteItems(@RequestBody List<Long> ids) {
-        itemService.removeByIds(ids);
+    public R<Void> batchDeleteItems(@RequestBody ItemIdsDTO dto) {
+        itemService.batchUpdateStatus(dto.getIds(), 3);
         return R.ok();
     }
 

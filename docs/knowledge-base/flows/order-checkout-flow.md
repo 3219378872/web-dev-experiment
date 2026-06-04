@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: c3df50bba422bfb1958cd238562624fcb04a09f1
+last_synced_commit: 5b082647d36437b35c35b8d32931283b001a34ea
 last_synced_date: 2026-06-04
-sync_note: "Phase 2 item-service 变更不影响下单流程，KB 内容不变"
+sync_note: "Phase 2 codex-review 修复：ItemController 接口变更不影响下单流程"
 ---
 
 # order-checkout-flow

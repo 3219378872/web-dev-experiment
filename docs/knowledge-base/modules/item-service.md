@@ -2,9 +2,9 @@
 title: item-service
 tracks:
   - item-service/
-last_synced_commit: cc119e56d47e8f1b29ea2afc5e7d82e2d766b7ff
+last_synced_commit: 5b082647d36437b35c35b8d32931283b001a34ea
 last_synced_date: 2026-06-04
-sync_note: "Phase 2: 新增 Banner、Seckill 模块；扩展 Item、Review 管理端接口"
+sync_note: "Phase 2 codex-review 修复：批量状态更新改用 DTO，删除改为逻辑删除"
 ---
 
 # item-service
