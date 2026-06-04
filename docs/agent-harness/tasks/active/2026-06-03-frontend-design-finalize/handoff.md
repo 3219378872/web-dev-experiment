@@ -64,6 +64,12 @@ Implemented，待 PR / CI / review。
 - admin ItemEdit.vue：保存时价格由「元」换算回整数「分」（后端 ItemDTO.price 为 Integer 分，原样回传"299.00"会反序列化失败或价格错乱）。
 - OrderConfirm.vue：下单 payload 补传 addressId（后端 OrderFormDTO 有该字段，虽当前未被服务使用，补齐更正确）。
 
+## Codex-Review 整改（第 9 轮）
+- Feedback.vue：「我的反馈记录」由硬编码改为接 `GET /my-feedbacks`（新增 `api/common.getMyFeedbacks`），按真实状态映射，提交后刷新。
+- Profile.vue：账户统计改为真实数据——余额取自登录信息，优惠券/收藏/订单状态计数接 `getMyCoupons`/`getFavorites`/`getOrders`；移除无后端的会员等级/积分/成长值/升级进度与假手机号兜底。
+- AccountSidebar.vue / Home.vue：移除硬编码「积分1280」，改通用「好集会员」。
+- OrderDetail.vue：物流时间轴改为依据真实订单状态与时间戳的概要节点，去除杜撰的快递员姓名/电话/网点/日期（物流明细接口缺失见 backend-api.md B3）。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 

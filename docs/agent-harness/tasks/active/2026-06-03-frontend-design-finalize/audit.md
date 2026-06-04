@@ -18,6 +18,7 @@
 | codex-review 第 6 轮整改 | done | Service 留言（公开路由 + 需登录的 POST /messages）：未登录提示登录不调接口、成功才回执、失败如实提示，消除匿名下静默丢消息的假成功 |
 | codex-review 第 7 轮整改 | done | Login：协议勾选框绑定 agreed（原硬编码已勾但 agreed 恒 false，注册被永久拦截）；找回密码补回新密码输入框并校验（原表单缺 newPassword 输入，重置必失败） |
 | codex-review 第 8 轮整改 | done | ①Login 注册补回用户名输入（后端 username @NotBlank）②ItemEdit 保存价格元→分换算（后端 Integer 分）③OrderConfirm 下单补传 addressId（后端字段虽暂未使用，补齐更正确） |
+| codex-review 第 9 轮整改 | done | Feedback 我的反馈接 GET /my-feedbacks；Profile 统计（余额/优惠券/收藏/订单状态）接真实接口、移除会员等级/积分/成长值等无后端虚构与假手机号；AccountSidebar/Home 去硬编码积分；OrderDetail 物流轨迹改为基于真实状态/时间戳、去除虚构快递员与网点 PII |
 | admin Dashboard 运营数据 | out of scope（已披露） | 看板统计后端接口不存在（backend-api.md B4），main 版本亦无后端调用；本页为视觉对齐+演示数据，已在 Dashboard.vue 顶部、context Out of scope、KB、PR 描述中明确声明留待后端接入 |
 | 无需独立 spec/plan | not applicable | 纯前端视觉收尾，见 task.yaml spec_waiver/plan_waiver |
 | FeedbackList 分页装饰化是否回归 | not applicable | `fetch()` 不传分页参数、数据层本不分页，HEAD 版 `el-pagination` 翻页亦只重拉全量；保留现状非行为回归 |

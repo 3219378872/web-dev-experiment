@@ -45,7 +45,7 @@
             }}
           </div>
           <div class="muted" style="font-size: 12px; margin: 3px 0 12px">
-            {{ userStore.isLoggedIn ? '普通会员 · 积分 1280' : '登录享受更多权益' }}
+            {{ userStore.isLoggedIn ? '好集会员' : '登录享受更多权益' }}
           </div>
           <div style="display: flex; gap: 8px">
             <router-link class="btn btn-primary btn-sm btn-block" to="/orders"

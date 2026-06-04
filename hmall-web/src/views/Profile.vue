@@ -84,25 +84,42 @@
           <aside>
             <div class="vip-card">
               <span class="b"></span>
-              <div class="lv">◆ 黄金会员 V3</div>
+              <div class="lv">◆ 好集会员</div>
               <div class="nm">
                 {{ userStore.userInfo?.nickname || userStore.userInfo?.username || '用户' }}
               </div>
               <div class="pts">
-                <div class="p"><b>1280</b><span>当前积分</span></div>
-                <div class="p"><b>86</b><span>成长值</span></div>
-                <div class="p"><b>32</b><span>优惠券</span></div>
+                <div class="p">
+                  <b>{{ (stats.balance / 100).toFixed(0) }}</b
+                  ><span>余额(元)</span>
+                </div>
+                <div class="p">
+                  <b>{{ stats.coupons }}</b
+                  ><span>优惠券</span>
+                </div>
+                <div class="p">
+                  <b>{{ stats.favorites }}</b
+                  ><span>收藏</span>
+                </div>
               </div>
-              <div class="vip-bar"><i style="width: 64%"></i></div>
-              <p style="font-size: 11.5px; opacity: 0.7; margin-top: 8px">
-                距升级铂金会员还需 420 成长值
-              </p>
             </div>
             <div class="quick-stat">
-              <div class="s"><b>2</b><span>待付款</span></div>
-              <div class="s"><b>1</b><span>待收货</span></div>
-              <div class="s"><b>8</b><span>收藏</span></div>
-              <div class="s"><b>3</b><span>足迹</span></div>
+              <div class="s">
+                <b>{{ stats.pendingPay }}</b
+                ><span>待付款</span>
+              </div>
+              <div class="s">
+                <b>{{ stats.pendingRecv }}</b
+                ><span>待收货</span>
+              </div>
+              <div class="s">
+                <b>{{ stats.favorites }}</b
+                ><span>收藏</span>
+              </div>
+              <div class="s">
+                <b>{{ stats.orders }}</b
+                ><span>全部订单</span>
+              </div>
             </div>
           </aside>
         </div>
@@ -112,9 +129,11 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, computed, onMounted } from 'vue';
 import { useUserStore } from '@/stores/user';
 import { updateProfile } from '@/api/user';
+import { getFavorites } from '@/api/common';
+import { getOrders, getMyCoupons } from '@/api/order';
 import { ElMessage } from 'element-plus';
 import AccountSidebar from '@/components/AccountSidebar.vue';
 
@@ -124,11 +143,47 @@ const form = reactive({
   username: userStore.userInfo?.username || '',
   nickname: userStore.userInfo?.nickname || '',
   email: userStore.userInfo?.email || '',
-  phone: userStore.userInfo?.phone || '138****8866',
+  phone: userStore.userInfo?.phone || '',
   avatar: userStore.userInfo?.avatar || '',
   gender: userStore.userInfo?.gender || 'N',
   birthday: userStore.userInfo?.birthday || '',
 });
+
+// 账户统计：余额取自登录用户信息，其余计数来自真实接口（收藏/优惠券/订单）
+const stats = reactive({
+  balance: userStore.userInfo?.balance || 0,
+  coupons: 0,
+  favorites: 0,
+  pendingPay: 0,
+  pendingRecv: 0,
+  orders: 0,
+});
+
+async function loadStats() {
+  try {
+    const favs = await getFavorites();
+    stats.favorites = (favs || []).length;
+  } catch (err) {
+    /* 未登录或失败时保持 0，错误已由拦截器提示 */
+  }
+  try {
+    const coupons = await getMyCoupons();
+    stats.coupons = (coupons || []).length;
+  } catch (err) {
+    /* 忽略 */
+  }
+  try {
+    const all = await getOrders({ page: 1, size: 100 });
+    const list = all?.list || [];
+    stats.orders = all?.total || list.length;
+    stats.pendingPay = list.filter((o) => o.status === 1).length;
+    stats.pendingRecv = list.filter((o) => o.status === 3).length;
+  } catch (err) {
+    /* 忽略 */
+  }
+}
+
+onMounted(loadStats);
 
 const avatarLetter = computed(() => {
   const name = form.nickname || form.username || '用户';

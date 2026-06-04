@@ -206,22 +206,28 @@ const orderItems = computed(() => {
 const logistics = computed(() => {
   const o = order.value;
   if (!o) return [];
+  // 物流轨迹明细接口后端暂未提供（见 docs/backend-api.md B3），此处依据订单状态与真实时间节点展示概要轨迹，不杜撰快递员/网点信息
   const logs = [];
-  if (o.status >= 3) {
-    logs.push({
-      text: '【上海市】快件已到达 浦东张江营业点，派件员 王师傅（138****6677）正在为您派送',
-      time: o.updateTime?.slice(0, 16) || '2026-05-23 08:42',
-    });
-    logs.push({ text: '【上海市】快件已到达 上海浦东转运中心', time: '2026-05-23 03:18' });
-    logs.push({ text: '【杭州市】快件已发出，下一站 上海浦东转运中心', time: '2026-05-22 21:05' });
-    logs.push({ text: '【杭州市】好集华东仓 已揽收', time: '2026-05-22 16:30' });
-    logs.push({ text: '商家已发货，等待揽收', time: '2026-05-22 14:12' });
-  } else if (o.status >= 2) {
-    logs.push({
-      text: '商家已发货，等待揽收',
-      time: o.payTime?.slice(0, 16) || o.createTime?.slice(0, 16),
-    });
+  if (o.status === 5) {
+    logs.push({ text: '订单已取消', time: o.updateTime?.slice(0, 16) || '' });
+  } else {
+    if (o.status >= 4) {
+      logs.push({ text: '已确认收货，交易完成', time: o.updateTime?.slice(0, 16) || '' });
+    }
+    if (o.status >= 3) {
+      logs.push({
+        text: '商家已发货，包裹运输中',
+        time: o.updateTime?.slice(0, 16) || o.payTime?.slice(0, 16) || '',
+      });
+    }
+    if (o.status >= 2) {
+      logs.push({
+        text: '买家已付款，商家备货中',
+        time: o.payTime?.slice(0, 16) || o.createTime?.slice(0, 16) || '',
+      });
+    }
   }
+  logs.push({ text: '订单已提交', time: o.createTime?.slice(0, 16) || '' });
   return logs;
 });
 

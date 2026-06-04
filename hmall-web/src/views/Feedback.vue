@@ -97,8 +97,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { submitFeedback } from '@/api/common';
+import { ref, onMounted } from 'vue';
+import { submitFeedback, getMyFeedbacks } from '@/api/common';
 import { ElMessage } from 'element-plus';
 import AccountSidebar from '@/components/AccountSidebar.vue';
 
@@ -114,29 +114,29 @@ const type = ref('bug');
 const content = ref('');
 const contact = ref('');
 
-const history = ref([
-  {
-    status: '已回复',
-    tagClass: 'tag-success',
-    question: '购物车优惠券无法叠加使用',
-    reply: '感谢反馈！该问题已修复，现支持平台券 + 品类券叠加，给您带来不便敬请谅解～',
-    time: '2026-05-20 提交 · 客服小集 回复',
-  },
-  {
-    status: '处理中',
-    tagClass: 'tag-warn',
-    question: '建议增加商品到货提醒功能',
-    reply: '',
-    time: '2026-05-26 提交 · 已转交产品团队',
-  },
-  {
-    status: '已关闭',
-    tagClass: 'tag-ghost',
-    question: 'App 闪退问题（已解决）',
-    reply: '',
-    time: '2026-05-12 提交',
-  },
-]);
+const history = ref([]);
+
+function mapFeedback(f) {
+  const replied = f.status === 1;
+  return {
+    status: replied ? '已回复' : '待处理',
+    tagClass: replied ? 'tag-success' : 'tag-warn',
+    question: f.content,
+    reply: f.reply || '',
+    time: `${(f.createTime || '').slice(0, 10)} 提交${replied ? ' · 客服已回复' : ''}`,
+  };
+}
+
+async function loadHistory() {
+  try {
+    const data = await getMyFeedbacks({ page: 1, size: 20 });
+    history.value = (data?.list || []).map(mapFeedback);
+  } catch (err) {
+    history.value = [];
+  }
+}
+
+onMounted(loadHistory);
 
 function triggerUpload() {
   ElMessage.info('图片上传功能开发中');
@@ -152,6 +152,7 @@ async function submit() {
     content.value = '';
     contact.value = '';
     ElMessage.success('反馈已提交');
+    loadHistory();
   } catch (err) {
     console.error(err);
   }

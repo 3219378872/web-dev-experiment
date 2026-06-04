@@ -4,7 +4,7 @@
       <div class="av">{{ avatarLetter }}</div>
       <div>
         <b>{{ userStore.userInfo?.nickname || userStore.userInfo?.username || '用户' }}</b>
-        <span class="lv">普通会员 · 积分1280</span>
+        <span class="lv">好集会员</span>
       </div>
     </div>
     <div class="acct-grp">
