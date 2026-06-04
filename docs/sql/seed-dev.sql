@@ -34,16 +34,15 @@ INSERT INTO user_favorites (user_id, item_id, create_time) VALUES
 
 -- ==================== 订单 ====================
 INSERT INTO `order` (id, total_fee, payment_type, user_id, status, create_time) VALUES
-(1, 79800, 1, 2, 1, NOW()),      -- 待付款
-(2, 29900, 1, 2, 2, NOW()),      -- 已付款
-(3, 12900, 1, 2, 3, NOW()),      -- 已发货
-(4, 49900, 1, 2, 4, NOW()),      -- 已完成
-(5, 199900, 1, 2, 5, NOW());     -- 已取消
+(1, 59800, 1, 2, 1, NOW()),      -- 待付款：无线蓝牙耳机×2
+(2, 29900, 1, 2, 2, NOW()),      -- 已付款：无线蓝牙耳机×1
+(3, 12900, 1, 2, 3, NOW()),      -- 已发货：防晒霜×1
+(4, 49900, 1, 2, 4, NOW()),      -- 已完成：运动跑鞋×1
+(5, 199900, 1, 2, 5, NOW());     -- 已取消：智能手表×1
 
 -- ==================== 订单详情 ====================
 INSERT INTO order_detail (order_id, item_id, name, spec, price, num, image, create_time) VALUES
 (1, 1, '无线蓝牙耳机', '黑色', 29900, 2, 'https://img.alicdn.com/imgextra/i3/2200721534029/O1CN01XqUJ0J2G7NRh9d5L1_!!2200721534029.jpg', NOW()),
-(1, 2, '轻薄笔记本电脑', '14寸 16GB', 599900, 0, 'https://img.alicdn.com/imgextra/i1/2200721534029/O1CN01Gt9YBn2G7NRaP0WYC_!!2200721534029.jpg', NOW()),
 (2, 1, '无线蓝牙耳机', '黑色', 29900, 1, 'https://img.alicdn.com/imgextra/i3/2200721534029/O1CN01XqUJ0J2G7NRh9d5L1_!!2200721534029.jpg', NOW()),
 (3, 4, '防晒霜SPF50', '50ml', 12900, 1, 'https://img.alicdn.com/imgextra/i2/2200721534029/O1CN01RRWkqN2G7NRcM1rYn_!!2200721534029.jpg', NOW()),
 (4, 3, '运动跑鞋', '42码 白色', 49900, 1, 'https://img.alicdn.com/imgextra/i4/2200721534029/O1CN01hGVUfK2G7NRdMiDHK_!!2200721534029.jpg', NOW()),
@@ -61,10 +60,11 @@ INSERT INTO logistics_trace (order_id, node, description, trace_time, create_tim
 (4, '已签收', '客户已签收', NOW(), NOW());
 
 -- ==================== 支付单 ====================
+-- biz_order_no 与 order.id 对齐，amount 与 order.total_fee 对齐
 INSERT INTO pay_order (id, biz_order_no, pay_order_no, biz_user_id, pay_channel_code, amount, pay_type, status, create_time, update_time) VALUES
-(3001, 200001, 400001, 2, 'balance', 29900, 5, 3, NOW(), NOW()),
-(3002, 200002, 400002, 2, 'balance', 12900, 5, 3, NOW(), NOW()),
-(3003, 200003, 400003, 2, 'balance', 49900, 5, 3, NOW(), NOW());
+(3001, 2, 400001, 2, 'balance', 29900, 5, 3, NOW(), NOW()),
+(3002, 3, 400002, 2, 'balance', 12900, 5, 3, NOW(), NOW()),
+(3003, 4, 400003, 2, 'balance', 49900, 5, 3, NOW(), NOW());
 
 -- ==================== 商品评价 ====================
 INSERT INTO item_reviews (user_id, item_id, content, rating, create_time) VALUES
