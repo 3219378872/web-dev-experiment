@@ -55,6 +55,10 @@ Implemented，待 PR / CI / review。
 - Service.vue：`/service` 为公开路由但 `POST /messages` 需登录。改为：未登录时回执提示先登录、不调用接口；登录后仅在提交成功时回执「已收到」，失败如实提示。消除匿名用户下「静默丢消息却显示已收到」的假成功。
 - 第 5 轮的 Dashboard 范围声明已生效，codex 不再就 Dashboard 阻塞。
 
+## Codex-Review 整改（第 7 轮）
+- Login.vue 注册：协议勾选框由硬编码 `checkbox on`（视觉已勾但 `agreed` 恒 false）改为 `:class="{on:agreed}" @click` 双向绑定，修复"注册永远提示请同意用户协议"。
+- Login.vue 找回密码：重设计后遗漏新密码输入框，补回 `resetForm.newPassword` 输入并在 doReset 增加非空校验，修复"重置必失败"。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 

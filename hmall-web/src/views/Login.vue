@@ -213,7 +213,13 @@
             />
           </div>
           <div class="agree">
-            <span class="checkbox on" style="margin-top: 1px">✓</span>
+            <span
+              class="checkbox"
+              :class="{ on: agreed }"
+              style="margin-top: 1px"
+              @click="agreed = !agreed"
+              >{{ agreed ? '✓' : '' }}</span
+            >
             <span>我已阅读并同意《<a>好集用户协议</a>》和《<a>隐私政策</a>》</span>
           </div>
           <button class="btn btn-hot btn-lg btn-block" @click="doRegister">注 册</button>
@@ -270,9 +276,18 @@
               </button>
             </div>
           </div>
+          <div class="field">
+            <label>设置新密码</label>
+            <input
+              v-model="resetForm.newPassword"
+              type="password"
+              class="input"
+              placeholder="请输入 6-20 位新密码"
+            />
+          </div>
 
           <button class="btn btn-hot btn-lg btn-block" style="margin-top: 8px" @click="doReset">
-            下一步
+            重置密码
           </button>
         </template>
       </div>
@@ -437,6 +452,10 @@ async function doRegister() {
 }
 
 async function doReset() {
+  if (!resetForm.email || !resetForm.code || !resetForm.newPassword) {
+    ElMessage.warning('请填写邮箱/手机号、验证码与新密码');
+    return;
+  }
   try {
     await resetPassword(resetForm);
     ElMessage.success('密码重置成功，请登录');
