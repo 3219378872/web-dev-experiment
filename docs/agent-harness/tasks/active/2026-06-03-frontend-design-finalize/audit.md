@@ -15,6 +15,7 @@
 | codex-review 第 2 轮整改 | done | Coupons 映射改用真实 Coupon 字段（discountType/discountValue/minAmount/endTime），消除 满undefined；移除冗余二进制 web-mall.zip 并 gitignore *.zip（原型以 prototype/ 解压形式保留） |
 | codex-review 第 3 轮整改 | done | FeedbackList 状态对齐后端真实两态（0 待处理/1 已回复）：移除自定义状态 chip 与 0/2/3 tab 过滤、回复仅提交 reply（后端固定置 1）；修正 backend-api.md 中"回复可带 status"的错误表述 |
 | codex-review 第 4 轮整改 | done | 详情页取数改用按 id 直连：web OrderDetail 用 getOrderById(GET /orders/{id}) 替代翻第一页客户端查找；admin ItemEdit 用 getItemById(GET /items/{id}) 替代 size:1 列表查找，修复超出首页/列表的订单与商品"不存在"漏数据回归 |
+| codex-review 第 6 轮整改 | done | Service 留言（公开路由 + 需登录的 POST /messages）：未登录提示登录不调接口、成功才回执、失败如实提示，消除匿名下静默丢消息的假成功 |
 | admin Dashboard 运营数据 | out of scope（已披露） | 看板统计后端接口不存在（backend-api.md B4），main 版本亦无后端调用；本页为视觉对齐+演示数据，已在 Dashboard.vue 顶部、context Out of scope、KB、PR 描述中明确声明留待后端接入 |
 | 无需独立 spec/plan | not applicable | 纯前端视觉收尾，见 task.yaml spec_waiver/plan_waiver |
 | FeedbackList 分页装饰化是否回归 | not applicable | `fetch()` 不传分页参数、数据层本不分页，HEAD 版 `el-pagination` 翻页亦只重拉全量；保留现状非行为回归 |

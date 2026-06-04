@@ -79,7 +79,9 @@
 <script setup>
 import { ref, nextTick } from 'vue';
 import { sendCustomerMessage } from '@/api/common';
+import { useUserStore } from '@/stores/user';
 
+const userStore = useUserStore();
 const inputText = ref('');
 const chatBody = ref(null);
 
@@ -111,24 +113,28 @@ function scrollToBottom() {
   });
 }
 
-/** 将留言提交到 notify-service（POST /messages）；未登录或失败时静默降级，不打断会话演示 */
-async function persistMessage(text) {
-  try {
-    await sendCustomerMessage({ content: text });
-  } catch (err) {
-    /* 未登录/后端不可用时仅本地展示，错误已由拦截器提示 */
-  }
-}
-
-function pushAutoReply(delay) {
+function pushReply(text, delay) {
   setTimeout(() => {
-    messages.value.push({
-      type: 'text',
-      text: '已收到您的留言，客服将尽快回复，您也可在「我的-消息」中查看进度～',
-      me: false,
-    });
+    messages.value.push({ type: 'text', text, me: false });
     scrollToBottom();
   }, delay);
+}
+
+/**
+ * 提交留言到 notify-service（POST /messages，需登录）。
+ * 仅在确实提交成功时回执「已收到」；未登录提示登录；失败如实提示，避免静默丢消息。
+ */
+async function handleSend(text, delay = 600) {
+  if (!userStore.isLoggedIn) {
+    pushReply('请先登录后再发送留言，登录后客服会第一时间回复您～', delay);
+    return;
+  }
+  try {
+    await sendCustomerMessage({ content: text });
+    pushReply('已收到您的留言，客服将尽快回复，您也可在「我的 - 消息」中查看进度～', delay);
+  } catch (err) {
+    pushReply('留言发送失败，请稍后重试。', delay);
+  }
 }
 
 function sendMessage() {
@@ -137,15 +143,13 @@ function sendMessage() {
   messages.value.push({ type: 'text', text, me: true });
   inputText.value = '';
   scrollToBottom();
-  persistMessage(text);
-  pushAutoReply(800);
+  handleSend(text);
 }
 
 function sendQuick(q) {
   messages.value.push({ type: 'text', text: q, me: true });
   scrollToBottom();
-  persistMessage(q);
-  pushAutoReply(600);
+  handleSend(q);
 }
 </script>
 

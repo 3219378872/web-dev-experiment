@@ -51,6 +51,10 @@ Implemented，待 PR / CI / review。
 - 按决策不回退/不造后端，而是**明确披露范围**：Dashboard.vue 顶部加说明注释；context.md Out of scope、KB hmall-admin、PR 描述均声明「看板运营数据后端暂未提供，本页为视觉对齐+演示数据，留待后端接入」。
 - 该项为已知且已披露的范围限制，不属于破坏既有 API/数据逻辑（main 同样无后端调用）。
 
+## Codex-Review 整改（第 6 轮）
+- Service.vue：`/service` 为公开路由但 `POST /messages` 需登录。改为：未登录时回执提示先登录、不调用接口；登录后仅在提交成功时回执「已收到」，失败如实提示。消除匿名用户下「静默丢消息却显示已收到」的假成功。
+- 第 5 轮的 Dashboard 范围声明已生效，codex 不再就 Dashboard 阻塞。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 
