@@ -73,14 +73,12 @@
     <nav v-if="showCatnav" class="catnav">
       <div class="wrap">
         <router-link to="/category" class="all">▦ 全部商品分类</router-link>
-        <router-link to="/search?q=手机数码">手机数码</router-link>
-        <router-link to="/search?q=家用电器">家用电器</router-link>
-        <router-link to="/search?q=服饰鞋包">服饰鞋包</router-link>
-        <router-link to="/search?q=美妆个护">美妆个护</router-link>
-        <router-link to="/search?q=食品生鲜">食品生鲜</router-link>
-        <router-link to="/search?q=家居家装">家居家装</router-link>
-        <router-link to="/search?q=母婴玩具">母婴玩具</router-link>
-        <router-link to="/search?q=运动户外">运动户外</router-link>
+        <router-link
+          v-for="c in catNavItems"
+          :key="c.name"
+          :to="`/search?q=${encodeURIComponent(c.name)}`"
+          >{{ c.name }}</router-link
+        >
         <span class="spacer"></span>
         <router-link to="/flashsale" class="promo">⚡ 限时秒杀</router-link>
         <router-link to="/coupons">领券中心</router-link>
@@ -90,16 +88,18 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useCartStore } from '@/stores/cart';
+import { getCategories } from '@/api/item';
 
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 const cartStore = useCartStore();
 const keyword = ref('');
+const catNavItems = ref([]);
 
 /** 原型中部分页面不含 catnav，需对齐 */
 const showCatnav = computed(() => {
@@ -112,6 +112,15 @@ function search() {
     router.push({ path: '/search', query: { q: keyword.value.trim() } });
   }
 }
+
+onMounted(async () => {
+  try {
+    const cats = await getCategories();
+    catNavItems.value = (cats || []).slice(0, 8);
+  } catch (e) {
+    /* ignore */
+  }
+});
 </script>
 
 <style scoped>
