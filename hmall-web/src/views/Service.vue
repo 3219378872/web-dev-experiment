@@ -78,6 +78,7 @@
 
 <script setup>
 import { ref, nextTick } from 'vue';
+import { sendCustomerMessage } from '@/api/common';
 
 const inputText = ref('');
 const chatBody = ref(null);
@@ -110,34 +111,41 @@ function scrollToBottom() {
   });
 }
 
+/** 将留言提交到 notify-service（POST /messages）；未登录或失败时静默降级，不打断会话演示 */
+async function persistMessage(text) {
+  try {
+    await sendCustomerMessage({ content: text });
+  } catch (err) {
+    /* 未登录/后端不可用时仅本地展示，错误已由拦截器提示 */
+  }
+}
+
+function pushAutoReply(delay) {
+  setTimeout(() => {
+    messages.value.push({
+      type: 'text',
+      text: '已收到您的留言，客服将尽快回复，您也可在「我的-消息」中查看进度～',
+      me: false,
+    });
+    scrollToBottom();
+  }, delay);
+}
+
 function sendMessage() {
   const text = inputText.value.trim();
   if (!text) return;
   messages.value.push({ type: 'text', text, me: true });
   inputText.value = '';
   scrollToBottom();
-  // TODO: integrate with real chat/notify-service WebSocket or API
-  setTimeout(() => {
-    messages.value.push({
-      type: 'text',
-      text: '收到您的问题，人工客服正在接入中，请稍候…',
-      me: false,
-    });
-    scrollToBottom();
-  }, 800);
+  persistMessage(text);
+  pushAutoReply(800);
 }
 
 function sendQuick(q) {
   messages.value.push({ type: 'text', text: q, me: true });
   scrollToBottom();
-  setTimeout(() => {
-    messages.value.push({
-      type: 'text',
-      text: '收到您的问题，人工客服正在接入中，请稍候…',
-      me: false,
-    });
-    scrollToBottom();
-  }, 600);
+  persistMessage(q);
+  pushAutoReply(600);
 }
 </script>
 

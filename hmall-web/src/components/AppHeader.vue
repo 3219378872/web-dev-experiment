@@ -5,8 +5,10 @@
       <div class="wrap">
         <div>
           <template v-if="userStore.isLoggedIn"
-            >你好，<router-link to="/profile">林晓</router-link><span class="sep">|</span
-            ><router-link to="/orders">我的订单</router-link></template
+            >你好，<router-link to="/profile">{{
+              userStore.userInfo?.username || '用户'
+            }}</router-link
+            ><span class="sep">|</span><router-link to="/orders">我的订单</router-link></template
           >
           <template v-else
             ><router-link to="/login">请登录</router-link><span class="sep">|</span
@@ -57,7 +59,7 @@
           <router-link to="/cart" class="icon-btn cart-btn">
             <span class="ic">🛒</span>
             <span>购物车</span>
-            <span class="badge">{{ cartStore.totalCount > 0 ? cartStore.totalCount : 3 }}</span>
+            <span v-if="cartStore.totalCount > 0" class="badge">{{ cartStore.totalCount }}</span>
           </router-link>
           <router-link to="/profile" class="icon-btn">
             <span class="ic">◍</span>

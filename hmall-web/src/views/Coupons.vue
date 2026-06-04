@@ -125,18 +125,36 @@ const categoryCoupons = ref([]);
 const myCoupons = ref([]);
 const myTab = ref('unused');
 
-const myTabs = [
-  { key: 'unused', label: '未使用', count: 32 },
-  { key: 'used', label: '已使用', count: 18 },
-  { key: 'expired', label: '已过期', count: 6 },
-];
+const stateByTab = { unused: 'use', used: 'used', expired: 'expired' };
+const countByTab = (key) => myCoupons.value.filter((c) => c.state === stateByTab[key]).length;
 
-const filteredMyCoupons = computed(() => {
-  // TODO: replace with real API filtering once backend supports status param
-  if (myTab.value === 'unused') return myCoupons.value.filter((c) => c.state === 'use');
-  if (myTab.value === 'used') return myCoupons.value.filter((c) => c.state === 'used');
-  return myCoupons.value.filter((c) => c.state === 'expired');
-});
+const myTabs = computed(() => [
+  { key: 'unused', label: '未使用', count: countByTab('unused') },
+  { key: 'used', label: '已使用', count: countByTab('used') },
+  { key: 'expired', label: '已过期', count: countByTab('expired') },
+]);
+
+const filteredMyCoupons = computed(() =>
+  myCoupons.value.filter((c) => c.state === stateByTab[myTab.value])
+);
+
+/** 后端未单独建模"平台/品类"，依据券的适用范围/名称文案判定品类券 */
+const CATEGORY_KEYWORDS = [
+  '数码',
+  '家电',
+  '美妆',
+  '服饰',
+  '食品',
+  '母婴',
+  '运动',
+  '家居',
+  '品类',
+  '指定',
+];
+function isCategoryCoupon(c) {
+  const text = `${c.scope || ''}${c.name || ''}`;
+  return CATEGORY_KEYWORDS.some((k) => text.includes(k));
+}
 
 async function handleClaim(id) {
   try {
@@ -162,11 +180,10 @@ async function loadCoupons() {
       expiry: c.expiry || c.endTime?.slice(0, 10) || '2026-06-30',
       state: c.state || '',
     }));
-    // split into platform vs category for demo; TODO: use c.type from backend
-    platformCoupons.value = list.filter((_, i) => i < 6);
-    categoryCoupons.value = list.filter((_, i) => i >= 6);
+    platformCoupons.value = list.filter((c) => !isCategoryCoupon(c));
+    categoryCoupons.value = list.filter((c) => isCategoryCoupon(c));
   } catch (err) {
-    // fallback placeholder data
+    // 接口不可用时的兜底展示数据
     platformCoupons.value = [
       {
         id: 1,

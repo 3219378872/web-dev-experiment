@@ -75,13 +75,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { ElMessage } from 'element-plus';
+import { getItems } from '@/api/item';
+import { useCartStore } from '@/stores/cart';
+import { useUserStore } from '@/stores/user';
+
+const cartStore = useCartStore();
+const userStore = useUserStore();
 
 const countdown = ref({ h: '01', m: '48', s: '13' });
 const flashPct = [88, 72, 95, 45, 60, 82, 38, 90, 55, 78, 42, 68, 93, 50, 75];
 const page = ref(1);
-const totalPages = ref(4);
+const size = ref(10);
+const total = ref(0);
+const totalPages = computed(() => Math.max(1, Math.ceil(total.value / size.value)));
 
 const timeSlots = [
   { time: '12:00', status: '疯抢中', active: true },
@@ -92,146 +100,42 @@ const timeSlots = [
   { time: '22:00', status: '敬请期待', active: false },
 ];
 
-// Prototype-aligned product data (matches HAOJI.P from prototype/assets/data.js)
-const prototypeProducts = [
-  {
-    id: 1,
-    name: 'TWS 主动降噪蓝牙耳机 入耳式 长续航',
-    price: 29900,
-    originalPrice: 49900,
-    phStyle: 's4',
-    phLabel: '手机数码',
-    phGlyph: '▣',
-  },
-  {
-    id: 2,
-    name: '超大容量空气炸锅 家用多功能无油低脂',
-    price: 26900,
-    originalPrice: 39900,
-    phStyle: 's1',
-    phLabel: '家用电器',
-    phGlyph: '▤',
-  },
-  {
-    id: 3,
-    name: '轻商务通勤双肩背包 防泼水大容量电脑包',
-    price: 15900,
-    originalPrice: 25900,
-    phStyle: 's3',
-    phLabel: '服饰鞋包',
-    phGlyph: '◈',
-  },
-  {
-    id: 4,
-    name: '氨基酸温和洁面乳 深层清洁 男女通用',
-    price: 6900,
-    originalPrice: 9900,
-    phStyle: 's6',
-    phLabel: '美妆个护',
-    phGlyph: '✿',
-  },
-  {
-    id: 5,
-    name: '每日坚果混合礼盒 750g 30小包独立装',
-    price: 8900,
-    originalPrice: 13900,
-    phStyle: 's2',
-    phLabel: '食品生鲜',
-    phGlyph: '◉',
-  },
-  {
-    id: 6,
-    name: '北欧实木收纳边几 客厅沙发角小桌',
-    price: 19900,
-    originalPrice: 32900,
-    phStyle: 's8',
-    phLabel: '家居家装',
-    phGlyph: '▦',
-  },
-  {
-    id: 7,
-    name: '婴儿纯棉连体哈衣 新生儿和尚服 3件装',
-    price: 9900,
-    originalPrice: 15900,
-    phStyle: 's5',
-    phLabel: '母婴玩具',
-    phGlyph: '❀',
-  },
-  {
-    id: 8,
-    name: '专业跑步运动鞋 轻量缓震透气网面',
-    price: 34900,
-    originalPrice: 59900,
-    phStyle: 's7',
-    phLabel: '运动户外',
-    phGlyph: '◐',
-  },
-  {
-    id: 9,
-    name: '4K 高清智能投影仪 家用卧室便携',
-    price: 129900,
-    originalPrice: 199900,
-    phStyle: 's4',
-    phLabel: '手机数码',
-    phGlyph: '▣',
-  },
-  {
-    id: 10,
-    name: '轻奢真皮单肩斜挎女包 通勤百搭',
-    price: 45900,
-    originalPrice: 89900,
-    phStyle: 's6',
-    phLabel: '服饰鞋包',
-    phGlyph: '◈',
-  },
-  {
-    id: 11,
-    name: '破壁料理机 家用加热静音榨汁豆浆机',
-    price: 39900,
-    originalPrice: 69900,
-    phStyle: 's1',
-    phLabel: '家用电器',
-    phGlyph: '▤',
-  },
-  {
-    id: 12,
-    name: '高保湿烟酰胺面部精华液 30ml 提亮肤色',
-    price: 12900,
-    originalPrice: 19900,
-    phStyle: 's5',
-    phLabel: '美妆个护',
-    phGlyph: '✿',
-  },
-  {
-    id: 13,
-    name: '有机原切牛排套餐 10片装 谷饲眼肉',
-    price: 19900,
-    originalPrice: 32800,
-    phStyle: 's6',
-    phLabel: '食品生鲜',
-    phGlyph: '◉',
-  },
-  {
-    id: 14,
-    name: '记忆棉人体工学办公椅 久坐护腰电脑椅',
-    price: 59900,
-    originalPrice: 109900,
-    phStyle: 's4',
-    phLabel: '家居家装',
-    phGlyph: '▦',
-  },
-  {
-    id: 15,
-    name: '儿童积木益智拼装玩具 1000颗粒大盒装',
-    price: 13900,
-    originalPrice: 22900,
-    phStyle: 's2',
-    phLabel: '母婴玩具',
-    phGlyph: '❀',
-  },
-];
+/** 按品类映射占位图标（当前后端商品未配真实图片，沿用全站占位视觉） */
+const glyphMap = {
+  手机数码: '▣',
+  家用电器: '▤',
+  服饰鞋包: '◈',
+  美妆个护: '✿',
+  食品生鲜: '◉',
+  家居家装: '▦',
+  母婴玩具: '❀',
+  运动户外: '◐',
+};
 
-const flashItems = ref(prototypeProducts);
+const flashItems = ref([]);
+
+function mapItem(x) {
+  return {
+    id: x.id,
+    name: x.name,
+    price: x.price,
+    phStyle: `s${(x.id % 8) + 1}`,
+    phLabel: x.category || '好物',
+    phGlyph: glyphMap[x.category] || '◆',
+  };
+}
+
+async function loadFlash() {
+  try {
+    const data = await getItems({ page: page.value, size: size.value, sortBy: 'sold' });
+    flashItems.value = (data?.list || []).map(mapItem);
+    total.value = data?.total || flashItems.value.length;
+  } catch (err) {
+    flashItems.value = [];
+  }
+}
+
+watch(page, loadFlash);
 
 let timer = null;
 function startCountdown() {
@@ -258,12 +162,21 @@ function originalPrice(p) {
   return Math.round((p.originalPrice || p.price || 0) / 100);
 }
 
-function handleBuy() {
-  // TODO: integrate with flash-sale API when available
-  ElMessage.info('秒杀商品即将上架，敬请期待');
+async function handleBuy(p) {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录');
+    return;
+  }
+  try {
+    await cartStore.addItem({ itemId: p.id, num: 1 });
+    ElMessage.success('已加入购物车');
+  } catch (err) {
+    /* 错误已由响应拦截器统一提示 */
+  }
 }
 
 onMounted(() => {
+  loadFlash();
   startCountdown();
   document.body.style.background = '#2A1410';
 });

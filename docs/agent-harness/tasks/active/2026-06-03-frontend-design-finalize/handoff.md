@@ -27,6 +27,13 @@ Implemented，待 PR / CI / review。
 - 视觉对齐为大面积模板/样式改动，已通过两前端 build + 单测；像素级回归由 e2e/visual 套件覆盖（CI smoke 不跑视觉套件，仅 build/test）。
 - CI 的 `codex-review` 若因缺 secrets 阻塞，与本变更无关，按 CLAUDE.md 在 PR 描述说明。
 
+## Codex-Review 整改（第 1 轮 blocking findings）
+- AppHeader.vue：用户名/购物车角标去硬编码，改绑 `userStore.userInfo.username` 与 `cartStore.totalCount`。
+- FlashSale.vue：移除原型硬编码商品与 no-op 抢购，改为 `/items/page` 真实加载 + `cartStore.addItem` 真实加购 + 真实分页。
+- Service.vue：留言接 `POST /messages`（新增 `api/common.sendCustomerMessage`），去除未完成标记。
+- Coupons.vue：我的券计数与平台/品类分类改为基于真实返回数据，去除未完成标记与演示注释。
+- 说明：admin Dashboard、web Notifications 的演示数据未改（统计/富展示字段的后端不存在，见 docs/backend-api.md B 节），本轮 codex 未将其列为 blocking。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 
