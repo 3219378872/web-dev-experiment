@@ -1,0 +1,7 @@
+slug: 2026-06-03-frontend-design-finalize
+status: active
+task_branch: task/2026-06-03-frontend-design-finalize
+spec: null
+plan: null
+spec_waiver: "纯前端视觉对齐收尾（延续高保真原型对齐工作），保持 API 与数据逻辑不变，无后端契约/数据/行为破坏性变更，无需独立 spec。"
+plan_waiver: "收尾性任务：提交既有分支未提交改动并修复 1 处分页功能回归，范围明确，无需多步实施计划。原分支 feat/fronted-design（其上已有 5 个前端对齐提交）已按 harness 命名规范重命名为 task/2026-06-03-frontend-design-finalize（重命名前未推送，历史完整保留）；branch->PR->CI->merge 流程照常。"

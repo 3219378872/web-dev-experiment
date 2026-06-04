@@ -110,7 +110,9 @@
           class="flash-item"
           :to="`/item/${p.id}`"
         >
-          <div class="ph" :class="`s${(p.id % 8) + 1}`"><div class="shape round"></div></div>
+          <div class="ph" :class="p.shade || `s${(p.id % 8) + 1}`" :data-label="p.category">
+            <span class="glyph">{{ p.glyph }}</span>
+          </div>
           <div class="nm">{{ p.name }}</div>
           <div class="pr">
             <small style="font-size: 12px">¥</small>{{ (p.price / 100).toFixed(0) }}
@@ -282,12 +284,8 @@ onMounted(async () => {
   try {
     const data = await getItems({ page: 1, size: 10 });
     const all = data?.list || [];
-    promoItems.value = all
-      .slice(0, 5)
-      .map((x) => ({ ...x, tag: x.tag || '促销', originalPrice: Math.round(x.price * 1.2) }));
-    flashItems.value = all
-      .slice(5, 11)
-      .map((x) => ({ ...x, originalPrice: Math.round(x.price * 1.5) }));
+    promoItems.value = all.slice(0, 5).map((x) => ({ ...x, tag: x.tag || '促销' }));
+    flashItems.value = all.slice(5, 11);
   } catch (e) {
     /* ignore */
   }
@@ -300,7 +298,9 @@ onUnmounted(() => {
 
 <style scoped>
 .home {
-  padding: 14px 0 40px;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 20px 40px;
 }
 
 /* ---- HERO ---- */

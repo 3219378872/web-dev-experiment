@@ -107,11 +107,10 @@ p {
 }
 
 /* ============ Layout ============ */
+/* 透传容器：宽度约束交给各页面自身的 .wrap，与原型 body > .wrap 结构一致，
+   避免 main-content 与 .wrap 双重 padding 导致内容宽度收窄、商品列宽/换行错位 */
 .main-content {
   min-height: calc(100vh - 120px);
-  max-width: var(--maxw);
-  margin: 0 auto;
-  padding: 0 20px;
 }
 
 .wrap {

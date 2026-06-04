@@ -9,8 +9,8 @@
         </p>
       </div>
       <div class="acts">
-        <el-button size="small">导出订单</el-button>
-        <el-button size="small">批量发货</el-button>
+        <a class="btn btn-ghost">导出订单</a>
+        <a class="btn btn-ghost">批量发货</a>
       </div>
     </div>
 
@@ -31,56 +31,53 @@
     <div class="adm-filter">
       <div class="field-inline">
         订单号
-        <el-input
+        <input
           v-model="searchId"
+          class="input"
           placeholder="输入订单号"
-          style="width: 180px"
+          style="width: 150px"
           @keyup.enter="fetch"
         />
       </div>
       <div class="field-inline">
         客户
-        <el-input
+        <input
           v-model="searchUser"
+          class="input"
           placeholder="用户名 / 手机"
-          style="width: 160px"
+          style="width: 150px"
           @keyup.enter="fetch"
         />
       </div>
       <div class="field-inline">
         支付方式
-        <el-select
-          v-model="searchPay"
-          placeholder="全部"
-          clearable
-          style="width: 120px"
-          @change="fetch"
-        >
-          <el-option label="全部" value="" />
-          <el-option label="微信" value="微信" />
-          <el-option label="支付宝" value="支付宝" />
-          <el-option label="余额" value="余额" />
-        </el-select>
+        <select v-model="searchPay" class="select" style="width: 120px" @change="fetch">
+          <option value="">全部</option>
+          <option value="微信">微信</option>
+          <option value="支付宝">支付宝</option>
+          <option value="余额">余额</option>
+        </select>
       </div>
       <div class="field-inline">
         下单时间
-        <el-input
+        <input
           v-model="searchDate"
+          class="input"
           placeholder="2026-05-01 ~ 2026-05-28"
-          style="width: 200px"
+          style="width: 180px"
           @keyup.enter="fetch"
         />
       </div>
       <div class="grow" />
-      <el-button type="primary" size="small" @click="fetch">查询</el-button>
-      <el-button size="small" @click="resetFilter">重置</el-button>
+      <a class="btn btn-primary btn-sm" @click="fetch">查询</a>
+      <a class="btn btn-ghost btn-sm" @click="resetFilter">重置</a>
     </div>
 
     <div class="acard">
       <table class="atable">
         <thead>
           <tr>
-            <th style="width: 30px"><el-checkbox v-model="allChecked" /></th>
+            <th style="width: 30px"><span class="checkbox"></span></th>
             <th>订单号</th>
             <th>客户</th>
             <th>商品</th>
@@ -93,7 +90,7 @@
         </thead>
         <tbody>
           <tr v-for="row in orders" :key="row.id">
-            <td><el-checkbox v-model="row.checked" /></td>
+            <td><span class="checkbox"></span></td>
             <td class="mono" style="font-size: 11.5px">{{ row.id }}</td>
             <td>
               <span class="u-cell">
@@ -125,22 +122,21 @@
       </table>
       <div class="adm-pager">
         <span>共 {{ total.toLocaleString() }} 条 · 每页 {{ size }} 条</span>
-        <el-pagination
-          background
-          layout="prev, pager, next"
-          :total="total"
-          :page-size="size"
-          :current-page="page"
-          @current-change="(p) => fetch(p)"
-        />
+        <div v-if="totalPages > 1" class="pgs">
+          <a :class="{ disabled: page === 1 }" @click="prevPage">‹</a>
+          <a v-for="p in pageRange" :key="p" :class="{ on: page === p }" @click="fetch(p)">{{
+            p
+          }}</a>
+          <a :class="{ disabled: page >= totalPages }" @click="nextPage">›</a>
+        </div>
       </div>
     </div>
 
     <el-dialog v-model="shipVisible" title="填写物流单号">
-      <el-input v-model="trackingNumber" placeholder="物流单号" />
+      <input v-model="trackingNumber" class="input" placeholder="物流单号" />
       <template #footer>
-        <el-button @click="shipVisible = false">取消</el-button>
-        <el-button type="primary" @click="doShip">确认发货</el-button>
+        <button class="btn btn-ghost" @click="shipVisible = false">取消</button>
+        <button class="btn btn-primary" @click="doShip">确认发货</button>
       </template>
     </el-dialog>
   </div>
@@ -200,14 +196,6 @@ const tabs = computed(() => [
   },
   { label: '已关闭', value: 'closed', badge: orders.value.filter((o) => o.status === 5).length },
 ]);
-
-const allChecked = computed({
-  get: () => orders.value.length > 0 && orders.value.every((i) => i.checked),
-  set: (v) =>
-    orders.value.forEach((i) => {
-      i.checked = v;
-    }),
-});
 
 function statusText(s) {
   return statusMap[s]?.text || '-';
@@ -270,6 +258,19 @@ async function fetch(p = 1) {
   }
 }
 
+const totalPages = computed(() => Math.ceil(total.value / size.value) || 1);
+const pageRange = computed(() => {
+  const pages = [];
+  for (let i = 1; i <= totalPages.value; i++) pages.push(i);
+  return pages;
+});
+function prevPage() {
+  if (page.value > 1) fetch(page.value - 1);
+}
+function nextPage() {
+  if (page.value < totalPages.value) fetch(page.value + 1);
+}
+
 function showShip(row) {
   currentOrder.value = row;
   shipVisible.value = true;
@@ -302,32 +303,29 @@ fetch();
 <style scoped>
 .tabs {
   display: flex;
-  gap: 0;
+  gap: 2px;
   border-bottom: 1px solid var(--admin-line);
 }
 .tabs button {
   background: transparent;
   border: 0;
-  padding: 14px 18px;
-  font-size: 13.5px;
+  padding: 13px 20px;
+  font-size: 14px;
   color: var(--ink-2);
   cursor: pointer;
   position: relative;
   font-family: inherit;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
 }
 .tabs button.active {
   color: var(--brand);
   font-weight: 700;
+  border-bottom-color: var(--brand);
 }
 .tabs button.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 12px;
-  right: 12px;
-  height: 2px;
-  background: var(--brand);
-  border-radius: 2px 2px 0 0;
+  display: none;
 }
 .tabs button:hover {
   color: var(--brand);
@@ -339,5 +337,90 @@ fetch();
 
 .mono {
   font-family: var(--mono);
+}
+
+/* align filter inputs/select with prototype sizing */
+.adm-filter .input,
+.adm-filter .select {
+  height: 36px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+/* checkbox sizing to match prototype 18px */
+.adm-filter .el-checkbox {
+  --el-checkbox-size: 18px;
+}
+
+/* table cell vertical padding to match prototype 13px */
+.atable tbody td {
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+
+/* status dot sizing */
+.sdot::before {
+  width: 7px;
+  height: 7px;
+}
+
+/* action links sizing */
+.atable .actions .lk {
+  font-size: 12.5px;
+}
+
+/* pager button sizing */
+.adm-pager .pgs {
+  display: flex;
+  gap: 6px;
+}
+.adm-pager .pgs a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 12.5px;
+  border: 1px solid var(--admin-line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.adm-pager .pgs a.on {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* avatar sizing */
+.u-av {
+  width: 36px;
+  height: 36px;
+  font-size: 13px;
+}
+
+/* amount color */
+.amount {
+  font-weight: 700;
+  color: var(--price);
+  font-variant-numeric: tabular-nums;
+}
+
+/* dim color */
+.dim {
+  color: var(--ink-3);
+}
+
+/* user cell gap */
+.u-cell {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.u-cell .nm {
+  font-weight: 600;
 }
 </style>

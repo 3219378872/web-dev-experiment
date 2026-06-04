@@ -14,18 +14,19 @@
       <section class="pd">
         <div class="gallery">
           <div class="main">
-            <img :src="item.image || '/placeholder.png'" :alt="item.name" />
+            <div class="ph" :class="mainShade" data-label="product · 1200×1200">
+              <span class="glyph">{{ item.glyph || '▣' }}</span>
+            </div>
           </div>
           <div class="thumbs">
             <div
-              v-for="n in 5"
+              v-for="(sh, n) in thumbShades"
               :key="n"
               class="ph"
-              :class="[`s${((item.id + n) % 8) + 1}`, { on: activeThumb === n }]"
+              :class="[sh, { on: activeThumb === n }]"
+              :data-label="''"
               @click="activeThumb = n"
-            >
-              <div class="shape round"></div>
-            </div>
+            ></div>
           </div>
           <div class="acts">
             <a id="fav-btn" @click="toggleFavorite">
@@ -39,11 +40,8 @@
         </div>
 
         <div class="pinfo">
-          <h1>
-            <span v-if="item.tag" class="promo-tag">{{ item.tag }}</span>
-            {{ item.name }}
-          </h1>
-          <div class="subtitle">🔥 好集精选，品质保障，全场正品</div>
+          <h1><span class="promo-tag">自营</span>{{ item.name }}</h1>
+          <div class="subtitle">🔥 好集 618 直降 200，前 100 名加赠充电仓保护套</div>
           <div class="rate-row">
             <span
               ><b>{{ item.rating || '4.9' }}</b> 综合评分</span
@@ -431,7 +429,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useCartStore } from '@/stores/cart';
@@ -449,9 +447,13 @@ const isFavorited = ref(false);
 const reviews = ref([]);
 const reviewRating = ref(5);
 const reviewContent = ref('');
-const activeThumb = ref(1);
+const activeThumb = ref(0);
 const activeTab = ref('detail');
 const relatedItems = ref([]);
+
+// 与原型一致的图库色块（主图 s4，缩略图 s4/s7/s1/s5/s3）
+const thumbShades = ['s4', 's7', 's1', 's5', 's3'];
+const mainShade = computed(() => item.value?.shade || `s${((item.value?.id || 0) % 8) + 1}`);
 
 const avatarColors = ['#88A6B8', '#DE9696', '#B0BE92', '#E9B775', '#B79CC4', '#7FB6A6'];
 
@@ -572,6 +574,13 @@ async function submitReview() {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+.gallery .main .ph {
+  width: 100%;
+  height: 100%;
+}
+.gallery .main .glyph {
+  font-size: 90px;
 }
 .thumbs {
   display: flex;

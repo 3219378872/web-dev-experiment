@@ -47,10 +47,9 @@
               <tr v-for="(g, idx) in goodsList" :key="idx">
                 <td>
                   <span class="prod-cell">
-                    <div
-                      class="ph"
-                      :style="`background:url(${g.image || '/placeholder.png'}) center/cover`"
-                    />
+                    <div class="ph" :class="g.shade" :data-label="g.category">
+                      <span class="glyph">{{ g.glyph }}</span>
+                    </div>
                     <span class="nm">{{ g.name }}</span>
                   </span>
                 </td>
@@ -213,12 +212,15 @@ const goodsList = computed(() => {
   const o = order.value;
   if (!o) return [];
   if (o.orderDetails?.length) {
-    return o.orderDetails.map((d) => ({
+    return o.orderDetails.map((d, i) => ({
       name: d.name || '-',
       spec: d.spec || '默认规格',
       price: d.price || 0,
       num: d.num || 1,
       image: d.image || '',
+      shade: d.shade || `s${(i % 8) + 1}`,
+      glyph: d.glyph || '▦',
+      category: d.category || '',
     }));
   }
   return [
@@ -259,11 +261,91 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.adm-ph {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.adm-ph h1 {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.adm-ph p {
+  color: var(--ink-3);
+  font-size: 13px;
+  margin-top: 4px;
+}
+.adm-ph .acts {
+  display: flex;
+  gap: 10px;
+}
 .od-grid {
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 16px;
   align-items: start;
+}
+
+/* 商品行缩略图色块（与原型 admin.css .prod-cell + 共享 .ph 一致） */
+.atable .prod-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.atable .prod-cell .ph {
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.atable .prod-cell .nm {
+  font-weight: 500;
+  line-height: 1.4;
+  max-width: 280px;
+}
+.atable .prod-cell .ph::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.78);
+  letter-spacing: 0.3px;
+}
+.atable .prod-cell .ph .glyph {
+  font-size: 22px;
+  opacity: 0.55;
+  filter: saturate(0) brightness(0) invert(1);
+}
+.atable .prod-cell .ph.s1 {
+  background: linear-gradient(135deg, #ec9b86, #e07c5e);
+}
+.atable .prod-cell .ph.s2 {
+  background: linear-gradient(135deg, #edc079, #e0a24d);
+}
+.atable .prod-cell .ph.s3 {
+  background: linear-gradient(135deg, #b0be92, #8fa06b);
+}
+.atable .prod-cell .ph.s4 {
+  background: linear-gradient(135deg, #92adbd, #6c8da1);
+}
+.atable .prod-cell .ph.s5 {
+  background: linear-gradient(135deg, #bfa6cc, #9d7fb0);
+}
+.atable .prod-cell .ph.s6 {
+  background: linear-gradient(135deg, #de9696, #c97070);
+}
+.atable .prod-cell .ph.s7 {
+  background: linear-gradient(135deg, #8cc0b0, #65a18f);
+}
+.atable .prod-cell .ph.s8 {
+  background: linear-gradient(135deg, #d2b176, #b88f4a);
 }
 .od-state {
   background: linear-gradient(120deg, #ff7a45, var(--brand));
@@ -299,7 +381,7 @@ onMounted(async () => {
   gap: 50px;
 }
 .od-total .row span:first-child {
-  width: 60px;
+  width: 90px;
   text-align: right;
 }
 .od-total .row span:last-child {
@@ -312,6 +394,7 @@ onMounted(async () => {
 }
 .od-total .row.total .amount {
   font-size: 20px;
+  color: var(--price);
 }
 
 .info-row {

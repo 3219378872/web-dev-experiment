@@ -33,8 +33,8 @@
             class="fs-card"
             :to="`/item/${p.id}`"
           >
-            <div class="ph" :class="`s${(p.id % 8) + 1}`">
-              <div class="shape round"></div>
+            <div class="ph" :class="p.phStyle" :data-label="p.phLabel">
+              <span class="glyph">{{ p.phGlyph }}</span>
             </div>
             <div class="b">
               <div class="nm">{{ p.name }}</div>
@@ -75,11 +75,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import { getItems } from '@/api/item';
 
-const flashItems = ref([]);
 const countdown = ref({ h: '01', m: '48', s: '13' });
 const flashPct = [88, 72, 95, 45, 60, 82, 38, 90, 55, 78, 42, 68, 93, 50, 75];
 const page = ref(1);
@@ -93,6 +91,147 @@ const timeSlots = [
   { time: '20:00', status: '敬请期待', active: false },
   { time: '22:00', status: '敬请期待', active: false },
 ];
+
+// Prototype-aligned product data (matches HAOJI.P from prototype/assets/data.js)
+const prototypeProducts = [
+  {
+    id: 1,
+    name: 'TWS 主动降噪蓝牙耳机 入耳式 长续航',
+    price: 29900,
+    originalPrice: 49900,
+    phStyle: 's4',
+    phLabel: '手机数码',
+    phGlyph: '▣',
+  },
+  {
+    id: 2,
+    name: '超大容量空气炸锅 家用多功能无油低脂',
+    price: 26900,
+    originalPrice: 39900,
+    phStyle: 's1',
+    phLabel: '家用电器',
+    phGlyph: '▤',
+  },
+  {
+    id: 3,
+    name: '轻商务通勤双肩背包 防泼水大容量电脑包',
+    price: 15900,
+    originalPrice: 25900,
+    phStyle: 's3',
+    phLabel: '服饰鞋包',
+    phGlyph: '◈',
+  },
+  {
+    id: 4,
+    name: '氨基酸温和洁面乳 深层清洁 男女通用',
+    price: 6900,
+    originalPrice: 9900,
+    phStyle: 's6',
+    phLabel: '美妆个护',
+    phGlyph: '✿',
+  },
+  {
+    id: 5,
+    name: '每日坚果混合礼盒 750g 30小包独立装',
+    price: 8900,
+    originalPrice: 13900,
+    phStyle: 's2',
+    phLabel: '食品生鲜',
+    phGlyph: '◉',
+  },
+  {
+    id: 6,
+    name: '北欧实木收纳边几 客厅沙发角小桌',
+    price: 19900,
+    originalPrice: 32900,
+    phStyle: 's8',
+    phLabel: '家居家装',
+    phGlyph: '▦',
+  },
+  {
+    id: 7,
+    name: '婴儿纯棉连体哈衣 新生儿和尚服 3件装',
+    price: 9900,
+    originalPrice: 15900,
+    phStyle: 's5',
+    phLabel: '母婴玩具',
+    phGlyph: '❀',
+  },
+  {
+    id: 8,
+    name: '专业跑步运动鞋 轻量缓震透气网面',
+    price: 34900,
+    originalPrice: 59900,
+    phStyle: 's7',
+    phLabel: '运动户外',
+    phGlyph: '◐',
+  },
+  {
+    id: 9,
+    name: '4K 高清智能投影仪 家用卧室便携',
+    price: 129900,
+    originalPrice: 199900,
+    phStyle: 's4',
+    phLabel: '手机数码',
+    phGlyph: '▣',
+  },
+  {
+    id: 10,
+    name: '轻奢真皮单肩斜挎女包 通勤百搭',
+    price: 45900,
+    originalPrice: 89900,
+    phStyle: 's6',
+    phLabel: '服饰鞋包',
+    phGlyph: '◈',
+  },
+  {
+    id: 11,
+    name: '破壁料理机 家用加热静音榨汁豆浆机',
+    price: 39900,
+    originalPrice: 69900,
+    phStyle: 's1',
+    phLabel: '家用电器',
+    phGlyph: '▤',
+  },
+  {
+    id: 12,
+    name: '高保湿烟酰胺面部精华液 30ml 提亮肤色',
+    price: 12900,
+    originalPrice: 19900,
+    phStyle: 's5',
+    phLabel: '美妆个护',
+    phGlyph: '✿',
+  },
+  {
+    id: 13,
+    name: '有机原切牛排套餐 10片装 谷饲眼肉',
+    price: 19900,
+    originalPrice: 32800,
+    phStyle: 's6',
+    phLabel: '食品生鲜',
+    phGlyph: '◉',
+  },
+  {
+    id: 14,
+    name: '记忆棉人体工学办公椅 久坐护腰电脑椅',
+    price: 59900,
+    originalPrice: 109900,
+    phStyle: 's4',
+    phLabel: '家居家装',
+    phGlyph: '▦',
+  },
+  {
+    id: 15,
+    name: '儿童积木益智拼装玩具 1000颗粒大盒装',
+    price: 13900,
+    originalPrice: 22900,
+    phStyle: 's2',
+    phLabel: '母婴玩具',
+    phGlyph: '❀',
+  },
+];
+
+const flashItems = ref(prototypeProducts);
 
 let timer = null;
 function startCountdown() {
@@ -124,32 +263,14 @@ function handleBuy() {
   ElMessage.info('秒杀商品即将上架，敬请期待');
 }
 
-async function loadItems() {
-  try {
-    const data = await getItems({ page: page.value, size: 15 });
-    const list = data?.list || [];
-    flashItems.value = list.map((x) => ({ ...x, originalPrice: Math.round((x.price || 0) * 1.5) }));
-    totalPages.value = Math.max(1, Math.ceil((data?.total || list.length) / 15));
-  } catch (err) {
-    // fallback placeholder
-    flashItems.value = Array.from({ length: 15 }, (_, i) => ({
-      id: i + 1,
-      name: `秒杀商品 ${i + 1} 限时特价`,
-      price: 9900 + i * 1000,
-      originalPrice: 14900 + i * 1500,
-    }));
-  }
-}
-
-watch(page, loadItems);
-
 onMounted(() => {
   startCountdown();
-  loadItems();
+  document.body.style.background = '#2A1410';
 });
 
 onUnmounted(() => {
   if (timer) clearInterval(timer);
+  document.body.style.background = '';
 });
 </script>
 

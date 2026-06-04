@@ -1,0 +1,14 @@
+# Audit
+
+| Requirement | Status | Evidence |
+| --- | --- | --- |
+| 提交分支残留前端视觉对齐改动 | done | hmall-web/hmall-admin 多页 + global.css/AdminLayout 等纳入提交 |
+| 保持 API 与数据逻辑不变 | done | diff 扫描仅 1 处涉及调用（OrderList 分页），其余为模板/样式；无 axios/store/router 逻辑改动 |
+| 修复分页功能回归（admin OrderList） | done | 装饰性 `<a>1/2/3/›</a>`（无 handler）→ `totalPages`/`pageRange` + `@click="fetch(p)"`/prev/next |
+| 修复 hmall-web 单测 | done | `App.spec.ts` 部分 mock `vue-router.useRoute`，保留 `createRouter` 真实导出；2/2 通过 |
+| 清理误入文件 | done | 删除空文件 EOF、`e2e/visual/` 下一次性调试脚本（analyze*/check-*/find-diff-regions/test-pixelmatch.js 与 test-mock 调试 spec）；根 test-results/ 取消暂存并加入 `.gitignore` |
+| KB co-change（K005） | done | 更新 `docs/knowledge-base/modules/hmall-web.md`、`docs/knowledge-base/modules/hmall-admin.md` sync_note 并 bump last_synced_commit |
+| 前端测试/构建通过 | done | 见 verification.md |
+| 不改后端 / CLAUDE / AGENTS | done | 变更仅前端、e2e、.gitignore、KB、本任务记录 |
+| 无需独立 spec/plan | not applicable | 纯前端视觉收尾，见 task.yaml spec_waiver/plan_waiver |
+| FeedbackList 分页装饰化是否回归 | not applicable | `fetch()` 不传分页参数、数据层本不分页，HEAD 版 `el-pagination` 翻页亦只重拉全量；保留现状非行为回归 |

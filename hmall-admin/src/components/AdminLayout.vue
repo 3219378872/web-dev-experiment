@@ -6,27 +6,20 @@
         <span class="nm">好集后台<small>ADMIN PANEL</small></span>
       </div>
       <nav class="adm-nav">
-        <div class="grp-t">数据</div>
+        <div class="grp-t">总览</div>
         <router-link to="/dashboard" :class="{ on: route.path === '/dashboard' }">
           <span class="i">📊</span>数据看板
         </router-link>
 
-        <div class="grp-t">商城</div>
-        <router-link to="/users" :class="{ on: route.path === '/users' }">
-          <span class="i">👥</span>用户管理
-        </router-link>
-        <router-link to="/categories" :class="{ on: route.path === '/categories' }">
-          <span class="i">🗂</span>分类管理
-        </router-link>
+        <div class="grp-t">运营</div>
         <router-link
           to="/items"
           :class="{ on: route.path === '/items' || route.path.startsWith('/items/') }"
         >
-          <span class="i">📦</span>商品列表
+          <span class="i">📦</span>商品管理
         </router-link>
-        <router-link to="/reviews" :class="{ on: route.path === '/reviews' }">
-          <span class="i">★</span>评价管理
-          <span v-if="reviewBadge" class="badge">{{ reviewBadge }}</span>
+        <router-link to="/categories" :class="{ on: route.path === '/categories' }">
+          <span class="i">🗂</span>分类管理
         </router-link>
         <router-link
           to="/orders"
@@ -35,8 +28,14 @@
           <span class="i">▤</span>订单管理
           <span v-if="orderBadge" class="badge">{{ orderBadge }}</span>
         </router-link>
+        <router-link to="/reviews" :class="{ on: route.path === '/reviews' }">
+          <span class="i">★</span>评价管理
+        </router-link>
+        <router-link to="/users" :class="{ on: route.path === '/users' }">
+          <span class="i">👥</span>用户管理
+        </router-link>
 
-        <div class="grp-t">系统</div>
+        <div class="grp-t">内容</div>
         <router-link to="/banners" :class="{ on: route.path === '/banners' }">
           <span class="i">🖼</span>轮播管理
         </router-link>
@@ -47,52 +46,39 @@
           <span class="i">💬</span>反馈管理
           <span v-if="feedbackBadge" class="badge">{{ feedbackBadge }}</span>
         </router-link>
+
+        <div class="grp-t">系统</div>
         <router-link to="/profile" :class="{ on: route.path === '/profile' }">
           <span class="i">⚙</span>个人中心
         </router-link>
       </nav>
       <div class="foot">
-        <div>© 2026 好集后台</div>
-        <div style="margin-top: 4px">仅供课程实验演示</div>
+        <div>好集 HAOJI ADMIN v2.6</div>
+        <div style="margin-top: 4px">© 2026 高保真原型</div>
       </div>
     </aside>
     <div class="adm-main">
       <header class="adm-top">
         <div class="crumb">
-          <span v-for="(crumb, i) in breadcrumbs" :key="i">
-            <router-link v-if="crumb.path" :to="crumb.path">{{ crumb.title }}</router-link>
-            <b v-else>{{ crumb.title }}</b>
-            <span v-if="i < breadcrumbs.length - 1" style="margin: 0 8px; color: var(--ink-3)"
-              >/</span
-            >
-          </span>
+          好集后台 <span style="margin: 0 6px; color: var(--line-2)">/</span>
+          <b>{{ pageTitle }}</b>
         </div>
-        <div class="search">
-          <span style="font-size: 15px; color: var(--ink-3)">🔍</span>
-          <input
-            placeholder="搜索功能、页面"
-            style="
-              border: 0;
-              background: transparent;
-              outline: 0;
-              font-size: 13px;
-              color: var(--ink);
-              font-family: inherit;
-              width: 100%;
-            "
-          />
-        </div>
+        <div class="search">🔍 搜索订单、商品、用户…</div>
         <div class="tools">
-          <span class="tbtn">🔔<span v-if="notifyDot" class="dot"></span></span>
-          <span class="tbtn">⚙</span>
-        </div>
-        <div class="me">
-          <span class="av">管</span>
-          <span class="nm">
-            {{ adminName }}
-            <small>超级管理员</small>
-          </span>
-          <span class="tbtn" style="margin-left: 8px; cursor: pointer" @click="logout">↪</span>
+          <a class="tbtn" href="/feedbacks" title="消息"
+            ><span>✉</span><span v-if="notifyDot" class="dot"></span
+          ></a>
+          <a class="tbtn" href="/notifications" title="通知"
+            ><span>🔔</span><span v-if="notifyDot" class="dot"></span
+          ></a>
+          <a class="tbtn" href="/" title="前台" target="_blank"><span>🏪</span></a>
+          <div class="me">
+            <span class="av">管</span>
+            <div class="nm">管理员 Admin<small>超级管理员</small></div>
+          </div>
+          <a class="tbtn" title="退出登录" style="cursor: pointer" @click="logout"
+            ><span>↪</span></a
+          >
         </div>
       </header>
       <div class="adm-body"><router-view /></div>
@@ -107,55 +93,27 @@ import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
 
-const reviewBadge = ref(14);
-const orderBadge = ref(28);
-const feedbackBadge = ref(6);
+const orderBadge = ref(5);
+const feedbackBadge = ref(3);
 const notifyDot = ref(true);
 
-const adminInfo = computed(() => {
-  try {
-    return JSON.parse(localStorage.getItem('adminInfo') || '{}');
-  } catch {
-    return {};
-  }
-});
-const adminName = computed(
-  () => adminInfo.value?.nickname || adminInfo.value?.username || '管理员'
-);
-
-const breadcrumbs = computed(() => {
+const pageTitle = computed(() => {
   const map = {
-    '/dashboard': [{ title: '首页', path: '/' }, { title: '数据看板' }],
-    '/users': [{ title: '首页', path: '/' }, { title: '用户管理' }],
-    '/categories': [{ title: '首页', path: '/' }, { title: '分类管理' }],
-    '/items': [{ title: '首页', path: '/' }, { title: '商品列表' }],
-    '/items/add': [
-      { title: '首页', path: '/' },
-      { title: '商品列表', path: '/items' },
-      { title: '新增商品' },
-    ],
-    '/reviews': [{ title: '首页', path: '/' }, { title: '评价管理' }],
-    '/orders': [{ title: '首页', path: '/' }, { title: '订单管理' }],
-    '/banners': [{ title: '首页', path: '/' }, { title: '轮播管理' }],
-    '/notifications': [{ title: '首页', path: '/' }, { title: '公告管理' }],
-    '/feedbacks': [{ title: '首页', path: '/' }, { title: '反馈管理' }],
-    '/profile': [{ title: '首页', path: '/' }, { title: '个人中心' }],
+    '/dashboard': '数据看板',
+    '/users': '用户管理',
+    '/categories': '分类管理',
+    '/items': '商品管理',
+    '/items/add': '新增商品',
+    '/reviews': '评价管理',
+    '/orders': '订单管理',
+    '/banners': '轮播管理',
+    '/notifications': '公告管理',
+    '/feedbacks': '反馈管理',
+    '/profile': '个人中心',
   };
-  if (route.path.startsWith('/items/') && route.path !== '/items/add') {
-    return [
-      { title: '首页', path: '/' },
-      { title: '商品列表', path: '/items' },
-      { title: '编辑商品' },
-    ];
-  }
-  if (route.path.startsWith('/orders/') && route.path !== '/orders') {
-    return [
-      { title: '首页', path: '/' },
-      { title: '订单管理', path: '/orders' },
-      { title: '订单详情' },
-    ];
-  }
-  return map[route.path] || [{ title: '首页', path: '/' }, { title: route.meta.title || '页面' }];
+  if (route.path.startsWith('/items/') && route.path !== '/items/add') return '编辑商品';
+  if (route.path.startsWith('/orders/') && route.path !== '/orders') return '订单详情';
+  return map[route.path] || '页面';
 });
 
 function logout() {

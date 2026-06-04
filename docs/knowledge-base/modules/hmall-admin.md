@@ -2,9 +2,9 @@
 title: hmall-admin
 tracks:
   - hmall-admin/
-last_synced_commit: 9c25528
-last_synced_date: 2026-06-03
-sync_note: "对齐全部管理后台页至高保真原型视觉：全局样式/AdminLayout、Dashboard/Login/ItemList/ItemEdit/CategoryList/OrderList/OrderDetail/UserList/ReviewList/BannerList/NotificationList/FeedbackList/Profile；保持 API 与数据逻辑不变。额外更新：Login.vue 完全重写对齐原型（深色侧边栏、统计数字、角色选择、验证码）。"
+last_synced_commit: 5fbb458
+last_synced_date: 2026-06-04
+sync_note: "对齐全部管理后台页至高保真原型视觉：全局样式/AdminLayout、Dashboard/Login/ItemList/ItemEdit/CategoryList/OrderList/OrderDetail/UserList/ReviewList/BannerList/NotificationList/FeedbackList/Profile；保持 API 与数据逻辑不变。额外更新：Login.vue 完全重写对齐原型（深色侧边栏、统计数字、角色选择、验证码）。2026-06-04 收尾：修复 OrderList 分页功能回归（装饰性→功能性 prev/next/fetch(p)）；AdminLayout topbar 恢复退出登录按钮；删除 OrderList 死代码 allChecked。"
 ---
 
 # hmall-admin

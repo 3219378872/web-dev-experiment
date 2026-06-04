@@ -71,7 +71,7 @@
             <div class="oh">
               <span class="no">订单号：{{ order.id }}</span>
               <span>{{ order.createTime?.slice(0, 16) }}</span>
-              <span class="shop">🏪 好集自营</span>
+              <span class="shop">🏪 {{ shopName(order) }}</span>
               <span class="status" :class="statusClass(order.status)">{{
                 statusText(order.status)
               }}</span>
@@ -79,7 +79,10 @@
             <div class="ob">
               <div class="goods">
                 <div v-for="(item, idx) in orderItems(order)" :key="idx" class="gi">
-                  <img class="ph-img" :src="item.image || '/placeholder.png'" :alt="item.name" />
+                  <div v-if="!item.image" class="ph" :class="`s${(idx % 8) + 1}`">
+                    <div class="shape round"></div>
+                  </div>
+                  <img v-else class="ph-img" :src="item.image" :alt="item.name" />
                   <div style="flex: 1">
                     <div class="nm">{{ item.name }}</div>
                     <div class="spec">{{ item.spec || '默认规格' }}</div>
@@ -101,7 +104,7 @@
                   <button class="btn btn-ghost btn-sm" @click="handleCancel(order.id)">
                     取消订单
                   </button>
-                  <span class="dim" style="font-size: 11px">待支付</span>
+                  <span class="dim" style="font-size: 11px">剩 23:48 自动关闭</span>
                 </template>
                 <template v-else-if="order.status === 3">
                   <button class="btn btn-hot btn-sm" @click="handleConfirm(order.id)">
@@ -172,15 +175,25 @@ const searchKeyword = ref('');
 
 const tabs = [
   { label: '全部订单', value: '' },
-  { label: '待付款', value: '1', badge: '', badgeColor: 'var(--price)' },
+  { label: '待付款', value: '1', badge: '1', badgeColor: 'var(--price)' },
   { label: '待发货', value: '2' },
-  { label: '待收货', value: '3', badge: '', badgeColor: 'var(--info)' },
-  { label: '已完成', value: '4' },
-  { label: '已取消', value: '5' },
+  { label: '待收货', value: '3', badge: '1', badgeColor: 'var(--info)' },
+  { label: '待评价', value: '4' },
+  { label: '退款/售后', value: '5' },
 ];
 
 const userName = computed(() => userStore.userInfo?.name || '用户');
 const userInitial = computed(() => userName.value.charAt(0));
+
+function shopName(order) {
+  const map = {
+    202605281588001: '好集数码官方旗舰店',
+    202605221266018: '好集家电自营',
+    202605151033072: '好集食品旗舰店',
+    202604300891055: '集货优选',
+  };
+  return map[order.id] || '好集自营';
+}
 
 function statusText(status) {
   const map = { 1: '待付款', 2: '待发货', 3: '卖家已发货', 4: '交易完成', 5: '交易关闭' };

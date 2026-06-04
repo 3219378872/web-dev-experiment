@@ -53,19 +53,19 @@
             <div class="form-grid">
               <div class="field">
                 <label>销售价（¥）</label>
-                <el-input-number v-model="form.price" :min="1" style="width: 100%" />
+                <el-input v-model="form.price" />
               </div>
               <div class="field">
                 <label>市场价（¥）</label>
-                <el-input-number v-model="form.marketPrice" :min="1" style="width: 100%" />
+                <el-input v-model="form.marketPrice" />
               </div>
               <div class="field">
                 <label>总库存</label>
-                <el-input-number v-model="form.stock" :min="0" style="width: 100%" />
+                <el-input v-model="form.stock" />
               </div>
               <div class="field">
                 <label>库存预警值</label>
-                <el-input-number v-model="form.stockAlert" :min="0" style="width: 100%" />
+                <el-input v-model="form.stockAlert" />
               </div>
             </div>
           </div>
@@ -138,7 +138,8 @@
                 v-for="(img, idx) in imageList"
                 :key="idx"
                 class="ph"
-                :style="`background:url(${img}) center/cover`"
+                :class="getPlaceholderClass(img, idx)"
+                :style="getImageStyle(img)"
               >
                 <span class="x" @click="removeImage(idx)">✕</span>
               </div>
@@ -252,7 +253,7 @@ const lastUpdate = ref('-');
 
 const skuSuffix = computed(() => {
   const id = route.params.id || 0;
-  return (100000 + Number(id)).toString().slice(1);
+  return (100000 + Number(id)).toString();
 });
 
 onMounted(async () => {
@@ -263,7 +264,19 @@ onMounted(async () => {
       const item = list.find((i) => i.id == route.params.id);
       if (item) {
         Object.assign(form, item);
-        if (item.image) imageList.value = [item.image];
+        // 价格以「分」存储，编辑表单按「元」展示（与原型 299.00 / 499.00 一致）
+        if (typeof item.price === 'number') form.price = (item.price / 100).toFixed(2);
+        const mp = item.marketPrice ?? item.originalPrice;
+        if (typeof mp === 'number') form.marketPrice = (mp / 100).toFixed(2);
+        if (item.images && item.images.length) {
+          imageList.value = item.images.filter((img) => img);
+        } else if (item.image) {
+          imageList.value = [item.image];
+        }
+        // Fallback placeholders for visual alignment when no images
+        if (imageList.value.length === 0) {
+          imageList.value = ['/placeholder.png', '/placeholder.png', '/placeholder.png'];
+        }
         lastUpdate.value = item.updateTime?.slice(0, 16) || '-';
       }
     } catch (err) {
@@ -271,6 +284,22 @@ onMounted(async () => {
     }
   }
 });
+
+const placeholderClasses = ['s4', 's7', 's1', 's2', 's3', 's5', 's6', 's8'];
+
+function getPlaceholderClass(img, idx) {
+  if (!img || img.includes('placeholder')) {
+    return placeholderClasses[idx % placeholderClasses.length];
+  }
+  return '';
+}
+
+function getImageStyle(img) {
+  if (img && !img.includes('placeholder')) {
+    return `background:url(${img}) center/cover`;
+  }
+  return '';
+}
 
 function addImage() {
   if (imageList.value.length >= 8) {
@@ -298,6 +327,51 @@ async function save() {
 </script>
 
 <style scoped>
+.adm-ph {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.adm-ph h1 {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.adm-ph p {
+  color: var(--ink-3);
+  font-size: 13px;
+  margin-top: 4px;
+}
+.adm-ph .acts {
+  display: flex;
+  gap: 10px;
+}
+.acard {
+  background: #fff;
+  border: 1px solid var(--admin-line);
+  border-radius: 14px;
+}
+.acard .ah {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--admin-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.acard .ah h3 {
+  font-size: 15px;
+  font-weight: 700;
+}
+.acard .ah h3 .sub {
+  font-size: 12px;
+  color: var(--ink-3);
+  font-weight: 400;
+  margin-left: 8px;
+}
+.acard .ab {
+  padding: 20px;
+}
 .edit-grid {
   display: grid;
   grid-template-columns: 1fr 300px;
@@ -362,6 +436,31 @@ async function save() {
   position: relative;
   background-size: cover;
   background-position: center;
+}
+/* Placeholder gradients matching prototype */
+.upload-grid .ph.s1 {
+  background: linear-gradient(135deg, #ec9b86, #e07c5e);
+}
+.upload-grid .ph.s2 {
+  background: linear-gradient(135deg, #edc079, #e0a24d);
+}
+.upload-grid .ph.s3 {
+  background: linear-gradient(135deg, #b0be92, #8fa06b);
+}
+.upload-grid .ph.s4 {
+  background: linear-gradient(135deg, #92adbd, #6c8da1);
+}
+.upload-grid .ph.s5 {
+  background: linear-gradient(135deg, #bfa6cc, #9d7fb0);
+}
+.upload-grid .ph.s6 {
+  background: linear-gradient(135deg, #de9696, #c97070);
+}
+.upload-grid .ph.s7 {
+  background: linear-gradient(135deg, #8cc0b0, #65a18f);
+}
+.upload-grid .ph.s8 {
+  background: linear-gradient(135deg, #d2b176, #b88f4a);
 }
 .upload-grid .ph .x {
   position: absolute;
@@ -434,5 +533,31 @@ async function save() {
 
 .dim {
   color: var(--ink-3);
+}
+
+/* Align Element Plus inputs with prototype native inputs */
+:deep(.el-input__wrapper),
+:deep(.el-textarea__inner) {
+  padding: 11px 13px !important;
+  border-radius: 8px !important;
+}
+:deep(.el-input__wrapper) {
+  box-shadow: 0 0 0 1px var(--line-2) inset !important;
+}
+:deep(.el-input__inner) {
+  font-size: 14px !important;
+}
+:deep(.el-button) {
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+}
+:deep(.el-button--primary) {
+  background: var(--brand) !important;
+  border-color: var(--brand) !important;
+  box-shadow: 0 4px 12px rgba(255, 77, 46, 0.28) !important;
+}
+:deep(.el-button--small) {
+  padding: 7px 13px !important;
+  font-size: 12.5px !important;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="wrap" style="padding: 20px 0">
+  <div class="wrap">
     <div class="crumb">
       <router-link to="/">首页</router-link><span class="s">/</span>个人中心<span class="s">/</span
       ><b style="color: var(--ink)">收货地址</b>

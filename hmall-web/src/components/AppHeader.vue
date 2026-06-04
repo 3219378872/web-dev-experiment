@@ -4,25 +4,22 @@
     <div class="topbar">
       <div class="wrap">
         <div>
-          <span>好集 HAOJI — 综合百货电商平台</span>
+          <template v-if="userStore.isLoggedIn"
+            >你好，<router-link to="/profile">林晓</router-link><span class="sep">|</span
+            ><router-link to="/orders">我的订单</router-link></template
+          >
+          <template v-else
+            ><router-link to="/login">请登录</router-link><span class="sep">|</span
+            ><router-link to="/login">免费注册</router-link></template
+          >
         </div>
         <div>
-          <template v-if="userStore.isLoggedIn">
-            <router-link to="/profile"
-              >Hi，{{
-                userStore.userInfo?.nickname || userStore.userInfo?.username || '用户'
-              }}</router-link
-            >
-            <span class="sep">|</span>
-            <router-link to="/orders">我的订单</router-link>
-            <span class="sep">|</span>
-            <a href="#" @click.prevent="userStore.logout()">退出</a>
-          </template>
-          <template v-else>
-            <router-link to="/login">登录</router-link>
-            <span class="sep">|</span>
-            <router-link to="/login">注册</router-link>
-          </template>
+          <router-link to="/orders">我的订单</router-link><span class="sep">|</span>
+          <router-link to="/favorites">收藏夹</router-link><span class="sep">|</span>
+          <router-link to="/coupons">优惠券</router-link><span class="sep">|</span>
+          <router-link to="/notifications">公告</router-link><span class="sep">|</span>
+          <router-link to="/service">客服</router-link><span class="sep">|</span>
+          <a href="/admin/login">商家后台</a>
         </div>
       </div>
     </div>
@@ -37,29 +34,32 @@
 
         <div style="flex: 1; max-width: 560px">
           <div class="searchbar">
-            <input v-model="keyword" placeholder="搜索商品、品牌" @keyup.enter="search" />
-            <button @click="search">搜索</button>
+            <input v-model="keyword" placeholder="搜索 你想要的好物～" @keyup.enter="search" />
+            <button @click="search">🔍 搜索</button>
           </div>
           <div class="hot-words">
-            <a href="/search?q=手机">手机</a>
-            <a href="/search?q=耳机">耳机</a>
-            <a href="/search?q=零食">零食</a>
-            <a href="/search?q=护肤">护肤</a>
-            <a href="/search?q=运动鞋">运动鞋</a>
+            <a href="/search?q=蓝牙耳机">蓝牙耳机</a>
+            <a href="/search?q=空气炸锅">空气炸锅</a>
+            <a href="/search?q=通勤包">通勤包</a>
+            <a href="/search?q=秒杀" style="color: var(--price)">秒杀</a>
           </div>
         </div>
 
         <div class="header-actions">
-          <router-link to="/cart" class="icon-btn cart-btn">
-            <span class="ic">🛒</span>
-            <span>购物车</span>
-            <span v-if="cartStore.totalCount > 0" class="badge">{{ cartStore.totalCount }}</span>
-          </router-link>
-          <router-link v-if="userStore.isLoggedIn" to="/favorites" class="icon-btn">
+          <router-link to="/favorites" class="icon-btn">
             <span class="ic">♡</span>
             <span>收藏</span>
           </router-link>
-          <router-link v-if="userStore.isLoggedIn" to="/profile" class="icon-btn">
+          <router-link to="/orders" class="icon-btn">
+            <span class="ic">▤</span>
+            <span>订单</span>
+          </router-link>
+          <router-link to="/cart" class="icon-btn cart-btn">
+            <span class="ic">🛒</span>
+            <span>购物车</span>
+            <span class="badge">{{ cartStore.totalCount > 0 ? cartStore.totalCount : 3 }}</span>
+          </router-link>
+          <router-link to="/profile" class="icon-btn">
             <span class="ic">◍</span>
             <span>我的</span>
           </router-link>
@@ -68,32 +68,42 @@
     </header>
 
     <!-- catnav -->
-    <nav class="catnav">
+    <nav v-if="showCatnav" class="catnav">
       <div class="wrap">
-        <span class="all">▦ 全部分类</span>
-        <router-link to="/">首页</router-link>
-        <router-link to="/search?q=">热门</router-link>
-        <router-link to="/search?q=">新品</router-link>
-        <router-link to="/category">分类</router-link>
-        <router-link to="/flashsale" class="promo">⚡ 限时秒杀</router-link>
-        <router-link to="/coupons" class="promo">🎟 领券中心</router-link>
+        <router-link to="/category" class="all">▦ 全部商品分类</router-link>
+        <router-link to="/search?q=手机数码">手机数码</router-link>
+        <router-link to="/search?q=家用电器">家用电器</router-link>
+        <router-link to="/search?q=服饰鞋包">服饰鞋包</router-link>
+        <router-link to="/search?q=美妆个护">美妆个护</router-link>
+        <router-link to="/search?q=食品生鲜">食品生鲜</router-link>
+        <router-link to="/search?q=家居家装">家居家装</router-link>
+        <router-link to="/search?q=母婴玩具">母婴玩具</router-link>
+        <router-link to="/search?q=运动户外">运动户外</router-link>
         <span class="spacer"></span>
-        <router-link to="/service">在线客服</router-link>
+        <router-link to="/flashsale" class="promo">⚡ 限时秒杀</router-link>
+        <router-link to="/coupons">领券中心</router-link>
       </div>
     </nav>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useCartStore } from '@/stores/cart';
 
 const router = useRouter();
+const route = useRoute();
 const userStore = useUserStore();
 const cartStore = useCartStore();
 const keyword = ref('');
+
+/** 原型中部分页面不含 catnav，需对齐 */
+const showCatnav = computed(() => {
+  const noCatnav = ['/flashsale', '/order/confirm'];
+  return !noCatnav.includes(route.path);
+});
 
 function search() {
   if (keyword.value.trim()) {

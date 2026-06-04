@@ -1,5 +1,5 @@
 <template>
-  <div class="wrap" style="padding: 20px 0">
+  <div class="wrap">
     <div class="crumb">
       <router-link to="/">首页</router-link><span class="s">/</span>个人中心<span class="s">/</span
       ><b style="color: var(--ink)">我的收藏</b>
@@ -25,6 +25,10 @@
             <div class="fav-bar">
               <div class="tabs">
                 <button class="active">全部 ({{ favorites.length }})</button>
+                <button>手机数码 (3)</button>
+                <button>家用电器 (2)</button>
+                <button>食品生鲜 (2)</button>
+                <button>降价提醒 (1)</button>
               </div>
               <span class="chip">↓ 收藏时间</span>
             </div>
@@ -32,17 +36,24 @@
               <div v-for="f in favorites" :key="f.id" class="pcard" style="position: relative">
                 <span class="fav-x" title="取消收藏" @click.prevent="removeFav(f.id)">✕</span>
                 <router-link :to="`/item/${f.id}`" style="color: inherit; text-decoration: none">
-                  <div class="ph" :class="`s${(f.id % 8) + 1}`">
-                    <div class="shape round"></div>
+                  <div
+                    class="ph"
+                    :class="f.styleClass || `s${(f.id % 8) + 1}`"
+                    :data-label="f.category"
+                  >
+                    <span class="glyph">{{ f.glyph }}</span>
                   </div>
                   <div class="body">
-                    <div class="title">
+                    <div class="tags">
                       <span v-if="f.tag" class="tag" :class="tagClass(f.tag)">{{ f.tag }}</span>
-                      {{ f.name }}
+                      <span v-if="f.originalPrice && f.originalPrice > f.price" class="tag tag-line"
+                        >省¥{{ ((f.originalPrice - f.price) / 100).toFixed(0) }}</span
+                      >
                     </div>
+                    <div class="title">{{ f.name }}</div>
                     <div class="row">
-                      <span class="price"
-                        ><small class="cur">¥</small>{{ (f.price / 100).toFixed(0) }}</span
+                      <span class="price" style="font-size: 19px"
+                        ><span class="cur">¥</span>{{ (f.price / 100).toFixed(0) }}</span
                       >
                       <span v-if="f.originalPrice" class="price-old"
                         >¥{{ (f.originalPrice / 100).toFixed(0) }}</span
@@ -50,7 +61,7 @@
                     </div>
                     <div class="meta">
                       <span>{{ f.sold ? `已售 ${formatSold(f.sold)}` : '新品上市' }}</span>
-                      <span v-if="f.rating" class="stars" v-html="renderStars(f.rating)"></span>
+                      <span class="dim">{{ f.shop ? f.shop.slice(0, 6) : '' }}</span>
                     </div>
                     <button class="btn btn-outline btn-sm fav-add" @click.prevent="addToCart(f.id)">
                       加入购物车
@@ -95,14 +106,6 @@ function tagClass(tag) {
 function formatSold(n) {
   if (n >= 10000) return (n / 10000).toFixed(1) + '万';
   return n;
-}
-
-function renderStars(rating) {
-  const full = Math.floor(rating || 0);
-  let s = '';
-  for (let i = 0; i < full; i++) s += '★';
-  for (let i = full; i < 5; i++) s += '<span class="off">★</span>';
-  return s;
 }
 
 async function load() {

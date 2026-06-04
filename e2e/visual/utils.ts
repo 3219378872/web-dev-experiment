@@ -37,6 +37,7 @@ export function compareScreenshots(
   const actualCanvas = padToSize(actual, maxWidth, maxHeight);
 
   const diff = new PNG({ width: maxWidth, height: maxHeight });
+  diff.data.fill(0);
   const diffPixels = pixelmatch(
     baseCanvas.data,
     actualCanvas.data,

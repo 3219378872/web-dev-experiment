@@ -11,13 +11,17 @@
           >” 的搜索结果
         </h2>
         <span class="muted" style="font-size: 13px"
-          >为您找到 <b style="color: var(--price)">{{ items.length }}</b> 件相关商品</span
+          >为您找到 <b style="color: var(--price)">{{ total }}</b> 件相关商品</span
         >
       </div>
 
       <div class="related" style="margin-bottom: 14px">
         <span>相关搜索：</span>
         <a v-for="r in related" :key="r" @click="goSearch(r)">{{ r }}</a>
+      </div>
+
+      <div class="empty-hint">
+        🔎 已为您开启「模糊匹配」，同时展示精准匹配与相关推荐。可在右侧切换匹配模式。
       </div>
 
       <div class="sortbar">
@@ -47,8 +51,7 @@
 
       <div v-if="items.length" class="pager">
         <span>‹ 上一页</span>
-        <a class="cur">1</a>
-        <span class="dots">…</span>
+        <a class="cur">1</a><a>2</a><a>3</a><a>4</a><a>5</a> <span class="dots">…</span><a>14</a>
         <a>下一页 ›</a>
       </div>
     </div>
@@ -64,11 +67,12 @@ import ProductCard from '@/components/ProductCard.vue';
 const route = useRoute();
 const router = useRouter();
 const items = ref([]);
+const total = ref(0);
 const query = ref('');
 const sortKey = ref('default');
 const fuzzy = ref(true);
 
-const related = ['手机', '耳机', '零食', '护肤', '运动鞋', '数码配件'];
+const related = ['降噪耳机', '蓝牙耳机 入耳式', '无线耳机', '运动耳机', '头戴式耳机', '骨传导'];
 
 const sortOptions = [
   { key: 'default', label: '综合排序' },
@@ -112,11 +116,13 @@ async function search() {
   query.value = q;
   if (!q) {
     items.value = [];
+    total.value = 0;
     return;
   }
   try {
     const data = await searchItems({ name: q });
     items.value = data?.list || [];
+    total.value = data?.total || items.value.length;
   } catch (err) {
     /* ignore */
   }
@@ -216,6 +222,16 @@ watch(() => route.query.q, search);
   background: var(--brand-soft);
   color: var(--brand-700);
   font-weight: 700;
+}
+
+.empty-hint {
+  background: var(--gold-soft);
+  border: 1px solid #f3d9a0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 12.5px;
+  color: #8a5d00;
+  margin-bottom: 14px;
 }
 
 @media (max-width: 1024px) {

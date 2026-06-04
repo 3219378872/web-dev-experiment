@@ -3,12 +3,10 @@
     <div class="adm-ph">
       <div>
         <h1>轮播图管理</h1>
-        <p>首页轮播位 · 共 {{ banners.length }} 张</p>
+        <p>首页轮播位 · 共 {{ banners.length }} 张 · 拖拽调整顺序</p>
       </div>
       <div class="acts">
-        <el-button type="primary" size="small" @click="dialogVisible = true"
-          >＋ 新增轮播图</el-button
-        >
+        <a class="btn btn-primary" href="#" @click.prevent="dialogVisible = true">＋ 新增轮播图</a>
       </div>
     </div>
 
@@ -28,14 +26,17 @@
               跳转链接：<span class="lk">{{ b.linkUrl || '/' }}</span>
             </div>
             <div class="dim" style="margin-top: 4px">
-              {{ b.timeRange || '长期有效' }} · <span class="sdot green">展示中</span>
+              {{ b.timeRange || '长期有效' }} ·
+              <span class="sdot" :class="b.enabled ? 'green' : 'gray'">{{
+                b.enabled ? '展示中' : '已下线'
+              }}</span>
             </div>
           </div>
           <div class="acts" style="flex-direction: column; align-items: flex-end; gap: 8px">
-            <el-switch v-model="b.enabled" active-color="#1FA85A" />
+            <span class="switch" :class="{ on: b.enabled }" @click="b.enabled = !b.enabled"></span>
             <span>
-              <span class="lk" @click="editBanner(b)">编辑</span>
-              <span class="lk" style="margin-left: 10px" @click="del(b.id)">删除</span>
+              <a class="lk" href="#" @click.prevent="editBanner(b)">编辑</a>
+              <a class="lk" href="#" @click.prevent="del(b.id)">删除</a>
             </span>
           </div>
         </div>
@@ -179,6 +180,33 @@ function del(id) {
   gap: 10px;
 }
 
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  background: #fff;
+  color: var(--ink);
+  transition: 0.14s;
+  line-height: 1;
+}
+.btn:hover {
+  transform: translateY(-1px);
+}
+.btn-primary {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 77, 46, 0.28);
+}
+.btn-primary:hover {
+  background: var(--brand-600);
+}
+
 .ban-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -265,6 +293,38 @@ function del(id) {
 }
 .sdot.green {
   color: var(--success);
+}
+.sdot.gray {
+  color: var(--ink-3);
+}
+
+.switch {
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--line-2);
+  position: relative;
+  cursor: pointer;
+  transition: 0.18s;
+  display: inline-block;
+}
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: 0.18s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.switch.on {
+  background: var(--success);
+}
+.switch.on::after {
+  left: 20px;
 }
 
 .dim {

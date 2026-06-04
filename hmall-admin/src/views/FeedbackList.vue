@@ -31,14 +31,14 @@
               style="padding: 6px 12px; font-size: 12.5px"
               @click="tab = 'replied'"
             >
-              已回复
+              处理中
             </button>
             <button
               :class="{ active: tab === 'closed' }"
               style="padding: 6px 12px; font-size: 12.5px"
               @click="tab = 'closed'"
             >
-              已关闭
+              已处理
             </button>
           </div>
         </div>
@@ -68,14 +68,12 @@
         </div>
         <div class="adm-pager">
           <span>共 {{ total }} 条</span>
-          <el-pagination
-            v-model:current-page="page"
-            :page-size="pageSize"
-            :total="total"
-            background
-            layout="prev, pager, next"
-            @current-change="fetch"
-          />
+          <div class="pgs">
+            <a :class="{ on: page === 1 }" @click="page = 1">1</a>
+            <a v-if="total > pageSize">2</a>
+            <a v-if="total > pageSize * 2">3</a>
+            <a v-if="total > pageSize">›</a>
+          </div>
         </div>
       </div>
 
@@ -105,6 +103,18 @@
             }}</span>
           </div>
           <div class="detail-msg">{{ selected.content }}</div>
+          <div style="display: flex; gap: 8px; margin-top: 12px">
+            <div
+              class="ph s4"
+              style="width: 64px; height: 64px; border-radius: 8px"
+              data-label=""
+            ></div>
+            <div
+              class="ph s7"
+              style="width: 64px; height: 64px; border-radius: 8px"
+              data-label=""
+            ></div>
+          </div>
 
           <div class="reply-box">
             <div class="field">
@@ -122,16 +132,16 @@
             </div>
             <div class="field" style="margin-top: 14px">
               <label>回复用户</label>
-              <el-input
+              <textarea
                 v-model="replyContent"
-                type="textarea"
-                :rows="4"
+                class="input"
+                rows="4"
                 placeholder="输入回复内容，将通过站内信通知用户…"
-              />
+              ></textarea>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 14px">
-              <el-button type="primary" style="flex: 1" @click="doReply">提交回复</el-button>
-              <el-button class="btn-ghost">转技术</el-button>
+              <button class="btn btn-primary btn-block" @click="doReply">提交回复</button>
+              <button class="btn btn-ghost">转技术</button>
             </div>
           </div>
         </div>
