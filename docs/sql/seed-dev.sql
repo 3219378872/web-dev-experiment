@@ -33,12 +33,12 @@ INSERT INTO user_favorites (user_id, item_id, create_time) VALUES
 (2, 5, NOW());
 
 -- ==================== 订单 ====================
-INSERT INTO `order` (total_fee, payment_type, user_id, status, create_time) VALUES
-(79800, 1, 2, 1, NOW()),      -- 待付款
-(29900, 1, 2, 2, NOW()),      -- 已付款
-(12900, 1, 2, 3, NOW()),      -- 已发货
-(49900, 1, 2, 4, NOW()),      -- 已完成
-(199900, 1, 2, 5, NOW());     -- 已取消
+INSERT INTO `order` (id, total_fee, payment_type, user_id, status, create_time) VALUES
+(1, 79800, 1, 2, 1, NOW()),      -- 待付款
+(2, 29900, 1, 2, 2, NOW()),      -- 已付款
+(3, 12900, 1, 2, 3, NOW()),      -- 已发货
+(4, 49900, 1, 2, 4, NOW()),      -- 已完成
+(5, 199900, 1, 2, 5, NOW());     -- 已取消
 
 -- ==================== 订单详情 ====================
 INSERT INTO order_detail (order_id, item_id, name, spec, price, num, image, create_time) VALUES
