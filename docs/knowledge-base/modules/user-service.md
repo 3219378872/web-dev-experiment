@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: c8518e84913fd26ee907c7702f3660b401743206
+last_synced_commit: 7d3df0b4fe1274d7a87f0c2f890d3ea9bdd915ec
 last_synced_date: 2026-06-04
-sync_note: "Phase 1 codex-review 修复：UserStatus 枚举 FROZEN 0→2，更新 init-all-tables.sql，PUT /users/profile 支持密码更新"
+sync_note: "Phase 1 codex-review 修复：移除 @JsonValue 保持前端兼容"
 ---
 
 # user-service

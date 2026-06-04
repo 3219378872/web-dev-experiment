@@ -2,7 +2,6 @@ package com.hmall.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.hmall.common.exception.BadRequestException;
-import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,7 +12,6 @@ public enum UserStatus {
     FROZEN(2, "冻结");
 
     @EnumValue
-    @JsonValue
     private final int value;
     private final String desc;
 
