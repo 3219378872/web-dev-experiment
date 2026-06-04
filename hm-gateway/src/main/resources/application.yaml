@@ -19,3 +19,6 @@ hm:
     excludeReadPaths:
       - /categories/**
       - /items/**
+      - /banners/**
+      - /ads/**
+      - /seckill/**

@@ -7,11 +7,15 @@ import com.hmall.common.domain.PageQuery;
 import com.hmall.common.domain.R;
 import com.hmall.common.utils.BeanUtils;
 import com.hmall.item.domain.dto.ItemDTO;
+import com.hmall.item.domain.dto.ItemIdsDTO;
+import com.hmall.item.domain.dto.ItemStatusDTO;
 import com.hmall.item.domain.dto.OrderDetailDTO;
 import com.hmall.item.domain.po.Item;
+import com.hmall.item.domain.vo.ItemVO;
 import com.hmall.item.service.IItemService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +46,14 @@ public class ItemController {
     @GetMapping("/items/{id}")
     public ItemDTO queryItemById(@PathVariable("id") Long id) {
         return BeanUtils.copyBean(itemService.getById(id), ItemDTO.class);
+    }
+
+    @ApiOperation("查询相关推荐商品")
+    @GetMapping("/items/{id}/related")
+    public List<ItemVO> queryRelatedItems(
+            @ApiParam("商品ID") @PathVariable Long id,
+            @ApiParam("推荐数量") @RequestParam(defaultValue = "5") Integer count) {
+        return itemService.queryRelatedItems(id, count);
     }
 
     // ===== 管理端接口 =====
@@ -88,10 +100,24 @@ public class ItemController {
         return R.ok();
     }
 
-    @ApiOperation("删除商品")
+    @ApiOperation("批量更新商品状态")
+    @PutMapping("/admin/items/status")
+    public R<Void> batchUpdateItemStatus(@RequestBody ItemStatusDTO dto) {
+        itemService.batchUpdateStatus(dto.getIds(), dto.getStatus());
+        return R.ok();
+    }
+
+    @ApiOperation("删除商品（逻辑删除）")
     @DeleteMapping("/admin/items/{id}")
     public R<Void> deleteItemById(@PathVariable("id") Long id) {
-        itemService.removeById(id);
+        itemService.batchUpdateStatus(List.of(id), 3);
+        return R.ok();
+    }
+
+    @ApiOperation("批量删除商品（逻辑删除）")
+    @DeleteMapping("/admin/items")
+    public R<Void> batchDeleteItems(@RequestBody ItemIdsDTO dto) {
+        itemService.batchUpdateStatus(dto.getIds(), 3);
         return R.ok();
     }
 

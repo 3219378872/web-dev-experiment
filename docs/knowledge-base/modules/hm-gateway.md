@@ -2,9 +2,9 @@
 title: hm-gateway
 tracks:
   - hm-gateway/
-last_synced_commit: c26c9eb
-last_synced_date: 2026-06-03
-sync_note: "2026-06-03: 移除 /hi 鉴权白名单（hm-service 清理）"
+last_synced_commit: f3e5054d5f264dfce355633e5654496c31b6f86d
+last_synced_date: 2026-06-04
+sync_note: "Phase 2: 新增 banners/ads/seckill 公开读路径到 excludeReadPaths"
 ---
 
 # hm-gateway
@@ -22,7 +22,7 @@ Spring Cloud Gateway 反向代理：路由分发、JWT 鉴权、CORS、限流、
   `hm-common.interceptor.UserInfoInterceptor` 写入 `UserContext`。
 - 白名单（`auth.excludePaths`，全方法放行）：`/search/**`, `/users/login`, `/users/register`,
     `/users/send-code`, `/users/reset-password`, `/notifications/active`, `/upload/**`, `/files/**`。
-- 读白名单（`auth.excludeReadPaths`，仅 GET/HEAD/OPTIONS 放行）：`/categories/**`, `/items/**`。
+- 读白名单（`auth.excludeReadPaths`，仅 GET/HEAD/OPTIONS 放行）：`/categories/**`, `/items/**`, `/banners/**`, `/ads/**`, `/seckill/**`。
 - `DynamicRouteLoader` 监听 Nacos `gateway-routes.json` 实现动态路由。
 
 ## 上游
