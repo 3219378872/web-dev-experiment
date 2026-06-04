@@ -14,5 +14,6 @@
 | codex-review blocking findings 整改 | done | ①AppHeader 去硬编码「林晓」/角标3，改绑 userStore.username 与 cartStore.totalCount（0 时隐藏）②FlashSale 接 /items/page 真实加载+真实加购（移除原型硬编码商品与无效抢购动作）③Service 接 POST /messages（新增 common.sendCustomerMessage）④Coupons 按真实数据计算计数与平台/品类分类（去除未完成标记与演示填充注释） |
 | codex-review 第 2 轮整改 | done | Coupons 映射改用真实 Coupon 字段（discountType/discountValue/minAmount/endTime），消除 满undefined；移除冗余二进制 web-mall.zip 并 gitignore *.zip（原型以 prototype/ 解压形式保留） |
 | codex-review 第 3 轮整改 | done | FeedbackList 状态对齐后端真实两态（0 待处理/1 已回复）：移除自定义状态 chip 与 0/2/3 tab 过滤、回复仅提交 reply（后端固定置 1）；修正 backend-api.md 中"回复可带 status"的错误表述 |
+| codex-review 第 4 轮整改 | done | 详情页取数改用按 id 直连：web OrderDetail 用 getOrderById(GET /orders/{id}) 替代翻第一页客户端查找；admin ItemEdit 用 getItemById(GET /items/{id}) 替代 size:1 列表查找，修复超出首页/列表的订单与商品"不存在"漏数据回归 |
 | 无需独立 spec/plan | not applicable | 纯前端视觉收尾，见 task.yaml spec_waiver/plan_waiver |
 | FeedbackList 分页装饰化是否回归 | not applicable | `fetch()` 不传分页参数、数据层本不分页，HEAD 版 `el-pagination` 翻页亦只重拉全量；保留现状非行为回归 |

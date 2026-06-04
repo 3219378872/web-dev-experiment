@@ -225,7 +225,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getItems, saveItem, updateItem } from '@/api/item';
+import { getItemById, saveItem, updateItem } from '@/api/item';
 import { ElMessage } from 'element-plus';
 
 const route = useRoute();
@@ -259,10 +259,8 @@ const skuSuffix = computed(() => {
 onMounted(async () => {
   if (isEdit.value) {
     try {
-      const r = await getItems({ page: 1, size: 1, name: '' });
-      const list = r.list || [];
-      const item = list.find((i) => i.id == route.params.id);
-      if (item) {
+      const item = await getItemById(route.params.id);
+      if (item && item.id) {
         Object.assign(form, item);
         // 价格以「分」存储，编辑表单按「元」展示（与原型 299.00 / 499.00 一致）
         if (typeof item.price === 'number') form.price = (item.price / 100).toFixed(2);
@@ -273,9 +271,9 @@ onMounted(async () => {
         } else if (item.image) {
           imageList.value = [item.image];
         }
-        // Fallback placeholders for visual alignment when no images
+        // 商品无图时留空（不再填充无效图片路径）
         if (imageList.value.length === 0) {
-          imageList.value = ['/placeholder.png', '/placeholder.png', '/placeholder.png'];
+          imageList.value = [];
         }
         lastUpdate.value = item.updateTime?.slice(0, 16) || '-';
       }

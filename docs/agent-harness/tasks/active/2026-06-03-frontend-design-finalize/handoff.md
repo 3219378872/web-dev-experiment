@@ -42,6 +42,10 @@ Implemented，待 PR / CI / review。
 - FeedbackList.vue：状态对齐后端真实两态（0 待处理 / 1 已回复）。移除可编辑状态 chip 与对 0/2/3 的 tab 过滤（后端只产生 0/1），回复仅提交 reply（reply 接口固定置 1）。修正本分支重设计引入的状态不一致回归。
 - backend-api.md：修正"反馈回复 body 可带 status"的错误表述（后端忽略并强制置 1）。
 
+## Codex-Review 整改（第 4 轮）
+- web OrderDetail.vue：新增 `api/order.getOrderById`，改用 `GET /orders/{id}` 直取订单，替代「翻第一页 size:20 客户端查找」（超出首页的订单会误判不存在）。
+- admin ItemEdit.vue：新增 `api/item.getItemById`，改用 `GET /items/{id}` 直取商品，替代「size:1 列表查找」（必然漏数据）；同时移除无效的占位图片路径填充。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 

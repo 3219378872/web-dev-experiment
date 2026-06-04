@@ -146,7 +146,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
-import { getOrders, cancelOrder, confirmOrder } from '@/api/order';
+import { getOrderById, cancelOrder, confirmOrder } from '@/api/order';
 import { ElMessage } from 'element-plus';
 
 const route = useRoute();
@@ -232,10 +232,9 @@ function maskPhone(phone) {
 
 async function fetchOrder() {
   try {
-    const data = await getOrders({ page: 1, size: 20 });
-    const found = (data?.list || []).find((o) => String(o.id) === String(route.params.id));
-    if (found) {
-      order.value = found;
+    const data = await getOrderById(route.params.id);
+    if (data && data.id) {
+      order.value = data;
     } else {
       ElMessage.error('订单不存在');
       router.push('/orders');
