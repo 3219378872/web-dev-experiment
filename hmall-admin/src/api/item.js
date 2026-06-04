@@ -1,5 +1,6 @@
 import request from './request';
 export const getItems = (params) => request.get('/admin/items', { params });
+export const getItemById = (id) => request.get(`/items/${id}`);
 export const saveItem = (data) => request.post('/items', data);
 export const updateItem = (id, data) => request.put(`/admin/items/${id}`, data);
 export const updateItemStatus = (id, status) =>

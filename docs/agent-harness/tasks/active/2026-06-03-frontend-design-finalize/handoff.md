@@ -1,0 +1,96 @@
+# Handoff: Frontend Design Finalize
+
+## Status
+Implemented，待 PR / CI / review。
+
+## Files Changed
+- 前端视觉对齐（hmall-web）：`App.vue`、`main.js`、`components/{AccountSidebar,AppHeader,ProductCard}.vue`、`styles/global.css`、`views/{AddressList,Coupons,FavoriteList,Feedback,FlashSale,Home,ItemDetail,Notifications,OrderList,Profile,Search}.vue`
+- 前端视觉对齐（hmall-admin）：`hmall-admin/src/components/AdminLayout.vue`、`views/{BannerList,CategoryList,FeedbackList,ItemEdit,OrderDetail,OrderList}.vue`
+- 分页回归修复：`hmall-admin/src/views/OrderList.vue`
+- 单测修复：`hmall-web/src/__tests__/App.spec.ts`
+- e2e：`e2e/visual/{fixtures.ts,regression.spec.ts,utils.ts}`
+- 配置：`.gitignore`（新增 `test-results/` 忽略）
+- KB：`docs/knowledge-base/modules/{hmall-web,hmall-admin}.md`（K005 co-change）
+- 文档修正：`docs/backend-api.md`（基于 `docs/api.md` 与后端 Controller 源码重写待补接口表）
+- 任务记录：`docs/agent-harness/tasks/active/2026-06-03-frontend-design-finalize/*`
+
+## Commands Run
+- `cd hmall-web && npm test && npm run build` → 全部通过
+- `cd hmall-admin && npm test && npm run build` → 全部通过
+- `python3 scripts/agent_harness.py check` → passed
+- `python3 scripts/engineering-lint.py` → passed（补 KB 两页后）
+- `docker compose config -q` → 有效
+
+## Known Risks
+- ⚠️ 核对 backend-api.md 时发现 2 处前端↔后端路径不一致（现网会 404）：`hmall-web` `searchItems` 调 `/items/search`（应为 `/search/list`）、`updateCartItem` 调 `PUT /carts/{id}`（应为 `PUT /carts` body 带 id）。本 PR 仅在 `docs/backend-api.md` A 节记录、未改前端调用以免扩大范围；建议后续单独修复（P0）。
+- `hmall-admin/src/views/FeedbackList.vue` 分页器为装饰性（页码 2/3 无 handler），因其 `fetch()` 不向后端传分页参数、数据层本不分页；HEAD 版的 `el-pagination` 翻页也只是重拉全量。**非行为回归**，未改动；如后续需要真分页须同时改 `getFeedbacks` 接口与 fetch。
+- 视觉对齐为大面积模板/样式改动，已通过两前端 build + 单测；像素级回归由 e2e/visual 套件覆盖（CI smoke 不跑视觉套件，仅 build/test）。
+- CI 的 `codex-review` 若因缺 secrets 阻塞，与本变更无关，按 CLAUDE.md 在 PR 描述说明。
+
+## Codex-Review 整改（第 1 轮 blocking findings）
+- AppHeader.vue：用户名/购物车角标去硬编码，改绑 `userStore.userInfo.username` 与 `cartStore.totalCount`。
+- FlashSale.vue：移除原型硬编码商品与 no-op 抢购，改为 `/items/page` 真实加载 + `cartStore.addItem` 真实加购 + 真实分页。
+- Service.vue：留言接 `POST /messages`（新增 `api/common.sendCustomerMessage`），去除未完成标记。
+- Coupons.vue：我的券计数与平台/品类分类改为基于真实返回数据，去除未完成标记与演示注释。
+- 说明：admin Dashboard、web Notifications 的演示数据未改（统计/富展示字段的后端不存在，见 docs/backend-api.md B 节），本轮 codex 未将其列为 blocking。
+
+## Codex-Review 整改（第 2 轮）
+- Coupons.vue：领券与我的券映射改用真实 Coupon 字段（discountType/discountValue/minAmount/endTime），消除真实数据下的「满undefined可用」/空折扣。
+- 移除冗余二进制 `web-mall.zip`（与 prototype/ 内容重复），新增 `.gitignore` 忽略 `*.zip`。
+
+## Codex-Review 整改（第 3 轮）
+- FeedbackList.vue：状态对齐后端真实两态（0 待处理 / 1 已回复）。移除可编辑状态 chip 与对 0/2/3 的 tab 过滤（后端只产生 0/1），回复仅提交 reply（reply 接口固定置 1）。修正本分支重设计引入的状态不一致回归。
+- backend-api.md：修正"反馈回复 body 可带 status"的错误表述（后端忽略并强制置 1）。
+
+## Codex-Review 整改（第 4 轮）
+- web OrderDetail.vue：新增 `api/order.getOrderById`，改用 `GET /orders/{id}` 直取订单，替代「翻第一页 size:20 客户端查找」（超出首页的订单会误判不存在）。
+- admin ItemEdit.vue：新增 `api/item.getItemById`，改用 `GET /items/{id}` 直取商品，替代「size:1 列表查找」（必然漏数据）；同时移除无效的占位图片路径填充。
+
+## Codex-Review 整改（第 5 轮）—— Dashboard 范围声明
+- codex 第 5 轮拦 admin Dashboard「硬编码运营数据」。核查：main 版本 Dashboard 本就无任何后端数据调用（仅 ref+echarts），看板统计接口后端完全不存在（backend-api.md B4）。
+- 按决策不回退/不造后端，而是**明确披露范围**：Dashboard.vue 顶部加说明注释；context.md Out of scope、KB hmall-admin、PR 描述均声明「看板运营数据后端暂未提供，本页为视觉对齐+演示数据，留待后端接入」。
+- 该项为已知且已披露的范围限制，不属于破坏既有 API/数据逻辑（main 同样无后端调用）。
+
+## Codex-Review 整改（第 6 轮）
+- Service.vue：`/service` 为公开路由但 `POST /messages` 需登录。改为：未登录时回执提示先登录、不调用接口；登录后仅在提交成功时回执「已收到」，失败如实提示。消除匿名用户下「静默丢消息却显示已收到」的假成功。
+- 第 5 轮的 Dashboard 范围声明已生效，codex 不再就 Dashboard 阻塞。
+
+## Codex-Review 整改（第 7 轮）
+- Login.vue 注册：协议勾选框由硬编码 `checkbox on`（视觉已勾但 `agreed` 恒 false）改为 `:class="{on:agreed}" @click` 双向绑定，修复"注册永远提示请同意用户协议"。
+- Login.vue 找回密码：重设计后遗漏新密码输入框，补回 `resetForm.newPassword` 输入并在 doReset 增加非空校验，修复"重置必失败"。
+
+## Codex-Review 整改（第 8 轮）
+- Login.vue 注册：补回用户名输入框（后端 RegisterFormDTO.username 为 @NotBlank，重设计遗漏导致注册必失败），doRegister 增加用户名/密码校验。
+- admin ItemEdit.vue：保存时价格由「元」换算回整数「分」（后端 ItemDTO.price 为 Integer 分，原样回传"299.00"会反序列化失败或价格错乱）。
+- OrderConfirm.vue：下单 payload 补传 addressId（后端 OrderFormDTO 有该字段，虽当前未被服务使用，补齐更正确）。
+
+## Codex-Review 整改（第 9 轮）
+- Feedback.vue：「我的反馈记录」由硬编码改为接 `GET /my-feedbacks`（新增 `api/common.getMyFeedbacks`），按真实状态映射，提交后刷新。
+- Profile.vue：账户统计改为真实数据——余额取自登录信息，优惠券/收藏/订单状态计数接 `getMyCoupons`/`getFavorites`/`getOrders`；移除无后端的会员等级/积分/成长值/升级进度与假手机号兜底。
+- AccountSidebar.vue / Home.vue：移除硬编码「积分1280」，改通用「好集会员」。
+- OrderDetail.vue：物流时间轴改为依据真实订单状态与时间戳的概要节点，去除杜撰的快递员姓名/电话/网点/日期（物流明细接口缺失见 backend-api.md B3）。
+
+## Codex-Review 整改（第 10 轮）
+- Coupons.vue：移除接口失败时的兜底假券数组（领券/我的券），失败即空态，避免用户对杜撰 ID 点「立即领取」。
+- Notifications.vue：移除空列表时的 6 条假公告与「把假 category/readCount/tag 合并进真实公告」逻辑；改为真实公告中性映射（不杜撰阅读量/标签/分类），空则空态。
+
+## Codex-Review 整改（第 11 轮）
+- FlashSale.vue：移除虚构 70% 秒杀价与假抢购率，展示真实商品价（与 addItem 成交价一致），按钮恒为「立即抢购」。
+- admin OrderList.vue：搜索由无效改为可用——订单号走后端 orderId 过滤，客户/支付/日期在已取数据上客户端过滤；支付方式列按 paymentType(1支付宝/2微信/3余额) 真值映射，客户列回退「用户{userId}」。
+- AdminLayout.vue：顶栏徽标改自真实接口（待发货订单数=getOrders status2 total、待处理反馈数=getFeedbacks status0 计数），身份取自登录 adminInfo，去除硬编码 5/3/true 与"管理员 Admin/超级管理员"。
+
+## Codex-Review 整改（第 12 轮）
+- web OrderDetail.vue：支付方式映射修正为后端真值（1 支付宝 / 2 微信 / 3 余额）。
+- admin OrderList.vue：移除后端 /admin/orders 不支持的客户/支付/日期搜索控件（客户端过滤在分页下不正确），仅保留订单号（后端 orderId）+ 状态 tab。
+- web Search.vue：接真实 `/search/list`（key + pageNo/pageSize），死分页器改为功能分页（pageRange/prev/next），移除无后端支持的模糊/精确模式与相关提示。
+- 顺带清零 backend-api.md A 节：`searchItems` 改 `/search/list`、`cart.js updateCartItem` 改 `PUT /carts`(body id+num)。
+
+## Codex-Review 整改（第 13 轮）
+- OrderConfirm.vue：支付方式选项值对齐后端 Order.paymentType（1 支付宝 / 2 微信 / 3 余额），移除无效的"银行卡(4)"，默认 1。
+- e2e/visual/regression.spec.ts：mock 路由同步应用真实调用（/api/search/list、/api/orders/{id}、/api/my-feedbacks），保持 mock 与前端一致。
+
+## Next Action
+推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
+
+## Worktree Or Branch
+- `task/2026-06-03-frontend-design-finalize`（由原 `feat/fronted-design` 按 harness 规范重命名，未推送前重命名，历史完整）

@@ -1,12 +1,127 @@
+/* ===========================================================
+   好集 HAOJI — 管理后台设计系统
+   左侧深色侧栏 + 橙红强调
+   =========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+
+:root {
+  /* Brand */
+  --brand: #ff4d2e;
+  --brand-600: #f23b1b;
+  --brand-700: #d62e10;
+  --brand-soft: #ffede7;
+  --brand-softer: #fff6f2;
+  --price: #fa2c19;
+  --gold: #ffb020;
+  --gold-soft: #fff3dc;
+
+  /* Status */
+  --success: #1fa85a;
+  --success-soft: #e7f6ee;
+  --warn: #f59a12;
+  --warn-soft: #fff3df;
+  --danger: #f5320c;
+  --info: #2d7ff9;
+  --info-soft: #e9f1ff;
+
+  /* Warm neutrals */
+  --bg: #f5f4f2;
+  --bg-2: #efedea;
+  --surface: #ffffff;
+  --ink: #221b17;
+  --ink-2: #5c544e;
+  --ink-3: #938a83;
+  --line: #ece8e4;
+  --line-2: #e0dad4;
+
+  /* Admin */
+  --admin-bg: #f4f5f7;
+  --admin-sidebar: #1e2128;
+  --admin-sidebar-2: #171a20;
+  --admin-line: #e8eaed;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 18px;
+  --shadow-1: 0 1px 2px rgba(60, 40, 30, 0.05), 0 1px 3px rgba(60, 40, 30, 0.06);
+  --shadow-2: 0 6px 18px rgba(70, 45, 30, 0.08), 0 2px 6px rgba(70, 45, 30, 0.05);
+  --font:
+    'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --mono: 'SFMono-Regular', ui-monospace, Menlo, Consolas, monospace;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
 body {
-  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--admin-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-size: 14px;
+  line-height: 1.55;
 }
+
 a {
   text-decoration: none;
   color: inherit;
+}
+
+/* ============ Buttons ============ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  background: #fff;
+  color: var(--ink);
+  transition: 0.14s;
+  line-height: 1;
+  cursor: pointer;
+}
+.btn:hover {
+  transform: translateY(-1px);
+}
+.btn-primary {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(255, 77, 46, 0.28);
+}
+.btn-primary:hover {
+  background: var(--brand-600);
+}
+.btn-ghost {
+  background: #fff;
+  border-color: var(--admin-line);
+  color: var(--ink);
+}
+.btn-ghost:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+.btn-sm {
+  padding: 7px 13px;
+  font-size: 12.5px;
+}
+
+/* ============ Element Plus Overrides ============ */
+.el-button--primary {
+  --el-button-bg-color: var(--brand);
+  --el-button-border-color: var(--brand);
+  --el-button-hover-bg-color: var(--brand-600);
+  --el-button-hover-border-color: var(--brand-600);
+}
+
+.el-pagination.is-background .el-pager li.is-active {
+  background-color: var(--brand) !important;
 }

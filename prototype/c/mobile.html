@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集 · 手机端 H5</title>
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  body{background:#221B17;}
+  .m-top{background:linear-gradient(120deg,#FF7A45,var(--brand-700));color:#fff;padding:34px 0 30px;}
+  .m-top .logo .name{color:#fff;}
+  .m-top .logo .name small{color:rgba(255,255,255,.8);}
+  .m-top h1{font-size:30px;font-weight:900;margin:14px 0 6px;letter-spacing:-.5px;}
+  .m-top p{opacity:.9;}
+  .stage{display:flex;gap:34px;overflow-x:auto;padding:40px 0 60px;justify-content:flex-start;}
+  .stage::-webkit-scrollbar{height:8px;}
+  .stage::-webkit-scrollbar-thumb{background:#48403a;border-radius:999px;}
+  .frame{flex-shrink:0;}
+  .frame .cap{text-align:center;color:#cabfb6;font-size:13px;margin-top:16px;font-weight:500;}
+  .frame .cap b{color:#fff;display:block;font-size:14px;}
+
+  /* ---- screen styles (375px) ---- */
+  .scr{width:100%;height:100%;background:var(--bg);overflow:hidden;display:flex;flex-direction:column;font-size:13px;}
+  .scr .sb{flex:1;overflow:auto;}
+  .m-search{padding:10px 14px;background:#fff;}
+  .m-search .bar{background:var(--bg-2);border-radius:999px;padding:8px 14px;font-size:12.5px;color:var(--ink-3);display:flex;align-items:center;gap:8px;}
+  .m-banner{margin:12px 14px;border-radius:14px;background:linear-gradient(120deg,#FF7A45,var(--brand-700));color:#fff;padding:18px;height:120px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
+  .m-banner h3{font-size:20px;font-weight:900;}
+  .m-banner p{font-size:12px;opacity:.9;margin-top:3px;}
+  .m-banner .burst{position:absolute;right:16px;top:50%;transform:translateY(-50%);width:62px;height:62px;border-radius:50%;background:var(--gold);color:#7a3b00;display:grid;place-items:center;text-align:center;font-weight:900;font-size:10px;line-height:1.2;}
+  .m-kk{display:grid;grid-template-columns:repeat(5,1fr);gap:8px 4px;padding:6px 10px 12px;background:#fff;margin:0 14px;border-radius:14px;}
+  .m-kk .k{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0;}
+  .m-kk .k .d{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:17px;}
+  .m-kk .k span{font-size:10.5px;color:var(--ink-2);}
+  .m-sec{display:flex;align-items:center;gap:8px;padding:16px 14px 8px;}
+  .m-sec .bar{width:4px;height:16px;border-radius:2px;background:var(--brand);}
+  .m-sec b{font-size:15px;font-weight:900;}
+  .m-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px 14px;}
+  .m-card{background:#fff;border-radius:12px;overflow:hidden;}
+  .m-card .ph{aspect-ratio:1;}
+  .m-card .b{padding:8px 10px 10px;}
+  .m-card .nm{font-size:12px;line-height:1.35;height:32px;overflow:hidden;color:var(--ink);}
+  .m-card .pr{color:var(--price);font-weight:900;font-size:15px;margin-top:6px;}
+  .m-card .pr small{font-size:10px;}
+  .m-tab{display:flex;background:#fff;border-top:1px solid var(--line);padding:6px 0 2px;flex-shrink:0;}
+  .m-tab .t{flex:1;text-align:center;font-size:10px;color:var(--ink-3);}
+  .m-tab .t .i{font-size:19px;display:block;}
+  .m-tab .t.on{color:var(--brand);}
+
+  /* product screen */
+  .mp-img{aspect-ratio:1;}
+  .mp-img .glyph{font-size:80px;}
+  .mp-info{background:#fff;padding:14px;}
+  .mp-price{color:var(--price);font-weight:900;font-size:26px;}
+  .mp-price small{font-size:14px;}
+  .mp-price .old{color:var(--ink-3);text-decoration:line-through;font-size:13px;font-weight:400;margin-left:8px;}
+  .mp-title{font-size:14px;font-weight:700;line-height:1.45;margin-top:8px;}
+  .mp-block{background:#fff;margin-top:8px;padding:13px 14px;}
+  .mp-block .h{font-size:11px;color:var(--ink-3);}
+  .mp-spec{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .mp-spec span{border:1px solid var(--line-2);border-radius:7px;padding:5px 12px;font-size:12px;}
+  .mp-spec span.on{border-color:var(--brand);background:var(--brand-softer);color:var(--brand-700);font-weight:700;}
+  .mp-bar{display:flex;gap:8px;background:#fff;border-top:1px solid var(--line);padding:8px 12px;flex-shrink:0;align-items:center;}
+  .mp-bar .ic{text-align:center;font-size:10px;color:var(--ink-3);padding:0 8px;}
+  .mp-bar .ic .i{font-size:17px;display:block;}
+  .mp-bar .btn{flex:1;}
+
+  /* cart screen */
+  .mc-item{background:#fff;border-radius:12px;margin:10px 14px;padding:12px;display:flex;gap:10px;}
+  .mc-item .ph{width:74px;height:74px;border-radius:10px;flex-shrink:0;}
+  .mc-item .nm{font-size:12.5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .mc-item .spec{font-size:11px;color:var(--ink-3);background:var(--bg);display:inline-block;padding:2px 8px;border-radius:5px;margin-top:5px;}
+  .mc-item .pr{color:var(--price);font-weight:900;font-size:15px;margin-top:6px;display:flex;justify-content:space-between;align-items:center;}
+  .mc-bar{background:#fff;border-top:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .mc-bar .tot{margin-left:auto;text-align:right;}
+  .mc-bar .tot b{color:var(--price);font-size:20px;font-weight:900;}
+
+  /* profile screen */
+  .mu-head{background:linear-gradient(120deg,#FF7A45,var(--brand-700));color:#fff;padding:20px 16px 30px;display:flex;align-items:center;gap:12px;}
+  .mu-head .av{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.25);display:grid;place-items:center;font-size:24px;font-weight:900;}
+  .mu-head b{font-size:17px;}
+  .mu-head .lv{font-size:11.5px;opacity:.9;}
+  .mu-orders{background:#fff;margin:-16px 14px 0;border-radius:14px;padding:14px;position:relative;}
+  .mu-orders .t{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;}
+  .mu-orders .row{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;}
+  .mu-orders .row .o .i{font-size:20px;}
+  .mu-orders .row .o span{font-size:11px;color:var(--ink-2);display:block;margin-top:4px;}
+  .mu-list{background:#fff;margin:12px 14px;border-radius:14px;overflow:hidden;}
+  .mu-list a{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--bg);font-size:13.5px;color:var(--ink);}
+  .mu-list a:last-child{border-bottom:0;}
+  .mu-list a .i{font-size:17px;width:22px;text-align:center;}
+  .mu-list a .ar{margin-left:auto;color:var(--line-2);}
+  .info-band{background:#2A1B14;color:#cabfb6;text-align:center;padding:24px;font-size:12.5px;}
+</style>
+</head>
+<body>
+<div class="m-top">
+  <div class="wrap">
+    <div class="logo"><span class="mark">集</span><span class="name">好集<small>HAOJI MALL</small></span></div>
+    <h1>📱 手机端 H5 · 核心购物流程</h1>
+    <p>响应式适配移动端，覆盖首页、商品列表、详情、购物车、个人中心。左右滑动查看 →</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="stage" id="stage"></div>
+</div>
+
+<div class="info-band">以上为 375 × 812 移动端 H5 高保真界面 · 与桌面端共享同一套设计系统 · 商品图以色块占位</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../assets/data.js"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel">
+const {IOSDevice} = window;
+const P = HAOJI.P;
+function ph(p,cls){ return <div className={"ph "+p.s} data-label="">{cls&&<span className="glyph" style={{filter:'saturate(0) brightness(0) invert(1)',opacity:.5}}>{cls}</span>}</div>; }
+
+const tabbar = (active) => (
+  <div className="m-tab">
+    {[['🏠','首页'],['▦','分类'],['⚡','秒杀'],['🛒','购物车'],['◍','我的']].map((t,i)=>(
+      <div key={i} className={"t"+(t[1]===active?' on':'')}><span className="i">{t[0]}</span>{t[1]}</div>
+    ))}
+  </div>
+);
+
+// 首页
+function HomeScreen(){
+  const kk=[['手机','▣','#FF6A45'],['家电','▤','#88A6B8'],['服饰','◈','#B79CC4'],['美妆','✿','#DE9696'],['食品','◉','#B0BE92'],['家居','▦','#C9A66B'],['母婴','❀','#E9B775'],['运动','◐','#7FB6A6'],['图书','▥','#92ADBD'],['更多','◆','#A7906B']];
+  return (
+    <div className="scr">
+      <div className="m-search"><div className="bar">🔍 搜索 你想要的好物～</div></div>
+      <div className="sb">
+        <div className="m-banner"><h3>618 年中狂欢</h3><p>全场低至 5 折</p>
+          <div className="burst">立减<br/>¥50</div></div>
+        <div className="m-kk">{kk.map((k,i)=>(<div className="k" key={i}><span className="d" style={{background:k[2]}}>{k[1]}</span><span>{k[0]}</span></div>))}</div>
+        <div className="m-sec"><span className="bar"></span><b>热门好物</b></div>
+        <div className="m-grid">{P.slice(0,6).map(p=>(
+          <div className="m-card" key={p.id}>{ph(p)}<div className="b"><div className="nm">{p.n}</div><div className="pr"><small>¥</small>{p.p}</div></div></div>
+        ))}</div>
+      </div>
+      {tabbar('首页')}
+    </div>
+  );
+}
+// 列表
+function ListScreen(){
+  return (
+    <div className="scr">
+      <div className="m-search" style={{display:'flex',gap:8,alignItems:'center'}}>
+        <span style={{fontSize:18}}>‹</span><div className="bar" style={{flex:1}}>🔍 蓝牙耳机</div></div>
+      <div style={{display:'flex',background:'#fff',padding:'10px 14px',gap:16,fontSize:12.5,borderTop:'1px solid var(--line)'}}>
+        <b style={{color:'var(--brand)'}}>综合</b><span>销量</span><span>价格 ↑↓</span><span>新品</span><span style={{marginLeft:'auto'}}>筛选 ▾</span></div>
+      <div className="sb">
+        <div className="m-grid" style={{paddingTop:12}}>{P.filter(p=>p.cat==='手机数码').concat(P).slice(0,8).map(p=>(
+          <div className="m-card" key={p.id+Math.random()}>{ph(p)}<div className="b"><div className="nm">{p.n}</div>
+            <div className="pr"><small>¥</small>{p.p} <span style={{color:'var(--ink-3)',textDecoration:'line-through',fontSize:10,fontWeight:400}}>¥{p.o}</span></div></div></div>
+        ))}</div>
+      </div>
+      {tabbar('分类')}
+    </div>
+  );
+}
+// 详情
+function ProductScreen(){
+  const p=HAOJI.byId(1);
+  return (
+    <div className="scr">
+      <div className="sb" style={{background:'#fff'}}>
+        <div className="mp-img ph s4" data-label=""><span className="glyph">▣</span></div>
+        <div className="mp-info">
+          <div className="mp-price"><small>¥</small>299<span className="old">¥499</span> <span className="tag tag-price" style={{marginLeft:6}}>秒杀</span></div>
+          <div className="mp-title">TWS 主动降噪蓝牙耳机 入耳式 长续航 游戏低延迟通用版</div>
+          <div style={{display:'flex',gap:14,fontSize:11.5,color:'var(--ink-3)',marginTop:8}}><span>★ 4.9 评分</span><span>1.2万 评价</span><span>已售 8421</span></div>
+        </div>
+        <div className="mp-block"><div className="h">选择 · 颜色</div>
+          <div className="mp-spec"><span className="on">曜石黑</span><span>云母白</span><span>雾霾蓝</span></div>
+          <div className="h" style={{marginTop:12}}>版本</div>
+          <div className="mp-spec"><span className="on">标准版</span><span>降噪增强 +¥80</span></div></div>
+        <div className="mp-block"><div className="h" style={{marginBottom:8}}>用户评价 (1.2万) · 好评98%</div>
+          <div style={{fontSize:12,color:'var(--ink-2)',lineHeight:1.6}}>"降噪效果绝了，地铁上几乎听不到外界声音，续航也很顶～"</div></div>
+      </div>
+      <div className="mp-bar">
+        <div className="ic"><span className="i">🏪</span>店铺</div>
+        <div className="ic"><span className="i">♡</span>收藏</div>
+        <a className="btn btn-outline">加入购物车</a>
+        <a className="btn btn-hot">立即购买</a>
+      </div>
+    </div>
+  );
+}
+// 购物车
+function CartScreen(){
+  const items=[[HAOJI.byId(1),'曜石黑·标准版',1],[HAOJI.byId(23),'深空灰·42mm',2],[HAOJI.byId(2),'象牙白·6L',1]];
+  return (
+    <div className="scr">
+      <div style={{background:'#fff',padding:'14px',fontWeight:900,fontSize:16,borderBottom:'1px solid var(--line)'}}>购物车 <span style={{fontSize:12,color:'var(--ink-3)',fontWeight:400}}>(3)</span></div>
+      <div className="sb">
+        {items.map((it,i)=>(
+          <div className="mc-item" key={i}>
+            <span className="checkbox on" style={{alignSelf:'center'}}>✓</span>
+            {ph(it[0],'')}
+            <div style={{flex:1}}><div className="nm">{it[0].n}</div><div className="spec">{it[1]}</div>
+              <div className="pr"><span><small style={{fontSize:11}}>¥</small>{it[0].p}</span>
+                <span className="qty" style={{transform:'scale(.85)'}}><button>−</button><input value={it[2]} readOnly/><button>+</button></span></div></div>
+          </div>
+        ))}
+      </div>
+      <div className="mc-bar">
+        <span className="checkbox on">✓</span><span style={{fontSize:12.5}}>全选</span>
+        <div className="tot"><div style={{fontSize:11,color:'var(--ink-3)'}}>合计 <b>¥936</b></div></div>
+        <a className="btn btn-hot">结算(4)</a>
+      </div>
+    </div>
+  );
+}
+// 我的
+function ProfileScreen(){
+  return (
+    <div className="scr">
+      <div className="sb" style={{padding:0}}>
+        <div className="mu-head"><div className="av">林</div>
+          <div><b>林晓</b><div className="lv">◆ 黄金会员 · 积分 1280</div></div></div>
+        <div className="mu-orders">
+          <div className="t"><span>我的订单</span><span style={{color:'var(--ink-3)',fontWeight:400,fontSize:11}}>全部 ›</span></div>
+          <div className="row">
+            <div className="o"><div className="i">💰</div><span>待付款</span></div>
+            <div className="o"><div className="i">📦</div><span>待发货</span></div>
+            <div className="o"><div className="i">🚚</div><span>待收货</span></div>
+            <div className="o"><div className="i">★</div><span>待评价</span></div>
+          </div>
+        </div>
+        <div className="mu-list">
+          <a>🎟 <span>我的优惠券</span><span className="ar">32 张 ›</span></a>
+          <a>♡ <span>我的收藏</span><span className="ar">8 件 ›</span></a>
+          <a>📍 <span>收货地址</span><span className="ar">›</span></a>
+          <a>💬 <span>在线客服</span><span className="ar">›</span></a>
+        </div>
+        <div className="mu-list">
+          <a>⚙ <span>账户设置</span><span className="ar">›</span></a>
+          <a>✍ <span>意见反馈</span><span className="ar">›</span></a>
+          <a>📢 <span>系统公告</span><span className="ar">›</span></a>
+        </div>
+      </div>
+      {tabbar('我的')}
+    </div>
+  );
+}
+
+const screens=[
+  [<HomeScreen/>,'首页','轮播 · 金刚区 · 商品流'],
+  [<ListScreen/>,'商品列表','搜索结果 · 排序筛选'],
+  [<ProductScreen/>,'商品详情','规格 · 评价 · 购买'],
+  [<CartScreen/>,'购物车','勾选 · 改量 · 结算'],
+  [<ProfileScreen/>,'个人中心','订单 · 钱包 · 设置']
+];
+const App=()=>(<>{screens.map((s,i)=>(
+  <div className="frame" key={i}>
+    <div style={{transform:'scale(.85)',transformOrigin:'top center'}}><IOSDevice>{s[0]}</IOSDevice></div>
+    <div className="cap"><b>{s[1]}</b>{s[2]}</div>
+  </div>
+))}</>);
+ReactDOM.createRoot(document.getElementById('stage')).render(<App/>);
+</script>
+</body>
+</html>

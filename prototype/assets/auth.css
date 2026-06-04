@@ -1,0 +1,33 @@
+/* 好集 — C端认证页共享样式（登录/注册/找回密码） */
+.auth-page{min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(120deg,#FF7A45,var(--brand) 55%,var(--brand-700));}
+.auth-top{padding:20px 40px;}
+.auth-top .logo .name{color:#fff;}
+.auth-top .logo .name small{color:rgba(255,255,255,.8);}
+.auth-wrap{flex:1;display:grid;grid-template-columns:1fr 440px;max-width:1080px;width:100%;margin:0 auto;align-items:center;gap:40px;padding:0 24px 40px;}
+.auth-promo{color:#fff;}
+.auth-promo .eyebrow{font-size:14px;font-weight:700;letter-spacing:4px;opacity:.85;}
+.auth-promo h1{font-size:46px;font-weight:900;letter-spacing:-1px;line-height:1.12;margin:16px 0;}
+.auth-promo p{font-size:16px;opacity:.92;max-width:420px;line-height:1.7;}
+.auth-feats{display:flex;gap:24px;margin-top:34px;}
+.auth-feats .f{display:flex;align-items:center;gap:10px;font-size:14px;}
+.auth-feats .f .d{width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:19px;}
+.auth-card{background:#fff;border-radius:18px;padding:36px 34px;box-shadow:var(--shadow-3);}
+.auth-card .tabs{margin-bottom:24px;}
+.auth-card .tabs a{font-size:16px;padding:0 0 14px;margin-right:28px;}
+.auth-card h2{font-size:22px;font-weight:900;margin-bottom:6px;}
+.auth-card .sub{color:var(--ink-3);font-size:13px;margin-bottom:22px;}
+.auth-card .field{margin-bottom:16px;}
+.auth-card .input{padding:13px 14px;}
+.auth-card .row-between{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:4px 0 18px;}
+.auth-card .row-between a{color:var(--brand);}
+.auth-card .code-row{display:flex;gap:10px;}
+.auth-card .code-row .btn{white-space:nowrap;}
+.auth-card .other{text-align:center;margin-top:22px;color:var(--ink-3);font-size:12.5px;}
+.auth-card .socials{display:flex;justify-content:center;gap:14px;margin-top:14px;}
+.auth-card .socials .s{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:18px;color:var(--ink-2);}
+.auth-card .socials .s:hover{border-color:var(--brand);color:var(--brand);}
+.auth-card .agree{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--ink-3);margin:4px 0 18px;line-height:1.5;}
+.auth-card .agree a{color:var(--brand);}
+.strength{display:flex;gap:5px;margin-top:8px;}
+.strength i{flex:1;height:4px;border-radius:999px;background:var(--line-2);}
+.strength i.on{background:var(--success);}

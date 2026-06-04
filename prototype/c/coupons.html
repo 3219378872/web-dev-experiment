@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集 · 领券中心</title>
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  .coupon-hero{background:linear-gradient(120deg,#FF7A45,var(--brand) 55%,var(--brand-700));border-radius:var(--radius);color:#fff;padding:30px 34px;margin:14px 0;position:relative;overflow:hidden;}
+  .coupon-hero .b{position:absolute;border-radius:50%;background:rgba(255,255,255,.12);}
+  .coupon-hero h1{font-size:30px;font-weight:900;}
+  .coupon-hero p{opacity:.92;margin-top:6px;}
+  .cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .cp{display:flex;background:#fff;border-radius:12px;overflow:hidden;border:1px solid var(--line);position:relative;}
+  .cp .left{background:linear-gradient(135deg,#FF6A45,var(--brand-700));color:#fff;width:130px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 8px;position:relative;}
+  .cp .left::after{content:'';position:absolute;right:-6px;top:0;bottom:0;width:12px;background:radial-gradient(circle at right,transparent 0,transparent 5px,#fff 5px);background-size:12px 14px;background-repeat:repeat-y;}
+  .cp .left .v{font-size:34px;font-weight:900;line-height:1;}
+  .cp .left .v small{font-size:15px;}
+  .cp .left .cond{font-size:11px;opacity:.9;margin-top:6px;}
+  .cp .right{flex:1;padding:14px 16px;display:flex;flex-direction:column;}
+  .cp .right .nm{font-size:14px;font-weight:700;}
+  .cp .right .scope{font-size:12px;color:var(--ink-3);margin-top:4px;}
+  .cp .right .exp{font-size:11.5px;color:var(--ink-3);margin-top:auto;}
+  .cp .right .btn{margin-top:8px;}
+  .cp.got .left{background:linear-gradient(135deg,#bbb,#999);}
+  .cp .stamp{position:absolute;right:14px;top:14px;width:48px;height:48px;border:2px solid var(--success);color:var(--success);border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;transform:rotate(-15deg);opacity:.85;}
+  .mycp-tabs{margin:10px 0 16px;}
+</style>
+</head>
+<body data-cart="3" data-acct="coupons.html">
+<div id="app-topbar"></div>
+<div id="app-header"></div>
+<div id="app-catnav"></div>
+
+<div class="wrap">
+  <div class="crumb"><a href="index.html">首页</a><span class="s">/</span><b style="color:var(--ink)">领券中心</b></div>
+
+  <div class="coupon-hero">
+    <span class="b" style="width:220px;height:220px;right:-60px;top:-80px"></span>
+    <span class="b" style="width:120px;height:120px;right:200px;bottom:-60px"></span>
+    <h1>🎟 领券中心</h1>
+    <p>每日领券，叠加满减更省钱。新人专享 90 元礼包限时开抢！</p>
+  </div>
+
+  <div class="sec-head" style="margin-top:6px"><div class="t"><span class="bar"></span><h2>平台券 · 全场可用</h2></div></div>
+  <div class="cgrid" id="plat-coupons"></div>
+
+  <div class="sec-head"><div class="t"><span class="bar" style="background:var(--gold)"></span><h2>品类券 · 指定分类</h2></div></div>
+  <div class="cgrid" id="cat-coupons"></div>
+
+  <div class="sec-head"><div class="t"><span class="bar" style="background:var(--info)"></span><h2>我的优惠券</h2></div></div>
+  <div class="tabs mycp-tabs" style="border:0">
+    <button class="active">未使用 (32)</button><button>已使用 (18)</button><button>已过期 (6)</button>
+  </div>
+  <div class="cgrid" id="my-coupons"></div>
+</div>
+
+<div id="app-footer"></div>
+<script src="../assets/data.js"></script>
+<script src="../assets/shared.js"></script>
+<script>
+function cp(v,unit,cond,nm,scope,exp,state){
+  var got = state==='got', use=state==='use';
+  return '<div class="cp '+(got?'got':'')+'">'+
+    '<div class="left"><div class="v">'+(unit==='折'?v+'<small>折</small>':'<small>¥</small>'+v)+'</div>'+
+      '<div class="cond">'+cond+'</div></div>'+
+    '<div class="right">'+(use?'<div class="stamp">已领</div>':'')+'<div class="nm">'+nm+'</div><div class="scope">'+scope+'</div>'+
+      '<div class="exp">有效期至 '+exp+'</div>'+
+      (got?'<button class="btn btn-ghost btn-sm" disabled>已抢光</button>':
+       use?'<a class="btn btn-outline btn-sm" href="search.html">去使用</a>':
+       '<button class="btn btn-hot btn-sm">立即领取</button>')+
+    '</div></div>';
+}
+document.getElementById('plat-coupons').innerHTML=[
+  cp(20,'','满199可用','平台通用券','全场商品可用','2026-06-30',''),
+  cp(50,'','满399可用','平台通用券','全场商品可用','2026-06-30',''),
+  cp(100,'','满699可用','平台通用券','全场商品可用','2026-06-30','got'),
+  cp(8.5,'折','满99打折','全场折扣券','最高减100元','2026-06-15',''),
+  cp(30,'','满299可用','新人专享券','仅限新用户首单','2026-06-30',''),
+  cp(15,'','无门槛','无门槛红包','全场通用','2026-06-10','')
+].join('');
+document.getElementById('cat-coupons').innerHTML=[
+  cp(40,'','满300可用','数码家电券','手机数码 / 家用电器','2026-06-20',''),
+  cp(25,'','满200可用','美妆个护券','美妆个护品类','2026-06-20',''),
+  cp(20,'','满150可用','食品生鲜券','食品生鲜品类','2026-06-20','got')
+].join('');
+document.getElementById('my-coupons').innerHTML=[
+  cp(50,'','满399可用','平台通用券','全场商品可用','2026-06-30','use'),
+  cp(20,'','满199可用','数码家电券','手机数码 / 家用电器','2026-06-20','use'),
+  cp(15,'','无门槛','无门槛红包','全场通用','2026-06-10','use')
+].join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集后台 · 个人中心</title>
+<link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/admin.css">
+<style>
+  .set-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+  .perm-table td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--admin-line);}
+  .perm-table tr:last-child td{border-bottom:0;}
+</style>
+</head>
+<body class="admin" data-adm="settings">
+<div class="adm">
+  <aside id="adm-side"></aside>
+  <div class="adm-main">
+    <header id="adm-top" data-crumb="个人中心"></header>
+    <div class="adm-body">
+      <div class="adm-ph">
+        <div><h1>个人中心</h1><p>管理账号信息、登录密码与角色权限</p></div>
+      </div>
+
+      <div class="set-grid">
+        <div>
+          <div class="acard" style="margin-bottom:16px">
+            <div class="ah"><h3>账号信息</h3></div>
+            <div class="ab">
+              <div style="display:flex;align-items:center;gap:18px;margin-bottom:20px">
+                <span class="u-av" style="width:72px;height:72px;font-size:30px;border-radius:16px;background:linear-gradient(135deg,#FF7A45,var(--brand))">管</span>
+                <div><a class="btn btn-ghost btn-sm">更换头像</a><p class="dim" style="font-size:12px;margin-top:8px">JPG/PNG，不超过 2MB</p></div>
+              </div>
+              <div class="form-grid">
+                <div class="field"><label>管理员账号</label><input class="input" value="admin@haoji.com" readonly style="background:var(--bg)"></div>
+                <div class="field"><label>姓名</label><input class="input" value="管理员"></div>
+                <div class="field"><label>手机号</label><input class="input" value="138****0000"></div>
+                <div class="field"><label>所属部门</label><input class="input" value="平台运营部"></div>
+              </div>
+              <button class="btn btn-primary" style="margin-top:16px">保存修改</button>
+            </div>
+          </div>
+
+          <div class="acard">
+            <div class="ah"><h3>修改密码</h3></div>
+            <div class="ab" style="max-width:420px">
+              <div class="field" style="margin-bottom:14px"><label>当前密码</label><input class="input" type="password" placeholder="请输入当前密码"></div>
+              <div class="field" style="margin-bottom:14px"><label>新密码</label><input class="input" type="password" placeholder="8-20位，含字母数字与符号"></div>
+              <div class="field" style="margin-bottom:14px"><label>确认新密码</label><input class="input" type="password" placeholder="请再次输入新密码"></div>
+              <button class="btn btn-primary">更新密码</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="acard" style="margin-bottom:16px">
+            <div class="ah"><h3>角色与权限</h3><span class="tag tag-brand">超级管理员</span></div>
+            <table class="atable perm-table">
+              <tbody>
+                <tr><td>数据看板</td><td style="text-align:right"><span class="sdot green">可访问</span></td></tr>
+                <tr><td>商品管理（增删改）</td><td style="text-align:right"><span class="sdot green">全部权限</span></td></tr>
+                <tr><td>订单管理（发货/退款）</td><td style="text-align:right"><span class="sdot green">全部权限</span></td></tr>
+                <tr><td>用户管理（禁用/启用）</td><td style="text-align:right"><span class="sdot green">全部权限</span></td></tr>
+                <tr><td>评价管理（删除）</td><td style="text-align:right"><span class="sdot green">全部权限</span></td></tr>
+                <tr><td>内容管理（轮播/公告）</td><td style="text-align:right"><span class="sdot green">全部权限</span></td></tr>
+                <tr><td>系统设置 / 管理员管理</td><td style="text-align:right"><span class="sdot green">全部权限</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="acard">
+            <div class="ah"><h3>最近登录记录</h3></div>
+            <table class="atable">
+              <thead><tr><th>登录时间</th><th>IP 地址</th><th>设备</th><th>状态</th></tr></thead>
+              <tbody>
+                <tr><td class="dim">2026-05-28 09:02</td><td class="mono" style="font-size:12px">123.118.x.x</td><td>Chrome · macOS</td><td><span class="sdot green">成功</span></td></tr>
+                <tr><td class="dim">2026-05-27 18:40</td><td class="mono" style="font-size:12px">123.118.x.x</td><td>Chrome · macOS</td><td><span class="sdot green">成功</span></td></tr>
+                <tr><td class="dim">2026-05-27 08:55</td><td class="mono" style="font-size:12px">110.242.x.x</td><td>Safari · iPhone</td><td><span class="sdot green">成功</span></td></tr>
+                <tr><td class="dim">2026-05-26 22:10</td><td class="mono" style="font-size:12px">58.246.x.x</td><td>未知设备</td><td><span class="sdot red">已拦截</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/admin.js"></script>
+</body>
+</html>

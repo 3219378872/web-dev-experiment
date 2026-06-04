@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集 · 订单详情</title>
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  .od-status{background:linear-gradient(120deg,#FF7A45,var(--brand));border-radius:var(--radius);color:#fff;padding:24px 28px;margin:14px 0;display:flex;align-items:center;justify-content:space-between;}
+  .od-status h2{font-size:22px;font-weight:900;}
+  .od-status p{opacity:.92;font-size:13.5px;margin-top:5px;}
+  .od-status .acts{display:flex;gap:10px;}
+  .od-status .acts .btn{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.35);}
+  .od-status .acts .btn.solid{background:#fff;color:var(--brand);border:0;}
+
+  .track{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px 28px;margin-bottom:16px;}
+  .track h3{font-size:15px;font-weight:700;margin-bottom:6px;}
+  .track h3::before{content:'';display:inline-block;width:4px;height:14px;border-radius:2px;background:var(--brand);margin-right:9px;vertical-align:-2px;}
+  .tl{margin-top:18px;padding-left:8px;}
+  .tl .ti{display:grid;grid-template-columns:18px 1fr;gap:16px;padding-bottom:22px;position:relative;}
+  .tl .ti:last-child{padding-bottom:0;}
+  .tl .ti .dot{width:12px;height:12px;border-radius:50%;background:var(--line-2);margin-top:4px;z-index:2;}
+  .tl .ti.on .dot{background:var(--brand);box-shadow:0 0 0 4px var(--brand-softer);}
+  .tl .ti::before{content:'';position:absolute;left:8px;top:14px;bottom:-4px;width:2px;background:var(--line);}
+  .tl .ti:last-child::before{display:none;}
+  .tl .ti .txt{font-size:13.5px;}
+  .tl .ti.on .txt b{color:var(--brand);}
+  .tl .ti .txt b{font-weight:700;}
+  .tl .ti .time{font-size:12px;color:var(--ink-3);margin-top:3px;}
+
+  .od-block{background:#fff;border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px;overflow:hidden;}
+  .od-block .bh{padding:14px 22px;border-bottom:1px solid var(--line);font-weight:700;font-size:15px;}
+  .od-block .bh::before{content:'';display:inline-block;width:4px;height:14px;border-radius:2px;background:var(--brand);margin-right:9px;vertical-align:-2px;}
+  .od-info{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .od-info .ic{padding:18px 22px;font-size:13.5px;line-height:1.9;border-right:1px solid var(--line);}
+  .od-info .ic:last-child{border-right:0;}
+  .od-info .ic .k{color:var(--ink-3);display:inline-block;width:74px;}
+
+  .gi{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--bg);}
+  .gi:last-child{border-bottom:0;}
+  .gi .ph{width:72px;height:72px;border-radius:8px;flex-shrink:0;}
+  .gi .nm{font-size:13.5px;flex:1;line-height:1.45;}
+  .gi .spec{font-size:12px;color:var(--ink-3);margin-top:5px;}
+  .gi .p{width:90px;text-align:right;color:var(--ink-2);}
+  .gi .q{width:50px;text-align:center;color:var(--ink-3);}
+  .gi .st{width:90px;text-align:right;color:var(--price);font-weight:700;}
+
+  .amt-rows{padding:14px 22px;}
+  .amt-rows .r{display:flex;justify-content:flex-end;gap:60px;padding:6px 0;font-size:13.5px;color:var(--ink-2);}
+  .amt-rows .r .v{width:110px;text-align:right;}
+  .amt-rows .r.big{border-top:1px solid var(--line);margin-top:6px;padding-top:14px;}
+  .amt-rows .r.big .v{color:var(--price);font-weight:900;font-size:22px;}
+</style>
+</head>
+<body data-cart="3" data-acct="orders.html">
+<div id="app-topbar"></div>
+<div id="app-header"></div>
+<div id="app-catnav"></div>
+
+<div class="wrap">
+  <div class="crumb"><a href="index.html">首页</a><span class="s">/</span><a href="orders.html">我的订单</a><span class="s">/</span><b style="color:var(--ink)">订单详情</b></div>
+
+  <div class="acct-layout">
+    <div id="app-account"></div>
+
+    <main>
+      <!-- 状态条 -->
+      <div class="od-status">
+        <div><h2>卖家已发货，待收货</h2>
+          <p>商品正在配送途中，预计 05-24 18:00 前送达。收到商品请及时确认收货～</p></div>
+        <div class="acts">
+          <a class="btn solid">确认收货</a>
+          <a class="btn">延长收货</a>
+          <a class="btn" href="service.html">申请售后</a>
+        </div>
+      </div>
+
+      <!-- 物流时间轴 -->
+      <div class="track">
+        <h3>物流跟踪 <span class="dim" style="font-weight:400;font-size:12.5px">顺丰速运 · SF1366028866018</span></h3>
+        <div class="tl">
+          <div class="ti on"><span class="dot"></span><div class="txt"><b>【上海市】快件已到达 浦东张江营业点，派件员 王师傅（138****6677）正在为您派送</b><div class="time">2026-05-23 08:42</div></div></div>
+          <div class="ti"><span class="dot"></span><div class="txt">【上海市】快件已到达 上海浦东转运中心<div class="time">2026-05-23 03:18</div></div></div>
+          <div class="ti"><span class="dot"></span><div class="txt">【杭州市】快件已发出，下一站 上海浦东转运中心<div class="time">2026-05-22 21:05</div></div></div>
+          <div class="ti"><span class="dot"></span><div class="txt">【杭州市】好集华东仓 已揽收<div class="time">2026-05-22 16:30</div></div></div>
+          <div class="ti"><span class="dot"></span><div class="txt">商家已发货，等待揽收<div class="time">2026-05-22 14:12</div></div></div>
+        </div>
+      </div>
+
+      <!-- 收货信息 + 订单信息 -->
+      <div class="od-block">
+        <div class="od-info">
+          <div class="ic"><div style="font-weight:700;margin-bottom:6px">收货信息</div>
+            <div><span class="k">收货人：</span>林晓</div>
+            <div><span class="k">联系电话：</span>138****8866</div>
+            <div><span class="k">收货地址：</span>上海市 浦东新区 张江镇 科苑路 88 号 好集科技园 A 座 1208 室</div></div>
+          <div class="ic"><div style="font-weight:700;margin-bottom:6px">订单信息</div>
+            <div><span class="k">订单编号：</span>202605221266018 <a class="dim" style="color:var(--brand);font-size:12px">复制</a></div>
+            <div><span class="k">下单时间：</span>2026-05-22 09:10:34</div>
+            <div><span class="k">付款时间：</span>2026-05-22 09:11:02</div>
+            <div><span class="k">支付方式：</span>微信支付</div>
+            <div><span class="k">配送方式：</span>普通快递（免邮）</div></div>
+        </div>
+      </div>
+
+      <!-- 商品清单 -->
+      <div class="od-block">
+        <div class="bh">商品清单 <span class="dim" style="font-weight:400;font-size:12.5px">好集家电自营</span></div>
+        <div id="od-goods"></div>
+        <div class="amt-rows">
+          <div class="r"><span>商品总额</span><span class="v">¥427.00</span></div>
+          <div class="r"><span>运费</span><span class="v">¥0.00</span></div>
+          <div class="r"><span>满减优惠</span><span class="v" style="color:var(--price)">−¥0.00</span></div>
+          <div class="r big"><span style="align-self:center;color:var(--ink)">实付款</span><span class="v">¥427.00</span></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="app-footer"></div>
+<script src="../assets/data.js"></script>
+<script src="../assets/shared.js"></script>
+<script>
+  var goods=[[HAOJI.byId(2),1],[HAOJI.byId(21),2]];
+  document.getElementById('od-goods').innerHTML = goods.map(function(g){
+    var p=g[0];
+    return '<div class="gi">'+HAOJI.phBlock(p)+'<div class="nm">'+p.n+'<div class="spec">规格：默认</div></div>'+
+      '<div class="p">¥'+p.p+'</div><div class="q">×'+g[1]+'</div><div class="st">¥'+(p.p*g[1])+'</div></div>';
+  }).join('');
+</script>
+</body>
+</html>

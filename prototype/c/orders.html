@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集 · 我的订单</title>
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  .order-search{display:flex;gap:10px;align-items:center;margin:14px 0;}
+  .order-search .input{max-width:300px;}
+  .ord{background:#fff;border:1px solid var(--line);border-radius:var(--radius);margin-bottom:14px;overflow:hidden;}
+  .ord .oh{display:flex;align-items:center;gap:16px;padding:13px 18px;background:var(--bg);border-bottom:1px solid var(--line);font-size:12.5px;color:var(--ink-3);}
+  .ord .oh .no{color:var(--ink-2);}
+  .ord .oh .shop{font-weight:700;color:var(--ink);font-size:13px;}
+  .ord .oh .status{margin-left:auto;font-weight:700;font-size:13.5px;}
+  .ord .ob{display:grid;grid-template-columns:1fr 160px;}
+  .ord .goods{padding:6px 18px;}
+  .ord .gi{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--bg);}
+  .ord .gi:last-child{border-bottom:0;}
+  .ord .gi .ph{width:70px;height:70px;border-radius:8px;flex-shrink:0;}
+  .ord .gi .nm{font-size:13.5px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .ord .gi .spec{font-size:12px;color:var(--ink-3);margin-top:5px;}
+  .ord .gi .pq{text-align:right;font-size:13px;color:var(--ink-2);flex-shrink:0;}
+  .ord .side{border-left:1px solid var(--line);padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;}
+  .ord .side .amt{font-size:12.5px;color:var(--ink-3);text-align:center;}
+  .ord .side .amt b{color:var(--price);font-size:18px;display:block;margin-top:2px;}
+  .ord .side .btn{width:118px;}
+  .status.wait-pay{color:var(--price);}
+  .status.wait-send{color:var(--warn);}
+  .status.wait-recv{color:var(--info);}
+  .status.done{color:var(--success);}
+  .status.closed{color:var(--ink-3);}
+</style>
+</head>
+<body data-cart="3" data-acct="orders.html">
+<div id="app-topbar"></div>
+<div id="app-header"></div>
+<div id="app-catnav"></div>
+
+<div class="wrap">
+  <div class="crumb"><a href="index.html">首页</a><span class="s">/</span>个人中心<span class="s">/</span><b style="color:var(--ink)">我的订单</b></div>
+
+  <div class="acct-layout">
+    <div id="app-account"></div>
+
+    <main>
+      <div class="tabs" style="background:#fff;border:1px solid var(--line);border-radius:var(--radius) var(--radius) 0 0;border-bottom:0;padding:0 8px">
+        <button class="active">全部订单</button><button>待付款 <span style="color:var(--price)">1</span></button>
+        <button>待发货</button><button>待收货 <span style="color:var(--info)">1</span></button>
+        <button>待评价</button><button>退款/售后</button>
+      </div>
+
+      <div class="panel" style="border-radius:0;border-top:0;border-bottom:0;padding:12px 16px">
+        <div class="order-search">
+          <input class="input" placeholder="🔍 搜索订单号 / 商品名称">
+          <select class="select" style="max-width:140px"><option>近三个月订单</option><option>今年内</option><option>2025年</option></select>
+          <button class="btn btn-ghost">查询</button>
+        </div>
+      </div>
+
+      <!-- 待付款 -->
+      <div class="ord">
+        <div class="oh"><span class="no">订单号：202605281588001</span><span>2026-05-28 14:32</span>
+          <span class="shop">🏪 好集数码官方旗舰店</span><span class="status wait-pay">待付款</span></div>
+        <div class="ob">
+          <div class="goods">
+            <div class="gi"><div class="ph s4" data-label=""></div>
+              <div style="flex:1"><div class="nm">TWS 主动降噪蓝牙耳机 入耳式 长续航</div><div class="spec">曜石黑 · 标准版</div></div>
+              <div class="pq">¥299 <div class="dim">×1</div></div></div>
+          </div>
+          <div class="side"><div class="amt">实付款<b>¥299.00</b></div>
+            <a class="btn btn-hot btn-sm" href="checkout.html">立即付款</a>
+            <a class="btn btn-ghost btn-sm">取消订单</a>
+            <span class="dim" style="font-size:11px">剩 23:48 自动关闭</span></div>
+        </div>
+      </div>
+
+      <!-- 待收货 -->
+      <div class="ord">
+        <div class="oh"><span class="no">订单号：202605221266018</span><span>2026-05-22 09:10</span>
+          <span class="shop">🏪 好集家电自营</span><span class="status wait-recv">卖家已发货</span></div>
+        <div class="ob">
+          <div class="goods">
+            <div class="gi"><div class="ph s1" data-label=""></div>
+              <div style="flex:1"><div class="nm">超大容量空气炸锅 家用多功能无油低脂 6L</div><div class="spec">象牙白 · 6L 标准版</div></div>
+              <div class="pq">¥269 <div class="dim">×1</div></div></div>
+            <div class="gi"><div class="ph s7" data-label=""></div>
+              <div style="flex:1"><div class="nm">保温焖烧杯 316不锈钢 大容量便携</div><div class="spec">雾蓝 · 800ml</div></div>
+              <div class="pq">¥79 <div class="dim">×2</div></div></div>
+          </div>
+          <div class="side"><div class="amt">实付款<b>¥427.00</b></div>
+            <a class="btn btn-hot btn-sm" href="order-detail.html">确认收货</a>
+            <a class="btn btn-ghost btn-sm" href="order-detail.html">查看物流</a>
+            <a class="btn btn-ghost btn-sm" href="service.html">联系卖家</a></div>
+        </div>
+      </div>
+
+      <!-- 已完成 -->
+      <div class="ord">
+        <div class="oh"><span class="no">订单号：202605151033072</span><span>2026-05-15 20:45</span>
+          <span class="shop">🏪 好集食品旗舰店</span><span class="status done">交易完成</span></div>
+        <div class="ob">
+          <div class="goods">
+            <div class="gi"><div class="ph s2" data-label=""></div>
+              <div style="flex:1"><div class="nm">每日坚果混合礼盒 750g 30小包独立装</div><div class="spec">混合口味 · 30包</div></div>
+              <div class="pq">¥89 <div class="dim">×1</div></div></div>
+          </div>
+          <div class="side"><div class="amt">实付款<b>¥89.00</b></div>
+            <a class="btn btn-gold btn-sm" href="product.html#reviews">评价晒单</a>
+            <a class="btn btn-ghost btn-sm">再次购买</a>
+            <a class="btn btn-ghost btn-sm" href="order-detail.html">订单详情</a></div>
+        </div>
+      </div>
+
+      <!-- 已关闭 -->
+      <div class="ord">
+        <div class="oh"><span class="no">订单号：202604300891055</span><span>2026-04-30 11:20</span>
+          <span class="shop">🏪 集货优选</span><span class="status closed">交易关闭</span></div>
+        <div class="ob">
+          <div class="goods">
+            <div class="gi"><div class="ph s3" data-label="" style="opacity:.7"></div>
+              <div style="flex:1"><div class="nm">轻商务通勤双肩背包 防泼水大容量电脑包</div><div class="spec">深灰 · 大号</div></div>
+              <div class="pq">¥159 <div class="dim">×1</div></div></div>
+          </div>
+          <div class="side"><div class="amt dim">超时未付款<b style="color:var(--ink-3)">¥159.00</b></div>
+            <a class="btn btn-ghost btn-sm">再次购买</a>
+            <a class="btn btn-ghost btn-sm">删除订单</a></div>
+        </div>
+      </div>
+
+      <div class="pager"><span>‹</span><a class="cur">1</a><a>2</a><a>3</a><a>›</a></div>
+    </main>
+  </div>
+</div>
+
+<div id="app-footer"></div>
+<script src="../assets/data.js"></script>
+<script src="../assets/shared.js"></script>
+</body>
+</html>

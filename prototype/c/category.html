@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集 · 分类浏览</title>
+<link rel="stylesheet" href="../assets/app.css">
+<style>
+  .layout{display:grid;grid-template-columns:206px 1fr;gap:18px;margin:8px 0 30px;}
+  .filters{display:flex;flex-direction:column;gap:14px;}
+  .fbox{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px;}
+  .fbox h4{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+  .fbox h4::before{content:'';width:4px;height:13px;border-radius:2px;background:var(--brand);}
+  .ftree a{display:flex;justify-content:space-between;padding:7px 9px;border-radius:7px;font-size:13px;color:var(--ink-2);}
+  .ftree a:hover{background:var(--brand-softer);color:var(--brand);}
+  .ftree a.on{background:var(--brand-soft);color:var(--brand-700);font-weight:700;}
+  .ftree a span{font-size:11px;color:var(--ink-3);}
+  .fchips{display:flex;flex-wrap:wrap;gap:7px;}
+  .fchips .chip{padding:5px 11px;font-size:12px;}
+  .price-range{display:flex;align-items:center;gap:6px;}
+  .price-range input{width:100%;padding:7px;border:1px solid var(--line-2);border-radius:6px;font-size:12px;outline:0;font-family:inherit;}
+
+  .sortbar{background:#fff;border:1px solid var(--line);border-radius:var(--radius);display:flex;align-items:center;gap:4px;padding:10px 14px;margin-bottom:14px;}
+  .sortbar .s{padding:7px 15px;border-radius:7px;font-size:13px;font-weight:500;color:var(--ink-2);display:flex;align-items:center;gap:4px;}
+  .sortbar .s.on{background:var(--brand);color:#fff;font-weight:700;}
+  .sortbar .s:hover:not(.on){color:var(--brand);}
+  .sortbar .right{margin-left:auto;font-size:12.5px;color:var(--ink-3);display:flex;align-items:center;gap:14px;}
+  .sortbar .right b{color:var(--price);}
+
+  .banner-cat{background:linear-gradient(120deg,#FF7A45,var(--brand));border-radius:var(--radius);color:#fff;padding:24px 28px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+  .banner-cat h2{font-size:26px;font-weight:900;}
+  .banner-cat p{opacity:.9;font-size:13.5px;margin-top:4px;}
+  .banner-cat .tags{display:flex;gap:8px;margin-top:12px;}
+  .banner-cat .tags span{background:rgba(255,255,255,.2);padding:4px 12px;border-radius:999px;font-size:12px;}
+</style>
+</head>
+<body data-cart="3" data-page="phone">
+<div id="app-topbar"></div>
+<div id="app-header"></div>
+<div id="app-catnav"></div>
+
+<div class="wrap">
+  <div class="crumb"><a href="index.html">首页</a><span class="s">/</span><a href="#">手机数码</a><span class="s">/</span><b style="color:var(--ink)">智能影音</b></div>
+
+  <div class="layout">
+    <!-- 左侧筛选 -->
+    <aside class="filters">
+      <div class="fbox">
+        <h4>商品分类</h4>
+        <div class="ftree">
+          <a class="on">全部数码 <span>1240</span></a>
+          <a>手机通讯 <span>320</span></a>
+          <a>电脑办公 <span>286</span></a>
+          <a>影音娱乐 <span>198</span></a>
+          <a>智能穿戴 <span>156</span></a>
+          <a>摄影摄像 <span>142</span></a>
+          <a>数码配件 <span>138</span></a>
+        </div>
+      </div>
+      <div class="fbox">
+        <h4>品牌</h4>
+        <div class="fchips">
+          <span class="chip on">不限</span><span class="chip">好集严选</span>
+          <span class="chip">声学派</span><span class="chip">视界</span>
+          <span class="chip">极客</span><span class="chip">云图</span>
+        </div>
+      </div>
+      <div class="fbox">
+        <h4>价格区间</h4>
+        <div class="price-range"><input placeholder="¥ 最低"><span class="dim">—</span><input placeholder="¥ 最高"></div>
+        <div class="fchips" style="margin-top:10px">
+          <span class="chip">0-100</span><span class="chip">100-300</span>
+          <span class="chip">300-500</span><span class="chip">500+</span>
+        </div>
+      </div>
+      <div class="fbox">
+        <h4>服务保障</h4>
+        <div style="display:flex;flex-direction:column;gap:9px;font-size:13px;color:var(--ink-2)">
+          <label style="display:flex;gap:8px;align-items:center"><span class="checkbox on">✓</span>当日达</label>
+          <label style="display:flex;gap:8px;align-items:center"><span class="checkbox"></span>七天无理由</label>
+          <label style="display:flex;gap:8px;align-items:center"><span class="checkbox"></span>假一赔十</label>
+          <label style="display:flex;gap:8px;align-items:center"><span class="checkbox"></span>分期免息</label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 右侧主体 -->
+    <main>
+      <div class="banner-cat">
+        <div>
+          <h2>手机数码 · 智能影音</h2>
+          <p>耳机 / 投影 / 音箱 / 键鼠 全场新品上市，限时折扣</p>
+          <div class="tags"><span>满300减50</span><span>分期免息</span><span>以旧换新</span></div>
+        </div>
+        <a class="btn btn-gold" href="flashsale.html">⚡ 秒杀专区</a>
+      </div>
+
+      <div class="sortbar">
+        <span class="s on">综合</span>
+        <span class="s">销量 ↓</span>
+        <span class="s">价格 ↑↓</span>
+        <span class="s">新品</span>
+        <span class="s">评价</span>
+        <span class="right">共 <b>1240</b> 件商品 · 第 1/52 页</span>
+      </div>
+
+      <div class="grid g4" id="cat-grid"></div>
+
+      <div class="pager">
+        <span>‹ 上一页</span>
+        <a class="cur">1</a><a>2</a><a>3</a><a>4</a><a>5</a>
+        <span class="dots">…</span><a>52</a>
+        <a>下一页 ›</a>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="app-footer"></div>
+<script src="../assets/data.js"></script>
+<script src="../assets/shared.js"></script>
+<script>
+  var list = HAOJI.P.concat(HAOJI.P).slice(0,12);
+  HAOJI.renderGrid('#cat-grid', list);
+</script>
+</body>
+</html>

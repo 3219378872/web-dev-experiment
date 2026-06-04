@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集后台 · 轮播管理</title>
+<link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/admin.css">
+<style>
+  .ban-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+  .ban{border:1px solid var(--admin-line);border-radius:12px;overflow:hidden;background:#fff;}
+  .ban .preview{height:150px;position:relative;color:#fff;padding:22px;display:flex;flex-direction:column;justify-content:center;}
+  .ban .preview .order{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.4);color:#fff;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-weight:900;font-size:12px;}
+  .ban .preview h3{font-size:22px;font-weight:900;}
+  .ban .preview p{opacity:.9;font-size:13px;margin-top:4px;}
+  .ban .meta{padding:14px 16px;display:flex;align-items:center;gap:12px;}
+  .ban .meta .info{flex:1;font-size:12.5px;}
+  .ban .meta .info .lk{color:var(--info);font-family:var(--mono);font-size:11px;}
+  .ban .meta .acts{display:flex;gap:12px;font-size:12.5px;}
+  .ban .meta .acts a{color:var(--ink-3);}
+  .ban .meta .acts a:hover{color:var(--brand);}
+</style>
+</head>
+<body class="admin" data-adm="banners">
+<div class="adm">
+  <aside id="adm-side"></aside>
+  <div class="adm-main">
+    <header id="adm-top" data-crumb="轮播管理"></header>
+    <div class="adm-body">
+      <div class="adm-ph">
+        <div><h1>轮播图管理</h1><p>首页轮播位 · 共 5 张 · 拖拽调整顺序</p></div>
+        <div class="acts"><a class="btn btn-primary">＋ 新增轮播图</a></div>
+      </div>
+
+      <div class="ban-grid" id="ban-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/admin.js"></script>
+<script>
+var bans=[
+ [1,'618 年中狂欢','全场最高直降 60%','linear-gradient(120deg,#FF7A45,#D62E10)','/flashsale','2026-06-01 ~ 2026-06-20','green','展示中'],
+ [2,'数码焕新季','耳机投影键盘低至5折','linear-gradient(120deg,#88A6B8,#5d7f93)','/category?c=digital','长期有效','green','展示中'],
+ [3,'食品生鲜节','坚果牛排水果产地直发','linear-gradient(120deg,#B0BE92,#8aa05f)','/category?c=food','2026-05-20 ~ 2026-06-10','green','展示中'],
+ [4,'新人专享礼包','注册立得90元券','linear-gradient(120deg,#B79CC4,#9d7fb0)','/coupons','长期有效','green','展示中'],
+ [5,'母婴狂欢周','奶粉纸尿裤满减','linear-gradient(120deg,#E9B775,#c9912f)','/category?c=baby','2026-06-05 ~ 2026-06-12','gray','已下线']
+];
+document.getElementById('ban-grid').innerHTML = bans.map(function(b){
+  return '<div class="ban"><div class="preview" style="background:'+b[3]+'"><span class="order">'+b[0]+'</span>'+
+    '<h3>'+b[1]+'</h3><p>'+b[2]+'</p></div>'+
+    '<div class="meta"><div class="info"><div>跳转链接：<span class="lk">'+b[4]+'</span></div>'+
+      '<div class="dim" style="margin-top:4px">'+b[5]+' · <span class="sdot '+b[6]+'">'+b[7]+'</span></div></div>'+
+      '<div class="acts" style="flex-direction:column;align-items:flex-end;gap:8px">'+
+        '<span class="switch '+(b[6]==='green'?'on':'')+'"></span>'+
+        '<span><a>编辑</a> <a>删除</a></span></div></div></div>';
+}).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好集后台 · 公告管理</title>
+<link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/admin.css">
+<style>
+  .ann-grid{display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start;}
+</style>
+</head>
+<body class="admin" data-adm="announcements">
+<div class="adm">
+  <aside id="adm-side"></aside>
+  <div class="adm-main">
+    <header id="adm-top" data-crumb="公告管理"></header>
+    <div class="adm-body">
+      <div class="adm-ph">
+        <div><h1>公告管理</h1><p>共 16 条公告 · 已发布 14 · 草稿 2</p></div>
+      </div>
+
+      <div class="ann-grid">
+        <div class="acard">
+          <div class="ah"><h3>公告列表</h3>
+            <div style="display:flex;gap:8px"><select class="select" style="font-size:12px;padding:6px 10px"><option>全部分类</option><option>活动促销</option><option>系统通知</option></select></div></div>
+          <table class="atable">
+            <thead><tr><th>标题</th><th>分类</th><th>状态</th><th>发布时间</th><th>阅读量</th><th>操作</th></tr></thead>
+            <tbody id="ann-rows"></tbody>
+          </table>
+          <div class="adm-pager"><span>共 16 条</span><div class="pgs"><a class="on">1</a><a>2</a><a>›</a></div></div>
+        </div>
+
+        <aside class="acard">
+          <div class="ah"><h3>＋ 发布公告</h3></div>
+          <div class="ab" style="display:flex;flex-direction:column;gap:16px">
+            <div class="field"><label>公告标题</label><input class="input" placeholder="请输入公告标题"></div>
+            <div class="field"><label>公告分类</label><select class="select"><option>活动促销</option><option>系统通知</option><option>规则更新</option><option>安全公告</option><option>维护通知</option></select></div>
+            <div class="field"><label>公告内容</label>
+              <div style="border:1px solid var(--line);border-radius:8px;overflow:hidden">
+                <div style="background:var(--bg);padding:6px 12px;display:flex;gap:12px;font-size:13px;color:var(--ink-2);border-bottom:1px solid var(--line)"><b>B</b><i>I</i><span>🔗</span><span>🖼</span><span>≡</span></div>
+                <textarea class="input" style="border:0;border-radius:0" rows="5" placeholder="请输入公告正文…"></textarea></div></div>
+            <div style="display:flex;gap:18px">
+              <label style="display:flex;gap:8px;align-items:center;font-size:13px"><span class="checkbox on">✓</span>置顶</label>
+              <label style="display:flex;gap:8px;align-items:center;font-size:13px"><span class="checkbox"></span>弹窗提醒</label>
+            </div>
+            <div style="display:flex;gap:10px"><button class="btn btn-primary btn-block">立即发布</button><button class="btn btn-ghost">存草稿</button></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/admin.js"></script>
+<script>
+var anns=[
+ ['好集 618 年中狂欢节预热开启','活动促销','tag-gold','green','已发布','2026-05-28 09:00','12.3万',1],
+ ['新增「当日达」配送服务上线','系统通知','tag-new','green','已发布','2026-05-25 10:30','4.8万',0],
+ ['《好集会员积分规则》更新公告','规则更新','tag-ghost','green','已发布','2026-05-20 14:00','2.1万',0],
+ ['关于谨防钓鱼诈骗的安全提示','安全公告','tag-warn','green','已发布','2026-05-18 16:20','6.5万',1],
+ ['系统例行维护通知','维护通知','tag-ghost','gray','草稿','—','—',0],
+ ['七天无理由退换升级为极速退款','规则更新','tag-new','green','已发布','2026-05-10 11:00','3.4万',0]
+];
+document.getElementById('ann-rows').innerHTML = anns.map(function(a){
+  return '<tr><td><div style="font-weight:600;max-width:200px">'+(a[7]?'<span class="tag tag-price" style="margin-right:6px">顶</span>':'')+a[0]+'</div></td>'+
+    '<td><span class="tag '+a[2]+'">'+a[1]+'</span></td>'+
+    '<td><span class="sdot '+a[3]+'">'+a[4]+'</span></td>'+
+    '<td class="dim">'+a[5]+'</td><td>'+a[6]+'</td>'+
+    '<td class="actions"><a class="lk">编辑</a><a class="lk">'+(a[4]==='草稿'?'发布':'下线')+'</a><a class="lk danger">删除</a></td></tr>';
+}).join('');
+</script>
+</body>
+</html>
