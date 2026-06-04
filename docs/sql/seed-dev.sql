@@ -93,3 +93,10 @@ INSERT INTO feedbacks (user_id, content, status, create_time) VALUES
 INSERT INTO customer_messages (user_id, content, status, create_time) VALUES
 (2, '我的订单什么时候发货？', 0, NOW()),
 (2, '怎么修改收货地址？', 1, NOW());
+
+-- ==================== 限时秒杀 ====================
+-- 时间窗口覆盖当前开发日期（2026-06-04），status=1，确保 /seckill/active 有数据
+INSERT INTO seckill (item_id, seckill_price, start_time, end_time, stock, sold, status, create_time, update_time) VALUES
+(1, 19900, '2026-06-01 00:00:00', '2026-06-30 23:59:59', 100, 15, 1, NOW(), NOW()),
+(3, 29900, '2026-06-01 00:00:00', '2026-06-30 23:59:59', 80, 8, 1, NOW(), NOW()),
+(4, 9900, '2026-06-01 00:00:00', '2026-06-30 23:59:59', 200, 42, 1, NOW(), NOW());
