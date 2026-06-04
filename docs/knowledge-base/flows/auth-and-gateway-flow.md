@@ -5,8 +5,8 @@ tracks:
   - user-service/
   - hm-common/
 last_synced_commit: 87b1acb30b772f96d3afe2f0e9aaa2e5aeaa4c5c
-last_synced_date: 2026-06-03
-sync_note: "JaCoCo 门控 70%→80%，trade-service 测试增强（仅测试和配置改动，KB 内容不变）"
+last_synced_date: 2026-06-04
+sync_note: "Phase 1 实现：新增管理端用户管理与个人中心端点（仅 user-service 代码改动，auth/gateway 流程不变）"
 ---
 
 # auth-and-gateway-flow

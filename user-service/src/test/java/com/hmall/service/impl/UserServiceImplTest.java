@@ -2,6 +2,7 @@ package com.hmall.service.impl;
 
 import com.hmall.UserServiceTestBase;
 import com.hmall.api.dto.LoginFormDTO;
+import com.hmall.common.domain.PageDTO;
 import com.hmall.common.exception.BadRequestException;
 import com.hmall.common.exception.BizIllegalException;
 import com.hmall.common.exception.ForbiddenException;
@@ -9,6 +10,7 @@ import com.hmall.domain.dto.RegisterFormDTO;
 import com.hmall.domain.dto.ResetPasswordDTO;
 import com.hmall.domain.po.User;
 import com.hmall.domain.vo.UserLoginVO;
+import com.hmall.domain.vo.UserVO;
 import com.hmall.enums.UserStatus;
 import com.hmall.mapper.UserMapper;
 import com.hmall.service.IUserService;
@@ -22,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -372,6 +375,239 @@ class UserServiceImplTest extends UserServiceTestBase {
             User after = userService.getById(1L);
             assertThat(after.getNickname()).isEqualTo("新昵称");
             assertThat(after.getAvatar()).isEqualTo(origAvatar);
+        }
+    }
+
+    // ───────────────────── admin methods ─────────────────────
+
+    @Nested
+    @DisplayName("queryUsersPage")
+    class QueryUsersPageTests {
+
+        @Test
+        @DisplayName("无关键词-返回所有用户")
+        void noKeyword_returnsAllUsers() {
+            PageDTO<UserVO> result = userService.queryUsersPage(1, 10, null);
+
+            assertThat(result.getList()).hasSize(3);
+            assertThat(result.getTotal()).isEqualTo(3L);
+        }
+
+        @Test
+        @DisplayName("有关键词-模糊匹配用户名")
+        void withKeyword_filtersByUsername() {
+            PageDTO<UserVO> result = userService.queryUsersPage(1, 10, "test");
+
+            assertThat(result.getList()).hasSize(1);
+            assertThat(result.getList().get(0).getUsername()).isEqualTo("testuser");
+        }
+
+        @Test
+        @DisplayName("有关键词-模糊匹配手机号")
+        void withKeyword_filtersByPhone() {
+            // 给用户设置手机号
+            User user = userService.getById(1L);
+            user.setPhone("13800138000");
+            userService.updateById(user);
+
+            PageDTO<UserVO> result = userService.queryUsersPage(1, 10, "138");
+
+            assertThat(result.getList()).hasSize(1);
+            assertThat(result.getList().get(0).getPhone()).isEqualTo("13800138000");
+        }
+
+        @Test
+        @DisplayName("分页参数生效")
+        void pagination_works() {
+            PageDTO<UserVO> result = userService.queryUsersPage(1, 2, null);
+
+            assertThat(result.getList()).hasSize(2);
+            assertThat(result.getTotal()).isEqualTo(3L);
+        }
+
+        @Test
+        @DisplayName("返回的UserVO不包含password字段")
+        void userVO_doesNotContainPasswordField() throws Exception {
+            PageDTO<UserVO> result = userService.queryUsersPage(1, 10, null);
+
+            // 验证UserVO类没有password字段
+            java.lang.reflect.Field passwordField = null;
+            try {
+                passwordField = UserVO.class.getDeclaredField("password");
+            } catch (NoSuchFieldException e) {
+                // 预期行为：UserVO没有password字段
+            }
+            assertThat(passwordField).isNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("updateUserStatus")
+    class UpdateUserStatusTests {
+
+        @Test
+        @DisplayName("正常修改用户状态-从正常到冻结")
+        void updateStatus_normalToFrozen() {
+            userService.updateUserStatus(1L, UserStatus.FROZEN.getValue());
+
+            User updated = userService.getById(1L);
+            assertThat(updated.getStatus()).isEqualTo(UserStatus.FROZEN);
+        }
+
+        @Test
+        @DisplayName("正常修改用户状态-从冻结到正常")
+        void updateStatus_frozenToNormal() {
+            userService.updateUserStatus(3L, UserStatus.NORMAL.getValue());
+
+            User updated = userService.getById(3L);
+            assertThat(updated.getStatus()).isEqualTo(UserStatus.NORMAL);
+        }
+
+        @Test
+        @DisplayName("无效状态值-抛出BadRequestException")
+        void updateStatus_invalidStatus_throws() {
+            assertThatThrownBy(() -> userService.updateUserStatus(1L, 99))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("无效的用户状态");
+        }
+
+        @Test
+        @DisplayName("用户不存在-抛出BadRequestException")
+        void updateStatus_userNotFound_throws() {
+            assertThatThrownBy(() -> userService.updateUserStatus(999L, UserStatus.NORMAL.getValue()))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("用户不存在");
+        }
+    }
+
+    @Nested
+    @DisplayName("getUserDetail")
+    class GetUserDetailTests {
+
+        @Test
+        @DisplayName("正常获取用户详情")
+        void getUserDetail_success() {
+            UserVO vo = userService.getUserDetail(1L);
+
+            assertThat(vo).isNotNull();
+            assertThat(vo.getId()).isEqualTo(1L);
+            assertThat(vo.getUsername()).isEqualTo("testuser");
+            // 验证脱敏：UserVO类没有password字段
+            java.lang.reflect.Field passwordField = null;
+            try {
+                passwordField = UserVO.class.getDeclaredField("password");
+            } catch (NoSuchFieldException e) {
+                // 预期行为：UserVO没有password字段
+            }
+            assertThat(passwordField).isNull();
+        }
+
+        @Test
+        @DisplayName("用户不存在-抛出BadRequestException")
+        void getUserDetail_userNotFound_throws() {
+            assertThatThrownBy(() -> userService.getUserDetail(999L))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("用户不存在");
+        }
+    }
+
+    @Nested
+    @DisplayName("updateProfileWithPassword")
+    class UpdateProfileWithPasswordTests {
+
+        @Test
+        @DisplayName("更新基本信息-不修改密码")
+        void updateProfileWithoutPassword() {
+            User profile = new User();
+            profile.setNickname("新昵称");
+            profile.setAvatar("avatar.png");
+
+            userService.updateProfileWithPassword(profile);
+
+            User updated = userService.getById(1L);
+            assertThat(updated.getNickname()).isEqualTo("新昵称");
+            assertThat(updated.getAvatar()).isEqualTo("avatar.png");
+            // 密码应该保持不变
+            assertThat(updated.getPassword()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("更新密码")
+        void updatePassword() {
+            User profile = new User();
+            profile.setPassword("newpassword123");
+
+            userService.updateProfileWithPassword(profile);
+
+            User updated = userService.getById(1L);
+            assertThat(passwordEncoder.matches("newpassword123", updated.getPassword())).isTrue();
+        }
+
+        @Test
+        @DisplayName("同时更新基本信息和密码")
+        void updateBoth() {
+            User profile = new User();
+            profile.setNickname("新昵称");
+            profile.setPassword("newpassword123");
+
+            userService.updateProfileWithPassword(profile);
+
+            User updated = userService.getById(1L);
+            assertThat(updated.getNickname()).isEqualTo("新昵称");
+            assertThat(passwordEncoder.matches("newpassword123", updated.getPassword())).isTrue();
+        }
+
+        @Test
+        @DisplayName("用户不存在-抛出BadRequestException")
+        void updateProfile_userNotFound_throws() {
+            // 切换到不存在的用户
+            com.hmall.common.utils.UserContext.setUser(999L);
+
+            User profile = new User();
+            profile.setNickname("新昵称");
+
+            assertThatThrownBy(() -> userService.updateProfileWithPassword(profile))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("用户不存在");
+        }
+    }
+
+    @Nested
+    @DisplayName("getAdminPermissions")
+    class GetAdminPermissionsTests {
+
+        @Test
+        @DisplayName("管理员用户-返回所有权限")
+        void adminUser_returnsAllPermissions() {
+            // 将用户角色设置为admin
+            User user = userService.getById(1L);
+            user.setRole("admin");
+            userService.updateById(user);
+
+            List<String> permissions = userService.getAdminPermissions();
+
+            assertThat(permissions).isNotEmpty();
+            assertThat(permissions).contains("user:manage", "item:manage", "order:manage");
+        }
+
+        @Test
+        @DisplayName("普通用户-返回空权限列表")
+        void normalUser_returnsEmptyPermissions() {
+            // 用户角色已经是user
+            List<String> permissions = userService.getAdminPermissions();
+
+            assertThat(permissions).isEmpty();
+        }
+
+        @Test
+        @DisplayName("用户不存在-抛出BadRequestException")
+        void getPermissions_userNotFound_throws() {
+            // 切换到不存在的用户
+            com.hmall.common.utils.UserContext.setUser(999L);
+
+            assertThatThrownBy(() -> userService.getAdminPermissions())
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("用户不存在");
         }
     }
 }

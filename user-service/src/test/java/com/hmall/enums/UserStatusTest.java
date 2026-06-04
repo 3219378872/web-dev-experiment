@@ -10,10 +10,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class UserStatusTest {
 
     @Test
-    @DisplayName("of(0) -> FROZEN，of(1) -> NORMAL")
+    @DisplayName("of(1) -> NORMAL，of(2) -> FROZEN")
     void of_validValues_returnsCorrespondingEnum() {
-        assertThat(UserStatus.of(0)).isEqualTo(UserStatus.FROZEN);
         assertThat(UserStatus.of(1)).isEqualTo(UserStatus.NORMAL);
+        assertThat(UserStatus.of(2)).isEqualTo(UserStatus.FROZEN);
     }
 
     @Test
@@ -25,11 +25,11 @@ class UserStatusTest {
     }
 
     @Test
-    @DisplayName("value/desc 字段对齐当前 DB 字典 (FROZEN=0, NORMAL=1)")
+    @DisplayName("value/desc 字段对齐当前 DB 字典 (NORMAL=1, FROZEN=2)")
     void valueAndDesc_alignWithDatabase() {
-        assertThat(UserStatus.FROZEN.getValue()).isZero();
         assertThat(UserStatus.NORMAL.getValue()).isEqualTo(1);
-        assertThat(UserStatus.FROZEN.getDesc()).isEqualTo("禁止使用");
-        assertThat(UserStatus.NORMAL.getDesc()).isEqualTo("已激活");
+        assertThat(UserStatus.FROZEN.getValue()).isEqualTo(2);
+        assertThat(UserStatus.NORMAL.getDesc()).isEqualTo("正常");
+        assertThat(UserStatus.FROZEN.getDesc()).isEqualTo("冻结");
     }
 }
