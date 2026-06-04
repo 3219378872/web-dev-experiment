@@ -2,7 +2,7 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: c7c40c5f5c10302cc9ae71ef1c41bc099cd68690
+last_synced_commit: 8cf14d8116ab2c563e5c51858da3fb2d533d2897
 last_synced_date: 2026-06-04
 sync_note: "Fix #57: login 异常类型调整（Assert.notNull → BadRequestException），无需文档更新"
 ---

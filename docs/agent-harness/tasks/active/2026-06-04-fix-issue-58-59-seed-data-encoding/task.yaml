@@ -1,7 +1,0 @@
-slug: 2026-06-04-fix-issue-58-59-seed-data-encoding
-status: active
-task_branch: task/2026-06-04-fix-issue-58-59-seed-data-encoding
-spec: null
-spec_waiver: "Bug fix from GitHub issues #58/#59; no spec needed."
-plan: null
-plan_waiver: "SQL and docker-compose changes; no plan needed."
