@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: f3e5054d5f264dfce355633e5654496c31b6f86d
+last_synced_commit: 3d72b70546694dbb2996d2afe64be701485e32c5
 last_synced_date: 2026-06-04
-sync_note: "Phase 2: 新增 banners/ads/seckill 公开读路径，AuthGlobalFilter 排除这些公开端点"
+sync_note: "Phase 4: 新增 /faqs/** 公开读路径，AuthGlobalFilter 排除该端点"
 ---
 
 # auth-and-gateway-flow

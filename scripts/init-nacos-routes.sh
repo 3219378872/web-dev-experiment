@@ -98,7 +98,8 @@ ROUTES='[
           "_genkey_3": "/admin/messages/**",
           "_genkey_4": "/feedbacks/**",
           "_genkey_5": "/my-feedbacks/**",
-          "_genkey_6": "/admin/feedbacks/**"
+          "_genkey_6": "/admin/feedbacks/**",
+          "_genkey_7": "/faqs/**"
         }
       }
     ]
