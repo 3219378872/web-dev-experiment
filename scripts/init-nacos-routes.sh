@@ -38,7 +38,9 @@ ROUTES='[
         "args": {
           "_genkey_0": "/users/**",
           "_genkey_1": "/addresses/**",
-          "_genkey_2": "/favorites/**"
+          "_genkey_2": "/favorites/**",
+          "_genkey_3": "/admin/users/**",
+          "_genkey_4": "/admin/profile/**"
         }
       }
     ]

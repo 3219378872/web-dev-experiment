@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 87b1acb30b772f96d3afe2f0e9aaa2e5aeaa4c5c
-last_synced_date: 2026-06-03
-sync_note: "JaCoCo 门控 70%→80%，trade-service 测试增强（仅测试和配置改动，KB 内容不变）"
+last_synced_commit: 7d3df0b4fe1274d7a87f0c2f890d3ea9bdd915ec
+last_synced_date: 2026-06-04
+sync_note: "Phase 1 codex-review 修复：移除 @JsonValue 保持前端兼容，仅 user-service 代码改动"
 ---
 
 # auth-and-gateway-flow

@@ -1,8 +1,11 @@
 package com.hmall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmall.api.dto.LoginFormDTO;
+import com.hmall.common.domain.PageDTO;
 import com.hmall.common.exception.BadRequestException;
 import com.hmall.common.exception.BizIllegalException;
 import com.hmall.common.exception.ForbiddenException;
@@ -12,6 +15,7 @@ import com.hmall.domain.dto.RegisterFormDTO;
 import com.hmall.domain.dto.ResetPasswordDTO;
 import com.hmall.domain.po.User;
 import com.hmall.domain.vo.UserLoginVO;
+import com.hmall.domain.vo.UserVO;
 import com.hmall.enums.UserStatus;
 import com.hmall.mapper.UserMapper;
 import com.hmall.service.IUserService;
@@ -29,6 +33,9 @@ import org.springframework.util.Assert;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -160,6 +167,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public void updateProfile(User profile) {
         User user = getById(UserContext.getUser());
+        if (user == null) {
+            throw new BadRequestException("用户不存在");
+        }
         if (StrUtil.isNotBlank(profile.getNickname())) {
             user.setNickname(profile.getNickname());
         }
@@ -169,6 +179,126 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (StrUtil.isNotBlank(profile.getEmail())) {
             user.setEmail(profile.getEmail());
         }
+        if (StrUtil.isNotBlank(profile.getPassword())) {
+            user.setPassword(passwordEncoder.encode(profile.getPassword()));
+        }
         updateById(user);
+    }
+
+    @Override
+    public PageDTO<UserVO> queryUsersPage(Integer page, Integer size, String keyword) {
+        // 构建查询条件
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        if (StrUtil.isNotBlank(keyword)) {
+            wrapper.like(User::getUsername, keyword)
+                   .or()
+                   .like(User::getPhone, keyword);
+        }
+
+        // 执行分页查询
+        Page<User> pageParam = new Page<>(page, size);
+        Page<User> result = page(pageParam, wrapper);
+
+        // 转换为 UserVO（脱敏）
+        List<UserVO> voList = result.getRecords().stream()
+                .map(this::convertToUserVO)
+                .collect(Collectors.toList());
+
+        return new PageDTO<>(result.getTotal(), result.getPages(), voList);
+    }
+
+    @Override
+    public void updateUserStatus(Long userId, Integer status) {
+        // 验证状态值
+        if (status != UserStatus.NORMAL.getValue() && status != UserStatus.FROZEN.getValue()) {
+            throw new BadRequestException("无效的用户状态");
+        }
+
+        // 查询用户
+        User user = getById(userId);
+        if (user == null) {
+            throw new BadRequestException("用户不存在");
+        }
+
+        // 更新状态
+        user.setStatus(UserStatus.of(status));
+        updateById(user);
+    }
+
+    @Override
+    public void toggleUserStatus(Long userId) {
+        // 查询用户
+        User user = getById(userId);
+        if (user == null) {
+            throw new BadRequestException("用户不存在");
+        }
+
+        // 切换状态
+        if (user.getStatus() == UserStatus.NORMAL) {
+            user.setStatus(UserStatus.FROZEN);
+        } else {
+            user.setStatus(UserStatus.NORMAL);
+        }
+        updateById(user);
+    }
+
+    @Override
+    public UserVO getUserDetail(Long userId) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new BadRequestException("用户不存在");
+        }
+        return convertToUserVO(user);
+    }
+
+    @Override
+    public void updateProfileWithPassword(User profile) {
+        updateProfile(profile);
+    }
+
+    @Override
+    public List<String> getAdminPermissions() {
+        // 获取当前登录用户
+        Long userId = UserContext.getUser();
+        User user = getById(userId);
+        if (user == null) {
+            throw new BadRequestException("用户不存在");
+        }
+
+        // 基于角色返回权限码
+        List<String> permissions = new ArrayList<>();
+        if ("admin".equals(user.getRole())) {
+            // 管理员拥有所有权限
+            permissions.add("user:manage");
+            permissions.add("item:manage");
+            permissions.add("order:manage");
+            permissions.add("coupon:manage");
+            permissions.add("notification:manage");
+            permissions.add("feedback:manage");
+            permissions.add("banner:manage");
+            permissions.add("dashboard:view");
+        } else {
+            // 普通用户无管理权限
+            // 可以根据需求扩展更细粒度的权限
+        }
+
+        return permissions;
+    }
+
+    private UserVO convertToUserVO(User user) {
+        UserVO vo = new UserVO();
+        vo.setId(user.getId());
+        vo.setUsername(user.getUsername());
+        // 不设置 password，实现脱敏
+        vo.setPhone(user.getPhone());
+        vo.setStatus(user.getStatus());
+        vo.setBalance(user.getBalance());
+        vo.setRole(user.getRole());
+        vo.setEmail(user.getEmail());
+        vo.setAvatar(user.getAvatar());
+        vo.setNickname(user.getNickname());
+        vo.setCreateTime(user.getCreateTime());
+        vo.setUpdateTime(user.getUpdateTime());
+        return vo;
     }
 }

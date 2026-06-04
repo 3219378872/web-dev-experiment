@@ -2,28 +2,25 @@ package com.hmall.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.hmall.common.exception.BadRequestException;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public enum UserStatus {
-    FROZEN(0, "禁止使用"),
-    NORMAL(1, "已激活"),
-    ;
-    @EnumValue
-    int value;
-    String desc;
+    NORMAL(1, "正常"),
+    FROZEN(2, "冻结");
 
-    UserStatus(Integer value, String desc) {
-        this.value = value;
-        this.desc = desc;
-    }
+    @EnumValue
+    private final int value;
+    private final String desc;
 
     public static UserStatus of(int value) {
-        if (value == 0) {
-            return FROZEN;
-        }
         if (value == 1) {
             return NORMAL;
+        }
+        if (value == 2) {
+            return FROZEN;
         }
         throw new BadRequestException("账户状态错误");
     }
