@@ -481,6 +481,39 @@ class UserServiceImplTest extends UserServiceTestBase {
     }
 
     @Nested
+    @DisplayName("toggleUserStatus")
+    class ToggleUserStatusTests {
+
+        @Test
+        @DisplayName("切换用户状态-从正常到冻结")
+        void toggleStatus_normalToFrozen() {
+            // 用户1初始状态为NORMAL
+            userService.toggleUserStatus(1L);
+
+            User updated = userService.getById(1L);
+            assertThat(updated.getStatus()).isEqualTo(UserStatus.FROZEN);
+        }
+
+        @Test
+        @DisplayName("切换用户状态-从冻结到正常")
+        void toggleStatus_frozenToNormal() {
+            // 用户3初始状态为FROZEN
+            userService.toggleUserStatus(3L);
+
+            User updated = userService.getById(3L);
+            assertThat(updated.getStatus()).isEqualTo(UserStatus.NORMAL);
+        }
+
+        @Test
+        @DisplayName("用户不存在-抛出BadRequestException")
+        void toggleStatus_userNotFound_throws() {
+            assertThatThrownBy(() -> userService.toggleUserStatus(999L))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("用户不存在");
+        }
+    }
+
+    @Nested
     @DisplayName("getUserDetail")
     class GetUserDetailTests {
 

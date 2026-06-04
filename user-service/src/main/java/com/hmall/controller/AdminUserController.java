@@ -33,8 +33,14 @@ public class AdminUserController {
     @PutMapping("/{id}/status")
     public R<Void> updateUserStatus(
             @ApiParam("用户ID") @PathVariable Long id,
-            @ApiParam("状态值") @RequestBody Integer status) {
-        userService.updateUserStatus(id, status);
+            @ApiParam("状态值（可选，不提供则自动切换）") @RequestBody(required = false) Integer status) {
+        if (status == null) {
+            // 如果没有提供状态值，则自动切换状态
+            userService.toggleUserStatus(id);
+        } else {
+            // 如果提供了状态值，则使用提供的值
+            userService.updateUserStatus(id, status);
+        }
         return R.ok();
     }
 

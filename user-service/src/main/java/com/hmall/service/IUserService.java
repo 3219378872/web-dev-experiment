@@ -42,6 +42,12 @@ public interface IUserService extends IService<User> {
     void updateUserStatus(Long userId, Integer status);
 
     /**
+     * 切换用户状态（管理端）
+     * @param userId 用户ID
+     */
+    void toggleUserStatus(Long userId);
+
+    /**
      * 获取用户详情（管理端，脱敏）
      * @param userId 用户ID
      * @return 用户脱敏信息

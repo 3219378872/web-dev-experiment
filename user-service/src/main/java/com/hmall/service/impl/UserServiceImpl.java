@@ -220,6 +220,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     }
 
     @Override
+    public void toggleUserStatus(Long userId) {
+        // 查询用户
+        User user = getById(userId);
+        if (user == null) {
+            throw new BadRequestException("用户不存在");
+        }
+
+        // 切换状态
+        if (user.getStatus() == UserStatus.NORMAL) {
+            user.setStatus(UserStatus.FROZEN);
+        } else {
+            user.setStatus(UserStatus.NORMAL);
+        }
+        updateById(user);
+    }
+
+    @Override
     public UserVO getUserDetail(Long userId) {
         User user = getById(userId);
         if (user == null) {
