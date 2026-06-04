@@ -35,7 +35,10 @@
               </div>
               <div class="ds">{{ n.content }}</div>
               <div class="meta">
-                <span>{{ n.category || '系统通知' }} · {{ n.readCount || 0 }}阅读</span>
+                <span
+                  >{{ n.category || '系统通知'
+                  }}<template v-if="n.readCount"> · {{ n.readCount }}阅读</template></span
+                >
                 <span style="cursor: pointer">查看详情 ›</span>
               </div>
             </div>
@@ -92,85 +95,21 @@ function monthOf(time) {
   return String(d.getMonth() + 1).padStart(2, '0') + '月';
 }
 
+/**
+ * 将后端 Notification（id/title/content/publishTime）映射为展示结构。
+ * 后端未提供分类/标签/阅读量，统一用中性默认，不杜撰运营数据；列表为空即空态。
+ */
 function enrich(list) {
-  // 如果后端返回的数据缺少展示字段，用 mock 数据补充
-  const mock = [
-    {
-      id: 1,
-      title: '好集 618 年中狂欢节预热开启',
-      tag: '置顶',
-      tagClass: 'tag-price',
-      content:
-        '全场最高直降 60%，每满 300 减 50，叠加平台券更划算。6 月 1 日 0 点正式开抢，更有整点秒杀与抽奖福利等你来！',
-      category: '活动促销',
-      categoryKey: 'promo',
-      readCount: '12.3万',
-      publishTime: '2026-05-28T10:00:00',
-    },
-    {
-      id: 2,
-      title: '新增「当日达」配送服务上线',
-      tag: '新',
-      tagClass: 'tag-new',
-      content: '即日起，上海、北京、杭州等 12 城核心区域支持当日达配送，下单后最快 4 小时送达。',
-      category: '系统通知',
-      categoryKey: 'system',
-      readCount: '4.8万',
-      publishTime: '2026-05-25T10:00:00',
-    },
-    {
-      id: 3,
-      title: '《好集会员积分规则》更新公告',
-      tag: '',
-      tagClass: '',
-      content:
-        '为提升会员权益，自 6 月 1 日起积分有效期延长至 24 个月，购物积分比例提升至 1:1，敬请关注。',
-      category: '规则更新',
-      categoryKey: 'rule',
-      readCount: '2.1万',
-      publishTime: '2026-05-20T10:00:00',
-    },
-    {
-      id: 4,
-      title: '关于谨防钓鱼诈骗的安全提示',
-      tag: '重要',
-      tagClass: 'tag-warn',
-      content:
-        '好集平台工作人员不会以任何理由要求您提供密码、验证码或进行转账。请通过官方渠道核实信息，谨防诈骗。',
-      category: '安全公告',
-      categoryKey: 'security',
-      readCount: '6.5万',
-      publishTime: '2026-05-18T10:00:00',
-    },
-    {
-      id: 5,
-      title: '系统例行维护通知',
-      tag: '',
-      tagClass: '',
-      content:
-        '为提供更稳定的服务，平台将于 5 月 16 日 02:00-04:00 进行系统升级维护，期间部分功能可能受影响，敬请谅解。',
-      category: '维护通知',
-      categoryKey: 'maintain',
-      readCount: '1.2万',
-      publishTime: '2026-05-15T10:00:00',
-    },
-    {
-      id: 6,
-      title: '七天无理由退换货升级为「极速退款」',
-      tag: '新',
-      tagClass: 'tag-new',
-      content: '符合条件的退货申请，确认后退款即时到账，无需等待商品退回，购物更安心。',
-      category: '规则更新',
-      categoryKey: 'rule',
-      readCount: '3.4万',
-      publishTime: '2026-05-10T10:00:00',
-    },
-  ];
-  if (!list || !list.length) return mock;
-  return list.map((n, i) => ({
-    ...mock[i % mock.length],
-    ...n,
-    publishTime: n.publishTime || mock[i % mock.length].publishTime,
+  return (list || []).map((n) => ({
+    id: n.id,
+    title: n.title,
+    content: n.content,
+    publishTime: n.publishTime || n.createTime || '',
+    tag: '',
+    tagClass: '',
+    category: '系统通知',
+    categoryKey: 'system',
+    readCount: '',
   }));
 }
 

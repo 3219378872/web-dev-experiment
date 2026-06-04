@@ -70,6 +70,10 @@ Implemented，待 PR / CI / review。
 - AccountSidebar.vue / Home.vue：移除硬编码「积分1280」，改通用「好集会员」。
 - OrderDetail.vue：物流时间轴改为依据真实订单状态与时间戳的概要节点，去除杜撰的快递员姓名/电话/网点/日期（物流明细接口缺失见 backend-api.md B3）。
 
+## Codex-Review 整改（第 10 轮）
+- Coupons.vue：移除接口失败时的兜底假券数组（领券/我的券），失败即空态，避免用户对杜撰 ID 点「立即领取」。
+- Notifications.vue：移除空列表时的 6 条假公告与「把假 category/readCount/tag 合并进真实公告」逻辑；改为真实公告中性映射（不杜撰阅读量/标签/分类），空则空态。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 

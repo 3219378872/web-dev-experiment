@@ -195,139 +195,16 @@ async function loadCoupons() {
     platformCoupons.value = list.filter((c) => !isCategoryCoupon(c));
     categoryCoupons.value = list.filter((c) => isCategoryCoupon(c));
   } catch (err) {
-    // 接口不可用时的兜底展示数据
-    platformCoupons.value = [
-      {
-        id: 1,
-        value: 20,
-        unit: '',
-        condition: '满199可用',
-        name: '平台通用券',
-        scope: '全场商品可用',
-        expiry: '2026-06-30',
-        state: '',
-      },
-      {
-        id: 2,
-        value: 50,
-        unit: '',
-        condition: '满399可用',
-        name: '平台通用券',
-        scope: '全场商品可用',
-        expiry: '2026-06-30',
-        state: '',
-      },
-      {
-        id: 3,
-        value: 100,
-        unit: '',
-        condition: '满699可用',
-        name: '平台通用券',
-        scope: '全场商品可用',
-        expiry: '2026-06-30',
-        state: 'got',
-      },
-      {
-        id: 4,
-        value: 8.5,
-        unit: '折',
-        condition: '满99打折',
-        name: '全场折扣券',
-        scope: '最高减100元',
-        expiry: '2026-06-15',
-        state: '',
-      },
-      {
-        id: 5,
-        value: 30,
-        unit: '',
-        condition: '满299可用',
-        name: '新人专享券',
-        scope: '仅限新用户首单',
-        expiry: '2026-06-30',
-        state: '',
-      },
-      {
-        id: 6,
-        value: 15,
-        unit: '',
-        condition: '无门槛',
-        name: '无门槛红包',
-        scope: '全场通用',
-        expiry: '2026-06-10',
-        state: '',
-      },
-    ];
-    categoryCoupons.value = [
-      {
-        id: 7,
-        value: 40,
-        unit: '',
-        condition: '满300可用',
-        name: '数码家电券',
-        scope: '手机数码 / 家用电器',
-        expiry: '2026-06-20',
-        state: '',
-      },
-      {
-        id: 8,
-        value: 25,
-        unit: '',
-        condition: '满200可用',
-        name: '美妆个护券',
-        scope: '美妆个护品类',
-        expiry: '2026-06-20',
-        state: '',
-      },
-      {
-        id: 9,
-        value: 20,
-        unit: '',
-        condition: '满150可用',
-        name: '食品生鲜券',
-        scope: '食品生鲜品类',
-        expiry: '2026-06-20',
-        state: 'got',
-      },
-    ];
+    // 接口失败时显示空态，不杜撰数据（错误已由拦截器提示）
+    platformCoupons.value = [];
+    categoryCoupons.value = [];
   }
 
   try {
     const data = await getMyCoupons();
     myCoupons.value = (data || []).map((c) => mapCoupon(c, 'use'));
   } catch (err) {
-    myCoupons.value = [
-      {
-        id: 101,
-        value: 50,
-        unit: '',
-        condition: '满399可用',
-        name: '平台通用券',
-        scope: '全场商品可用',
-        expiry: '2026-06-30',
-        state: 'use',
-      },
-      {
-        id: 102,
-        value: 20,
-        unit: '',
-        condition: '满199可用',
-        name: '数码家电券',
-        scope: '手机数码 / 家用电器',
-        expiry: '2026-06-20',
-        state: 'use',
-      },
-      {
-        id: 103,
-        value: 15,
-        unit: '',
-        condition: '无门槛',
-        name: '无门槛红包',
-        scope: '全场通用',
-        expiry: '2026-06-10',
-        state: 'use',
-      },
-    ];
+    myCoupons.value = [];
   }
 }
 
