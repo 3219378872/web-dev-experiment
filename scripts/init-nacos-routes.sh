@@ -38,7 +38,9 @@ ROUTES='[
         "args": {
           "_genkey_0": "/users/**",
           "_genkey_1": "/addresses/**",
-          "_genkey_2": "/favorites/**"
+          "_genkey_2": "/favorites/**",
+          "_genkey_3": "/admin/users/**",
+          "_genkey_4": "/admin/profile/**"
         }
       }
     ]
@@ -64,7 +66,8 @@ ROUTES='[
           "_genkey_1": "/coupons/**",
           "_genkey_2": "/my-coupons/**",
           "_genkey_3": "/admin/coupons/**",
-          "_genkey_4": "/admin/orders/**"
+          "_genkey_4": "/admin/orders/**",
+          "_genkey_5": "/admin/dashboard/**"
         }
       }
     ]
@@ -92,7 +95,8 @@ ROUTES='[
           "_genkey_3": "/admin/messages/**",
           "_genkey_4": "/feedbacks/**",
           "_genkey_5": "/my-feedbacks/**",
-          "_genkey_6": "/admin/feedbacks/**"
+          "_genkey_6": "/admin/feedbacks/**",
+          "_genkey_7": "/faqs/**"
         }
       }
     ]
