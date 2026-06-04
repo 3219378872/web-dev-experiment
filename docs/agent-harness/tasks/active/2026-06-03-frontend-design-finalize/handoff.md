@@ -79,6 +79,12 @@ Implemented，待 PR / CI / review。
 - admin OrderList.vue：搜索由无效改为可用——订单号走后端 orderId 过滤，客户/支付/日期在已取数据上客户端过滤；支付方式列按 paymentType(1支付宝/2微信/3余额) 真值映射，客户列回退「用户{userId}」。
 - AdminLayout.vue：顶栏徽标改自真实接口（待发货订单数=getOrders status2 total、待处理反馈数=getFeedbacks status0 计数），身份取自登录 adminInfo，去除硬编码 5/3/true 与"管理员 Admin/超级管理员"。
 
+## Codex-Review 整改（第 12 轮）
+- web OrderDetail.vue：支付方式映射修正为后端真值（1 支付宝 / 2 微信 / 3 余额）。
+- admin OrderList.vue：移除后端 /admin/orders 不支持的客户/支付/日期搜索控件（客户端过滤在分页下不正确），仅保留订单号（后端 orderId）+ 状态 tab。
+- web Search.vue：接真实 `/search/list`（key + pageNo/pageSize），死分页器改为功能分页（pageRange/prev/next），移除无后端支持的模糊/精确模式与相关提示。
+- 顺带清零 backend-api.md A 节：`searchItems` 改 `/search/list`、`cart.js updateCartItem` 改 `PUT /carts`(body id+num)。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 

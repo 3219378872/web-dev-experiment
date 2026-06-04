@@ -39,35 +39,6 @@
           @keyup.enter="fetch"
         />
       </div>
-      <div class="field-inline">
-        客户
-        <input
-          v-model="searchUser"
-          class="input"
-          placeholder="用户名 / 手机"
-          style="width: 150px"
-          @keyup.enter="fetch"
-        />
-      </div>
-      <div class="field-inline">
-        支付方式
-        <select v-model="searchPay" class="select" style="width: 120px" @change="fetch">
-          <option value="">全部</option>
-          <option value="微信">微信</option>
-          <option value="支付宝">支付宝</option>
-          <option value="余额">余额</option>
-        </select>
-      </div>
-      <div class="field-inline">
-        下单时间
-        <input
-          v-model="searchDate"
-          class="input"
-          placeholder="2026-05-01 ~ 2026-05-28"
-          style="width: 180px"
-          @keyup.enter="fetch"
-        />
-      </div>
       <div class="grow" />
       <a class="btn btn-primary btn-sm" @click="fetch">查询</a>
       <a class="btn btn-ghost btn-sm" @click="resetFilter">重置</a>
@@ -89,7 +60,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="row in displayOrders" :key="row.id">
+          <tr v-for="row in orders" :key="row.id">
             <td><span class="checkbox"></span></td>
             <td class="mono" style="font-size: 11.5px">{{ row.id }}</td>
             <td>
@@ -152,9 +123,6 @@ const total = ref(0);
 const page = ref(1);
 const size = ref(10);
 const searchId = ref('');
-const searchUser = ref('');
-const searchPay = ref('');
-const searchDate = ref('');
 const activeTab = ref('all');
 const shipVisible = ref(false);
 const trackingNumber = ref('');
@@ -208,15 +176,6 @@ const payLabel = (t) => ({ 1: '支付宝', 2: '微信', 3: '余额' })[t] || '-'
 function customerName(o) {
   return o.userName || (o.userId != null ? `用户${o.userId}` : '-');
 }
-// 后端 /admin/orders 仅支持 orderId + status 过滤；客户/支付/日期在已取数据上做客户端过滤
-const displayOrders = computed(() =>
-  orders.value.filter((o) => {
-    if (searchUser.value && !customerName(o).includes(searchUser.value.trim())) return false;
-    if (searchPay.value && payLabel(o.paymentType) !== searchPay.value) return false;
-    if (searchDate.value && !(o.createTime || '').includes(searchDate.value.trim())) return false;
-    return true;
-  })
-);
 function userColor(name) {
   const palette = [
     '#88A6B8',
@@ -242,9 +201,6 @@ function switchTab(val) {
 
 function resetFilter() {
   searchId.value = '';
-  searchUser.value = '';
-  searchPay.value = '';
-  searchDate.value = '';
   activeTab.value = 'all';
   fetch(1);
 }

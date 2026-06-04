@@ -8,14 +8,14 @@
 
 ---
 
-## A. 路径待对齐（前端正在调用，后端已实现但路径不一致 → 当前会 404）
+## A. 路径待对齐（前端↔后端路径不一致）—— 已在本 PR 修复
 
-这两项最紧急：前端代码实际发出请求，但后端没有该路径，需对齐前端或后端其一。
+原有两处前端路径与后端不一致（会 404），本 PR 已对齐前端调用：
 
-| 前端调用 | 前端当前路径 | 后端实际路径 | 后端证据 | 建议 |
-|---|---|---|---|---|
-| `hmall-web` `searchItems`（Search.vue） | `GET /items/search` | `GET /search/list` | `SearchController` `@RequestMapping("/search")` + `@GetMapping("/list")` | 改前端 `item.js` 调 `/search/list`（后端已具备 key/category/brand/价格区间/分页） |
-| `hmall-web` `updateCartItem`（Cart.vue） | `PUT /carts/{id}` | `PUT /carts`（body 携带 `id`+`num`） | `CartController` `@PutMapping`（无 `{id}`） | 改前端 `cart.js` 调 `PUT /carts` 并在 body 传 `{id,num}` |
+| 前端调用 | 原前端路径 | 后端实际路径 | 修复 |
+|---|---|---|---|
+| `hmall-web` `searchItems`（Search.vue） | `GET /items/search` | `GET /search/list` | 已改 `item.js` 调 `/search/list`，参数 `key`/`pageNo`/`pageSize`，并接入真实分页 |
+| `hmall-web` `updateCartItem`（Cart.vue） | `PUT /carts/{id}` | `PUT /carts`（body `id`+`num`） | 已改 `cart.js` 调 `PUT /carts` 并在 body 传 `{id,num}` |
 
 > 注：`docs/api.md` §12.1 也把 `searchItems` 误记为 `/items/search`，对齐后需同步修订。
 

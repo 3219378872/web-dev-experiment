@@ -180,7 +180,8 @@ const statusDesc = computed(() => {
 });
 
 const payTypeText = computed(() => {
-  const map = { 1: '余额支付', 2: '微信支付', 3: '支付宝', 4: '银行卡' };
+  // 后端 OrderVO.paymentType：1 支付宝 / 2 微信 / 3 扣减余额
+  const map = { 1: '支付宝', 2: '微信支付', 3: '余额支付' };
   return map[order.value?.paymentType] || '在线支付';
 });
 

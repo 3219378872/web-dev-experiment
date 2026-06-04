@@ -20,10 +20,6 @@
         <a v-for="r in related" :key="r" @click="goSearch(r)">{{ r }}</a>
       </div>
 
-      <div class="empty-hint">
-        🔎 已为您开启「模糊匹配」，同时展示精准匹配与相关推荐。可在右侧切换匹配模式。
-      </div>
-
       <div class="sortbar">
         <span
           v-for="s in sortOptions"
@@ -33,12 +29,6 @@
           @click="sortKey = s.key"
           >{{ s.label }}</span
         >
-        <span class="mode">
-          匹配：<span class="tg"
-            ><span :class="{ on: fuzzy }" @click="fuzzy = true">模糊</span
-            ><span :class="{ on: !fuzzy }" @click="fuzzy = false">精准</span></span
-          >
-        </span>
       </div>
 
       <div class="grid g5">
@@ -49,10 +39,12 @@
         暂无搜索结果
       </div>
 
-      <div v-if="items.length" class="pager">
-        <span>‹ 上一页</span>
-        <a class="cur">1</a><a>2</a><a>3</a><a>4</a><a>5</a> <span class="dots">…</span><a>14</a>
-        <a>下一页 ›</a>
+      <div v-if="totalPages > 1" class="pager">
+        <span :class="{ disabled: page <= 1 }" @click="prevPage">‹ 上一页</span>
+        <a v-for="n in pageRange" :key="n" :class="{ cur: n === page }" @click="goPage(n)">{{
+          n
+        }}</a>
+        <span :class="{ disabled: page >= totalPages }" @click="nextPage">下一页 ›</span>
       </div>
     </div>
   </div>
@@ -70,7 +62,16 @@ const items = ref([]);
 const total = ref(0);
 const query = ref('');
 const sortKey = ref('default');
-const fuzzy = ref(true);
+const page = ref(1);
+const size = ref(20);
+const totalPages = computed(() => Math.max(1, Math.ceil(total.value / size.value)));
+const pageRange = computed(() => {
+  const pages = [];
+  const start = Math.max(1, page.value - 2);
+  const end = Math.min(totalPages.value, start + 4);
+  for (let i = start; i <= end; i++) pages.push(i);
+  return pages;
+});
 
 const related = ['降噪耳机', '蓝牙耳机 入耳式', '无线耳机', '运动耳机', '头戴式耳机', '骨传导'];
 
@@ -80,7 +81,6 @@ const sortOptions = [
   { key: 'priceAsc', label: '价格 ↑' },
   { key: 'priceDesc', label: '价格 ↓' },
   { key: 'new', label: '新品优先' },
-  { key: 'rating', label: '好评优先' },
 ];
 
 const sortedItems = computed(() => {
@@ -120,16 +120,37 @@ async function search() {
     return;
   }
   try {
-    const data = await searchItems({ name: q });
+    const data = await searchItems({ key: q, pageNo: page.value, pageSize: size.value });
     items.value = data?.list || [];
     total.value = data?.total || items.value.length;
   } catch (err) {
-    /* ignore */
+    items.value = [];
+    total.value = 0;
   }
 }
 
+function goPage(n) {
+  if (n < 1 || n > totalPages.value || n === page.value) return;
+  page.value = n;
+  search();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function prevPage() {
+  if (page.value > 1) goPage(page.value - 1);
+}
+function nextPage() {
+  if (page.value < totalPages.value) goPage(page.value + 1);
+}
+
 onMounted(search);
-watch(() => route.query.q, search);
+// 关键词变化时重置到第 1 页再查
+watch(
+  () => route.query.q,
+  () => {
+    page.value = 1;
+    search();
+  }
+);
 </script>
 
 <style scoped>
