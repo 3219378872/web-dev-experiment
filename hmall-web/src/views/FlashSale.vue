@@ -27,36 +27,17 @@
     <div class="fs-body">
       <div class="wrap">
         <div class="grid g5">
-          <router-link
-            v-for="(p, i) in flashItems"
-            :key="p.id"
-            class="fs-card"
-            :to="`/item/${p.id}`"
-          >
+          <router-link v-for="p in flashItems" :key="p.id" class="fs-card" :to="`/item/${p.id}`">
             <div class="ph" :class="p.phStyle" :data-label="p.phLabel">
               <span class="glyph">{{ p.phGlyph }}</span>
             </div>
             <div class="b">
               <div class="nm">{{ p.name }}</div>
               <div class="pr">
-                <span class="now">¥{{ flashPrice(p) }}</span>
-                <span class="old">¥{{ originalPrice(p) }}</span>
-              </div>
-              <div class="bar">
-                <i :style="`width:${flashPct[i % flashPct.length]}%`"></i>
-                <span>已抢 {{ flashPct[i % flashPct.length] }}%</span>
+                <span class="now">¥{{ priceYuan(p) }}</span>
               </div>
             </div>
-            <button
-              :class="[
-                'btn',
-                flashPct[i % flashPct.length] >= 95 ? 'btn-ghost' : 'btn-hot',
-                'btn-block',
-              ]"
-              @click.prevent="handleBuy(p)"
-            >
-              {{ flashPct[i % flashPct.length] >= 95 ? '即将抢光' : '立即抢购' }}
-            </button>
+            <button class="btn btn-hot btn-block" @click.prevent="handleBuy(p)">立即抢购</button>
           </router-link>
         </div>
         <div class="pager">
@@ -85,7 +66,6 @@ const cartStore = useCartStore();
 const userStore = useUserStore();
 
 const countdown = ref({ h: '01', m: '48', s: '13' });
-const flashPct = [88, 72, 95, 45, 60, 82, 38, 90, 55, 78, 42, 68, 93, 50, 75];
 const page = ref(1);
 const size = ref(10);
 const total = ref(0);
@@ -154,12 +134,9 @@ function startCountdown() {
   }, 1000);
 }
 
-function flashPrice(p) {
-  return Math.round(((p.price || 0) * 0.7) / 100);
-}
-
-function originalPrice(p) {
-  return Math.round((p.originalPrice || p.price || 0) / 100);
+// 无秒杀后端，展示真实商品价格（与加入购物车的成交价一致）
+function priceYuan(p) {
+  return Math.round((p.price || 0) / 100);
 }
 
 async function handleBuy(p) {

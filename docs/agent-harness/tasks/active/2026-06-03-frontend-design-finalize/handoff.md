@@ -74,6 +74,11 @@ Implemented，待 PR / CI / review。
 - Coupons.vue：移除接口失败时的兜底假券数组（领券/我的券），失败即空态，避免用户对杜撰 ID 点「立即领取」。
 - Notifications.vue：移除空列表时的 6 条假公告与「把假 category/readCount/tag 合并进真实公告」逻辑；改为真实公告中性映射（不杜撰阅读量/标签/分类），空则空态。
 
+## Codex-Review 整改（第 11 轮）
+- FlashSale.vue：移除虚构 70% 秒杀价与假抢购率，展示真实商品价（与 addItem 成交价一致），按钮恒为「立即抢购」。
+- admin OrderList.vue：搜索由无效改为可用——订单号走后端 orderId 过滤，客户/支付/日期在已取数据上客户端过滤；支付方式列按 paymentType(1支付宝/2微信/3余额) 真值映射，客户列回退「用户{userId}」。
+- AdminLayout.vue：顶栏徽标改自真实接口（待发货订单数=getOrders status2 total、待处理反馈数=getFeedbacks status0 计数），身份取自登录 adminInfo，去除硬编码 5/3/true 与"管理员 Admin/超级管理员"。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 

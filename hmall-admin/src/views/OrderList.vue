@@ -89,20 +89,20 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="row in orders" :key="row.id">
+          <tr v-for="row in displayOrders" :key="row.id">
             <td><span class="checkbox"></span></td>
             <td class="mono" style="font-size: 11.5px">{{ row.id }}</td>
             <td>
               <span class="u-cell">
-                <span class="u-av" :style="`background:${userColor(row.userName)}`">{{
-                  (row.userName || '?')[0]
+                <span class="u-av" :style="`background:${userColor(customerName(row))}`">{{
+                  customerName(row)[0]
                 }}</span>
-                <span class="nm">{{ row.userName || '-' }}</span>
+                <span class="nm">{{ customerName(row) }}</span>
               </span>
             </td>
             <td class="dim">{{ row.goodsText || '-' }}</td>
             <td class="amount">&yen;{{ (row.totalFee / 100).toFixed(2) }}</td>
-            <td>{{ row.payType || '-' }}</td>
+            <td>{{ payLabel(row.paymentType) }}</td>
             <td class="dim">{{ (row.createTime || '').slice(5, 16) }}</td>
             <td>
               <span class="sdot" :class="statusClass(row.status)">{{
@@ -203,6 +203,20 @@ function statusText(s) {
 function statusClass(s) {
   return statusMap[s]?.cls || 'gray';
 }
+// OrderVO.paymentType：1 支付宝 / 2 微信 / 3 余额
+const payLabel = (t) => ({ 1: '支付宝', 2: '微信', 3: '余额' })[t] || '-';
+function customerName(o) {
+  return o.userName || (o.userId != null ? `用户${o.userId}` : '-');
+}
+// 后端 /admin/orders 仅支持 orderId + status 过滤；客户/支付/日期在已取数据上做客户端过滤
+const displayOrders = computed(() =>
+  orders.value.filter((o) => {
+    if (searchUser.value && !customerName(o).includes(searchUser.value.trim())) return false;
+    if (searchPay.value && payLabel(o.paymentType) !== searchPay.value) return false;
+    if (searchDate.value && !(o.createTime || '').includes(searchDate.value.trim())) return false;
+    return true;
+  })
+);
 function userColor(name) {
   const palette = [
     '#88A6B8',
@@ -239,6 +253,7 @@ async function fetch(p = 1) {
   page.value = p;
   try {
     const params = { page: p, size: size.value };
+    if (searchId.value) params.orderId = searchId.value;
     if (activeTab.value === 'pendingPay') params.status = 1;
     if (activeTab.value === 'pendingShip') params.status = 2;
     if (activeTab.value === 'shipped') params.status = 3;

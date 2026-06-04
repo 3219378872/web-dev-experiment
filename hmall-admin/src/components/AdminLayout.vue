@@ -73,8 +73,8 @@
           ></a>
           <a class="tbtn" href="/" title="前台" target="_blank"><span>🏪</span></a>
           <div class="me">
-            <span class="av">管</span>
-            <div class="nm">管理员 Admin<small>超级管理员</small></div>
+            <span class="av">{{ (adminName || '管')[0] }}</span>
+            <div class="nm">{{ adminName }}<small>管理员</small></div>
           </div>
           <a class="tbtn" title="退出登录" style="cursor: pointer" @click="logout"
             ><span>↪</span></a
@@ -87,15 +87,38 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { getOrders } from '@/api/order';
+import { getFeedbacks } from '@/api/system';
 
 const route = useRoute();
 const router = useRouter();
 
-const orderBadge = ref(5);
-const feedbackBadge = ref(3);
-const notifyDot = ref(true);
+const adminInfo = JSON.parse(localStorage.getItem('adminInfo') || 'null');
+const adminName = computed(() => adminInfo?.username || '管理员');
+
+// 侧边/顶栏徽标取自真实接口：待发货订单数、待处理反馈数
+const orderBadge = ref(0);
+const feedbackBadge = ref(0);
+const notifyDot = computed(() => feedbackBadge.value > 0);
+
+async function loadBadges() {
+  try {
+    const r = await getOrders({ page: 1, size: 1, status: 2 });
+    orderBadge.value = r?.total || 0;
+  } catch (err) {
+    /* 忽略，徽标保持 0 */
+  }
+  try {
+    const r = await getFeedbacks({ page: 1, size: 100 });
+    feedbackBadge.value = (r?.list || []).filter((f) => f.status === 0).length;
+  } catch (err) {
+    /* 忽略 */
+  }
+}
+
+onMounted(loadBadges);
 
 const pageTitle = computed(() => {
   const map = {
