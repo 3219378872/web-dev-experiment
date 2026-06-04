@@ -24,7 +24,11 @@ ROUTES='[
           "_genkey_1": "/search/**",
           "_genkey_2": "/categories/**",
           "_genkey_3": "/admin/items/**",
-          "_genkey_4": "/admin/reviews/**"
+          "_genkey_4": "/admin/reviews/**",
+          "_genkey_5": "/banners/**",
+          "_genkey_6": "/ads/**",
+          "_genkey_7": "/admin/banners/**",
+          "_genkey_8": "/seckill/**"
         }
       }
     ]

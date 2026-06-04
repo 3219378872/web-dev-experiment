@@ -2,9 +2,9 @@
 title: hm-gateway
 tracks:
   - hm-gateway/
-last_synced_commit: c26c9eb
-last_synced_date: 2026-06-03
-sync_note: "2026-06-03: 移除 /hi 鉴权白名单（hm-service 清理）"
+last_synced_commit: f3e5054d5f264dfce355633e5654496c31b6f86d
+last_synced_date: 2026-06-04
+sync_note: "Phase 2: 新增 banners/ads/seckill 公开读路径到 excludeReadPaths"
 ---
 
 # hm-gateway
