@@ -4,7 +4,7 @@ tracks:
   - user-service/
 last_synced_commit: c120b3314094ec2d50324c73a0e91ec28a896c3a
 last_synced_date: 2026-06-04
-sync_note: "Phase 1 实现：新增管理端用户管理与个人中心端点，修复toggleUserStatus无body问题"
+sync_note: "Phase 1 实现：新增管理端用户管理与个人中心端点，修复toggleUserStatus无body问题，新增UserStatusDTO"
 ---
 
 # user-service
@@ -31,6 +31,7 @@ sync_note: "Phase 1 实现：新增管理端用户管理与个人中心端点，
 
 ### 数据模型
 - `UserVO`：用户脱敏 VO，包含 id、username、phone、status、balance、role、email、avatar、nickname、createTime、updateTime（不含 password）
+- `UserStatusDTO`：用户状态修改 DTO，包含 status 字段（1=正常/2=冻结）
 - `UserStatus` 枚举：NORMAL(1, "正常")、FROZEN(2, "冻结")
 
 ## 上游

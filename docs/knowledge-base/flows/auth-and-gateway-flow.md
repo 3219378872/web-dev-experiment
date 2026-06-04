@@ -6,7 +6,7 @@ tracks:
   - hm-common/
 last_synced_commit: c120b3314094ec2d50324c73a0e91ec28a896c3a
 last_synced_date: 2026-06-04
-sync_note: "Phase 1 实现：新增管理端用户管理与个人中心端点，修复toggleUserStatus无body问题（仅 user-service 代码改动，auth/gateway 流程不变）"
+sync_note: "Phase 1 修复：新增 UserStatusDTO，修复 PUT /admin/users/{id}/status 端点以符合 spec 要求（仅 user-service 代码改动，auth/gateway 流程不变）"
 ---
 
 # auth-and-gateway-flow
