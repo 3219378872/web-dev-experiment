@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 87b1acb30b772f96d3afe2f0e9aaa2e5aeaa4c5c
-last_synced_date: 2026-06-03
-sync_note: "JaCoCo 门控 70%→80%，trade-service 测试增强（仅测试和配置改动，KB 内容不变）"
+last_synced_commit: c3df50bba422bfb1958cd238562624fcb04a09f1
+last_synced_date: 2026-06-04
+sync_note: "Phase 2 item-service 变更不影响下单流程，KB 内容不变"
 ---
 
 # order-checkout-flow
