@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 6842c1b7cc0e6be245520166c9395d947a932081
+last_synced_commit: 7fbdea0734907e62cccf35d274363d7bc391706e
 last_synced_date: 2026-06-04
-sync_note: "Phase 2 codex-review 修复：BannerController 变更不影响下单流程"
+sync_note: "Phase 3 codex-review 修复：发货插入物流轨迹，下单流程不变"
 ---
 
 # order-checkout-flow

@@ -70,7 +70,8 @@ ROUTES='[
           "_genkey_1": "/coupons/**",
           "_genkey_2": "/my-coupons/**",
           "_genkey_3": "/admin/coupons/**",
-          "_genkey_4": "/admin/orders/**"
+          "_genkey_4": "/admin/orders/**",
+          "_genkey_5": "/admin/dashboard/**"
         }
       }
     ]

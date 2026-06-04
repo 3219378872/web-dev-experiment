@@ -65,3 +65,12 @@ CREATE TABLE IF NOT EXISTS user_coupons (
     use_time TIMESTAMP,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS logistics_trace (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    node VARCHAR(64) NOT NULL,
+    description VARCHAR(255),
+    trace_time TIMESTAMP NOT NULL,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

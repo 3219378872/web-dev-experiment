@@ -301,4 +301,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         vo.setUpdateTime(user.getUpdateTime());
         return vo;
     }
+
+    @Override
+    public Long countNewUsers(Integer days) {
+        LocalDateTime since = LocalDateTime.now().minusDays(days);
+        return lambdaQuery()
+                .ge(User::getCreateTime, since)
+                .count();
+    }
 }

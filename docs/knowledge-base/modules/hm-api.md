@@ -2,9 +2,9 @@
 title: hm-api
 tracks:
   - hm-api/
-last_synced_commit: 44e2d196f1eb7ddb2991e36f10ba095307a54094
-last_synced_date: 2026-06-01
-sync_note: "v3 合并 PR：所有阶段测试补足共 51 tests，覆盖率 80.5%"
+last_synced_commit: d7b580c
+last_synced_date: 2026-06-04
+sync_note: "Phase 3: UserClient 新增 countNewUsers(days) 方法"
 ---
 
 # hm-api
@@ -32,8 +32,10 @@ sync_note: "v3 合并 PR：所有阶段测试补足共 51 tests，覆盖率 80.5
 
 ## 关键文件
 
-- `client/ItemClient.java`、`client/UserClient.java` 等 —— Feign 调用契约。
-- `dto/ItemDTO.java`、`dto/OrderDTO.java` 等 —— 公共数据契约。
+- `client/ItemClient.java`、`client/UserClient.java`（含 `countNewUsers`）、
+  `client/CouponClient.java` 等 —— Feign 调用契约。
+- `dto/ItemDTO.java`、`dto/OrderDTO.java`、`dto/CouponDTO.java`、`dto/AddressDTO.java`
+  等 —— 公共数据契约。
 
 ## 注意事项与陷阱
 

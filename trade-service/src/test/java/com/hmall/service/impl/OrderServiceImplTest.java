@@ -16,6 +16,7 @@ import com.hmall.domain.po.OrderLogistics;
 import com.hmall.mapper.OrderMapper;
 import com.hmall.service.IOrderDetailService;
 import com.hmall.service.IOrderLogisticsService;
+import com.hmall.service.ILogisticsTraceService;
 import com.hmall.service.IOrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,6 +52,9 @@ class OrderServiceImplTest extends TradeServiceTestBase {
 
     @Autowired
     private IOrderLogisticsService logisticsService;
+
+    @Autowired
+    private ILogisticsTraceService logisticsTraceService;
 
     @Autowired
     private IOrderDetailService detailService;
@@ -184,7 +189,7 @@ class OrderServiceImplTest extends TradeServiceTestBase {
     void handleOrderClose_usesAtomicPendingStatusGuard() {
         OrderMapper orderMapper = mock(OrderMapper.class);
         OrderServiceImpl service = new OrderServiceImpl(
-                detailService, logisticsService, itemClient, mqMessagePublisher, mqConsumerSupport);
+                detailService, logisticsService, logisticsTraceService, itemClient, mqMessagePublisher, mqConsumerSupport);
         ReflectionTestUtils.setField(service, "baseMapper", orderMapper);
 
         service.handleOrderClose(new OrderCreatedEvent(123L, 1L, List.of(100L)));
@@ -397,6 +402,81 @@ class OrderServiceImplTest extends TradeServiceTestBase {
                 eq(MqConstants.orderStatusKey("shipped")),
                 isA(OrderStatusChangedEvent.class),
                 any(CorrelationData.class));
+    }
+
+    // ===== refundAudit tests =====
+
+    @Test
+    void refundAudit_approved_closesOrder() {
+        Order order = new Order();
+        order.setUserId(1L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(6); // 申请退款
+        orderService.save(order);
+        Long orderId = order.getId();
+
+        orderService.refundAudit(orderId, true, "同意退款");
+
+        Order updated = orderService.getById(orderId);
+        assertThat(updated.getStatus()).isEqualTo(5);
+        assertThat(updated.getCloseTime()).isNotNull();
+    }
+
+    @Test
+    void refundAudit_rejectedNotShipped_restoresToPaid() {
+        Order order = new Order();
+        order.setUserId(1L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(6); // 申请退款
+        order.setConsignTime(null); // 未发货
+        orderService.save(order);
+        Long orderId = order.getId();
+
+        orderService.refundAudit(orderId, false, "不符合退款条件");
+
+        Order updated = orderService.getById(orderId);
+        assertThat(updated.getStatus()).isEqualTo(2); // 恢复到已付款
+    }
+
+    @Test
+    void refundAudit_rejectedShipped_restoresToShipped() {
+        Order order = new Order();
+        order.setUserId(1L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(6); // 申请退款
+        order.setConsignTime(LocalDateTime.now()); // 已发货
+        orderService.save(order);
+        Long orderId = order.getId();
+
+        orderService.refundAudit(orderId, false, "商品已签收");
+
+        Order updated = orderService.getById(orderId);
+        assertThat(updated.getStatus()).isEqualTo(3); // 恢复到已发货
+    }
+
+    @Test
+    void refundAudit_nonExistentOrder_throwsBadRequest() {
+        assertThatThrownBy(() -> orderService.refundAudit(999999L, true, "审核"))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("不存在");
+    }
+
+    @Test
+    void refundAudit_nonRefundStatus_throwsBizIllegal() {
+        Order order = new Order();
+        order.setUserId(1L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(2); // 已付款，非退款状态
+        orderService.save(order);
+        Long orderId = order.getId();
+
+        assertThatThrownBy(() -> orderService.refundAudit(orderId, true, "审核"))
+                .isInstanceOf(BizIllegalException.class)
+                .hasMessageContaining("不可审核退款");
     }
 
     private void runAfterCommitCallbacks() {

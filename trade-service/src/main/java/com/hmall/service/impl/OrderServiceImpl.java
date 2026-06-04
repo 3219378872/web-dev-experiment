@@ -17,9 +17,11 @@ import com.hmall.common.utils.UserContext;
 import com.hmall.domain.po.Order;
 import com.hmall.domain.po.OrderDetail;
 import com.hmall.domain.po.OrderLogistics;
+import com.hmall.domain.po.LogisticsTrace;
 import com.hmall.mapper.OrderMapper;
 import com.hmall.service.IOrderDetailService;
 import com.hmall.service.IOrderLogisticsService;
+import com.hmall.service.ILogisticsTraceService;
 import com.hmall.service.IOrderService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     private final IOrderDetailService detailService;
     private final IOrderLogisticsService logisticsService;
+    private final ILogisticsTraceService logisticsTraceService;
     private final ItemClient itemClient;
     private final MqMessagePublisher mqMessagePublisher;
     private final MqConsumerSupport mqConsumerSupport;
@@ -191,6 +194,28 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
+    public void refundAudit(Long orderId, boolean approved, String reason) {
+        Order order = getById(orderId);
+        if (order == null) {
+            throw new BadRequestException("订单不存在");
+        }
+        if (order.getStatus() != 6) {
+            throw new BizIllegalException("当前状态不可审核退款");
+        }
+        if (approved) {
+            // 退款通过：关闭订单
+            order.setStatus(5);
+            order.setCloseTime(LocalDateTime.now());
+        } else {
+            // 退款驳回：恢复到退款前状态
+            // 已发货(consignTime不为空) → 3，否则 → 2
+            order.setStatus(order.getConsignTime() != null ? 3 : 2);
+        }
+        order.setUpdateTime(LocalDateTime.now());
+        updateById(order);
+    }
+
+    @Override
     public void ship(Long orderId, String trackingNumber) {
         Order order = getById(orderId);
         if (order == null) throw new BadRequestException("订单不存在");
@@ -204,6 +229,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             logistics.setLogisticsNumber(trackingNumber);
             logisticsService.updateById(logistics);
         }
+        // 插入物流轨迹记录
+        LogisticsTrace trace = new LogisticsTrace();
+        trace.setOrderId(orderId);
+        trace.setNode("已发货");
+        trace.setTraceTime(LocalDateTime.now());
+        trace.setDescription("商品已发货，运单号：" + trackingNumber);
+        trace.setCreateTime(LocalDateTime.now());
+        logisticsTraceService.save(trace);
     }
 
     private List<OrderDetail> buildDetails(Long orderId, List<ItemDTO> items, Map<Long, Integer> numMap) {

@@ -169,4 +169,82 @@ class CouponServiceImplTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(c1.getId());
     }
+
+    // ===== getAvailableCouponsForAmount tests =====
+
+    @Test
+    void getAvailableCouponsForAmount_filtersByMinAmount() {
+        LocalDateTime now = LocalDateTime.now();
+        Coupon c1 = coupon("满100减10", 1000, 10, 1, now.minusDays(1), now.plusDays(1));
+        c1.setMinAmount(10000);
+        couponMapper.insert(c1);
+        Coupon c2 = coupon("满50减5", 500, 10, 1, now.minusDays(1), now.plusDays(1));
+        c2.setMinAmount(5000);
+        couponMapper.insert(c2);
+
+        // 用户领取两张券
+        couponService.claimCoupon(TEST_USER_ID, c1.getId());
+        couponService.claimCoupon(TEST_USER_ID, c2.getId());
+
+        // 金额8000分，只能用满50的
+        List<Coupon> result = couponService.getAvailableCouponsForAmount(TEST_USER_ID, 8000);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("满50减5");
+    }
+
+    @Test
+    void getAvailableCouponsForAmount_onlyReturnsClaimedCoupons() {
+        LocalDateTime now = LocalDateTime.now();
+        Coupon c1 = coupon("未领取券", 1000, 10, 1, now.minusDays(1), now.plusDays(1));
+        c1.setMinAmount(0);
+        couponMapper.insert(c1);
+        Coupon c2 = coupon("已领取券", 500, 10, 1, now.minusDays(1), now.plusDays(1));
+        c2.setMinAmount(0);
+        couponMapper.insert(c2);
+
+        couponService.claimCoupon(TEST_USER_ID, c2.getId());
+
+        List<Coupon> result = couponService.getAvailableCouponsForAmount(TEST_USER_ID, 10000);
+
+        // 只返回已领取的券
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("已领取券");
+    }
+
+    @Test
+    void getAvailableCouponsForAmount_nullAmount_returnsAllClaimed() {
+        LocalDateTime now = LocalDateTime.now();
+        Coupon c1 = coupon("满减券", 1000, 10, 1, now.minusDays(1), now.plusDays(1));
+        c1.setMinAmount(99999);
+        couponMapper.insert(c1);
+
+        couponService.claimCoupon(TEST_USER_ID, c1.getId());
+
+        List<Coupon> result = couponService.getAvailableCouponsForAmount(TEST_USER_ID, null);
+
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    void getAvailableCouponsForAmount_excludesExpiredAndDisabled() {
+        LocalDateTime now = LocalDateTime.now();
+        Coupon expired = coupon("过期券", 1000, 10, 1, now.minusDays(10), now.minusDays(1));
+        expired.setMinAmount(0);
+        couponMapper.insert(expired);
+        Coupon disabled = coupon("禁用券", 1000, 10, 2, now.minusDays(1), now.plusDays(1));
+        disabled.setMinAmount(0);
+        couponMapper.insert(disabled);
+
+        List<Coupon> result = couponService.getAvailableCouponsForAmount(TEST_USER_ID, 10000);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getAvailableCouponsForAmount_noCoupons_returnsEmpty() {
+        List<Coupon> result = couponService.getAvailableCouponsForAmount(TEST_USER_ID, 10000);
+
+        assertThat(result).isEmpty();
+    }
 }
