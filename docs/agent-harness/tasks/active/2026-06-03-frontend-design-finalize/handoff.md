@@ -38,6 +38,10 @@ Implemented，待 PR / CI / review。
 - Coupons.vue：领券与我的券映射改用真实 Coupon 字段（discountType/discountValue/minAmount/endTime），消除真实数据下的「满undefined可用」/空折扣。
 - 移除冗余二进制 `web-mall.zip`（与 prototype/ 内容重复），新增 `.gitignore` 忽略 `*.zip`。
 
+## Codex-Review 整改（第 3 轮）
+- FeedbackList.vue：状态对齐后端真实两态（0 待处理 / 1 已回复）。移除可编辑状态 chip 与对 0/2/3 的 tab 过滤（后端只产生 0/1），回复仅提交 reply（reply 接口固定置 1）。修正本分支重设计引入的状态不一致回归。
+- backend-api.md：修正"反馈回复 body 可带 status"的错误表述（后端忽略并强制置 1）。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 

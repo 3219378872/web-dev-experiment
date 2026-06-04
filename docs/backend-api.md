@@ -86,7 +86,7 @@
 | admin 商品上下架、分类级联 | `ItemController PUT /admin/items/{id}/status`；`CategoryController` |
 | admin 订单筛选、发货、改状态 | `OrderController GET /admin/orders`(含 orderId/status)、`/ship`、`/status` |
 | admin 公告 CRUD、发布状态 | `NotificationController /admin/notifications` 全套（status 字段控制上下线） |
-| admin 反馈列表、回复、标记处理 | `FeedbackController GET /admin/feedbacks`、`PUT .../reply`（reply body 可带 status） |
+| admin 反馈列表、回复 | `FeedbackController GET /admin/feedbacks`、`PUT .../reply`（回复接口固定将状态置为 1=已回复，**不接受**自定义 status；如需"已解决/已关闭"等多态状态机需后端扩展 reply 接口与状态字段） |
 | 收藏夹、用户反馈提交 | `FavoriteController` 全套；`FeedbackController POST /feedbacks` |
 
 ---

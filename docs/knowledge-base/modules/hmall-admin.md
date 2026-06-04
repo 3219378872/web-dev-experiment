@@ -4,7 +4,7 @@ tracks:
   - hmall-admin/
 last_synced_commit: e23d151
 last_synced_date: 2026-06-04
-sync_note: "对齐全部管理后台页至高保真原型视觉：全局样式/AdminLayout、Dashboard/Login/ItemList/ItemEdit/CategoryList/OrderList/OrderDetail/UserList/ReviewList/BannerList/NotificationList/FeedbackList/Profile；保持 API 与数据逻辑不变。额外更新：Login.vue 完全重写对齐原型（深色侧边栏、统计数字、角色选择、验证码）。2026-06-04 收尾：修复 OrderList 分页功能回归（装饰性→功能性 prev/next/fetch(p)）；AdminLayout topbar 恢复退出登录按钮；删除 OrderList 死代码 allChecked。"
+sync_note: "对齐全部管理后台页至高保真原型视觉：全局样式/AdminLayout、Dashboard/Login/ItemList/ItemEdit/CategoryList/OrderList/OrderDetail/UserList/ReviewList/BannerList/NotificationList/FeedbackList/Profile；保持 API 与数据逻辑不变。额外更新：Login.vue 完全重写对齐原型（深色侧边栏、统计数字、角色选择、验证码）。2026-06-04 收尾：修复 OrderList 分页功能回归（装饰性→功能性 prev/next/fetch(p)）；AdminLayout topbar 恢复退出登录按钮；删除 OrderList 死代码 allChecked。codex-review 修正：FeedbackList 状态对齐后端真实两态（0 待处理/1 已回复），移除无法持久化的自定义状态编辑与 0/2/3 过滤，回复仅提交 reply。"
 ---
 
 # hmall-admin

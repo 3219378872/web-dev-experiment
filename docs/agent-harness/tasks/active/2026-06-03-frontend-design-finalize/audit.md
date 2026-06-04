@@ -13,5 +13,6 @@
 | 修正 backend-api.md 待补接口表述 | done | 逐条核验后端 16 个 Controller：纠正约 12 类误报（OrderList/Coupons/OrderConfirm/OrderDetail/ItemDetail/Profile/Address/admin 商品·订单·公告·反馈 实为已实现）；补 2 处漏报路径不一致（web `/items/search`→`/search/list`、`PUT /carts/{id}`→`PUT /carts`）；保留真实缺失（/admin/users、/admin/reviews、banner、dashboard、秒杀、客服、运费、物流、相关推荐、导出等） |
 | codex-review blocking findings 整改 | done | ①AppHeader 去硬编码「林晓」/角标3，改绑 userStore.username 与 cartStore.totalCount（0 时隐藏）②FlashSale 接 /items/page 真实加载+真实加购（移除原型硬编码商品与无效抢购动作）③Service 接 POST /messages（新增 common.sendCustomerMessage）④Coupons 按真实数据计算计数与平台/品类分类（去除未完成标记与演示填充注释） |
 | codex-review 第 2 轮整改 | done | Coupons 映射改用真实 Coupon 字段（discountType/discountValue/minAmount/endTime），消除 满undefined；移除冗余二进制 web-mall.zip 并 gitignore *.zip（原型以 prototype/ 解压形式保留） |
+| codex-review 第 3 轮整改 | done | FeedbackList 状态对齐后端真实两态（0 待处理/1 已回复）：移除自定义状态 chip 与 0/2/3 tab 过滤、回复仅提交 reply（后端固定置 1）；修正 backend-api.md 中"回复可带 status"的错误表述 |
 | 无需独立 spec/plan | not applicable | 纯前端视觉收尾，见 task.yaml spec_waiver/plan_waiver |
 | FeedbackList 分页装饰化是否回归 | not applicable | `fetch()` 不传分页参数、数据层本不分页，HEAD 版 `el-pagination` 翻页亦只重拉全量；保留现状非行为回归 |

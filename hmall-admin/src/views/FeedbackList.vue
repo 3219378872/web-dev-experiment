@@ -31,14 +31,7 @@
               style="padding: 6px 12px; font-size: 12.5px"
               @click="tab = 'replied'"
             >
-              处理中
-            </button>
-            <button
-              :class="{ active: tab === 'closed' }"
-              style="padding: 6px 12px; font-size: 12.5px"
-              @click="tab = 'closed'"
-            >
-              已处理
+              已回复
             </button>
           </div>
         </div>
@@ -118,19 +111,6 @@
 
           <div class="reply-box">
             <div class="field">
-              <label>处理状态</label>
-              <div style="display: flex; gap: 8px">
-                <span
-                  v-for="s in statusOptions"
-                  :key="s.value"
-                  class="chip"
-                  :class="{ on: selected.status === s.value }"
-                  @click="selected.status = s.value"
-                  >{{ s.label }}</span
-                >
-              </div>
-            </div>
-            <div class="field" style="margin-top: 14px">
               <label>回复用户</label>
               <textarea
                 v-model="replyContent"
@@ -182,25 +162,17 @@ function avatarColor(i) {
   return avatarColors[i % avatarColors.length];
 }
 
-const statusOptions = [
-  { label: '待处理', value: 0 },
-  { label: '处理中', value: 1 },
-  { label: '已解决', value: 2 },
-  { label: '已关闭', value: 3 },
-];
-
+// 后端 feedback 仅有两种状态：0 待处理、1 已回复（回复接口固定置 1）
 function statusText(s) {
-  return ['待处理', '处理中', '已解决', '已关闭'][s] || '-';
+  return ['待处理', '已回复'][s] || '-';
 }
 function statusDot(s) {
-  return ['warn', 'blue', 'green', 'gray'][s] || 'gray';
+  return ['warn', 'green'][s] || 'gray';
 }
 
 const filteredFeedbacks = computed(() => {
-  if (tab.value === 'all') return feedbacks.value;
   if (tab.value === 'pending') return feedbacks.value.filter((f) => f.status === 0);
-  if (tab.value === 'replied') return feedbacks.value.filter((f) => f.status === 2);
-  if (tab.value === 'closed') return feedbacks.value.filter((f) => f.status === 3);
+  if (tab.value === 'replied') return feedbacks.value.filter((f) => f.status === 1);
   return feedbacks.value;
 });
 
@@ -226,10 +198,8 @@ async function fetch() {
 async function doReply() {
   if (!selected.value) return;
   try {
-    await replyFeedback(selected.value.id, {
-      reply: replyContent.value,
-      status: selected.value.status,
-    });
+    // 后端回复接口固定将状态置为 1（已回复），不接受自定义状态
+    await replyFeedback(selected.value.id, { reply: replyContent.value });
     ElMessage.success('已回复');
     fetch();
   } catch (err) {
