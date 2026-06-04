@@ -11,6 +11,7 @@ Implemented，待 PR / CI / review。
 - e2e：`e2e/visual/{fixtures.ts,regression.spec.ts,utils.ts}`
 - 配置：`.gitignore`（新增 `test-results/` 忽略）
 - KB：`docs/knowledge-base/modules/{hmall-web,hmall-admin}.md`（K005 co-change）
+- 文档修正：`docs/backend-api.md`（基于 `docs/api.md` 与后端 Controller 源码重写待补接口表）
 - 任务记录：`docs/agent-harness/tasks/active/2026-06-03-frontend-design-finalize/*`
 
 ## Commands Run
@@ -21,6 +22,7 @@ Implemented，待 PR / CI / review。
 - `docker compose config -q` → 有效
 
 ## Known Risks
+- ⚠️ 核对 backend-api.md 时发现 2 处前端↔后端路径不一致（现网会 404）：`hmall-web` `searchItems` 调 `/items/search`（应为 `/search/list`）、`updateCartItem` 调 `PUT /carts/{id}`（应为 `PUT /carts` body 带 id）。本 PR 仅在 `docs/backend-api.md` A 节记录、未改前端调用以免扩大范围；建议后续单独修复（P0）。
 - `hmall-admin/src/views/FeedbackList.vue` 分页器为装饰性（页码 2/3 无 handler），因其 `fetch()` 不向后端传分页参数、数据层本不分页；HEAD 版的 `el-pagination` 翻页也只是重拉全量。**非行为回归**，未改动；如后续需要真分页须同时改 `getFeedbacks` 接口与 fetch。
 - 视觉对齐为大面积模板/样式改动，已通过两前端 build + 单测；像素级回归由 e2e/visual 套件覆盖（CI smoke 不跑视觉套件，仅 build/test）。
 - CI 的 `codex-review` 若因缺 secrets 阻塞，与本变更无关，按 CLAUDE.md 在 PR 描述说明。

@@ -12,6 +12,7 @@
   - 修复 `hmall-web` 单测 `App.spec.ts`（缺少 router 上下文导致 `useRoute()` 崩溃）。
   - 清理误入仓库的调试产物与忽略规则。
   - harness 任务记录 + KB 页 co-change（K005）。
+  - 修正 `docs/backend-api.md`：将前端 api/*.js 调用逐条比对 `docs/api.md` 与后端 Controller 源码，纠正旧版误报（已实现却列为缺失）并补漏报（前端 404 的路径不一致）。
 - Out of scope:
   - 任何后端 / API 契约 / 数据库改动。
   - 既有 endpoint 返回形态变更。

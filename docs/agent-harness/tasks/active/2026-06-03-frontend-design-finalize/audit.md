@@ -10,5 +10,6 @@
 | KB co-change（K005） | done | 更新 `docs/knowledge-base/modules/hmall-web.md`、`docs/knowledge-base/modules/hmall-admin.md` sync_note 并 bump last_synced_commit |
 | 前端测试/构建通过 | done | 见 verification.md |
 | 不改后端 / CLAUDE / AGENTS | done | 变更仅前端、e2e、.gitignore、KB、本任务记录 |
+| 修正 backend-api.md 待补接口表述 | done | 逐条核验后端 16 个 Controller：纠正约 12 类误报（OrderList/Coupons/OrderConfirm/OrderDetail/ItemDetail/Profile/Address/admin 商品·订单·公告·反馈 实为已实现）；补 2 处漏报路径不一致（web `/items/search`→`/search/list`、`PUT /carts/{id}`→`PUT /carts`）；保留真实缺失（/admin/users、/admin/reviews、banner、dashboard、秒杀、客服、运费、物流、相关推荐、导出等） |
 | 无需独立 spec/plan | not applicable | 纯前端视觉收尾，见 task.yaml spec_waiver/plan_waiver |
 | FeedbackList 分页装饰化是否回归 | not applicable | `fetch()` 不传分页参数、数据层本不分页，HEAD 版 `el-pagination` 翻页亦只重拉全量；保留现状非行为回归 |
