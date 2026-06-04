@@ -167,6 +167,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public void updateProfile(User profile) {
         User user = getById(UserContext.getUser());
+        if (user == null) {
+            throw new BadRequestException("用户不存在");
+        }
         if (StrUtil.isNotBlank(profile.getNickname())) {
             user.setNickname(profile.getNickname());
         }
@@ -175,6 +178,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         if (StrUtil.isNotBlank(profile.getEmail())) {
             user.setEmail(profile.getEmail());
+        }
+        if (StrUtil.isNotBlank(profile.getPassword())) {
+            user.setPassword(passwordEncoder.encode(profile.getPassword()));
         }
         updateById(user);
     }
@@ -247,32 +253,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public void updateProfileWithPassword(User profile) {
-        // 获取当前登录用户
-        Long userId = UserContext.getUser();
-        User user = getById(userId);
-        if (user == null) {
-            throw new BadRequestException("用户不存在");
-        }
-
-        // 更新基本信息
-        if (StrUtil.isNotBlank(profile.getNickname())) {
-            user.setNickname(profile.getNickname());
-        }
-        if (StrUtil.isNotBlank(profile.getAvatar())) {
-            user.setAvatar(profile.getAvatar());
-        }
-        if (StrUtil.isNotBlank(profile.getEmail())) {
-            user.setEmail(profile.getEmail());
-        }
-
-        // 更新密码（如果提供）
-        if (StrUtil.isNotBlank(profile.getPassword())) {
-            // 加密密码
-            String encodedPassword = passwordEncoder.encode(profile.getPassword());
-            user.setPassword(encodedPassword);
-        }
-
-        updateById(user);
+        updateProfile(profile);
     }
 
     @Override

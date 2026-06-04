@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: c120b3314094ec2d50324c73a0e91ec28a896c3a
+last_synced_commit: c8518e84913fd26ee907c7702f3660b401743206
 last_synced_date: 2026-06-04
-sync_note: "Phase 1 修复：新增 UserStatusDTO，修复 PUT /admin/users/{id}/status 端点以符合 spec 要求（仅 user-service 代码改动，auth/gateway 流程不变）"
+sync_note: "Phase 1 codex-review 修复：UserStatus 枚举值更新，init-all-tables.sql 同步，仅 user-service 代码改动"
 ---
 
 # auth-and-gateway-flow

@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS `user` (
     avatar VARCHAR(512),
     nickname VARCHAR(64),
     role VARCHAR(16) DEFAULT 'user',
-    status INT DEFAULT 1 COMMENT '0=FROZEN 1=NORMAL',
+    status INT DEFAULT 1 COMMENT '1=NORMAL 2=FROZEN',
     balance INT DEFAULT 0,
     create_time DATETIME,
     update_time DATETIME
@@ -266,7 +266,7 @@ CREATE TABLE IF NOT EXISTS banners (
 -- ==================== 测试数据 ====================
 
 -- 管理员用户 (password: admin123)
--- UserStatus enum: 0=FROZEN, 1=NORMAL
+-- UserStatus enum: 1=NORMAL, 2=FROZEN
 INSERT INTO `user` (username, password, role, status, create_time) VALUES
 ('admin', '$2a$10$sx/sI.5QQ4sX4giAI.7YbeP.ZrAIqIE.5mexP.6MsV8DnI8rbKGEW', 'admin', 1, NOW()),
 ('testuser', '$2a$10$sx/sI.5QQ4sX4giAI.7YbeP.ZrAIqIE.5mexP.6MsV8DnI8rbKGEW', 'user', 1, NOW());

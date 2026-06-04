@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: c120b3314094ec2d50324c73a0e91ec28a896c3a
+last_synced_commit: c8518e84913fd26ee907c7702f3660b401743206
 last_synced_date: 2026-06-04
-sync_note: "Phase 1 实现：新增管理端用户管理与个人中心端点，修复toggleUserStatus无body问题，新增UserStatusDTO"
+sync_note: "Phase 1 codex-review 修复：UserStatus 枚举 FROZEN 0→2，更新 init-all-tables.sql，PUT /users/profile 支持密码更新"
 ---
 
 # user-service
