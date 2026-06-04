@@ -166,6 +166,14 @@
           <div class="sub">已有账号？<a @click="switchMode('login')">直接登录 ›</a></div>
 
           <div class="field">
+            <label>用户名</label>
+            <input
+              v-model="registerForm.username"
+              class="input"
+              placeholder="设置用户名，用于登录"
+            />
+          </div>
+          <div class="field">
             <label>邮箱地址</label>
             <input
               v-model="registerForm.email"
@@ -438,6 +446,10 @@ async function sendResetCode() {
 }
 
 async function doRegister() {
+  if (!registerForm.username || !registerForm.password) {
+    ElMessage.warning('请填写用户名与密码');
+    return;
+  }
   if (!agreed.value) {
     ElMessage.warning('请同意用户协议');
     return;

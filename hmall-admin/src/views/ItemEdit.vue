@@ -313,7 +313,13 @@ function removeImage(idx) {
 
 async function save() {
   try {
-    const payload = { ...form, image: imageList.value[0] || '' };
+    // 表单以「元」展示/编辑，后端 ItemDTO.price 为整数「分」，提交前换算
+    const priceYuan = parseFloat(form.price);
+    const payload = {
+      ...form,
+      image: imageList.value[0] || '',
+      price: Number.isFinite(priceYuan) ? Math.round(priceYuan * 100) : 0,
+    };
     if (isEdit.value) await updateItem(route.params.id, payload);
     else await saveItem(payload);
     ElMessage.success('已保存');

@@ -59,6 +59,11 @@ Implemented，待 PR / CI / review。
 - Login.vue 注册：协议勾选框由硬编码 `checkbox on`（视觉已勾但 `agreed` 恒 false）改为 `:class="{on:agreed}" @click` 双向绑定，修复"注册永远提示请同意用户协议"。
 - Login.vue 找回密码：重设计后遗漏新密码输入框，补回 `resetForm.newPassword` 输入并在 doReset 增加非空校验，修复"重置必失败"。
 
+## Codex-Review 整改（第 8 轮）
+- Login.vue 注册：补回用户名输入框（后端 RegisterFormDTO.username 为 @NotBlank，重设计遗漏导致注册必失败），doRegister 增加用户名/密码校验。
+- admin ItemEdit.vue：保存时价格由「元」换算回整数「分」（后端 ItemDTO.price 为 Integer 分，原样回传"299.00"会反序列化失败或价格错乱）。
+- OrderConfirm.vue：下单 payload 补传 addressId（后端 OrderFormDTO 有该字段，虽当前未被服务使用，补齐更正确）。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 
