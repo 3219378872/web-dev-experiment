@@ -3,9 +3,14 @@
     <!-- HERO -->
     <section class="hero">
       <div class="catmenu">
-        <div v-for="c in categories" :key="c.name" class="it">
+        <router-link
+          v-for="c in categories"
+          :key="c.name"
+          class="it"
+          :to="`/search?q=${encodeURIComponent(c.name)}`"
+        >
           <b>{{ c.name }}</b> <span class="sub">{{ c.sub }} ›</span>
-        </div>
+        </router-link>
       </div>
 
       <div class="carousel">
@@ -209,14 +214,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { getItems } from '@/api/item';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { getItems, getCategories } from '@/api/item';
 import ProductCard from '@/components/ProductCard.vue';
 import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore();
-// bannerTexts reserved for future carousel data
-// const bannerTexts = ref(['新品上市', '限时特惠', '品质生活']);
 const hotItems = ref([]);
 const newItems = ref([]);
 const promoItems = ref([]);
@@ -224,31 +227,27 @@ const flashItems = ref([]);
 const countdown = ref({ h: '02', m: '48', s: '13' });
 const flashPct = [78, 64, 90, 45, 82, 58];
 
-const categories = [
-  { name: '手机数码', sub: '手机/电脑/影音' },
-  { name: '家用电器', sub: '大家电/厨房' },
-  { name: '服饰鞋包', sub: '男装/女装/箱包' },
-  { name: '美妆个护', sub: '护肤/彩妆/洗护' },
-  { name: '食品生鲜', sub: '零食/水果/肉禽' },
-  { name: '家居家装', sub: '家具/家纺/收纳' },
-  { name: '母婴玩具', sub: '奶粉/玩具/童装' },
-  { name: '运动户外', sub: '运动鞋/健身' },
-  { name: '图书文娱', sub: '图书/乐器' },
-  { name: '汽车用品', sub: '配件/养护' },
+const categories = ref([]);
+const kkIcons = ['▣', '▤', '◈', '✿', '◉', '▦', '❀', '◐', '▥', '◆'];
+const kkColors = [
+  '#FF6A45',
+  '#88A6B8',
+  '#B79CC4',
+  '#DE9696',
+  '#B0BE92',
+  '#C9A66B',
+  '#E9B775',
+  '#7FB6A6',
+  '#92ADBD',
+  '#A7906B',
 ];
-
-const kingKong = [
-  ['手机数码', '▣', '#FF6A45'],
-  ['家用电器', '▤', '#88A6B8'],
-  ['服饰鞋包', '◈', '#B79CC4'],
-  ['美妆个护', '✿', '#DE9696'],
-  ['食品生鲜', '◉', '#B0BE92'],
-  ['家居家装', '▦', '#C9A66B'],
-  ['母婴玩具', '❀', '#E9B775'],
-  ['运动户外', '◐', '#7FB6A6'],
-  ['图书文娱', '▥', '#92ADBD'],
-  ['汽车用品', '◆', '#A7906B'],
-];
+const kingKong = computed(() =>
+  categories.value.map((c, i) => [
+    c.name,
+    kkIcons[i % kkIcons.length],
+    kkColors[i % kkColors.length],
+  ])
+);
 
 let timer = null;
 function startCountdown() {
@@ -269,6 +268,12 @@ function startCountdown() {
 
 onMounted(async () => {
   startCountdown();
+  try {
+    const cats = await getCategories();
+    categories.value = (cats || []).map((c) => ({ name: c.name, sub: '' }));
+  } catch (e) {
+    /* ignore */
+  }
   try {
     const data = await getItems({ page: 1, size: 10, sortBy: 'sold' });
     hotItems.value = (data?.list || []).map((x) => ({ ...x, tag: x.tag || '热卖' })).slice(0, 5);

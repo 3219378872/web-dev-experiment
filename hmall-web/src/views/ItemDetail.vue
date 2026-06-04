@@ -491,10 +491,12 @@ onMounted(async () => {
   } catch (err) {
     /* ignore */
   }
-  try {
-    isFavorited.value = await checkFavorite(route.params.id);
-  } catch (err) {
-    /* ignore */
+  if (userStore.isLoggedIn) {
+    try {
+      isFavorited.value = await checkFavorite(route.params.id);
+    } catch (err) {
+      /* ignore */
+    }
   }
   try {
     const data = await getItems({ page: 1, size: 4 });
