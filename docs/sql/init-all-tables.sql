@@ -1,6 +1,8 @@
 -- hmall 全量建表 SQL（基础表 + 扩展表）
 -- docker exec -i hmall-mysql-1 mysql -uroot -proot hmall < docs/sql/init-all-tables.sql
 
+SET NAMES utf8mb4;
+
 -- ==================== 基础表 ====================
 
 CREATE TABLE IF NOT EXISTS `user` (
