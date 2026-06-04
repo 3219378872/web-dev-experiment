@@ -2,9 +2,9 @@
 title: notify-service
 tracks:
   - notify-service/
-last_synced_commit: HEAD
+last_synced_commit: 3d72b70546694dbb2996d2afe64be701485e32c5
 last_synced_date: 2026-06-04
-sync_note: "Phase 4: 新增 GET /faqs 端点 + FAQ 表"
+sync_note: "Phase 4: 新增 GET /faqs 端点 + FAQ 表 + 公开读路径"
 ---
 
 # notify-service
