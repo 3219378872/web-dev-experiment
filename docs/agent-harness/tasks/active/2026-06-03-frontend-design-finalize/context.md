@@ -17,6 +17,10 @@
   - 任何后端 / API 契约 / 数据库改动。
   - 既有 endpoint 返回形态变更。
   - 修改 `CLAUDE.md` / `AGENTS.md`。
+  - **admin Dashboard 运营数据接入**：成交额/订单/新增用户/访客/销售趋势/品类占比/
+    热销/待办/最新订单所需的后端统计接口当前不存在（见 `docs/backend-api.md` B4），
+    本页仅做视觉对齐 + 演示数据，真实数据待后端统计接口接入后再替换。main 版本
+    同样无任何后端数据调用，故不构成"破坏既有 API/数据逻辑"。
 
 ## Related Artifacts
 - Spec: none —— 纯前端视觉收尾，无 API/数据/行为破坏性变更（见 task.yaml spec_waiver）。

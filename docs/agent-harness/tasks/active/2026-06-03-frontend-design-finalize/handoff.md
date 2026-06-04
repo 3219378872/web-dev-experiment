@@ -46,6 +46,11 @@ Implemented，待 PR / CI / review。
 - web OrderDetail.vue：新增 `api/order.getOrderById`，改用 `GET /orders/{id}` 直取订单，替代「翻第一页 size:20 客户端查找」（超出首页的订单会误判不存在）。
 - admin ItemEdit.vue：新增 `api/item.getItemById`，改用 `GET /items/{id}` 直取商品，替代「size:1 列表查找」（必然漏数据）；同时移除无效的占位图片路径填充。
 
+## Codex-Review 整改（第 5 轮）—— Dashboard 范围声明
+- codex 第 5 轮拦 admin Dashboard「硬编码运营数据」。核查：main 版本 Dashboard 本就无任何后端数据调用（仅 ref+echarts），看板统计接口后端完全不存在（backend-api.md B4）。
+- 按决策不回退/不造后端，而是**明确披露范围**：Dashboard.vue 顶部加说明注释；context.md Out of scope、KB hmall-admin、PR 描述均声明「看板运营数据后端暂未提供，本页为视觉对齐+演示数据，留待后端接入」。
+- 该项为已知且已披露的范围限制，不属于破坏既有 API/数据逻辑（main 同样无后端调用）。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 
