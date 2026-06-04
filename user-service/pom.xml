@@ -83,6 +83,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
+        <!-- H2 for testing -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.heima</groupId>
             <artifactId>hm-api</artifactId>
@@ -104,6 +110,7 @@
                     <execution>
                         <id>check</id>
                         <configuration combine.self="override">
+                            <skip>${jacoco.check.skip}</skip>
                             <haltOnFailure>true</haltOnFailure>
                             <rules>
                                 <rule>
@@ -115,7 +122,7 @@
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.00</minimum>
+                                            <minimum>0.80</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
@@ -124,7 +131,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- TODO(coverage-ratchet): raise to 0.70 -->
         </plugins>
     </build>
 </project>
