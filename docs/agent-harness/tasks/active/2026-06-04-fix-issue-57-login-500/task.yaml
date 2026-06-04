@@ -1,0 +1,7 @@
+slug: 2026-06-04-fix-issue-57-login-500
+status: active
+task_branch: task/2026-06-04-fix-issue-57-login-500
+spec: null
+spec_waiver: "Bug fix from GitHub issue #57; no spec needed."
+plan: null
+plan_waiver: "Single-line code change + test update; no plan needed."
