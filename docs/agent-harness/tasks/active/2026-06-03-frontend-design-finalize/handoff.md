@@ -34,6 +34,10 @@ Implemented，待 PR / CI / review。
 - Coupons.vue：我的券计数与平台/品类分类改为基于真实返回数据，去除未完成标记与演示注释。
 - 说明：admin Dashboard、web Notifications 的演示数据未改（统计/富展示字段的后端不存在，见 docs/backend-api.md B 节），本轮 codex 未将其列为 blocking。
 
+## Codex-Review 整改（第 2 轮）
+- Coupons.vue：领券与我的券映射改用真实 Coupon 字段（discountType/discountValue/minAmount/endTime），消除真实数据下的「满undefined可用」/空折扣。
+- 移除冗余二进制 `web-mall.zip`（与 prototype/ 内容重复），新增 `.gitignore` 忽略 `*.zip`。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 

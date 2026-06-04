@@ -156,6 +156,27 @@ function isCategoryCoupon(c) {
   return CATEGORY_KEYWORDS.some((k) => text.includes(k));
 }
 
+/**
+ * 将后端 Coupon（name/description/discountType/discountValue/minAmount/endTime）
+ * 映射为页面展示结构。discountType: 2=折扣（discountValue 为 10 倍折扣值），其余=满减（分）。
+ */
+function mapCoupon(c, state) {
+  const isPct = c.discountType === 2;
+  const minYuan = c.minAmount ? Math.round(c.minAmount / 100) : 0;
+  let resolved = state;
+  if (state !== '' && c.endTime && new Date(c.endTime) < new Date()) resolved = 'expired';
+  return {
+    id: c.id,
+    value: isPct ? (c.discountValue || 0) / 10 : Math.round((c.discountValue || 0) / 100),
+    unit: isPct ? '折' : '',
+    condition: minYuan > 0 ? `满${minYuan}可用` : '无门槛',
+    name: c.name || '优惠券',
+    scope: c.description || '全场商品可用',
+    expiry: c.endTime ? String(c.endTime).slice(0, 10) : '长期有效',
+    state: resolved,
+  };
+}
+
 async function handleClaim(id) {
   try {
     await claimCoupon(id);
@@ -170,16 +191,7 @@ async function handleClaim(id) {
 async function loadCoupons() {
   try {
     const data = await getCoupons();
-    const list = (data || []).map((c) => ({
-      id: c.id,
-      value: c.discount || c.value,
-      unit: c.unit || '',
-      condition: c.condition || `满${c.threshold}可用`,
-      name: c.name,
-      scope: c.scope || '全场商品可用',
-      expiry: c.expiry || c.endTime?.slice(0, 10) || '2026-06-30',
-      state: c.state || '',
-    }));
+    const list = (data || []).map((c) => mapCoupon(c, ''));
     platformCoupons.value = list.filter((c) => !isCategoryCoupon(c));
     categoryCoupons.value = list.filter((c) => isCategoryCoupon(c));
   } catch (err) {
@@ -282,16 +294,7 @@ async function loadCoupons() {
 
   try {
     const data = await getMyCoupons();
-    myCoupons.value = (data || []).map((c) => ({
-      id: c.id,
-      value: c.discount || c.value,
-      unit: c.unit || '',
-      condition: c.condition || `满${c.threshold}可用`,
-      name: c.name,
-      scope: c.scope || '全场商品可用',
-      expiry: c.expiry || c.endTime?.slice(0, 10) || '2026-06-30',
-      state: c.state || 'use',
-    }));
+    myCoupons.value = (data || []).map((c) => mapCoupon(c, 'use'));
   } catch (err) {
     myCoupons.value = [
       {

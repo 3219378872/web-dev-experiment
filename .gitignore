@@ -34,6 +34,9 @@ e2e/blob-report/
 e2e/visual/results/
 e2e/visual/screenshots/
 
+# 归档（原型资源以解压后的 prototype/ 形式入库，不再提交 zip）
+*.zip
+
 # OS / 编辑器
 .DS_Store
 *.log
