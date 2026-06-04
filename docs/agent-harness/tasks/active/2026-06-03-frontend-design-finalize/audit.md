@@ -22,6 +22,7 @@
 | codex-review 第 10 轮整改 | done | 移除 Coupons 接口失败兜底假券（改空态，杜绝对假 ID 领取）、Notifications 空列表的 6 条假公告与假字段合并（改真实公告中性映射、空则空态、不显伪阅读量） |
 | codex-review 第 11 轮整改 | done | ①FlashSale 去虚构 70% 秒杀价/假抢购率，展示真实价（与加购一致）②admin OrderList 搜索接入：orderId 走后端、客户/支付/日期客户端过滤、支付列按 paymentType 真值映射③AdminLayout 徽标接真实接口（待发货/待处理反馈）、身份取 adminInfo，去硬编码 |
 | codex-review 第 12 轮整改 | done | ①OrderDetail 支付映射修正为后端真值②admin OrderList 移除后端不支持的客户/支付/日期搜索（分页下伪过滤），仅留订单号+状态③Search 接真实 /search/list+功能分页、去模糊/精确伪模式④顺带修复 A 节两处路径不一致（/items/search→/search/list、PUT /carts/{id}→PUT /carts），A 节已清零 |
+| codex-review 第 13 轮整改 | done | OrderConfirm 支付方式值对齐后端（1支付宝/2微信/3余额，移除无效"银行卡");e2e 视觉 mock 同步应用真实路径（/search/list、/orders/{id}、/my-feedbacks） |
 | admin Dashboard 运营数据 | out of scope（已披露） | 看板统计后端接口不存在（backend-api.md B4），main 版本亦无后端调用；本页为视觉对齐+演示数据，已在 Dashboard.vue 顶部、context Out of scope、KB、PR 描述中明确声明留待后端接入 |
 | 无需独立 spec/plan | not applicable | 纯前端视觉收尾，见 task.yaml spec_waiver/plan_waiver |
 | FeedbackList 分页装饰化是否回归 | not applicable | `fetch()` 不传分页参数、数据层本不分页，HEAD 版 `el-pagination` 翻页亦只重拉全量；保留现状非行为回归 |

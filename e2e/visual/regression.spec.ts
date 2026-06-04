@@ -265,20 +265,15 @@ async function setupApiMocks(page: Page, pageName?: string): Promise<void> {
       }
       return json(mockItems);
     }
-    if (url.match(/\/api\/items\/search(\?|$)/)) return json(mockSearchItems);
+    if (url.match(/\/api\/search\/list(\?|$)/)) return json(mockSearchItems);
     if (url.match(/\/api\/items\/\d+$/)) return json(mockItemDetail);
     if (url.match(/\/api\/items\/\d+\/reviews$/)) return json([]);
     if (url.match(/\/api\/categories$/)) return json(mockCategories);
 
     // Orders
-    if (url.match(/\/api\/orders(\?|$)/)) {
-      // web-order-detail 从列表中查找 id=1 的订单
-      const modified = {
-        ...mockOrders,
-        list: mockOrders.list.map((o, i) => (i === 0 ? { ...o, id: 1 } : o)),
-      };
-      return json(modified);
-    }
+    // web-order-detail 通过 GET /orders/{id} 直取单条订单
+    if (url.match(/\/api\/orders\/\d+$/)) return json({ ...mockOrders.list[0], id: 1 });
+    if (url.match(/\/api\/orders(\?|$)/)) return json(mockOrders);
 
     // Cart
     if (url.match(/\/api\/carts$/)) return json(mockCart.items);
@@ -296,6 +291,10 @@ async function setupApiMocks(page: Page, pageName?: string): Promise<void> {
     // Coupons
     if (url.match(/\/api\/coupons$/)) return json(mockCoupons);
     if (url.match(/\/api\/my-coupons$/)) return json(mockMyCoupons);
+
+    // 我的反馈（web Feedback 页）
+    if (url.match(/\/api\/my-feedbacks(\?|$)/))
+      return json({ list: mockFeedbacks, total: mockFeedbacks.length });
 
     // Admin items（编辑页用 TWS 对齐数据，列表页用原始数据）
     if (url.match(/\/api\/admin\/items(\?|$)/)) {

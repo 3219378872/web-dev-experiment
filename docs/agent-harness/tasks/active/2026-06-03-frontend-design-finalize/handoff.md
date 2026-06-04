@@ -85,6 +85,10 @@ Implemented，待 PR / CI / review。
 - web Search.vue：接真实 `/search/list`（key + pageNo/pageSize），死分页器改为功能分页（pageRange/prev/next），移除无后端支持的模糊/精确模式与相关提示。
 - 顺带清零 backend-api.md A 节：`searchItems` 改 `/search/list`、`cart.js updateCartItem` 改 `PUT /carts`(body id+num)。
 
+## Codex-Review 整改（第 13 轮）
+- OrderConfirm.vue：支付方式选项值对齐后端 Order.paymentType（1 支付宝 / 2 微信 / 3 余额），移除无效的"银行卡(4)"，默认 1。
+- e2e/visual/regression.spec.ts：mock 路由同步应用真实调用（/api/search/list、/api/orders/{id}、/api/my-feedbacks），保持 mock 与前端一致。
+
 ## Next Action
 推远程开 PR，过 CI 与 review，合并后删除远程分支，并将本任务移至 completed/（status: done）。
 

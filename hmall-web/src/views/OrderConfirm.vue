@@ -193,12 +193,13 @@ const cartStore = useCartStore();
 const addresses = ref([]);
 const selectedAddress = ref(null);
 const remark = ref('');
-const payType = ref(2);
+const payType = ref(1);
 
+// 后端 Order.paymentType：1 支付宝 / 2 微信 / 3 余额
 const payOptions = [
+  { value: 1, label: '支付宝', icon: '支', color: '#1677FF' },
   { value: 2, label: '微信支付', icon: '微', color: '#09BB07' },
-  { value: 3, label: '支付宝', icon: '支', color: '#1677FF' },
-  { value: 4, label: '银行卡', icon: '银', color: '#C5221F' },
+  { value: 3, label: '余额支付', icon: '余', color: '#FF9D00' },
 ];
 
 const selectedAddr = computed(() => addresses.value.find((a) => a.id === selectedAddress.value));
