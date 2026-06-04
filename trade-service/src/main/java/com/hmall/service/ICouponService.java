@@ -8,4 +8,12 @@ public interface ICouponService extends IService<Coupon> {
     List<Coupon> getAvailableCoupons();
     void claimCoupon(Long userId, Long couponId);
     List<Coupon> getUserCoupons(Long userId);
+
+    /**
+     * 获取用户可用的优惠券（过滤满减门槛、有效期、未使用）
+     * @param userId 用户id
+     * @param amount 订单金额，单位为分
+     * @return 可用优惠券列表
+     */
+    List<Coupon> getAvailableCouponsForAmount(Long userId, Integer amount);
 }

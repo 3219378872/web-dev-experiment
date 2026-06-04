@@ -191,6 +191,28 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
+    public void refundAudit(Long orderId, boolean approved, String reason) {
+        Order order = getById(orderId);
+        if (order == null) {
+            throw new BadRequestException("订单不存在");
+        }
+        if (order.getStatus() != 6) {
+            throw new BizIllegalException("当前状态不可审核退款");
+        }
+        if (approved) {
+            // 退款通过：关闭订单
+            order.setStatus(5);
+            order.setCloseTime(LocalDateTime.now());
+        } else {
+            // 退款驳回：恢复到退款前状态
+            // 已发货(consignTime不为空) → 3，否则 → 2
+            order.setStatus(order.getConsignTime() != null ? 3 : 2);
+        }
+        order.setUpdateTime(LocalDateTime.now());
+        updateById(order);
+    }
+
+    @Override
     public void ship(Long orderId, String trackingNumber) {
         Order order = getById(orderId);
         if (order == null) throw new BadRequestException("订单不存在");

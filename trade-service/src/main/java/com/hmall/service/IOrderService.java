@@ -17,4 +17,12 @@ public interface IOrderService extends IService<Order> {
     void refund(Long orderId, Long userId);
 
     void ship(Long orderId, String trackingNumber);
+
+    /**
+     * 退款审核
+     * @param orderId 订单id
+     * @param approved 是否通过
+     * @param reason 审核原因
+     */
+    void refundAudit(Long orderId, boolean approved, String reason);
 }

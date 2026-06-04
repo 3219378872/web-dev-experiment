@@ -67,6 +67,16 @@ CREATE TABLE IF NOT EXISTS user_coupons (
     INDEX idx_user_id (user_id)
 );
 
+CREATE TABLE IF NOT EXISTS logistics_trace (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    node VARCHAR(64) NOT NULL,
+    description VARCHAR(255),
+    trace_time DATETIME NOT NULL,
+    create_time DATETIME,
+    INDEX idx_order_id (order_id)
+);
+
 CREATE TABLE IF NOT EXISTS mq_outbox_message (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     exchange_name VARCHAR(128) NOT NULL,
