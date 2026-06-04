@@ -284,6 +284,16 @@ CREATE TABLE IF NOT EXISTS `seckill` (
     KEY `idx_status_time` (`status`, `start_time`, `end_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='限时秒杀表';
 
+CREATE TABLE IF NOT EXISTS faq (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    question VARCHAR(255) NOT NULL,
+    answer TEXT NOT NULL,
+    sort INT DEFAULT 0,
+    status TINYINT DEFAULT 1,
+    create_time DATETIME,
+    update_time DATETIME
+);
+
 -- ==================== 测试数据 ====================
 
 -- 管理员用户 (password: admin123)
