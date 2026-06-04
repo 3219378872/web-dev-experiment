@@ -72,5 +72,11 @@ public class UserController {
     public User getById(@PathVariable Long id) {
         return userService.getById(id);
     }
+
+    @ApiOperation("统计最近N天新增用户数")
+    @GetMapping("/count-new")
+    public Long countNewUsers(@RequestParam("days") Integer days) {
+        return userService.countNewUsers(days);
+    }
 }
 

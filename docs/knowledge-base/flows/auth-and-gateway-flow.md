@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 3d72b70546694dbb2996d2afe64be701485e32c5
+last_synced_commit: 7fbdea0734907e62cccf35d274363d7bc391706e
 last_synced_date: 2026-06-04
-sync_note: "Phase 4: 新增 /faqs/** 公开读路径，AuthGlobalFilter 排除该端点"
+sync_note: "Phase 3: user-service 新增 /users/count-new 端点，已在 /users/** 路由中"
 ---
 
 # auth-and-gateway-flow

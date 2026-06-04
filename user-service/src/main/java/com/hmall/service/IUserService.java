@@ -65,4 +65,11 @@ public interface IUserService extends IService<User> {
      * @return 权限码列表
      */
     List<String> getAdminPermissions();
+
+    /**
+     * 统计最近N天新增用户数
+     * @param days 天数
+     * @return 新增用户数
+     */
+    Long countNewUsers(Integer days);
 }

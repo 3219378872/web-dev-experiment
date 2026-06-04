@@ -182,6 +182,10 @@ class CouponServiceImplTest {
         c2.setMinAmount(5000);
         couponMapper.insert(c2);
 
+        // 用户领取两张券
+        couponService.claimCoupon(TEST_USER_ID, c1.getId());
+        couponService.claimCoupon(TEST_USER_ID, c2.getId());
+
         // 金额8000分，只能用满50的
         List<Coupon> result = couponService.getAvailableCouponsForAmount(TEST_USER_ID, 8000);
 
@@ -190,7 +194,7 @@ class CouponServiceImplTest {
     }
 
     @Test
-    void getAvailableCouponsForAmount_excludesClaimedCoupons() {
+    void getAvailableCouponsForAmount_onlyReturnsClaimedCoupons() {
         LocalDateTime now = LocalDateTime.now();
         Coupon c1 = coupon("未领取券", 1000, 10, 1, now.minusDays(1), now.plusDays(1));
         c1.setMinAmount(0);
@@ -203,16 +207,19 @@ class CouponServiceImplTest {
 
         List<Coupon> result = couponService.getAvailableCouponsForAmount(TEST_USER_ID, 10000);
 
+        // 只返回已领取的券
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).isEqualTo("未领取券");
+        assertThat(result.get(0).getName()).isEqualTo("已领取券");
     }
 
     @Test
-    void getAvailableCouponsForAmount_nullAmount_returnsAllValid() {
+    void getAvailableCouponsForAmount_nullAmount_returnsAllClaimed() {
         LocalDateTime now = LocalDateTime.now();
         Coupon c1 = coupon("满减券", 1000, 10, 1, now.minusDays(1), now.plusDays(1));
         c1.setMinAmount(99999);
         couponMapper.insert(c1);
+
+        couponService.claimCoupon(TEST_USER_ID, c1.getId());
 
         List<Coupon> result = couponService.getAvailableCouponsForAmount(TEST_USER_ID, null);
 

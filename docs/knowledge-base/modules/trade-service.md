@@ -2,9 +2,9 @@
 title: trade-service
 tracks:
   - trade-service/
-last_synced_commit: d7b580c
+last_synced_commit: 7fbdea0734907e62cccf35d274363d7bc391706e
 last_synced_date: 2026-06-04
-sync_note: "Phase 3: 新增运费/可用券/物流/退款审核/导出/数据看板端点"
+sync_note: "Phase 3 codex-review 修复：优惠券查询改用已领取逻辑，运费支持地区计算，发货插入物流轨迹"
 ---
 
 # trade-service

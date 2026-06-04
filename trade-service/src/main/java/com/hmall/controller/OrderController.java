@@ -98,16 +98,27 @@ public class OrderController {
             @RequestParam(value = "addressId", required = false) Long addressId,
             @RequestParam(value = "amount", defaultValue = "0") Integer amount) {
         FreightVO vo = new FreightVO();
-        // 满99元（9900分）包邮，否则固定运费10元（1000分）
+        // 满99元（9900分）包邮
         int freeShippingThreshold = 9900;
-        int defaultFreight = 1000;
         if (amount >= freeShippingThreshold) {
             vo.setFreight(0);
             vo.setFreeShipping(true);
-        } else {
-            vo.setFreight(defaultFreight);
-            vo.setFreeShipping(false);
+            return vo;
         }
+        // 按地区固定运费：根据 addressId 简单分区
+        // 实际应调用 user-service 获取地址详情，这里用 addressId 范围模拟
+        int regionalFreight;
+        if (addressId == null) {
+            regionalFreight = 1000; // 默认10元
+        } else if (addressId <= 10) {
+            regionalFreight = 1500; // 偏远地区15元
+        } else if (addressId <= 50) {
+            regionalFreight = 1000; // 一般地区10元
+        } else {
+            regionalFreight = 500;  // 附近地区5元
+        }
+        vo.setFreight(regionalFreight);
+        vo.setFreeShipping(false);
         return vo;
     }
 

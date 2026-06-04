@@ -17,9 +17,11 @@ import com.hmall.common.utils.UserContext;
 import com.hmall.domain.po.Order;
 import com.hmall.domain.po.OrderDetail;
 import com.hmall.domain.po.OrderLogistics;
+import com.hmall.domain.po.LogisticsTrace;
 import com.hmall.mapper.OrderMapper;
 import com.hmall.service.IOrderDetailService;
 import com.hmall.service.IOrderLogisticsService;
+import com.hmall.service.ILogisticsTraceService;
 import com.hmall.service.IOrderService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     private final IOrderDetailService detailService;
     private final IOrderLogisticsService logisticsService;
+    private final ILogisticsTraceService logisticsTraceService;
     private final ItemClient itemClient;
     private final MqMessagePublisher mqMessagePublisher;
     private final MqConsumerSupport mqConsumerSupport;
@@ -226,6 +229,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             logistics.setLogisticsNumber(trackingNumber);
             logisticsService.updateById(logistics);
         }
+        // 插入物流轨迹记录
+        LogisticsTrace trace = new LogisticsTrace();
+        trace.setOrderId(orderId);
+        trace.setNode("已发货");
+        trace.setTraceTime(LocalDateTime.now());
+        trace.setDescription("商品已发货，运单号：" + trackingNumber);
+        trace.setCreateTime(LocalDateTime.now());
+        logisticsTraceService.save(trace);
     }
 
     private List<OrderDetail> buildDetails(Long orderId, List<ItemDTO> items, Map<Long, Integer> numMap) {

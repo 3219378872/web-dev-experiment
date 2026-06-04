@@ -73,28 +73,25 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon>
 
     @Override
     public List<Coupon> getAvailableCouponsForAmount(Long userId, Integer amount) {
-        // 获取用户未使用的优惠券id
-        List<Long> usedCouponIds = userCouponMapper.selectList(
+        // 获取用户已领取且未使用的优惠券id
+        List<Long> claimedCouponIds = userCouponMapper.selectList(
                 new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<UserCoupon>()
                         .eq(UserCoupon::getUserId, userId)
                         .eq(UserCoupon::getStatus, 1))
                 .stream().map(UserCoupon::getCouponId).collect(Collectors.toList());
 
+        if (claimedCouponIds.isEmpty()) return List.of();
+
         LocalDateTime now = LocalDateTime.now();
         LambdaQueryWrapper<Coupon> wrapper = new LambdaQueryWrapper<Coupon>()
+                .in(Coupon::getId, claimedCouponIds)
                 .eq(Coupon::getStatus, 1)
-                .gt(Coupon::getRemainingStock, 0)
                 .lt(Coupon::getStartTime, now)
                 .gt(Coupon::getEndTime, now);
 
         // 如果传了金额，过滤满减门槛
         if (amount != null) {
             wrapper.le(Coupon::getMinAmount, amount);
-        }
-
-        // 排除已领取的
-        if (!usedCouponIds.isEmpty()) {
-            wrapper.notIn(Coupon::getId, usedCouponIds);
         }
 
         return list(wrapper);

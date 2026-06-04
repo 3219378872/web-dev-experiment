@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: 7d3df0b4fe1274d7a87f0c2f890d3ea9bdd915ec
+last_synced_commit: 7fbdea0734907e62cccf35d274363d7bc391706e
 last_synced_date: 2026-06-04
-sync_note: "Phase 1 codex-review 修复：移除 @JsonValue 保持前端兼容"
+sync_note: "Phase 3: 新增 countNewUsers(days) 端点供 Dashboard 使用"
 ---
 
 # user-service
