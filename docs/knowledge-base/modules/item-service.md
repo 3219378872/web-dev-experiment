@@ -4,7 +4,7 @@ tracks:
   - item-service/
 last_synced_commit: 99ab98b
 last_synced_date: 2026-06-05
-sync_note: "Issue #95: ItemController 新增 /admin/items/stats 接口返回商品统计（total/onSale/offSale/lowStock）；adminQueryItemByPage 新增 minPrice/maxPrice 参数支持，并排除 status=3（已删除）商品。Item.java 和 ItemDTO.java 新增 isSeckill/isRecommend/isSevenDayReturn 字段；新增迁移脚本 docs/sql/item-seckill-recommend-fields.sql；init-all-tables.sql 与测试 schema 同步更新。"
+sync_note: "Issue #95: ItemController 新增 /admin/items/stats 接口（返回 ItemStatsVO）和 minPrice/maxPrice 查询参数，adminQueryItemByPage 排除 status=3（已删除）商品。Item.java/ItemDTO.java 新增 isSeckill/isRecommend/isSevenDayReturn 字段；新增迁移脚本 docs/sql/item-seckill-recommend-fields.sql；init-all-tables.sql 与测试 schema 同步更新。新增 ItemStatsVO。"
 ---
 
 # item-service

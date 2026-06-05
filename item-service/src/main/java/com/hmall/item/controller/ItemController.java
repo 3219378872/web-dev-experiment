@@ -11,6 +11,7 @@ import com.hmall.item.domain.dto.ItemIdsDTO;
 import com.hmall.item.domain.dto.ItemStatusDTO;
 import com.hmall.item.domain.dto.OrderDetailDTO;
 import com.hmall.item.domain.po.Item;
+import com.hmall.item.domain.vo.ItemStatsVO;
 import com.hmall.item.domain.vo.ItemVO;
 import com.hmall.item.service.IItemService;
 import io.swagger.annotations.Api;
@@ -19,9 +20,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Api(tags = "商品管理相关接口")
 @RestController
@@ -136,14 +135,14 @@ public class ItemController {
 
     @ApiOperation("管理端商品统计")
     @GetMapping("/admin/items/stats")
-    public Map<String, Object> adminItemStats() {
-        Map<String, Object> stats = new HashMap<>();
+    public ItemStatsVO adminItemStats() {
         LambdaQueryWrapper<Item> nonDeleted = new LambdaQueryWrapper<>();
         nonDeleted.ne(Item::getStatus, 3);
-        stats.put("total", itemService.count(nonDeleted));
-        stats.put("onSale", itemService.lambdaQuery().eq(Item::getStatus, 1).count());
-        stats.put("offSale", itemService.lambdaQuery().eq(Item::getStatus, 2).count());
-        stats.put("lowStock", itemService.lambdaQuery().lt(Item::getStock, 20).eq(Item::getStatus, 1).count());
-        return stats;
+        return ItemStatsVO.builder()
+                .total(itemService.count(nonDeleted))
+                .onSale(itemService.lambdaQuery().eq(Item::getStatus, 1).count())
+                .offSale(itemService.lambdaQuery().eq(Item::getStatus, 2).count())
+                .lowStock(itemService.lambdaQuery().lt(Item::getStock, 20).eq(Item::getStatus, 1).count())
+                .build();
     }
 }
