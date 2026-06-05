@@ -257,6 +257,52 @@ class OrderServiceImplTest extends TradeServiceTestBase {
     }
 
     @Test
+    void createOrder_withPercentageCoupon_appliesDiscount() {
+        // discountType=2 (折扣券), discountValue=90 means "9折" (pay 90%)
+        ItemDTO item = new ItemDTO();
+        item.setId(600L);
+        item.setPrice(10000);
+        item.setName("折后商品");
+        item.setSpec("标准");
+        item.setImage("/img/t.png");
+        when(itemClient.queryItemByIds(anySet())).thenReturn(List.of(item));
+
+        Coupon coupon = new Coupon();
+        coupon.setName("测试折扣券");
+        coupon.setDiscountType(2);
+        coupon.setDiscountValue(90);
+        coupon.setMinAmount(0);
+        coupon.setTotalStock(10);
+        coupon.setRemainingStock(10);
+        coupon.setStatus(1);
+        coupon.setStartTime(LocalDateTime.now().minusDays(1));
+        coupon.setEndTime(LocalDateTime.now().plusDays(1));
+        couponMapper.insert(coupon);
+
+        UserCoupon uc = new UserCoupon();
+        uc.setUserId(TEST_USER_ID);
+        uc.setCouponId(coupon.getId());
+        uc.setStatus(1);
+        uc.setCreateTime(LocalDateTime.now());
+        userCouponMapper.insert(uc);
+
+        OrderFormDTO form = new OrderFormDTO();
+        form.setPaymentType(1);
+        form.setCouponId(coupon.getId());
+        OrderDetailDTO detail = new OrderDetailDTO();
+        detail.setItemId(600L);
+        detail.setNum(1);
+        form.setDetails(List.of(detail));
+
+        Long orderId = orderService.createOrder(form);
+
+        assertThat(orderId).isNotNull();
+        Order order = orderService.getById(orderId);
+        // 10000 * 90 / 100 = 9000 (pay 90%)
+        assertThat(order.getTotalFee()).isEqualTo(9000);
+    }
+
+    @Test
     void markOrderPaySuccess_updatesStatus() {
         Order order = new Order();
         order.setUserId(1L);

@@ -2,7 +2,7 @@
 
 | Requirement | Status | Notes |
 |---|---|---|
-| All changes are in `hmall-web/` only | PASS | No backend changes needed |
+| Backend changes reviewed | PASS | `hm-api` DTO + `trade-service` logic changes reviewed for security and correctness |
 | `npm run build` passes | PASS | No errors or warnings |
 | No hardcoded secrets | PASS | All API calls use environment config |
 | No mutation of original objects | PASS | Using Vue ref/computed properly |

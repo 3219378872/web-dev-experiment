@@ -108,7 +108,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     .findFirst()
                     .orElseThrow(() -> new BadRequestException("优惠券不可用或已过期"));
             if (coupon.getDiscountType() == 2) {
-                total = total * (100 - coupon.getDiscountValue()) / 100;
+                total = total * coupon.getDiscountValue() / 100;
             } else {
                 total -= coupon.getDiscountValue();
             }

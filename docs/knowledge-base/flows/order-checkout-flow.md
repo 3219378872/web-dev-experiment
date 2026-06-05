@@ -7,7 +7,7 @@ tracks:
   - pay-service/
 last_synced_commit: e6a9848
 last_synced_date: 2026-06-06
-sync_note: "Issue #89: trade-service OrderController.myOrders() 填充 details 字段；Issue #92: cart-service 加入/查询购物车时填充商品元数据；Issue #95: item-service 新增管理端接口和字段；Issue #100: pay-service 修复 NPE 和 MQ 降级；fix(#103): OrderServiceImpl.createOrder 服务端重算运费(对齐 Controller 报价)/校验优惠券后应用折扣/useCoupon 标记；OrderServiceImplTest 适配新构造函数 + 4 个新测试；下单结算流程更新为含运费/券"
+sync_note: "Issue #89: trade-service OrderController.myOrders() 填充 details 字段；Issue #92: cart-service 加入/查询购物车时填充商品元数据；Issue #95: item-service 新增管理端接口和字段；Issue #100: pay-service 修复 NPE 和 MQ 降级；fix(#103): OrderServiceImpl.createOrder 服务端重算运费(对齐 Controller)/校验优惠券/修正折扣券计算/useCoupon 标记；OrderServiceImplTest +5 测试；下单结算流程更新为含运费/券"
 ---
 
 # order-checkout-flow
