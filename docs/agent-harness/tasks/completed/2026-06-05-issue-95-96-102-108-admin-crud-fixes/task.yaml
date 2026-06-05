@@ -1,0 +1,7 @@
+slug: 2026-06-05-issue-95-96-102-108-admin-crud-fixes
+status: done
+task_branch: task/2026-06-05-issue-95-96-102-108-admin-crud-fixes
+spec: null
+plan: null
+spec_waiver: "Bug fixes for existing features, no new spec required"
+plan_waiver: "Straightforward CRUD fixes, no separate plan required"

@@ -90,6 +90,21 @@ public class Item implements Serializable {
     private Integer status;
 
     /**
+     * 是否加入秒杀
+     */
+    private Boolean isSeckill;
+
+    /**
+     * 是否推荐到首页
+     */
+    private Boolean isRecommend;
+
+    /**
+     * 是否支持七天无理由退货
+     */
+    private Boolean isSevenDayReturn;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;

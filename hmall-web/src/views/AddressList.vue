@@ -49,30 +49,6 @@
                     placeholder="街道、门牌号、楼栋、房间号等"
                   ></textarea>
                 </div>
-                <div class="field">
-                  <label>邮政编码</label>
-                  <input v-model="form.zipCode" class="input" placeholder="选填" />
-                </div>
-                <div class="field">
-                  <label>地址标签</label>
-                  <div style="display: flex; gap: 8px; padding-top: 6px">
-                    <span class="chip" :class="{ on: form.tag === '家' }" @click="form.tag = '家'"
-                      >家</span
-                    >
-                    <span
-                      class="chip"
-                      :class="{ on: form.tag === '公司' }"
-                      @click="form.tag = '公司'"
-                      >公司</span
-                    >
-                    <span
-                      class="chip"
-                      :class="{ on: form.tag === '学校' }"
-                      @click="form.tag = '学校'"
-                      >学校</span
-                    >
-                  </div>
-                </div>
               </div>
               <label
                 style="
@@ -114,7 +90,6 @@
                 </div>
                 <div class="tags">
                   <span v-if="addr.isDefault" class="tag tag-brand">默认</span>
-                  <span v-if="addr.tag" class="tag tag-ghost">{{ addr.tag }}</span>
                 </div>
                 <div class="acts">
                   <a v-if="!addr.isDefault" class="set" @click="setDefault(addr.id)">设为默认</a>
@@ -159,8 +134,6 @@ const form = reactive({
   city: '',
   district: '',
   detail: '',
-  zipCode: '',
-  tag: '',
   isDefault: false,
 });
 
@@ -179,8 +152,6 @@ function resetForm() {
   form.city = '';
   form.district = '';
   form.detail = '';
-  form.zipCode = '';
-  form.tag = '';
   form.isDefault = false;
   editingId.value = null;
 }
@@ -198,8 +169,6 @@ function editAddr(addr) {
   form.city = addr.city;
   form.district = addr.district;
   form.detail = addr.detail;
-  form.zipCode = addr.zipCode || '';
-  form.tag = addr.tag || '';
   form.isDefault = addr.isDefault;
   showForm.value = true;
 }

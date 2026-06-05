@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: d418693
+last_synced_commit: cd0eb9e
 last_synced_date: 2026-06-05
-sync_note: "Issue #100: pay-service 新增测试覆盖；下单结算流程本身未变，无需内容更新"
+sync_note: "Issue #89: trade-service OrderController.myOrders() 填充 details 字段；Issue #92: cart-service 加入/查询购物车时填充商品元数据；Issue #95: item-service 新增管理端接口和字段；Issue #100: pay-service 修复 NPE 和 MQ 降级。下单结算流程本身未变，无需内容更新"
 ---
 
 # order-checkout-flow
