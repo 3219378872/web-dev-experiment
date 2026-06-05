@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS feedbacks (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
     content TEXT,
+    images TEXT,
     reply TEXT,
     status INT DEFAULT 0,
     create_time DATETIME,

@@ -9,7 +9,7 @@
     <div class="auth-wrap">
       <!-- 左侧 promo 区域：根据当前 mode 展示不同文案 -->
       <div class="auth-promo">
-        <template v-if="mode === 'login' || mode === 'sms'">
+        <template v-if="mode === 'login'">
           <div class="eyebrow">欢迎回来</div>
           <h1>万物好集<br />登录即享会员价</h1>
           <p>登录后可享受会员专属折扣、积分商城、收藏夹同步与订单全程跟踪。</p>
@@ -45,8 +45,7 @@
         <!-- 登录 -->
         <template v-if="mode === 'login'">
           <div class="tabs">
-            <button class="active">账号登录</button>
-            <button @click="switchMode('sms')">短信登录</button>
+            <span class="tab-label">账号登录</span>
           </div>
 
           <div class="field">
@@ -91,73 +90,6 @@
             {{ loading ? '登录中...' : '登 录' }}
           </button>
           <div class="other">还没有账号？<a @click="switchMode('register')">立即注册 ›</a></div>
-          <div class="other" style="margin-top: 18px; position: relative">
-            <span style="background: #fff; padding: 0 12px; position: relative; z-index: 2"
-              >其他登录方式</span
-            >
-            <span
-              style="
-                position: absolute;
-                left: 0;
-                right: 0;
-                top: 50%;
-                height: 1px;
-                background: var(--line);
-              "
-            ></span>
-          </div>
-          <div class="socials">
-            <a class="s">微</a><a class="s">支</a><a class="s">Q</a><a class="s">微博</a>
-          </div>
-        </template>
-
-        <!-- 短信登录 -->
-        <template v-else-if="mode === 'sms'">
-          <div class="tabs">
-            <button @click="switchMode('login')">账号登录</button>
-            <button class="active">短信登录</button>
-          </div>
-
-          <div class="field">
-            <label>手机号</label>
-            <input v-model="smsForm.phone" class="input" placeholder="请输入手机号" />
-          </div>
-          <div class="field">
-            <label>验证码</label>
-            <div class="code-row">
-              <input
-                v-model="smsForm.code"
-                class="input"
-                placeholder="请输入验证码"
-                @keyup.enter="doSmsLogin"
-              />
-              <button class="btn btn-ghost" :disabled="smsCountdown > 0" @click="sendSmsCode">
-                {{ smsCountdown > 0 ? smsCountdown + 's' : '获取验证码' }}
-              </button>
-            </div>
-          </div>
-          <button class="btn btn-hot btn-lg btn-block" :disabled="loading" @click="doSmsLogin">
-            {{ loading ? '登录中...' : '登 录' }}
-          </button>
-          <div class="other">还没有账号？<a @click="switchMode('register')">立即注册 ›</a></div>
-          <div class="other" style="margin-top: 18px; position: relative">
-            <span style="background: #fff; padding: 0 12px; position: relative; z-index: 2"
-              >其他登录方式</span
-            >
-            <span
-              style="
-                position: absolute;
-                left: 0;
-                right: 0;
-                top: 50%;
-                height: 1px;
-                background: var(--line);
-              "
-            ></span>
-          </div>
-          <div class="socials">
-            <a class="s">微</a><a class="s">支</a><a class="s">Q</a><a class="s">微博</a>
-          </div>
         </template>
 
         <!-- 注册 -->
@@ -255,27 +187,6 @@
             />
           </div>
           <div class="field">
-            <label>图形验证码</label>
-            <div class="code-row">
-              <input v-model="resetForm.captcha" class="input" placeholder="请输入右侧字符" />
-              <span
-                style="
-                  width: 96px;
-                  border-radius: 8px;
-                  background: linear-gradient(110deg, #88a6b8, #b79cc4);
-                  display: grid;
-                  place-items: center;
-                  color: #fff;
-                  font-weight: 900;
-                  letter-spacing: 4px;
-                  font-style: italic;
-                  font-size: 18px;
-                "
-                >8 K 2 d</span
-              >
-            </div>
-          </div>
-          <div class="field">
             <label>短信/邮箱验证码</label>
             <div class="code-row">
               <input v-model="resetForm.code" class="input" placeholder="6 位验证码" />
@@ -318,10 +229,8 @@ const loading = ref(false);
 const remember = ref(false);
 const agreed = ref(false);
 const codeCountdown = ref(0);
-const smsCountdown = ref(0);
 
 const loginForm = reactive({ username: '', password: '' });
-const smsForm = reactive({ phone: '', code: '' });
 const registerForm = reactive({
   username: '',
   password: '',
@@ -330,7 +239,7 @@ const registerForm = reactive({
   code: '',
   confirmPassword: '',
 });
-const resetForm = reactive({ email: '', code: '', newPassword: '', captcha: '' });
+const resetForm = reactive({ email: '', code: '', newPassword: '' });
 
 function switchMode(target) {
   mode.value = target;
@@ -347,25 +256,22 @@ onMounted(() => {
     const tab = route.query.tab;
     if (tab === 'register') mode.value = 'register';
     else if (tab === 'forgot') mode.value = 'reset';
-    else if (tab === 'sms') mode.value = 'sms';
     else mode.value = 'login';
+  }
+  // 恢复记住的用户名
+  const saved = localStorage.getItem('rememberedUser');
+  if (saved) {
+    loginForm.username = saved;
+    remember.value = true;
   }
 });
 
-function startCountdown(type = 'code') {
-  if (type === 'sms') {
-    smsCountdown.value = 60;
-    const timer = setInterval(() => {
-      smsCountdown.value--;
-      if (smsCountdown.value <= 0) clearInterval(timer);
-    }, 1000);
-  } else {
-    codeCountdown.value = 60;
-    const timer = setInterval(() => {
-      codeCountdown.value--;
-      if (codeCountdown.value <= 0) clearInterval(timer);
-    }, 1000);
-  }
+function startCountdown() {
+  codeCountdown.value = 60;
+  const timer = setInterval(() => {
+    codeCountdown.value--;
+    if (codeCountdown.value <= 0) clearInterval(timer);
+  }, 1000);
 }
 
 async function doLogin() {
@@ -376,44 +282,18 @@ async function doLogin() {
   loading.value = true;
   try {
     await userStore.login(loginForm);
+    // 记住密码：保存用户名到 localStorage
+    if (remember.value) {
+      localStorage.setItem('rememberedUser', loginForm.username);
+    } else {
+      localStorage.removeItem('rememberedUser');
+    }
     router.push('/');
     ElMessage.success('登录成功');
   } catch (err) {
     console.error('登录失败:', err);
   } finally {
     loading.value = false;
-  }
-}
-
-async function doSmsLogin() {
-  if (!smsForm.phone || !smsForm.code) {
-    ElMessage.warning('请填写手机号和验证码');
-    return;
-  }
-  loading.value = true;
-  try {
-    // 复用 login API，phone 映射到 username，code 映射到 password
-    await userStore.login({ username: smsForm.phone, password: smsForm.code });
-    router.push('/');
-    ElMessage.success('登录成功');
-  } catch (err) {
-    console.error('短信登录失败:', err);
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function sendSmsCode() {
-  if (!smsForm.phone) {
-    ElMessage.warning('请输入手机号');
-    return;
-  }
-  try {
-    await sendCode(smsForm.phone);
-    startCountdown('sms');
-    ElMessage.success('验证码已发送');
-  } catch (err) {
-    console.error(err);
   }
 }
 
@@ -448,6 +328,10 @@ async function sendResetCode() {
 async function doRegister() {
   if (!registerForm.username || !registerForm.password) {
     ElMessage.warning('请填写用户名与密码');
+    return;
+  }
+  if (registerForm.password !== registerForm.confirmPassword) {
+    ElMessage.warning('两次输入的密码不一致');
     return;
   }
   if (!agreed.value) {
@@ -593,16 +477,18 @@ async function doReset() {
 .auth-card .tabs {
   margin-bottom: 24px;
 }
-.auth-card .tabs button {
+.auth-card .tabs button,
+.auth-card .tabs .tab-label {
   font-size: 16px;
   padding: 0 0 14px;
   margin-right: 28px;
   border: 0;
   background: none;
-  cursor: pointer;
+  cursor: default;
   color: var(--ink-2);
 }
-.auth-card .tabs button.active {
+.auth-card .tabs button.active,
+.auth-card .tabs .tab-label {
   color: var(--brand);
   font-weight: 700;
 }

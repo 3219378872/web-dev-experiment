@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: d418693
-last_synced_date: 2026-06-05
-sync_note: "fix(issue-71): Category.vue 筛选；fix(issue-70): buyNow+num；fix(issue-73): 订单操作+支付安全修复；fix(issue-75): ItemDetail.vue 颜色/版本选择器交互+推荐导航刷新；fix(#90): 首页分类按钮跳转至分类页；fix(#91): 分类页接入后端分页；fix(#113): AddressList.vue 移除 zipCode/tag 字段"
+last_synced_commit: 93d535b
+last_synced_date: 2026-06-06
+sync_note: "fix(#105-#111): hmall-web feature pages修复；backend images字段支持；codex-review findings全部修复"
 ---
 
 # hmall-web

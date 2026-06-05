@@ -32,7 +32,7 @@
       </div>
 
       <div class="grid g5">
-        <ProductCard v-for="item in sortedItems" :key="item.id" :item="item" />
+        <ProductCard v-for="item in items" :key="item.id" :item="item" />
       </div>
 
       <div v-if="!items.length" style="text-align: center; padding: 60px 0; color: var(--ink-3)">
@@ -75,6 +75,18 @@ const pageRange = computed(() => {
 
 const related = ['降噪耳机', '蓝牙耳机 入耳式', '无线耳机', '运动耳机', '头戴式耳机', '骨传导'];
 
+/**
+ * 排序选项 → 后端 sortBy 和 isAsc 映射
+ * default: 不传排序参数，由后端默认排序
+ */
+const sortMap = {
+  default: { sortBy: undefined, isAsc: undefined },
+  sold: { sortBy: 'sold', isAsc: false },
+  priceAsc: { sortBy: 'price', isAsc: true },
+  priceDesc: { sortBy: 'price', isAsc: false },
+  new: { sortBy: 'create_time', isAsc: false },
+};
+
 const sortOptions = [
   { key: 'default', label: '综合排序' },
   { key: 'sold', label: '销量 ↓' },
@@ -82,30 +94,6 @@ const sortOptions = [
   { key: 'priceDesc', label: '价格 ↓' },
   { key: 'new', label: '新品优先' },
 ];
-
-const sortedItems = computed(() => {
-  const list = [...items.value];
-  switch (sortKey.value) {
-    case 'sold':
-      list.sort((a, b) => (b.sold || 0) - (a.sold || 0));
-      break;
-    case 'priceAsc':
-      list.sort((a, b) => (a.price || 0) - (b.price || 0));
-      break;
-    case 'priceDesc':
-      list.sort((a, b) => (b.price || 0) - (a.price || 0));
-      break;
-    case 'new':
-      list.sort((a, b) => (b.createTime || '').localeCompare(a.createTime || ''));
-      break;
-    case 'rating':
-      list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-      break;
-    default:
-      break;
-  }
-  return list;
-});
 
 function goSearch(keyword) {
   router.push({ path: '/search', query: { q: keyword } });
@@ -120,7 +108,11 @@ async function search() {
     return;
   }
   try {
-    const data = await searchItems({ key: q, pageNo: page.value, pageSize: size.value });
+    const params = { key: q, pageNo: page.value, pageSize: size.value };
+    const sort = sortMap[sortKey.value] || {};
+    if (sort.sortBy) params.sortBy = sort.sortBy;
+    if (sort.isAsc != null) params.isAsc = sort.isAsc;
+    const data = await searchItems(params);
     items.value = data?.list || [];
     total.value = data?.total || items.value.length;
   } catch (err) {
@@ -141,6 +133,12 @@ function prevPage() {
 function nextPage() {
   if (page.value < totalPages.value) goPage(page.value + 1);
 }
+
+// 排序变化时重置到第 1 页并重新搜索
+watch(sortKey, () => {
+  page.value = 1;
+  search();
+});
 
 onMounted(search);
 // 关键词变化时重置到第 1 页再查
