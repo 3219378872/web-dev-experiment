@@ -22,7 +22,7 @@
                   border-radius: 16px;
                   background: linear-gradient(135deg, #ff7a45, var(--brand));
                 "
-                >管</span
+                >{{ (profileForm.name || '管')[0] }}</span
               >
               <div>
                 <el-button class="btn-ghost" size="small">更换头像</el-button>
@@ -32,7 +32,7 @@
             <div class="form-grid">
               <div class="field">
                 <label>管理员账号</label>
-                <el-input v-model="profileForm.account" readonly style="background: var(--bg)" />
+                <el-input v-model="profileForm.account" readonly />
               </div>
               <div class="field">
                 <label>姓名</label>
@@ -81,7 +81,7 @@
         <div class="acard" style="margin-bottom: 16px">
           <div class="ah">
             <h3>角色与权限</h3>
-            <span class="tag tag-brand">超级管理员</span>
+            <span class="tag tag-brand">{{ adminRole }}</span>
           </div>
           <table class="atable perm-table">
             <tbody>
@@ -126,18 +126,21 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
+import { updateAdminProfile, getAdminPermissions } from '@/api/profile';
 import { ElMessage } from 'element-plus';
 
 const profileForm = reactive({
-  account: 'admin@haoji.com',
-  name: '管理员',
-  phone: '138****0000',
-  dept: '平台运营部',
+  account: '',
+  name: '',
+  phone: '',
+  dept: '',
 });
 const pwdForm = reactive({ current: '', newPwd: '', confirm: '' });
+const adminRole = ref('管理员');
+const permissions = ref([]);
 
-const permissions = [
+const defaultPermissions = [
   { name: '数据看板', access: '可访问' },
   { name: '商品管理（增删改）', access: '全部权限' },
   { name: '订单管理（发货/退款）', access: '全部权限' },
@@ -154,11 +157,58 @@ const loginLogs = [
   { time: '2026-05-26 22:10', ip: '58.246.x.x', device: '未知设备', ok: false },
 ];
 
-function saveProfile() {
-  ElMessage.success('信息已保存');
+function loadAdminInfo() {
+  const info = localStorage.getItem('adminInfo');
+  if (info) {
+    try {
+      const data = JSON.parse(info);
+      profileForm.account = data.username || '';
+      profileForm.name = data.name || data.username || '管理员';
+      profileForm.phone = data.phone || '';
+      profileForm.dept = data.dept || '平台运营部';
+      adminRole.value = data.roleName || '管理员';
+    } catch (e) {
+      console.error(e);
+    }
+  }
 }
 
-function savePwd() {
+async function loadPermissions() {
+  try {
+    const perms = await getAdminPermissions();
+    if (perms && perms.length) {
+      permissions.value = perms.map((p) => ({ name: p, access: '已授权' }));
+    } else {
+      permissions.value = defaultPermissions;
+    }
+  } catch (err) {
+    console.error(err);
+    permissions.value = defaultPermissions;
+  }
+}
+
+async function saveProfile() {
+  try {
+    await updateAdminProfile({
+      username: profileForm.account,
+      name: profileForm.name,
+      phone: profileForm.phone,
+      dept: profileForm.dept,
+    });
+    // 更新 localStorage
+    const info = JSON.parse(localStorage.getItem('adminInfo') || '{}');
+    info.name = profileForm.name;
+    info.phone = profileForm.phone;
+    info.dept = profileForm.dept;
+    localStorage.setItem('adminInfo', JSON.stringify(info));
+    ElMessage.success('信息已保存');
+  } catch (err) {
+    console.error(err);
+    ElMessage.error('保存失败');
+  }
+}
+
+async function savePwd() {
   if (!pwdForm.current || !pwdForm.newPwd || !pwdForm.confirm) {
     ElMessage.warning('请填写完整');
     return;
@@ -167,11 +217,26 @@ function savePwd() {
     ElMessage.error('两次输入不一致');
     return;
   }
-  ElMessage.success('密码已修改');
-  pwdForm.current = '';
-  pwdForm.newPwd = '';
-  pwdForm.confirm = '';
+  try {
+    await updateAdminProfile({
+      username: profileForm.account,
+      password: pwdForm.newPwd,
+      oldPassword: pwdForm.current,
+    });
+    ElMessage.success('密码已修改');
+    pwdForm.current = '';
+    pwdForm.newPwd = '';
+    pwdForm.confirm = '';
+  } catch (err) {
+    console.error(err);
+    ElMessage.error('密码修改失败');
+  }
 }
+
+onMounted(() => {
+  loadAdminInfo();
+  loadPermissions();
+});
 </script>
 
 <style scoped>

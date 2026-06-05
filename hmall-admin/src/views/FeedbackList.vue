@@ -15,21 +15,21 @@
             <button
               :class="{ active: tab === 'all' }"
               style="padding: 6px 12px; font-size: 12.5px"
-              @click="tab = 'all'"
+              @click="switchTab('all')"
             >
               全部
             </button>
             <button
               :class="{ active: tab === 'pending' }"
               style="padding: 6px 12px; font-size: 12.5px"
-              @click="tab = 'pending'"
+              @click="switchTab('pending')"
             >
               待处理
             </button>
             <button
               :class="{ active: tab === 'replied' }"
               style="padding: 6px 12px; font-size: 12.5px"
-              @click="tab = 'replied'"
+              @click="switchTab('replied')"
             >
               已回复
             </button>
@@ -37,7 +37,7 @@
         </div>
         <div id="fb-list">
           <div
-            v-for="(f, i) in filteredFeedbacks"
+            v-for="(f, i) in feedbacks"
             :key="f.id"
             class="fb-item"
             :class="{ on: selected?.id === f.id }"
@@ -48,25 +48,26 @@
                 (f.userName || '匿')[0]
               }}</span>
               <b>{{ f.userName || '匿名用户' }}</b>
-              <span class="tag tag-ghost" style="font-size: 11px">{{ f.type || '反馈' }}</span>
               <span class="sdot" :class="statusDot(f.status)" style="margin-left: auto">{{
                 statusText(f.status)
               }}</span>
             </div>
             <div class="q">{{ f.content }}</div>
             <div class="bt">
-              <span>{{ f.createTime?.slice(0, 16) || '—' }}</span>
+              <span>{{ formatTime(f.createTime) }}</span>
             </div>
           </div>
         </div>
         <div class="adm-pager">
           <span>共 {{ total }} 条</span>
-          <div class="pgs">
-            <a :class="{ on: page === 1 }" @click="page = 1">1</a>
-            <a v-if="total > pageSize">2</a>
-            <a v-if="total > pageSize * 2">3</a>
-            <a v-if="total > pageSize">›</a>
-          </div>
+          <el-pagination
+            v-model:current-page="page"
+            :page-size="pageSize"
+            :total="total"
+            background
+            layout="prev, pager, next"
+            @current-change="fetch"
+          />
         </div>
       </div>
 
@@ -85,29 +86,16 @@
                 {{ selected.userName || '匿名用户' }}
               </div>
               <div class="dim" style="font-size: 12px">
-                {{ selected.createTime?.slice(0, 16) || '—' }}
+                {{ formatTime(selected.createTime) }}
               </div>
             </div>
           </div>
           <div style="display: flex; gap: 8px; margin-bottom: 12px">
-            <span class="tag tag-new">{{ selected.type || '反馈' }}</span>
             <span class="dim" style="font-size: 12px; align-self: center">{{
-              selected.createTime?.slice(0, 16) || '—'
+              formatTime(selected.createTime)
             }}</span>
           </div>
           <div class="detail-msg">{{ selected.content }}</div>
-          <div style="display: flex; gap: 8px; margin-top: 12px">
-            <div
-              class="ph s4"
-              style="width: 64px; height: 64px; border-radius: 8px"
-              data-label=""
-            ></div>
-            <div
-              class="ph s7"
-              style="width: 64px; height: 64px; border-radius: 8px"
-              data-label=""
-            ></div>
-          </div>
 
           <div class="reply-box">
             <div class="field">
@@ -121,7 +109,6 @@
             </div>
             <div style="display: flex; gap: 10px; margin-top: 14px">
               <button class="btn btn-primary btn-block" @click="doReply">提交回复</button>
-              <button class="btn btn-ghost">转技术</button>
             </div>
           </div>
         </div>
@@ -134,7 +121,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { getFeedbacks, replyFeedback } from '@/api/system';
 import { ElMessage } from 'element-plus';
 
@@ -170,11 +157,22 @@ function statusDot(s) {
   return ['warn', 'green'][s] || 'gray';
 }
 
-const filteredFeedbacks = computed(() => {
-  if (tab.value === 'pending') return feedbacks.value.filter((f) => f.status === 0);
-  if (tab.value === 'replied') return feedbacks.value.filter((f) => f.status === 1);
-  return feedbacks.value;
-});
+function formatTime(t) {
+  if (!t) return '—';
+  return t.slice(0, 16).replace('T', ' ');
+}
+
+function getStatusFilter() {
+  if (tab.value === 'pending') return 0;
+  if (tab.value === 'replied') return 1;
+  return null;
+}
+
+function switchTab(val) {
+  tab.value = val;
+  page.value = 1;
+  fetch();
+}
 
 function select(row) {
   selected.value = row;
@@ -183,7 +181,10 @@ function select(row) {
 
 async function fetch() {
   try {
-    const r = await getFeedbacks();
+    const params = { page: page.value, size: pageSize.value };
+    const status = getStatusFilter();
+    if (status !== null) params.status = status;
+    const r = await getFeedbacks(params);
     feedbacks.value = r.list || [];
     total.value = r.total || feedbacks.value.length;
     if (feedbacks.value.length && !selected.value) {

@@ -173,6 +173,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (user == null) {
             throw new BadRequestException("用户不存在");
         }
+        // name 映射到 nickname（前端用 name 字段表示显示名称）
         if (StrUtil.isNotBlank(profile.getNickname())) {
             user.setNickname(profile.getNickname());
         }
@@ -182,8 +183,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (StrUtil.isNotBlank(profile.getEmail())) {
             user.setEmail(profile.getEmail());
         }
-        if (StrUtil.isNotBlank(profile.getPassword())) {
-            user.setPassword(passwordEncoder.encode(profile.getPassword()));
+        if (StrUtil.isNotBlank(profile.getPhone())) {
+            user.setPhone(profile.getPhone());
         }
         updateById(user);
     }
@@ -256,6 +257,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public void updateProfileWithPassword(User profile) {
+        User user = getById(UserContext.getUser());
+        if (user == null) {
+            throw new BadRequestException("用户不存在");
+        }
+        // 如果请求包含新密码，则必须校验旧密码
+        if (StrUtil.isNotBlank(profile.getPassword())) {
+            if (StrUtil.isBlank(profile.getOldPassword())) {
+                throw new BadRequestException("修改密码必须提供旧密码");
+            }
+            if (!passwordEncoder.matches(profile.getOldPassword(), user.getPassword())) {
+                throw new BadRequestException("旧密码错误");
+            }
+            user.setPassword(passwordEncoder.encode(profile.getPassword()));
+            updateById(user);
+            // 密码更新后不再走普通资料更新逻辑（避免重复 update）
+            return;
+        }
         updateProfile(profile);
     }
 

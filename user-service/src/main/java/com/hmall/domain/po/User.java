@@ -1,6 +1,7 @@
 package com.hmall.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.hmall.enums.UserStatus;
@@ -81,5 +82,11 @@ public class User implements Serializable {
      * 昵称
      */
     private String nickname;
+
+    /**
+     * 旧密码（修改密码时校验用，不持久化）
+     */
+    @TableField(exist = false)
+    private String oldPassword;
 
 }

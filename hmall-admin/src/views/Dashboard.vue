@@ -23,26 +23,26 @@
       <div class="stat">
         <div class="ic" style="background: linear-gradient(135deg, #ff7a45, var(--brand))">💰</div>
         <div class="lab">今日成交额</div>
-        <div class="val"><small>¥</small>128,640</div>
-        <div class="delta up">▲ 12.4% <span style="color: var(--ink-3)">较昨日</span></div>
+        <div class="val"><small>¥</small>{{ formatAmount(summary.totalAmount) }}</div>
+        <div class="delta up">▲ — <span style="color: var(--ink-3)">较昨日</span></div>
       </div>
       <div class="stat">
         <div class="ic" style="background: linear-gradient(135deg, #3b82f6, #1257c4)">▤</div>
         <div class="lab">今日订单数</div>
-        <div class="val">1,286</div>
-        <div class="delta up">▲ 8.2% <span style="color: var(--ink-3)">较昨日</span></div>
+        <div class="val">{{ summary.totalOrders?.toLocaleString() || 0 }}</div>
+        <div class="delta up">▲ — <span style="color: var(--ink-3)">较昨日</span></div>
       </div>
       <div class="stat">
         <div class="ic" style="background: linear-gradient(135deg, #10b981, #137a40)">👥</div>
         <div class="lab">今日新增用户</div>
-        <div class="val">486</div>
-        <div class="delta up">▲ 5.6% <span style="color: var(--ink-3)">较昨日</span></div>
+        <div class="val">{{ summary.newUsers?.toLocaleString() || 0 }}</div>
+        <div class="delta up">▲ — <span style="color: var(--ink-3)">较昨日</span></div>
       </div>
       <div class="stat">
         <div class="ic" style="background: linear-gradient(135deg, #f59e0b, var(--gold))">👁</div>
         <div class="lab">今日访客量</div>
-        <div class="val">42,180</div>
-        <div class="delta down">▼ 2.1% <span style="color: var(--ink-3)">较昨日</span></div>
+        <div class="val">{{ summary.visitors?.toLocaleString() || 0 }}</div>
+        <div class="delta down">▼ — <span style="color: var(--ink-3)">较昨日</span></div>
       </div>
     </div>
 
@@ -64,19 +64,7 @@
       <div class="acard">
         <div class="ah"><h3>品类销售占比</h3></div>
         <div class="ab" style="display: flex; align-items: center; gap: 22px">
-          <div
-            class="donut"
-            style="
-              background: conic-gradient(
-                #ff4d2e 0 32%,
-                #3b82f6 32% 54%,
-                #10b981 54% 72%,
-                #f59e0b 72% 86%,
-                #b79cc4 86% 100%
-              );
-              position: relative;
-            "
-          >
+          <div class="donut" :style="donutStyle" style="position: relative">
             <div
               style="
                 position: absolute;
@@ -89,31 +77,16 @@
               "
             >
               <div>
-                <div style="font-size: 20px; font-weight: 900">2.4万</div>
-                <div style="font-size: 10px; color: var(--ink-3)">在售SKU</div>
+                <div style="font-size: 20px; font-weight: 900">{{ topItems.length }}</div>
+                <div style="font-size: 10px; color: var(--ink-3)">热销商品</div>
               </div>
             </div>
           </div>
           <div class="legend" style="flex: 1">
-            <div class="l">
-              <span class="sw" style="background: #ff4d2e"></span><span class="nm">手机数码</span
-              ><span class="v">32%</span>
-            </div>
-            <div class="l">
-              <span class="sw" style="background: #3b82f6"></span><span class="nm">家用电器</span
-              ><span class="v">22%</span>
-            </div>
-            <div class="l">
-              <span class="sw" style="background: #10b981"></span><span class="nm">食品生鲜</span
-              ><span class="v">18%</span>
-            </div>
-            <div class="l">
-              <span class="sw" style="background: #f59e0b"></span><span class="nm">服饰美妆</span
-              ><span class="v">14%</span>
-            </div>
-            <div class="l">
-              <span class="sw" style="background: #b79cc4"></span><span class="nm">其他品类</span
-              ><span class="v">14%</span>
+            <div v-for="(c, i) in categoryShare" :key="i" class="l">
+              <span class="sw" :style="`background:${donutColors[i % donutColors.length]}`"></span
+              ><span class="nm">{{ c.category }}</span
+              ><span class="v">{{ c.percentage }}%</span>
             </div>
           </div>
         </div>
@@ -130,17 +103,17 @@
           >
         </div>
         <div class="ab rank">
-          <div v-for="(p, i) in topProducts" :key="p.id" class="r">
+          <div v-for="(p, i) in topItems" :key="p.itemId" class="r">
             <span class="no">{{ i + 1 }}</span>
             <div
               class="ph"
-              :class="`s${(p.id % 8) + 1}`"
+              :class="`s${(p.itemId % 8) + 1}`"
               style="width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0"
             >
               <div class="shape round"></div>
             </div>
             <span class="nm">{{ p.name }}</span>
-            <span class="v">{{ formatSales(p.sales) }}<small> 销量</small></span>
+            <span class="v">{{ formatSales(p.sold) }}<small> 销量</small></span>
           </div>
         </div>
       </div>
@@ -155,7 +128,7 @@
                 >需尽快处理</span
               >
             </div>
-            <b style="color: var(--warn); font-size: 20px">28</b>
+            <b style="color: var(--warn); font-size: 20px">{{ todo.pendingShipment || 0 }}</b>
           </router-link>
           <router-link class="qa" style="margin-bottom: 10px" to="/orders">
             <span class="d" style="background: var(--danger)">↺</span>
@@ -163,27 +136,27 @@
               <div>退款/售后申请</div>
               <span style="font-size: 11.5px; font-weight: 400; color: var(--ink-3)">待审核</span>
             </div>
-            <b style="color: var(--danger); font-size: 20px">6</b>
+            <b style="color: var(--danger); font-size: 20px">{{ todo.pendingRefund || 0 }}</b>
           </router-link>
           <router-link class="qa" style="margin-bottom: 10px" to="/reviews">
             <span class="d" style="background: var(--info)">★</span>
             <div style="flex: 1">
-              <div>待审核评价</div>
+              <div>待付款订单</div>
               <span style="font-size: 11.5px; font-weight: 400; color: var(--ink-3)"
-                >含 2 条疑似违规</span
+                >待用户支付</span
               >
             </div>
-            <b style="color: var(--info); font-size: 20px">14</b>
+            <b style="color: var(--info); font-size: 20px">{{ todo.pendingPayment || 0 }}</b>
           </router-link>
-          <router-link class="qa" to="/items">
+          <router-link class="qa" to="/orders">
             <span class="d" style="background: #b79cc4">📦</span>
             <div style="flex: 1">
-              <div>库存预警商品</div>
+              <div>今日已完成</div>
               <span style="font-size: 11.5px; font-weight: 400; color: var(--ink-3)"
-                >库存低于 10 件</span
+                >已确认收货</span
               >
             </div>
-            <b style="color: #9d7fb0; font-size: 20px">9</b>
+            <b style="color: #9d7fb0; font-size: 20px">{{ todo.completedToday || 0 }}</b>
           </router-link>
         </div>
       </div>
@@ -210,20 +183,22 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="o in recentOrders" :key="o[0]">
-            <td class="mono" style="font-size: 12px">{{ o[0] }}</td>
+          <tr v-for="o in latestOrders" :key="o.id">
+            <td class="mono" style="font-size: 12px">{{ o.id }}</td>
             <td>
               <span class="u-cell">
-                <span class="u-av" :style="`background:${o[2]}`">{{ o[1][0] }}</span>
-                <span class="nm">{{ o[1] }}</span>
+                <span class="u-av" :style="`background:${userColor(o.userId)}`">{{
+                  userInitial(o)
+                }}</span>
+                <span class="nm">{{ o.userName || '用户' + o.userId }}</span>
               </span>
             </td>
-            <td style="color: var(--ink-3)">{{ o[3] }}</td>
-            <td class="amount">{{ o[4] }}</td>
-            <td>{{ o[5] }}</td>
-            <td style="color: var(--ink-3)">{{ o[6] }}</td>
+            <td style="color: var(--ink-3)">{{ goodsText(o) }}</td>
+            <td class="amount">¥{{ (o.totalFee / 100).toFixed(2) }}</td>
+            <td>{{ payLabel(o.paymentType) }}</td>
+            <td style="color: var(--ink-3)">{{ formatTime(o.createTime) }}</td>
             <td>
-              <span class="sdot" :class="o[8]">{{ o[7] }}</span>
+              <span class="sdot" :class="statusClass(o.status)">{{ statusText(o.status) }}</span>
             </td>
           </tr>
         </tbody>
@@ -233,78 +208,125 @@
 </template>
 
 <script setup>
-/*
- * 说明（重要）：本看板的运营统计（成交额/订单/新增用户/访客/销售趋势/品类占比/
- * 热销 TOP/待办/最新订单）所需的后端统计接口当前【尚未提供】，详见
- * docs/backend-api.md「B4 全新领域 - 数据看板」。
- * 本页为高保真原型的【视觉对齐 + 演示数据】实现，运营数据为代表性示例，
- * 待后端统计接口接入后再替换为真实数据；此为本 PR 已知且已披露的范围限制，
- * 不属于"破坏既有 API/数据逻辑"（main 版本同样不含任何后端数据调用）。
- */
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import * as echarts from 'echarts';
+import {
+  getDashboardSummary,
+  getDashboardTrend,
+  getDashboardCategoryShare,
+  getDashboardTopItems,
+  getDashboardTodo,
+  getDashboardLatestOrders,
+} from '@/api/dashboard';
+import { ElMessage } from 'element-plus';
 
 const dateRange = ref('today');
 const today = ref('');
 const chartRef = ref(null);
-const topProducts = ref([]);
+const summary = ref({});
+const trend = ref([]);
+const categoryShare = ref([]);
+const topItems = ref([]);
+const todo = ref({});
+const latestOrders = ref([]);
 
-const recentOrders = [
-  [
-    '202605281588',
-    '林晓',
-    '#88A6B8',
-    'TWS蓝牙耳机 等2件',
-    '¥817',
-    '微信',
-    '14:32',
-    '待付款',
-    'orange',
-  ],
-  ['202605281587', '陈一鸣', '#DE9696', '空气炸锅6L', '¥269', '支付宝', '14:28', '待发货', 'blue'],
-  [
-    '202605281586',
-    '王悦',
-    '#B0BE92',
-    '每日坚果礼盒 等3件',
-    '¥356',
-    '余额',
-    '14:15',
-    '已发货',
-    'blue',
-  ],
-  [
-    '202605281585',
-    '刘洋',
-    '#C9A66B',
-    '办公椅 等2件',
-    '¥1,198',
-    '银行卡',
-    '13:58',
-    '已完成',
-    'green',
-  ],
-  ['202605281584', '赵敏', '#B79CC4', '烟酰胺精华', '¥129', '微信', '13:42', '已完成', 'green'],
-  ['202605281583', '孙浩', '#7FB6A6', '登山徒步杖', '¥129', '支付宝', '13:30', '已取消', 'gray'],
-];
+const donutColors = ['#ff4d2e', '#3b82f6', '#10b981', '#f59e0b', '#b79cc4', '#8b5cf6', '#ec4899'];
+
+const donutStyle = computed(() => {
+  if (!categoryShare.value.length) return { background: '#e5e7eb' };
+  let gradient = '';
+  let start = 0;
+  categoryShare.value.forEach((c, i) => {
+    const end = start + (c.percentage || 0);
+    gradient += `${donutColors[i % donutColors.length]} ${start}% ${end}%, `;
+    start = end;
+  });
+  gradient = gradient.slice(0, -2);
+  return { background: `conic-gradient(${gradient})` };
+});
+
+function formatAmount(amount) {
+  if (!amount) return '0';
+  const yuan = amount / 100;
+  if (yuan >= 10000) return (yuan / 10000).toFixed(1) + '万';
+  return yuan.toLocaleString();
+}
 
 function formatSales(n) {
   if (n >= 10000) return (n / 10000).toFixed(1) + '万';
   return n;
 }
 
-onMounted(() => {
-  const d = new Date();
-  today.value = `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日，星期${['日', '一', '二', '三', '四', '五', '六'][d.getDay()]}`;
+function formatTime(t) {
+  if (!t) return '—';
+  return t.slice(5, 16).replace('T', ' ');
+}
 
-  // Chart
-  const chart = echarts.init(chartRef.value);
+const statusMap = {
+  1: { text: '待付款', cls: 'orange' },
+  2: { text: '待发货', cls: 'orange' },
+  3: { text: '已发货', cls: 'blue' },
+  4: { text: '已完成', cls: 'green' },
+  5: { text: '已关闭', cls: 'gray' },
+  6: { text: '退款中', cls: 'red' },
+};
+
+function statusText(s) {
+  return statusMap[s]?.text || '-';
+}
+function statusClass(s) {
+  return statusMap[s]?.cls || 'gray';
+}
+
+const payLabel = (t) => ({ 1: '支付宝', 2: '微信', 3: '余额' })[t] || '-';
+
+function userInitial(o) {
+  const name = o.userName || '用户' + o.userId;
+  return name ? name[0] : '?';
+}
+
+function userColor(id) {
+  const palette = [
+    '#88A6B8',
+    '#DE9696',
+    '#B0BE92',
+    '#C9A66B',
+    '#B79CC4',
+    '#7FB6A6',
+    '#92ADBD',
+    '#A7906B',
+    '#9d7fb0',
+    '#E9B775',
+  ];
+  if (id == null) return palette[0];
+  return palette[Math.abs(id) % palette.length];
+}
+
+function goodsText(o) {
+  if (!o.details || !o.details.length) return '-';
+  const first = o.details[0]?.name || '-';
+  if (o.details.length === 1) return first;
+  return first + ' 等' + o.details.length + '件';
+}
+
+let chart = null;
+
+function initChart() {
+  if (!chartRef.value) return;
+  chart = echarts.init(chartRef.value);
+  updateChart();
+}
+
+function updateChart() {
+  if (!chart) return;
+  const labels = trend.value.map((t) => t.date?.slice(5) || '');
+  const data = trend.value.map((t) => (t.amount || 0) / 100);
   chart.setOption({
     tooltip: { trigger: 'axis' },
     grid: { left: 0, right: 0, top: 10, bottom: 20 },
     xAxis: {
       type: 'category',
-      data: ['05-22', '05-23', '05-24', '05-25', '05-26', '05-27', '今日'],
+      data: labels,
       axisLine: { lineStyle: { color: '#E8EAED' } },
       axisLabel: { color: '#938A83', fontSize: 11 },
     },
@@ -312,7 +334,7 @@ onMounted(() => {
     series: [
       {
         type: 'bar',
-        data: [98000, 112000, 86000, 135000, 121000, 104000, 129000],
+        data: data,
         itemStyle: {
           borderRadius: [6, 6, 0, 0],
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -324,15 +346,50 @@ onMounted(() => {
       },
     ],
   });
+}
 
-  // Mock top products
-  topProducts.value = [
-    { id: 1, name: 'TWS蓝牙耳机 Pro', sales: 12450 },
-    { id: 2, name: '空气炸锅 6L 智能款', sales: 8320 },
-    { id: 3, name: '每日坚果礼盒 750g', sales: 7650 },
-    { id: 4, name: '烟酰胺焕亮精华液', sales: 5420 },
-    { id: 5, name: '办公人体工学椅', sales: 3890 },
-  ];
+async function loadData() {
+  try {
+    const [s, tr, cs, ti, td, lo] = await Promise.all([
+      getDashboardSummary(),
+      getDashboardTrend(7),
+      getDashboardCategoryShare(),
+      getDashboardTopItems(),
+      getDashboardTodo(),
+      getDashboardLatestOrders(),
+    ]);
+    summary.value = s || {};
+    trend.value = tr || [];
+    categoryShare.value = cs || [];
+    topItems.value = (ti || []).slice(0, 5);
+    todo.value = td || {};
+    latestOrders.value = lo || [];
+    updateChart();
+  } catch (err) {
+    console.error(err);
+    ElMessage.error('加载看板数据失败');
+  }
+}
+
+onMounted(() => {
+  const d = new Date();
+  today.value = `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日，星期${['日', '一', '二', '三', '四', '五', '六'][d.getDay()]}`;
+  initChart();
+  loadData();
+});
+
+watch(dateRange, (val) => {
+  if (val === 'week') {
+    getDashboardTrend(7).then((r) => {
+      trend.value = r || [];
+      updateChart();
+    });
+  } else if (val === 'month') {
+    getDashboardTrend(30).then((r) => {
+      trend.value = r || [];
+      updateChart();
+    });
+  }
 });
 </script>
 

@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 6f3c2a0
+last_synced_commit: 6acd015
 last_synced_date: 2026-06-05
-sync_note: "Issue #86 跟进：hm-common 加 SpringfoxCompatibilityConfig（actuator×springfox NPE 补丁，@ConditionalOnWebApplication(SERVLET) 不影响 reactive 网关）、user-service feign contextId；鉴权/网关流程本身未变"
+sync_note: "Issue #86: hm-common 加 SpringfoxCompatibilityConfig；Issue #104: AdminProfileController 支持管理员资料/密码更新（校验 oldPassword）；Issue #112: 管理端登录页移除假数据。鉴权/网关流程本身未变"
 ---
 
 # auth-and-gateway-flow

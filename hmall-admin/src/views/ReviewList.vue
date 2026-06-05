@@ -14,50 +14,52 @@
       </div>
       <div class="stat" style="padding: 16px">
         <div class="lab">平均评分</div>
-        <div class="val" style="font-size: 24px; color: var(--gold)">— ★</div>
+        <div class="val" style="font-size: 24px; color: var(--gold)">{{ avgRating }} ★</div>
       </div>
       <div class="stat" style="padding: 16px">
         <div class="lab">好评率</div>
-        <div class="val" style="font-size: 24px; color: var(--success)">—</div>
+        <div class="val" style="font-size: 24px; color: var(--success)">{{ goodRate }}</div>
       </div>
       <div class="stat" style="padding: 16px">
-        <div class="lab">待处理</div>
-        <div class="val" style="font-size: 24px; color: var(--danger)">—</div>
+        <div class="lab">差评</div>
+        <div class="val" style="font-size: 24px; color: var(--danger)">{{ badCount }}</div>
       </div>
     </div>
 
     <div class="acard" style="margin-bottom: 16px">
       <div class="tabs" style="padding: 0 16px">
-        <button :class="{ active: tab === 'all' }" @click="tab = 'all'">全部</button>
-        <button :class="{ active: tab === 'good' }" @click="tab = 'good'">好评</button>
-        <button :class="{ active: tab === 'mid' }" @click="tab = 'mid'">中评</button>
-        <button :class="{ active: tab === 'bad' }" @click="tab = 'bad'">差评</button>
+        <button :class="{ active: tab === 'all' }" @click="switchTab('all')">全部</button>
+        <button :class="{ active: tab === 'good' }" @click="switchTab('good')">好评</button>
+        <button :class="{ active: tab === 'mid' }" @click="switchTab('mid')">中评</button>
+        <button :class="{ active: tab === 'bad' }" @click="switchTab('bad')">差评</button>
       </div>
     </div>
 
     <div class="acard">
       <div class="ab" id="rev-rows">
-        <div v-for="(r, i) in filteredReviews" :key="r.id" class="rev-row">
+        <div v-for="(r, i) in reviews" :key="r.id" class="rev-row">
           <div class="av" :style="`background:${avatarColor(i)}`">
-            {{ (r.userName || '匿')[0] }}
+            {{ (r.username || r.userName || '匿')[0] }}
           </div>
           <div class="main">
             <div class="who">
-              <b>{{ r.userName || '匿名用户' }}</b>
+              <b>{{ r.username || r.userName || '匿名用户' }}</b>
               <span class="stars"
                 >{{ starStr(r.rating) }}<span class="off">{{ offStars(r.rating) }}</span></span
               >
               <span class="dim" style="margin-left: 6px; font-size: 12px">{{
-                r.createTime?.slice(0, 16) || '—'
+                formatTime(r.createTime)
               }}</span>
             </div>
             <div class="txt">{{ r.content }}</div>
-            <div v-if="r.images?.length" class="imgs">
-              <div
-                v-for="(img, idx) in r.images.slice(0, 4)"
+            <div v-if="parseImages(r.images).length" class="imgs">
+              <img
+                v-for="(img, idx) in parseImages(r.images).slice(0, 4)"
                 :key="idx"
+                :src="img"
                 class="ph"
-                :style="`background:${avatarColor(idx)}`"
+                style="width: 54px; height: 54px; border-radius: 7px; object-fit: cover"
+                @error="$event.target.style.display = 'none'"
               />
             </div>
             <div class="prod" style="margin-top: 8px">
@@ -65,12 +67,14 @@
                 class="ph"
                 style="width: 28px; height: 28px; border-radius: 5px; background: var(--line-2)"
               />
-              <span>商品ID: {{ r.itemId || '—' }}</span>
+              <span>{{ r.itemName || '商品ID: ' + (r.itemId || '—') }}</span>
             </div>
           </div>
           <div class="side">
             <span class="sdot green">已通过</span>
-            <el-button class="btn-ghost" size="small">回复</el-button>
+            <el-button class="btn-ghost" size="small" @click="$message.info('回复功能开发中')"
+              >回复</el-button
+            >
             <el-button
               size="small"
               style="background: #fff; border: 1px solid var(--line-2); color: var(--danger)"
@@ -122,12 +126,20 @@ function avatarColor(i) {
   return avatarColors[i % avatarColors.length];
 }
 
-const filteredReviews = computed(() => {
-  if (tab.value === 'all') return reviews.value;
-  if (tab.value === 'good') return reviews.value.filter((r) => r.rating >= 4);
-  if (tab.value === 'mid') return reviews.value.filter((r) => r.rating === 3);
-  if (tab.value === 'bad') return reviews.value.filter((r) => r.rating <= 2);
-  return reviews.value;
+const avgRating = computed(() => {
+  if (!reviews.value.length) return '—';
+  const sum = reviews.value.reduce((acc, r) => acc + (r.rating || 0), 0);
+  return (sum / reviews.value.length).toFixed(1);
+});
+
+const goodRate = computed(() => {
+  if (!reviews.value.length) return '—';
+  const good = reviews.value.filter((r) => (r.rating || 0) >= 4).length;
+  return ((good / reviews.value.length) * 100).toFixed(0) + '%';
+});
+
+const badCount = computed(() => {
+  return reviews.value.filter((r) => (r.rating || 0) <= 2).length;
 });
 
 function starStr(n) {
@@ -137,11 +149,38 @@ function offStars(n) {
   return '★★★★★'.slice(Math.max(0, Math.min(5, n || 0)));
 }
 
+function formatTime(t) {
+  if (!t) return '—';
+  return t.slice(0, 16).replace('T', ' ');
+}
+
+function parseImages(images) {
+  if (!images) return [];
+  if (Array.isArray(images)) return images;
+  return images.split(',').filter((s) => s.trim());
+}
+
+function getRatingFilter() {
+  if (tab.value === 'good') return 4;
+  if (tab.value === 'mid') return 3;
+  if (tab.value === 'bad') return 2;
+  return null;
+}
+
+function switchTab(val) {
+  tab.value = val;
+  page.value = 1;
+  fetch();
+}
+
 async function fetch() {
   try {
-    const r = await getReviews();
-    reviews.value = r.list || r || [];
-    total.value = reviews.value.length;
+    const params = { page: page.value, size: pageSize.value };
+    const rating = getRatingFilter();
+    if (rating !== null) params.rating = rating;
+    const r = await getReviews(params);
+    reviews.value = r.list || [];
+    total.value = r.total || 0;
   } catch (err) {
     console.error(err);
   }

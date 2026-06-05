@@ -48,7 +48,7 @@
       <table class="atable">
         <thead>
           <tr>
-            <th style="width: 30px"><span class="checkbox"></span></th>
+            <th style="width: 30px"><el-checkbox v-model="allChecked" @change="toggleAll" /></th>
             <th>订单号</th>
             <th>客户</th>
             <th>商品</th>
@@ -61,7 +61,7 @@
         </thead>
         <tbody>
           <tr v-for="row in orders" :key="row.id">
-            <td><span class="checkbox"></span></td>
+            <td><el-checkbox v-model="row.checked" /></td>
             <td class="mono" style="font-size: 11.5px">{{ row.id }}</td>
             <td>
               <span class="u-cell">
@@ -127,6 +127,28 @@ const activeTab = ref('all');
 const shipVisible = ref(false);
 const trackingNumber = ref('');
 const currentOrder = ref(null);
+const allChecked = ref(false);
+
+// 全局统计（基于 total，不是当前页）
+const todayCount = computed(() => total.value);
+const pendingShipCount = computed(() => tabCounts.value[2] || 0);
+const refundCount = computed(() => tabCounts.value[5] || 0);
+
+const tabCounts = ref({});
+
+async function loadTabCounts() {
+  try {
+    const statuses = [1, 2, 3, 4, 5, 6];
+    const counts = {};
+    for (const s of statuses) {
+      const r = await getOrders({ page: 1, size: 1, status: s });
+      counts[s] = r.total || 0;
+    }
+    tabCounts.value = counts;
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 const statusMap = {
   1: { text: '待付款', cls: 'orange' },
@@ -137,32 +159,24 @@ const statusMap = {
   6: { text: '退款中', cls: 'red' },
 };
 
-const todayCount = computed(() => orders.value.length);
-const pendingShipCount = computed(() => orders.value.filter((o) => o.status === 2).length);
-const refundCount = computed(() => orders.value.filter((o) => o.status === 6).length);
-
 const tabs = computed(() => [
   { label: '全部订单', value: 'all', badge: total.value },
-  {
-    label: '待付款',
-    value: 'pendingPay',
-    badge: orders.value.filter((o) => o.status === 1).length,
-  },
+  { label: '待付款', value: 'pendingPay', badge: tabCounts.value[1] || 0 },
   {
     label: '待发货',
     value: 'pendingShip',
-    badge: pendingShipCount.value,
+    badge: tabCounts.value[2] || 0,
     badgeStyle: 'color:var(--warn)',
   },
-  { label: '待收货', value: 'shipped', badge: orders.value.filter((o) => o.status === 3).length },
-  { label: '已完成', value: 'done', badge: orders.value.filter((o) => o.status === 4).length },
+  { label: '待收货', value: 'shipped', badge: tabCounts.value[3] || 0 },
+  { label: '已完成', value: 'done', badge: tabCounts.value[4] || 0 },
   {
     label: '退款/售后',
     value: 'refund',
-    badge: refundCount.value,
+    badge: tabCounts.value[6] || 0,
     badgeStyle: 'color:var(--danger)',
   },
-  { label: '已关闭', value: 'closed', badge: orders.value.filter((o) => o.status === 5).length },
+  { label: '已关闭', value: 'closed', badge: tabCounts.value[5] || 0 },
 ]);
 
 function statusText(s) {
@@ -202,11 +216,19 @@ function switchTab(val) {
 function resetFilter() {
   searchId.value = '';
   activeTab.value = 'all';
+  allChecked.value = false;
   fetch(1);
+}
+
+function toggleAll() {
+  orders.value.forEach((o) => {
+    o.checked = allChecked.value;
+  });
 }
 
 async function fetch(p = 1) {
   page.value = p;
+  allChecked.value = false;
   try {
     const params = { page: p, size: size.value };
     if (searchId.value) params.orderId = searchId.value;
@@ -232,7 +254,14 @@ async function fetch(p = 1) {
 const totalPages = computed(() => Math.ceil(total.value / size.value) || 1);
 const pageRange = computed(() => {
   const pages = [];
-  for (let i = 1; i <= totalPages.value; i++) pages.push(i);
+  const maxVisible = 7;
+  const half = Math.floor(maxVisible / 2);
+  let start = Math.max(1, page.value - half);
+  let end = Math.min(totalPages.value, start + maxVisible - 1);
+  if (end - start + 1 < maxVisible) {
+    start = Math.max(1, end - maxVisible + 1);
+  }
+  for (let i = start; i <= end; i++) pages.push(i);
   return pages;
 });
 function prevPage() {
@@ -263,12 +292,14 @@ async function updateStatus(row, status) {
     await updateOrderStatus(row.id, status);
     row.status = status;
     ElMessage.success('已更新');
+    loadTabCounts();
   } catch (err) {
     console.error(err);
   }
 }
 
 fetch();
+loadTabCounts();
 </script>
 
 <style scoped>

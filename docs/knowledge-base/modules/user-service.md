@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: aa63abd
+last_synced_commit: 6acd015
 last_synced_date: 2026-06-05
-sync_note: "Issue #86: 添加 actuator 依赖；新增 UserServiceFeignContextLoadTest 非 mock Feign 上下文加载测试"
+sync_note: "Issue #86: 添加 actuator 依赖；Issue #104: AdminProfileController PUT /admin/profile 支持 name/phone/email/nickname/avatar 更新，updateProfileWithPassword 校验 oldPassword 后才修改密码；Issue #112: 管理端登录页移除静态验证码、角色选择和假运营数据。"
 ---
 
 # user-service

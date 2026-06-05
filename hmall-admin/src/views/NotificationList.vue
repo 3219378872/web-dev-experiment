@@ -12,47 +12,31 @@
         <div class="ah">
           <h3>公告列表</h3>
           <div style="display: flex; gap: 8px">
-            <el-select
-              v-model="categoryFilter"
-              placeholder="全部分类"
-              size="small"
-              style="width: 120px"
-            >
-              <el-option label="全部分类" value="" />
-              <el-option label="活动促销" value="promo" />
-              <el-option label="系统通知" value="system" />
-            </el-select>
+            <el-button size="small" class="btn-ghost" @click="fetch">刷新</el-button>
           </div>
         </div>
         <table class="atable">
           <thead>
             <tr>
               <th>标题</th>
-              <th>分类</th>
               <th>状态</th>
               <th>发布时间</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in filteredNotifications" :key="row.id">
+            <tr v-for="row in notifications" :key="row.id">
               <td>
                 <div style="font-weight: 600; max-width: 260px">
-                  <span v-if="row.pinned" class="tag tag-price" style="margin-right: 6px">顶</span>
                   {{ row.title }}
                 </div>
-              </td>
-              <td>
-                <span class="tag" :class="categoryTag(row.category)">{{
-                  row.category || '系统通知'
-                }}</span>
               </td>
               <td>
                 <span class="sdot" :class="row.status === 1 ? 'green' : 'gray'">{{
                   row.status === 1 ? '已发布' : '草稿'
                 }}</span>
               </td>
-              <td class="dim">{{ row.publishTime?.slice(0, 16) || '—' }}</td>
+              <td class="dim">{{ formatTime(row.publishTime || row.createTime) }}</td>
               <td class="actions">
                 <span class="lk" @click="showDialog(row)">编辑</span>
                 <span class="lk" @click="toggleStatus(row)">{{
@@ -84,16 +68,6 @@
             <el-input v-model="form.title" placeholder="请输入公告标题" />
           </div>
           <div class="field">
-            <label>公告分类</label>
-            <el-select v-model="form.category" placeholder="请选择" style="width: 100%">
-              <el-option label="活动促销" value="promo" />
-              <el-option label="系统通知" value="system" />
-              <el-option label="规则更新" value="rule" />
-              <el-option label="安全公告" value="security" />
-              <el-option label="维护通知" value="maint" />
-            </el-select>
-          </div>
-          <div class="field">
             <label>公告内容</label>
             <el-input
               v-model="form.content"
@@ -101,16 +75,6 @@
               :rows="5"
               placeholder="请输入公告正文…"
             />
-          </div>
-          <div style="display: flex; gap: 18px">
-            <label style="display: flex; gap: 8px; align-items: center; font-size: 13px">
-              <el-checkbox v-model="form.pinned" />
-              置顶
-            </label>
-            <label style="display: flex; gap: 8px; align-items: center; font-size: 13px">
-              <el-checkbox v-model="form.popup" />
-              弹窗提醒
-            </label>
           </div>
           <div style="display: flex; gap: 10px">
             <el-button type="primary" style="flex: 1" @click="save">立即发布</el-button>
@@ -136,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive } from 'vue';
 import {
   getNotifications,
   saveNotification,
@@ -149,31 +113,19 @@ const notifications = ref([]);
 const page = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
-const categoryFilter = ref('');
 const dialogVisible = ref(false);
 const editing = ref(null);
-const form = reactive({ title: '', content: '', category: 'promo', pinned: false, popup: false });
+const form = reactive({ title: '', content: '' });
 const editForm = reactive({ title: '', content: '' });
 
-const filteredNotifications = computed(() => {
-  if (!categoryFilter.value) return notifications.value;
-  return notifications.value.filter((n) => n.category === categoryFilter.value);
-});
-
-function categoryTag(cat) {
-  const map = {
-    promo: 'tag-gold',
-    system: 'tag-new',
-    rule: 'tag-ghost',
-    security: 'tag-warn',
-    maint: 'tag-ghost',
-  };
-  return map[cat] || 'tag-ghost';
+function formatTime(t) {
+  if (!t) return '—';
+  return t.slice(0, 16).replace('T', ' ');
 }
 
 async function fetch() {
   try {
-    const r = await getNotifications();
+    const r = await getNotifications({ page: page.value, size: pageSize.value });
     notifications.value = r.list || [];
     total.value = r.total || notifications.value.length;
   } catch (err) {
@@ -210,8 +162,6 @@ async function save() {
     await saveNotification({ ...form, status: 1, publishTime: new Date().toISOString() });
     form.title = '';
     form.content = '';
-    form.pinned = false;
-    form.popup = false;
     fetch();
     ElMessage.success('已发布');
   } catch (err) {
@@ -224,8 +174,6 @@ async function saveDraft() {
     await saveNotification({ ...form, status: 0 });
     form.title = '';
     form.content = '';
-    form.pinned = false;
-    form.popup = false;
     fetch();
     ElMessage.success('已存草稿');
   } catch (err) {

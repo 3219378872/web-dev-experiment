@@ -1,0 +1,7 @@
+slug: 2026-06-05-admin-login-dashboard-fixes
+status: active
+task_branch: task/2026-06-05-admin-login-dashboard-fixes
+spec: null
+plan: null
+spec_waiver: "简单 bugfix，6个相关前端 issue 合在一个 PR 处理"
+plan_waiver: "简单 bugfix，不需要多步计划"
