@@ -41,26 +41,34 @@
                     :class="f.styleClass || `s${(f.id % 8) + 1}`"
                     :data-label="f.category"
                   >
-                    <span class="glyph">{{ f.glyph }}</span>
+                    <img
+                      v-if="f.itemImage"
+                      :src="f.itemImage"
+                      :alt="f.itemName"
+                      style="width: 100%; height: 100%; object-fit: cover"
+                    />
+                    <span v-else class="glyph">{{ f.glyph }}</span>
                   </div>
                   <div class="body">
                     <div class="tags">
                       <span v-if="f.tag" class="tag" :class="tagClass(f.tag)">{{ f.tag }}</span>
-                      <span v-if="f.originalPrice && f.originalPrice > f.price" class="tag tag-line"
-                        >省¥{{ ((f.originalPrice - f.price) / 100).toFixed(0) }}</span
+                      <span
+                        v-if="f.originalPrice && f.originalPrice > f.itemPrice"
+                        class="tag tag-line"
+                        >省¥{{ ((f.originalPrice - f.itemPrice) / 100).toFixed(0) }}</span
                       >
                     </div>
-                    <div class="title">{{ f.name }}</div>
+                    <div class="title">{{ f.itemName }}</div>
                     <div class="row">
                       <span class="price" style="font-size: 19px"
-                        ><span class="cur">¥</span>{{ (f.price / 100).toFixed(0) }}</span
+                        ><span class="cur">¥</span>{{ (f.itemPrice / 100).toFixed(0) }}</span
                       >
                       <span v-if="f.originalPrice" class="price-old"
                         >¥{{ (f.originalPrice / 100).toFixed(0) }}</span
                       >
                     </div>
                     <div class="meta">
-                      <span>{{ f.sold ? `已售 ${formatSold(f.sold)}` : '新品上市' }}</span>
+                      <span>{{ f.itemSold ? `已售 ${formatSold(f.itemSold)}` : '新品上市' }}</span>
                       <span class="dim">{{ f.shop ? f.shop.slice(0, 6) : '' }}</span>
                     </div>
                     <button class="btn btn-outline btn-sm fav-add" @click.prevent="addToCart(f.id)">

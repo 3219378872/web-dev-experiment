@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: 7b19f73
+last_synced_commit: 4472ad0
 last_synced_date: 2026-06-05
-sync_note: "修复收藏页面缺少商品信息：添加 FavoriteVO，在集成测试中添加 ItemClient 模拟"
+sync_note: "修复收藏页面缺少商品信息：添加 FavoriteVO，在集成测试中添加 ItemClient 模拟，添加 @EnableFeignClients"
 ---
 
 # user-service
