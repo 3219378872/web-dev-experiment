@@ -15,7 +15,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest(properties = {
     "spring.cloud.bootstrap.enabled=false",
-    "spring.autoconfigure.exclude=org.springframework.cloud.openfeign.FeignAutoConfiguration"
+    "spring.autoconfigure.exclude=org.springframework.cloud.openfeign.FeignAutoConfiguration,org.springframework.cloud.openfeign.FeignClientsConfiguration"
 })
 @Transactional
 public abstract class UserServiceTestBase {
