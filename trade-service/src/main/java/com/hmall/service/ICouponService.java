@@ -16,4 +16,12 @@ public interface ICouponService extends IService<Coupon> {
      * @return 可用优惠券列表
      */
     List<Coupon> getAvailableCouponsForAmount(Long userId, Integer amount);
+
+    /**
+     * 使用优惠券：标记用户优惠券为已使用
+     * @param userId 用户id
+     * @param couponId 优惠券id
+     * @param orderId 订单id
+     */
+    void useCoupon(Long userId, Long couponId, Long orderId);
 }

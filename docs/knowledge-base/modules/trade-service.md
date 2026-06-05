@@ -2,9 +2,9 @@
 title: trade-service
 tracks:
   - trade-service/
-last_synced_commit: b05c078
+last_synced_commit: d2daa13
 last_synced_date: 2026-06-05
-sync_note: "Issue #89: OrderController.myOrders() 填充 details 字段，订单列表接口返回商品名称/图片/规格/单价；接口契约未变"
+sync_note: "fix(#103): OrderFormDTO 新增 freight/couponId 字段；OrderServiceImpl.createOrder 计算运费/优惠券折扣；CouponServiceImpl 新增 useCoupon"
 ---
 
 # trade-service

@@ -19,6 +19,8 @@ import com.hmall.domain.po.OrderDetail;
 import com.hmall.domain.po.OrderLogistics;
 import com.hmall.domain.po.LogisticsTrace;
 import com.hmall.mapper.OrderMapper;
+import com.hmall.domain.po.Coupon;
+import com.hmall.service.ICouponService;
 import com.hmall.service.IOrderDetailService;
 import com.hmall.service.IOrderLogisticsService;
 import com.hmall.service.ILogisticsTraceService;
@@ -54,6 +56,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private final IOrderLogisticsService logisticsService;
     private final ILogisticsTraceService logisticsTraceService;
     private final ItemClient itemClient;
+    private final ICouponService couponService;
     private final MqMessagePublisher mqMessagePublisher;
     private final MqConsumerSupport mqConsumerSupport;
 
@@ -79,13 +82,39 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         for (ItemDTO item : items) {
             total += item.getPrice() * itemNumMap.get(item.getId());
         }
-        order.setTotalFee(total);
+        // 1.4a.加运费
+        if (orderFormDTO.getFreight() != null) {
+            total += orderFormDTO.getFreight();
+        }
+        // 1.4b.减优惠券
+        if (orderFormDTO.getCouponId() != null) {
+            Coupon coupon = couponService.getById(orderFormDTO.getCouponId());
+            if (coupon != null) {
+                if (coupon.getDiscountType() == 2) {
+                    // 折扣券：折扣百分比
+                    total = total * (100 - coupon.getDiscountValue()) / 100;
+                } else {
+                    // 满减券：直接减金额
+                    total -= coupon.getDiscountValue();
+                }
+            }
+        }
+        order.setTotalFee(Math.max(0, total));
         // 1.5.其它属性
         order.setPaymentType(orderFormDTO.getPaymentType());
         order.setUserId(UserContext.getUser());
         order.setStatus(1);
         // 1.6.将Order写入数据库order表中
         save(order);
+
+        // 1.7.标记优惠券已使用
+        if (orderFormDTO.getCouponId() != null) {
+            try {
+                couponService.useCoupon(order.getUserId(), orderFormDTO.getCouponId(), order.getId());
+            } catch (Exception e) {
+                throw new RuntimeException("优惠券使用失败", e);
+            }
+        }
 
         // 2.保存订单详情
         List<OrderDetail> details = buildDetails(order.getId(), items, itemNumMap);

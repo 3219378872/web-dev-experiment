@@ -306,7 +306,13 @@ async function submitOrder() {
     num: i.num,
   }));
   try {
-    await createOrder({ addressId: selectedAddress.value, paymentType: payType.value, details });
+    await createOrder({
+      addressId: selectedAddress.value,
+      paymentType: payType.value,
+      details,
+      freight: freight.value || undefined,
+      couponId: selectedCoupon.value || undefined,
+    });
     ElMessage.success('下单成功');
     router.push('/orders');
   } catch (err) {
