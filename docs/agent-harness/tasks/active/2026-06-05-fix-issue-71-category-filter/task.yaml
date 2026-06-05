@@ -1,0 +1,7 @@
+slug: 2026-06-05-fix-issue-71-category-filter
+status: active
+task_branch: task/2026-06-05-fix-issue-71-category-filter
+spec: null
+plan: null
+spec_waiver: Pure frontend bug-fix with clear root cause analysis; no separate spec required
+plan_waiver: Single-file change with well-defined fix strategy; no separate plan required
