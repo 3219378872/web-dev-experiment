@@ -1,5 +1,6 @@
 slug: 2026-06-05-fix-web-core-pages
-status: active
+status: done
+remote_cleanup: done
 task_branch: task/2026-06-05-fix-web-core-pages
 pull_request: https://github.com/3219378872/web-dev-experiment/pull/125
 spec: null
