@@ -4,7 +4,7 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 4472ad0
+last_synced_commit: 8284522
 last_synced_date: 2026-06-05
 sync_note: "修复收藏页面缺少商品信息，无需文档更新"
 ---
