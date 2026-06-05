@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 7b06a59
+last_synced_commit: c76b3a0
 last_synced_date: 2026-06-05
-sync_note: "fix(issue-71): Category.vue 筛选改为按 category 名称匹配，品类数量改为客户端计算 categoriesWithCount"
+sync_note: "fix(issue-71): Category.vue 筛选按 category 名称匹配；fix(issue-73): 订单操作修复；fix(issue-74): FlashSale.vue 秒杀抢购使用 p.itemId"
 ---
 
 # hmall-web

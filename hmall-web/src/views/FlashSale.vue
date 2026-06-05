@@ -145,7 +145,7 @@ async function handleBuy(p) {
     return;
   }
   try {
-    await cartStore.addItem({ itemId: p.id, num: 1 });
+    await cartStore.addItem({ itemId: p.itemId, num: 1 });
     ElMessage.success('已加入购物车');
   } catch (err) {
     /* 错误已由响应拦截器统一提示 */
