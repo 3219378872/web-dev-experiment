@@ -1,0 +1,7 @@
+slug: 2026-06-05-frontend-page-audit-issues
+status: active
+task_branch: task/2026-06-05-frontend-page-audit-issues
+spec: null
+plan: null
+spec_waiver: Audit-only task against existing docs/front-spec.md and live frontend/backend code; no new product design required.
+plan_waiver: Issue-submission audit with no implementation changes; checklist is tracked in audit.md and handoff.md.
