@@ -2,9 +2,9 @@
 title: pay-service
 tracks:
   - pay-service/
-last_synced_commit: 1987935
-last_synced_date: 2026-06-03
-sync_note: "fix(issue-73): 支付安全修复——双重校验；修复 PayServiceTestBase/PayOrderServiceImplTest OrderClient mock 重复定义"
+last_synced_commit: aa63abd
+last_synced_date: 2026-06-05
+sync_note: "Issue #86: 添加 actuator 依赖，配合 docker-compose healthcheck"
 ---
 
 # pay-service

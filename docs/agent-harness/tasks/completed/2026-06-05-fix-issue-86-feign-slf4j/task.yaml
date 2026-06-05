@@ -1,0 +1,7 @@
+slug: 2026-06-05-fix-issue-86-feign-slf4j
+status: done
+task_branch: task/2026-06-05-fix-issue-86-feign-slf4j
+spec: null
+plan: null
+spec_waiver: Single-file dependency fix; Issue
+plan_waiver: Single-file dependency fix; no multi-step plan needed.

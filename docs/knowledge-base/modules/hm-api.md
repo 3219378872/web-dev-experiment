@@ -2,9 +2,9 @@
 title: hm-api
 tracks:
   - hm-api/
-last_synced_commit: 673384d
+last_synced_commit: 6f3c2a0
 last_synced_date: 2026-06-05
-sync_note: "fix(issue-73): 支付安全修复；OrderClient 服务名修正为 trade-service；PayApplyDTO/PayOrderFormDTO 加 @NoArgsConstructor/@AllArgsConstructor 支持 Jackson 反序列化"
+sync_note: "Issue #86: 多个 @FeignClient 指向同一服务时新增 contextId，避免 FeignClientSpecification bean 重名导致服务启动崩溃"
 ---
 
 # hm-api
@@ -42,3 +42,10 @@ sync_note: "fix(issue-73): 支付安全修复；OrderClient 服务名修正为 t
 - DTO 字段是跨服务公共契约，改名/删字段需要全部调用方同步迁移。
 - fallback 必须实现且非空，否则熔断时 NPE。
 - 不要在 hm-api 写业务逻辑，仅放接口与 DTO。
+- **多个 `@FeignClient` 指向同一目标服务时必须各设唯一 `contextId`**。Spring Cloud
+  OpenFeign 以 `<contextId>.FeignClientSpecification` 命名配置 bean，`contextId` 默认等于
+  服务名；若两个客户端共用服务名（如 `OrderClient`/`CouponClient` 都指 `trade-service`，
+  `UserClient`/`FavoriteClient` 都指 `user-service`，`ItemClient`/`ReviewClient` 都指
+  `item-service`）且未设 `contextId`，会产生重名 bean，在
+  `allow-bean-definition-overriding=false`（Spring Boot 2.7 默认）下使引用方服务启动崩溃。
+  `value`/`name` 仍须保持为服务名以供注册中心路由。

@@ -2,9 +2,9 @@
 title: file-service
 tracks:
   - file-service/
-last_synced_commit: 9a268fd360c655aff778d07d72ecb71240c1d165
-last_synced_date: 2026-06-02
-sync_note: "接入 MinIO：本地 FS -> 公开桶 hmall + /files/** 网关反代理；收紧 legacy fallback 与凭据注入"
+last_synced_commit: aa63abd
+last_synced_date: 2026-06-05
+sync_note: "Issue #86: 添加 actuator 依赖，配合 docker-compose healthcheck"
 ---
 
 # file-service

@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: HEAD
+last_synced_commit: 6f3c2a0
 last_synced_date: 2026-06-05
-sync_note: "Issue #76: UserLoginVO 增加 role 字段，login() 将 role 回填到 VO；登录响应体现在包含用户角色，管理端可据此区分 admin/user"
+sync_note: "Issue #86 跟进：hm-common 加 SpringfoxCompatibilityConfig（actuator×springfox NPE 补丁，@ConditionalOnWebApplication(SERVLET) 不影响 reactive 网关）、user-service feign contextId；鉴权/网关流程本身未变"
 ---
 
 # auth-and-gateway-flow

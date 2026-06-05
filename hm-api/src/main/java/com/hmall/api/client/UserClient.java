@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient("user-service")
+@FeignClient(value = "user-service", contextId = "userClient")
 public interface UserClient {
     @PutMapping("/money/deduct")
     void deductMoney(@RequestParam("pw") String pw, @RequestParam("amount") Integer amount);

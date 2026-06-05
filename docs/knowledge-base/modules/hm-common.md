@@ -2,9 +2,9 @@
 title: hm-common
 tracks:
   - hm-common/
-last_synced_commit: b25e21464938f9ce5f1cef682ae90224ca30f054
-last_synced_date: 2026-06-02
-sync_note: "RabbitMQ after-commit publish plus consumer retry/dead-letter semantics"
+last_synced_commit: 6f3c2a0
+last_synced_date: 2026-06-05
+sync_note: "Issue #86: 新增 SpringfoxCompatibilityConfig，修复 actuator × springfox 2.10.5 在 Spring Boot 2.7 下的启动 NPE"
 ---
 
 # hm-common
@@ -35,6 +35,14 @@ sync_note: "RabbitMQ after-commit publish plus consumer retry/dead-letter semant
   只在 `afterCommit` 后发送。
 - `MqConsumerSupport` —— 统一消费失败处理：未超过重试次数时 nack 到专用 retry queue，
   超过上限后转发到 `hmall.mq.dead.queue` 并 ack 原消息。
+- `config/SpringfoxCompatibilityConfig` —— 自动装配（spring.factories）。springfox 2.10.5
+  与 Spring Boot 2.7 默认 PathPattern 路由匹配不兼容：引入 `spring-boot-starter-actuator`
+  后，actuator 端点的 PathPattern 映射使 springfox `getPatterns()` 返回 null 抛 NPE，导致
+  启用 knife4j 的服务启动崩溃。该配置以 BeanPostProcessor 从 springfox 的
+  `WebMvcRequestHandlerProvider` 中剔除 `patternParser != null` 的映射（actuator 端点），
+  仅保留 ant 风格映射；配合 `spring.mvc.pathmatch.matching-strategy=ant_path_matcher`
+  使应用控制器仍可正常生成文档。仅 servlet 应用生效（`@ConditionalOnWebApplication(SERVLET)`
+  排除 reactive 网关），且对未启用 knife4j 的服务为无操作。
 
 ## 上游
 

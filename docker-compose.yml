@@ -1,5 +1,11 @@
 x-java-service: &java-service
   restart: unless-stopped
+  healthcheck:
+    test: ["CMD-SHELL", "curl -sf http://localhost:8080/actuator/health || exit 1"]
+    interval: 10s
+    timeout: 5s
+    retries: 20
+    start_period: 30s
   environment: &java-env
     hm.db.host: mysql
     hm.db.port: "3306"
@@ -18,6 +24,18 @@ x-java-service: &java-service
     spring.rabbitmq.publisher-returns: "true"
     spring.cloud.nacos.server-addr: nacos:8848
     hm.seata.host: seata-server
+    # 容器内各服务统一监听 8080，使共享 healthcheck（探 :8080）对所有服务一致生效。
+    # 业务服务不发布端口到宿主机，服务间走 nacos 发现（gateway 路由用 lb://），改端口安全。
+    SERVER_PORT: "8080"
+    # Springfox 2.10.5 与 Spring Boot 2.7（默认 PathPattern 路由匹配）不兼容：actuator
+    # 端点的 PathPattern 条件使 springfox WebMvcPatternsRequestConditionWrapper.getPatterns()
+    # 返回 null 抛 NPE，导致启用 knife4j 的服务启动崩溃。回退 ant_path_matcher 修复。
+    SPRING_MVC_PATHMATCH_MATCHING_STRATEGY: ant_path_matcher
+    # spring.redis.* 在各服务 application.yaml 中未配置（或被错误缩进到 mybatis-plus 下），
+    # 默认连 localhost:6379，docker 内无此 redis，使 actuator RedisHealthIndicator 报 DOWN→503。
+    # 直接用 spring.redis.host 指向 redis 服务（本地开发无此 env 时回退默认 localhost）。
+    SPRING_REDIS_HOST: redis
+    SPRING_REDIS_PORT: "6379"
 
 services:
   mysql:
@@ -81,8 +99,11 @@ services:
       SEATA_PORT: "8091"
       STORE_MODE: file
       # 以 Nacos 作注册中心，store 用 file（样例项目，无需额外 DB 表）
+      # 注意：seata-server 1.8.0 的原生配置层（io.seata.config）用 camelCase key
+      # registry.nacos.serverAddr，而非 Spring 风格的 server-addr。写成 kebab-case 会被
+      # 静默忽略并回退到默认 localhost:8848，导致 seata 注册失败、进程崩溃退出。
       registry.type: nacos
-      registry.nacos.server-addr: nacos:8848
+      registry.nacos.serverAddr: nacos:8848
       registry.nacos.namespace: ""
       registry.nacos.group: SEATA_GROUP
       registry.nacos.application: seata-server
@@ -97,7 +118,9 @@ services:
       mysql:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:7091/health || exit 1"]
+      # /health 与 /actuator 等路径受 console 鉴权拦截返回 401；根路径 / 在
+      # seata.security.ignore.urls 白名单内返回 200，可用于探活（进程崩溃即不监听，curl 失败）。
+      test: ["CMD-SHELL", "curl -sf http://localhost:7091/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -227,6 +250,12 @@ services:
       spring.rabbitmq.publisher-returns: "true"
       spring.cloud.nacos.server-addr: nacos:8848
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/hmall?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+      # cart-service 使用独立 env 块（未合并 x-java-env），需单独补这几项，
+      # 否则 healthcheck 端口不一致、Springfox NPE、redis 连 localhost 三个问题仍在。
+      SERVER_PORT: "8080"
+      SPRING_MVC_PATHMATCH_MATCHING_STRATEGY: ant_path_matcher
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: "6379"
     depends_on:
       nacos:
         condition: service_healthy

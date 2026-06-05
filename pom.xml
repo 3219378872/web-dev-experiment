@@ -123,6 +123,15 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <knife4j.enable>false</knife4j.enable>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.10</version>
@@ -216,6 +225,7 @@
                                     <systemPropertyVariables>
                                         <spring.cloud.bootstrap.enabled>false</spring.cloud.bootstrap.enabled>
                                         <spring.cloud.nacos.config.enabled>false</spring.cloud.nacos.config.enabled>
+                                        <knife4j.enable>false</knife4j.enable>
                                     </systemPropertyVariables>
                                 </configuration>
                             </execution>
