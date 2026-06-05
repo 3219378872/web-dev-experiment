@@ -34,8 +34,11 @@
             </div>
             <div v-if="favorites.length" class="grid g4">
               <div v-for="f in favorites" :key="f.id" class="pcard" style="position: relative">
-                <span class="fav-x" title="取消收藏" @click.prevent="removeFav(f.id)">✕</span>
-                <router-link :to="`/item/${f.id}`" style="color: inherit; text-decoration: none">
+                <span class="fav-x" title="取消收藏" @click.prevent="removeFav(f.itemId)">✕</span>
+                <router-link
+                  :to="`/item/${f.itemId}`"
+                  style="color: inherit; text-decoration: none"
+                >
                   <div
                     class="ph"
                     :class="f.styleClass || `s${(f.id % 8) + 1}`"

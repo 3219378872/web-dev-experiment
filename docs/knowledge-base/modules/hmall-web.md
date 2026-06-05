@@ -2,7 +2,7 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 4472ad0
+last_synced_commit: 321df6b
 last_synced_date: 2026-06-05
 sync_note: "修复收藏页面字段名与 FavoriteVO 匹配"
 ---
