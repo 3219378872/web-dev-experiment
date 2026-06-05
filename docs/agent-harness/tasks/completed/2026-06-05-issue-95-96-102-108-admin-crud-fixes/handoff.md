@@ -6,11 +6,20 @@
 ## Files Changed
 - `hmall-admin/src/views/ItemList.vue` - 查询参数、批量操作、徽章统计
 - `hmall-admin/src/views/CategoryList.vue` - 移除假数据
-- `hmall-admin/src/views/BannerList.vue` - 接入 Banner API
+- `hmall-admin/src/views/BannerList.vue` - 接入 Banner API，修复编辑离线 banner 时 status 总是置 1 的问题
 - `hmall-admin/src/views/ItemEdit.vue` - 分类动态、图片上传、规格管理、发布设置
 - `hmall-admin/src/api/item.js` - 新增批量操作、统计、Banner API
 - `hmall-admin/src/api/upload.js` - 新增图片上传 API
 - `item-service/src/main/java/com/hmall/item/controller/ItemController.java` - 新增 stats 接口、minPrice/maxPrice 支持
+- `item-service/src/main/java/com/hmall/item/domain/po/Item.java` - 新增 isSeckill/isRecommend/isSevenDayReturn 字段
+- `item-service/src/main/java/com/hmall/item/domain/dto/ItemDTO.java` - 新增 isSeckill/isRecommend/isSevenDayReturn 字段
+- `docs/sql/item-seckill-recommend-fields.sql` - 新增 item 表字段迁移脚本
+- `docs/sql/init-all-tables.sql` - 新增 item 表三个字段
+- `item-service/src/test/resources/schema.sql` - 测试 schema 同步新增字段
+- `item-service/src/test/resources/sql/schema.sql` - 测试 schema 同步新增字段
+
+## Code Review Rounds
+- Round 1 (codex-review): 发现 3 个 blocking findings，全部已修复
 
 ## Commands Run
 - `python3 scripts/agent_harness.py check` - passed

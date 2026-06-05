@@ -31,4 +31,10 @@ public class ItemDTO {
     private Boolean isAD;
     @ApiModelProperty("商品状态 1-正常，2-下架，3-删除")
     private Integer status;
+    @ApiModelProperty("是否加入秒杀")
+    private Boolean isSeckill;
+    @ApiModelProperty("是否推荐到首页")
+    private Boolean isRecommend;
+    @ApiModelProperty("是否支持七天无理由退货")
+    private Boolean isSevenDayReturn;
 }

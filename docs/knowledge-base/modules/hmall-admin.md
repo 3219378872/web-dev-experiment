@@ -4,7 +4,7 @@ tracks:
   - hmall-admin/
 last_synced_commit: 99ab98b
 last_synced_date: 2026-06-05
-sync_note: "Issue #95 #96 #102 #108: 修复管理端商品/分类/轮播图 CRUD。ItemList 查询参数补全（category/minPrice/maxPrice）、批量操作接入后端、徽章统计走 /admin/items/stats；CategoryList 移除 LV1_COUNTS/PALETTE 假数据；BannerList 接入 /admin/banners CRUD；ItemEdit 分类动态获取、图片真实上传（/upload/image）、规格动态管理、发布设置开关绑定 reactive 字段（isSeckill/isRecommend/isSevenDayReturn）。新增 src/api/upload.js。"
+sync_note: "Issue #95 #96 #102 #108: 修复管理端商品/分类/轮播图 CRUD。ItemList 查询参数补全（category/minPrice/maxPrice）、批量操作接入后端、徽章统计走 /admin/items/stats；CategoryList 移除 LV1_COUNTS/PALETTE 假数据；BannerList 接入 /admin/banners CRUD，修复编辑离线 banner 时 status 总是置 1 的问题；ItemEdit 分类动态获取、图片真实上传（/upload/image）、规格动态管理、发布设置开关绑定后端 isSeckill/isRecommend/isSevenDayReturn 字段。新增 src/api/upload.js。codex-review 3 blocking findings 已修复。"
 ---
 
 # hmall-admin

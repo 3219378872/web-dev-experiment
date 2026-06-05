@@ -129,7 +129,7 @@ async function save() {
   try {
     const payload = {
       ...form,
-      status: 1,
+      status: editing.value ? editing.value.status : 1,
     };
     if (editing.value) {
       await updateBanner(editing.value.id, payload);
