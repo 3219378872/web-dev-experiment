@@ -3,7 +3,8 @@
 -- MySQL 8 兼容：使用存储过程检查列是否存在再添加
 DELIMITER $$
 
-CREATE PROCEDURE IF NOT EXISTS add_item_publish_columns()
+DROP PROCEDURE IF EXISTS add_item_publish_columns$$
+CREATE PROCEDURE add_item_publish_columns()
 BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
