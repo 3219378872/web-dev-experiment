@@ -19,6 +19,7 @@ public class Feedback implements Serializable {
     private Long id;
     private Long userId;
     private String content;
+    private String images;
     private String reply;
     private Integer status;
     private LocalDateTime createTime;

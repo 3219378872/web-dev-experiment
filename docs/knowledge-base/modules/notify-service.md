@@ -2,9 +2,9 @@
 title: notify-service
 tracks:
   - notify-service/
-last_synced_commit: aa63abd
-last_synced_date: 2026-06-05
-sync_note: "Issue #86: 添加 actuator 依赖，配合 docker-compose healthcheck"
+last_synced_commit: 93d535b
+last_synced_date: 2026-06-06
+sync_note: "add images field to Feedback entity and schema for issue #106 feedback image upload"
 ---
 
 # notify-service

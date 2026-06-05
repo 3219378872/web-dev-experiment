@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: f8438d6
-last_synced_date: 2026-06-05
-sync_note: "fix(#105-#111): hmall-web feature pages修复；fix(codex): uploadImage URL提取、SeckillVO字段修正、Feedback images字段移除"
+last_synced_commit: 93d535b
+last_synced_date: 2026-06-06
+sync_note: "fix(#105-#111): hmall-web feature pages修复；backend images字段支持；codex-review findings全部修复"
 ---
 
 # hmall-web
