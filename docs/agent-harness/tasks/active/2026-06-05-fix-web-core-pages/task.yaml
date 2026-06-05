@@ -1,6 +1,7 @@
 slug: 2026-06-05-fix-web-core-pages
 status: active
 task_branch: task/2026-06-05-fix-web-core-pages
+pull_request: https://github.com/3219378872/web-dev-experiment/pull/125
 spec: null
 plan: null
 spec_waiver: 前端仅修复已有的视图/API调用逻辑，无新设计决策需 spec。
