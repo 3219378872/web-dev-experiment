@@ -12,11 +12,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 class CartServiceImplTest extends CartServiceTestBase {
@@ -28,15 +30,21 @@ class CartServiceImplTest extends CartServiceTestBase {
     private CartMapper cartMapper;
 
     @Test
-    @DisplayName("新增购物车-新商品-保存成功")
+    @DisplayName("新增购物车-新商品-保存成功并从itemService获取名称图片价格")
     void addItem2Cart_newItem_success() {
         // Arrange
         CartFormDTO formDTO = new CartFormDTO();
         formDTO.setItemId(100L);
-        formDTO.setName("测试商品");
         formDTO.setSpec("规格1");
-        formDTO.setPrice(5000);
-        formDTO.setImage("test.jpg");
+        formDTO.setNum(2);
+
+        // Mock itemClient 返回商品信息
+        ItemDTO itemDTO = new ItemDTO();
+        itemDTO.setId(100L);
+        itemDTO.setName("测试商品");
+        itemDTO.setPrice(5000);
+        itemDTO.setImage("test.jpg");
+        when(itemClient.queryItemByIds(anyCollection())).thenReturn(List.of(itemDTO));
 
         // Act
         cartService.addItem2Cart(formDTO);
@@ -48,9 +56,11 @@ class CartServiceImplTest extends CartServiceTestBase {
         assertThat(saved).isNotNull();
         assertThat(saved.getUserId()).isEqualTo(TEST_USER_ID);
         assertThat(saved.getItemId()).isEqualTo(100L);
-        assertThat(saved.getNum()).isEqualTo(1);
+        assertThat(saved.getNum()).isEqualTo(2);
+        // 验证商品信息来自 itemClient
         assertThat(saved.getName()).isEqualTo("测试商品");
         assertThat(saved.getPrice()).isEqualTo(5000);
+        assertThat(saved.getImage()).isEqualTo("test.jpg");
     }
 
     @Test
@@ -142,6 +152,40 @@ class CartServiceImplTest extends CartServiceTestBase {
         assertThat(vo.getStock()).isEqualTo(50);
         // 仍保留快照价格
         assertThat(vo.getPrice()).isEqualTo(5000);
+    }
+
+    @Test
+    @DisplayName("查询购物车列表-快照无名称图片价格-从itemService回填")
+    void queryMyCarts_nullNameImagePrice_backfilledFromItem() {
+        // Arrange - 插入购物车记录，name/image/price 为 null
+        Cart cart = new Cart();
+        cart.setUserId(TEST_USER_ID);
+        cart.setItemId(400L);
+        cart.setNum(1);
+        cartMapper.insert(cart);
+
+        // Mock itemClient 返回实时数据
+        ItemDTO itemDTO = new ItemDTO();
+        itemDTO.setId(400L);
+        itemDTO.setName("回填商品");
+        itemDTO.setPrice(8800);
+        itemDTO.setImage("backfill.jpg");
+        itemDTO.setStatus(1);
+        itemDTO.setStock(99);
+        when(itemClient.queryItemByIds(anySet())).thenReturn(List.of(itemDTO));
+
+        // Act
+        List<CartVO> result = cartService.queryMyCarts();
+
+        // Assert
+        assertThat(result).hasSize(1);
+        CartVO vo = result.get(0);
+        assertThat(vo.getName()).isEqualTo("回填商品");
+        assertThat(vo.getPrice()).isEqualTo(8800);
+        assertThat(vo.getImage()).isEqualTo("backfill.jpg");
+        assertThat(vo.getNewPrice()).isEqualTo(8800);
+        assertThat(vo.getStatus()).isEqualTo(1);
+        assertThat(vo.getStock()).isEqualTo(99);
     }
 
     @Test

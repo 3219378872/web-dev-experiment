@@ -2,9 +2,9 @@
 title: pay-service
 tracks:
   - pay-service/
-last_synced_commit: aa63abd
+last_synced_commit: d418693
 last_synced_date: 2026-06-05
-sync_note: "Issue #86: 添加 actuator 依赖，配合 docker-compose healthcheck"
+sync_note: "Issue #100: PayOrderServiceImpl 新增测试覆盖；设计未变，无需内容更新"
 ---
 
 # pay-service

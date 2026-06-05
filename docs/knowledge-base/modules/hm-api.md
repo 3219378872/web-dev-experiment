@@ -2,9 +2,9 @@
 title: hm-api
 tracks:
   - hm-api/
-last_synced_commit: 6f3c2a0
+last_synced_commit: d418693
 last_synced_date: 2026-06-05
-sync_note: "Issue #86: 多个 @FeignClient 指向同一服务时新增 contextId，避免 FeignClientSpecification bean 重名导致服务启动崩溃"
+sync_note: "Issue #100: OrderClient 和 UserClient 添加 fallbackFactory 降级实现；设计未变，无需内容更新"
 ---
 
 # hm-api
