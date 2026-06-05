@@ -548,6 +548,7 @@
 ```json
 {
   "itemId": "long - 商品 ID",
+  "num": "integer - 购买数量，可选，默认 1",
   "name": "string - 商品标题",
   "spec": "string - 规格",
   "price": "integer - 价格(分)",

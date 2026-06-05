@@ -2,9 +2,9 @@
 title: hm-api
 tracks:
   - hm-api/
-last_synced_commit: 96cde0f
+last_synced_commit: 76cd364
 last_synced_date: 2026-06-05
-sync_note: "CartFormDTO 添加 num 字段并为 num 加 @Min(1)/@NotNull 校验"
+sync_note: "CartFormDTO num 设为可选并保留 @Min(1) 校验，更新 API 文档"
 ---
 
 # hm-api
