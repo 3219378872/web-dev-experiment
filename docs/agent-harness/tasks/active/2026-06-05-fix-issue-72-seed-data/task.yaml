@@ -1,0 +1,13 @@
+slug: 2026-06-05-fix-issue-72-seed-data
+status: active
+base_branch: main
+task_branch: task/2026-06-05-fix-issue-72-seed-data
+remote_branch: origin/task/2026-06-05-fix-issue-72-seed-data
+pull_request: null
+ci_status: pending
+codex_review: pending
+remote_cleanup: pending
+spec: null
+plan: null
+spec_waiver: "seed data task — no functional spec required; scope is SQL INSERT data generation only"
+plan_waiver: "seed data task — single-file change with clear acceptance criteria from Issue #72"
