@@ -1,5 +1,6 @@
 package com.hmall.it;
 
+import com.hmall.api.client.ItemClient;
 import com.hmall.common.exception.BizIllegalException;
 import com.hmall.common.utils.UserContext;
 import com.hmall.service.IFavoriteService;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ActiveProfiles("test")
 @Transactional
 class FavoriteServiceImplIT {
+
+    @MockBean
+    private ItemClient itemClient;
 
     @BeforeEach
     void setUp() { UserContext.setUser(1L); }
