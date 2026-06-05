@@ -1,0 +1,7 @@
+slug: 2026-06-05-issue-91-category-pagination
+status: active
+task_branch: task/2026-06-05-issue-91-category-pagination
+spec: null
+plan: null
+spec_waiver: 改动范围小，无需单独 spec
+plan_waiver: 单文件修改，无需多步计划

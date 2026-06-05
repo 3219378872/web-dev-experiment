@@ -48,7 +48,7 @@
               >{{ s.label }}</span
             >
             <span class="right"
-              >共 <b>{{ filteredItems.length }}</b> 件商品</span
+              >共 <b>{{ total }}</b> 件商品</span
             >
           </div>
 
@@ -62,6 +62,14 @@
           >
             该分类下暂无商品
           </div>
+
+          <div v-if="totalPages > 1" class="pager">
+            <span :class="{ disabled: page <= 1 }" @click="prevPage">‹ 上一页</span>
+            <a v-for="n in pageRange" :key="n" :class="{ cur: n === page }" @click="goPage(n)">{{
+              n
+            }}</a>
+            <span :class="{ disabled: page >= totalPages }" @click="nextPage">下一页 ›</span>
+          </div>
         </main>
       </div>
     </div>
@@ -69,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { getCategories, getItems } from '@/api/item';
 import ProductCard from '@/components/ProductCard.vue';
 
@@ -77,6 +85,9 @@ const categories = ref([]);
 const items = ref([]);
 const activeCatId = ref(null);
 const sortKey = ref('default');
+const page = ref(1);
+const size = ref(20);
+const total = ref(0);
 
 const sortOptions = [
   { key: 'default', label: '综合' },
@@ -85,6 +96,15 @@ const sortOptions = [
   { key: 'priceDesc', label: '价格 ↓' },
   { key: 'new', label: '新品' },
 ];
+
+const totalPages = computed(() => Math.max(1, Math.ceil(total.value / size.value)));
+const pageRange = computed(() => {
+  const pages = [];
+  const start = Math.max(1, page.value - 2);
+  const end = Math.min(totalPages.value, start + 4);
+  for (let i = start; i <= end; i++) pages.push(i);
+  return pages;
+});
 
 // 基于已加载的 items 客户端计算每个分类商品数，渲染带 count 字段的分类列表
 const categoriesWithCount = computed(() =>
@@ -131,7 +151,40 @@ function sortItems(list, key) {
 
 function selectCategory(id) {
   activeCatId.value = activeCatId.value === id ? null : id;
+  page.value = 1;
 }
+
+async function loadItems() {
+  try {
+    const params = { pageNo: page.value, pageSize: size.value };
+    if (sortKey.value !== 'default') {
+      params.sortBy = sortKey.value;
+    }
+    const data = await getItems(params);
+    items.value = data?.list || [];
+    total.value = data?.total || items.value.length;
+  } catch (err) {
+    /* ignore */
+  }
+}
+
+function goPage(n) {
+  if (n < 1 || n > totalPages.value || n === page.value) return;
+  page.value = n;
+  loadItems();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function prevPage() {
+  if (page.value > 1) goPage(page.value - 1);
+}
+function nextPage() {
+  if (page.value < totalPages.value) goPage(page.value + 1);
+}
+
+watch(sortKey, () => {
+  page.value = 1;
+  loadItems();
+});
 
 onMounted(async () => {
   try {
@@ -139,12 +192,7 @@ onMounted(async () => {
   } catch (err) {
     /* ignore */
   }
-  try {
-    const data = await getItems({ page: 1, size: 100 });
-    items.value = data?.list || [];
-  } catch (err) {
-    /* ignore */
-  }
+  await loadItems();
 });
 </script>
 
