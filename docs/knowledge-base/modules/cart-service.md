@@ -2,7 +2,7 @@
 title: cart-service
 tracks:
   - cart-service/
-last_synced_commit: 497554c
+last_synced_commit: 7b06a59
 last_synced_date: 2026-06-03
 sync_note: "2026-06-03: 移除 /hi 配置残留（hm-service 清理）"
 ---
