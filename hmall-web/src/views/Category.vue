@@ -13,13 +13,13 @@
             <h4>商品分类</h4>
             <div class="ftree">
               <a
-                v-for="cat in categories"
+                v-for="cat in categoriesWithCount"
                 :key="cat.id"
                 :class="{ on: activeCatId === cat.id }"
                 @click="selectCategory(cat.id)"
               >
                 {{ cat.name }}
-                <span>{{ cat.count || 0 }}</span>
+                <span>{{ cat.count }}</span>
               </a>
             </div>
           </div>
@@ -72,6 +72,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { getCategories, getItems } from '@/api/item';
 import ProductCard from '@/components/ProductCard.vue';
+
 const categories = ref([]);
 const items = ref([]);
 const activeCatId = ref(null);
@@ -85,29 +86,48 @@ const sortOptions = [
   { key: 'new', label: '新品' },
 ];
 
+// 基于已加载的 items 客户端计算每个分类商品数，渲染带 count 字段的分类列表
+const categoriesWithCount = computed(() =>
+  categories.value.map((cat) => ({
+    ...cat,
+    count: items.value.filter((i) => i.category === cat.name).length,
+  }))
+);
+
+// 按分类名称匹配商品（后端 item 只有 category 字段，值为分类名称字符串）
 const filteredItems = computed(() => {
-  let list = [...items.value];
-  if (activeCatId.value) {
-    list = list.filter((i) => i.categoryId === activeCatId.value || i.cid === activeCatId.value);
-  }
-  switch (sortKey.value) {
+  const activeCatName =
+    activeCatId.value != null
+      ? categories.value.find((c) => c.id === activeCatId.value)?.name
+      : null;
+
+  const baseList = activeCatName
+    ? items.value.filter((i) => i.category === activeCatName)
+    : [...items.value];
+
+  return sortItems(baseList, sortKey.value);
+});
+
+function sortItems(list, key) {
+  const sorted = [...list];
+  switch (key) {
     case 'sold':
-      list.sort((a, b) => (b.sold || 0) - (a.sold || 0));
+      sorted.sort((a, b) => (b.sold || 0) - (a.sold || 0));
       break;
     case 'priceAsc':
-      list.sort((a, b) => (a.price || 0) - (b.price || 0));
+      sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
       break;
     case 'priceDesc':
-      list.sort((a, b) => (b.price || 0) - (a.price || 0));
+      sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
       break;
     case 'new':
-      list.sort((a, b) => (b.createTime || '').localeCompare(a.createTime || ''));
+      sorted.sort((a, b) => (b.createTime || '').localeCompare(a.createTime || ''));
       break;
     default:
       break;
   }
-  return list;
-});
+  return sorted;
+}
 
 function selectCategory(id) {
   activeCatId.value = activeCatId.value === id ? null : id;
