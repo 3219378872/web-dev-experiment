@@ -7,9 +7,7 @@ tracks:
   - pay-service/
 last_synced_commit: 96cde0f
 last_synced_date: 2026-06-05
-sync_note: "购物车添加数量字段验证"
-last_synced_date: 2026-06-05
-sync_note: "修复订单详情缺少商品信息，无需文档更新"
+sync_note: "购物车添加数量字段"
 ---
 
 # order-checkout-flow
