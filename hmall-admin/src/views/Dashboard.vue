@@ -15,7 +15,6 @@
           <el-option label="近 7 天" value="7" />
           <el-option label="近 30 天" value="30" />
         </el-select>
-        <el-button size="small" @click="exportReport">导出报表</el-button>
         <el-button type="primary" size="small" @click="$router.push('/items/add')"
           >＋ 发布商品</el-button
         >
@@ -230,7 +229,6 @@ import {
   getTodo,
   getLatestOrders,
 } from '@/api/dashboard';
-import { ElMessage } from 'element-plus';
 
 const dateRange = ref('7');
 const today = ref('');
@@ -395,10 +393,6 @@ async function loadAll() {
     await nextTick();
     initChart();
   }
-}
-
-function exportReport() {
-  ElMessage.info('导出功能开发中');
 }
 
 async function onDateRangeChange() {

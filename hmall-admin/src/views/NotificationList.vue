@@ -84,10 +84,9 @@
             />
           </div>
           <div style="display: flex; gap: 10px">
-            <el-button type="primary" style="flex: 1" :loading="saving" @click="save"
-              >立即发布</el-button
+            <el-button type="primary" style="flex: 1; width: 100%" :loading="saving" @click="save"
+              >发布公告</el-button
             >
-            <el-button class="btn-ghost" @click="saveDraft">存草稿</el-button>
           </div>
         </div>
       </aside>
@@ -184,26 +183,6 @@ async function save() {
   } catch (err) {
     console.error(err);
     ElMessage.error('发布失败');
-  } finally {
-    saving.value = false;
-  }
-}
-
-async function saveDraft() {
-  if (!form.title) {
-    ElMessage.warning('请输入公告标题');
-    return;
-  }
-  saving.value = true;
-  try {
-    await saveNotification({ ...form, status: 0 });
-    form.title = '';
-    form.content = '';
-    fetch();
-    ElMessage.success('已存草稿');
-  } catch (err) {
-    console.error(err);
-    ElMessage.error('保存草稿失败');
   } finally {
     saving.value = false;
   }
