@@ -37,6 +37,11 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.hmall.cart.controller
+hm:
+  cart:
+    # 购物车最大条目数。原项目放 nacos 共享配置，本仓库 nacos 未初始化该配置，
+    # 缺省会使 CartProperties.maxItems 为 null，checkCartsFull 拆箱抛 NPE（POST /carts 500）。
+    max-items: 10
 feign:
   okhttp:
     enabled: true

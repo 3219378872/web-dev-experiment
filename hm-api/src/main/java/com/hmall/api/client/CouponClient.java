@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient("trade-service")
+@FeignClient(value = "trade-service", contextId = "couponClient")
 public interface CouponClient {
 
     @GetMapping("/coupons")

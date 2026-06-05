@@ -2,9 +2,9 @@
 title: cart-service
 tracks:
   - cart-service/
-last_synced_commit: aa63abd
+last_synced_commit: 6f3c2a0
 last_synced_date: 2026-06-05
-sync_note: "Issue #86: 添加 actuator 依赖，配合 docker-compose healthcheck"
+sync_note: "Issue #86: application.yaml 补 hm.cart.max-items 默认值，修复 CartProperties.maxItems 为 null 导致 POST /carts 拆箱 NPE"
 ---
 
 # cart-service
@@ -39,7 +39,9 @@ sync_note: "Issue #86: 添加 actuator 依赖，配合 docker-compose healthchec
 - `service/ICartService.java` 与 impl。
 - `mapper/CartMapper.java`。
 - `domain/po/Cart.java`、`domain/vo/CartVO.java`。
-- `config/CartProperties.java` —— 单用户最大购物车容量等限制。
+- `config/CartProperties.java` —— 单用户最大购物车容量等限制（`hm.cart.max-items`）。
+  原项目该值放 nacos 共享配置，本仓库 nacos 未初始化，故在 `application.yaml` 补默认值 10；
+  否则 `maxItems` 为 null，`checkCartsFull` 拆箱抛 NPE 使 `POST /carts` 返 500。
 - `mq/OrderCreatedListener.java` —— 按事件中的 `userId` 与 `itemIds` 删除对应购物车项。
 
 ## 注意事项与陷阱

@@ -3,7 +3,7 @@ package com.hmall.api.client;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient("user-service")
+@FeignClient(value = "user-service", contextId = "favoriteClient")
 public interface FavoriteClient {
 
     @PostMapping("/favorites")

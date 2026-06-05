@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 /*configuration = {OpenFeignConfiguration.class}*/
-@FeignClient(value = "item-service")
+@FeignClient(value = "item-service", contextId = "itemClient")
 public interface ItemClient {
     /**
      * 根据Id批量查询商品

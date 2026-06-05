@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient("trade-service")
+@FeignClient(value = "trade-service", contextId = "orderClient")
 public interface OrderClient {
     @GetMapping("/orders/{id}")
     OrderDTO queryOrderById(@PathVariable("id") Long id);
