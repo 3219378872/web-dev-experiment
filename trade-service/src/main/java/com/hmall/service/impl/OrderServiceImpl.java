@@ -82,21 +82,35 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         for (ItemDTO item : items) {
             total += item.getPrice() * itemNumMap.get(item.getId());
         }
-        // 1.4a.加运费
-        if (orderFormDTO.getFreight() != null) {
-            total += orderFormDTO.getFreight();
+        // 1.4a.加运费：服务端重新计算（不信任客户端提交值）
+        Long addressId = orderFormDTO.getAddressId();
+        int calcedFreight = 0;
+        int freeShippingThreshold = 9900; // 满99元包邮
+        if (total < freeShippingThreshold) {
+            if (addressId == null) {
+                calcedFreight = 1000;     // 默认10元
+            } else if (addressId <= 10) {
+                calcedFreight = 1500;     // 偏远15元
+            } else if (addressId <= 50) {
+                calcedFreight = 1000;     // 一般10元
+            } else {
+                calcedFreight = 800;      // 近地8元
+            }
         }
-        // 1.4b.减优惠券
+        total += calcedFreight;
+
+        // 1.4b.减优惠券：服务端校验有效性后再应用折扣
         if (orderFormDTO.getCouponId() != null) {
-            Coupon coupon = couponService.getById(orderFormDTO.getCouponId());
-            if (coupon != null) {
-                if (coupon.getDiscountType() == 2) {
-                    // 折扣券：折扣百分比
-                    total = total * (100 - coupon.getDiscountValue()) / 100;
-                } else {
-                    // 满减券：直接减金额
-                    total -= coupon.getDiscountValue();
-                }
+            List<Coupon> available = couponService.getAvailableCouponsForAmount(
+                    UserContext.getUser(), total);
+            Coupon coupon = available.stream()
+                    .filter(c -> c.getId().equals(orderFormDTO.getCouponId()))
+                    .findFirst()
+                    .orElseThrow(() -> new BadRequestException("优惠券不可用或已过期"));
+            if (coupon.getDiscountType() == 2) {
+                total = total * (100 - coupon.getDiscountValue()) / 100;
+            } else {
+                total -= coupon.getDiscountValue();
             }
         }
         order.setTotalFee(Math.max(0, total));

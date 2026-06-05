@@ -164,9 +164,10 @@
               <span class="sum-discount">−¥{{ (couponDiscount / 100).toFixed(2) }}</span>
             </div>
             <div class="sum-row big">
-              <span style="align-self: flex-end; color: var(--ink)">商品总额</span>
+              <span style="align-self: flex-end; color: var(--ink)">应付总额</span>
               <span class="v">
-                <span style="font-size: 17px">¥</span>{{ (cartStore.totalAmount / 100).toFixed(2) }}
+                <span style="font-size: 17px">¥</span
+                >{{ ((cartStore.totalAmount + freight - couponDiscount) / 100).toFixed(2) }}
               </span>
             </div>
           </div>
@@ -310,7 +311,6 @@ async function submitOrder() {
       addressId: selectedAddress.value,
       paymentType: payType.value,
       details,
-      freight: freight.value || undefined,
       couponId: selectedCoupon.value || undefined,
     });
     ElMessage.success('下单成功');
