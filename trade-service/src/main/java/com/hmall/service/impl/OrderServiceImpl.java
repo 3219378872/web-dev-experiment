@@ -94,7 +94,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             } else if (addressId <= 50) {
                 calcedFreight = 1000;     // 一般10元
             } else {
-                calcedFreight = 800;      // 近地8元
+                calcedFreight = 500;      // 附近5元
             }
         }
         total += calcedFreight;

@@ -12,7 +12,7 @@ npm run build
 ## Code Review
 
 ### Issue #91 - Category Pagination
-- [x] Template no longer shows `cat.count` 
+- [x] Template no longer shows `cat.count`
 - [x] `categoriesWithCount` computed removed
 - [x] `filteredItems` simplified to server-side only
 - [x] Pagination controls preserved (`page`, `size`, `total`, `totalPages`)
