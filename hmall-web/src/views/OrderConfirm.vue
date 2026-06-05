@@ -152,11 +152,7 @@
             </div>
             <div v-if="couponList.length" class="sum-row">
               <span>优惠券</span>
-              <select
-                v-model="selectedCoupon"
-                @change="applyCoupon(couponList.find((c) => c.id === selectedCoupon))"
-                style="font-size: 12px; max-width: 160px"
-              >
+              <select v-model="selectedCoupon" style="font-size: 12px; max-width: 160px">
                 <option :value="null">不使用优惠券</option>
                 <option v-for="c in couponList" :key="c.id" :value="c.id">
                   {{ c.name }}
@@ -168,10 +164,9 @@
               <span class="sum-discount">−¥{{ (couponDiscount / 100).toFixed(2) }}</span>
             </div>
             <div class="sum-row big">
-              <span style="align-self: flex-end; color: var(--ink)">应付总额</span>
+              <span style="align-self: flex-end; color: var(--ink)">商品总额</span>
               <span class="v">
-                <span style="font-size: 17px">¥</span
-                >{{ ((cartStore.totalAmount + freight - couponDiscount) / 100).toFixed(2) }}
+                <span style="font-size: 17px">¥</span>{{ (cartStore.totalAmount / 100).toFixed(2) }}
               </span>
             </div>
           </div>
@@ -262,23 +257,25 @@ async function loadCoupons() {
   }
 }
 
-function applyCoupon(coupon) {
-  if (selectedCoupon.value === coupon.id) {
-    selectedCoupon.value = null;
+// 监听优惠券选择变化，实时计算折扣金额
+watch(selectedCoupon, (newId) => {
+  if (!newId) {
     couponDiscount.value = 0;
-  } else {
-    selectedCoupon.value = coupon.id;
-    if (coupon.discountType === 2) {
-      // 折扣券
-      couponDiscount.value = Math.floor(
-        (cartStore.totalAmount * (100 - coupon.discountValue)) / 100
-      );
-    } else {
-      // 满减券
-      couponDiscount.value = coupon.discountValue || 0;
-    }
+    return;
   }
-}
+  const coupon = couponList.value.find((c) => c.id === newId);
+  if (!coupon) {
+    couponDiscount.value = 0;
+    return;
+  }
+  if (coupon.discountType === 2) {
+    // 折扣券
+    couponDiscount.value = Math.floor((cartStore.totalAmount * (100 - coupon.discountValue)) / 100);
+  } else {
+    // 满减券
+    couponDiscount.value = coupon.discountValue || 0;
+  }
+});
 
 onMounted(async () => {
   try {
