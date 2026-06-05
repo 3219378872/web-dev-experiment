@@ -117,7 +117,9 @@
                 </template>
                 <template v-else-if="order.status === 4">
                   <router-link class="btn btn-gold btn-sm" to="/feedback">评价晒单</router-link>
-                  <button class="btn btn-ghost btn-sm">再次购买</button>
+                  <button class="btn btn-ghost btn-sm" @click="handleRepurchase(order)">
+                    再次购买
+                  </button>
                   <router-link class="btn btn-ghost btn-sm" :to="`/order/${order.id}`"
                     >订单详情</router-link
                   >
@@ -128,8 +130,12 @@
                       >¥{{ (order.totalFee / 100).toFixed(2) }}</b
                     >
                   </div>
-                  <button class="btn btn-ghost btn-sm">再次购买</button>
-                  <button class="btn btn-ghost btn-sm">删除订单</button>
+                  <button class="btn btn-ghost btn-sm" @click="handleRepurchase(order)">
+                    再次购买
+                  </button>
+                  <button class="btn btn-ghost btn-sm" @click="handleDeleteOrder(order.id)">
+                    删除订单
+                  </button>
                 </template>
                 <template v-else>
                   <router-link class="btn btn-ghost btn-sm" :to="`/order/${order.id}`"
@@ -161,11 +167,15 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
-import { getOrders, cancelOrder, confirmOrder } from '@/api/order';
+import { useCartStore } from '@/stores/cart';
+import { getOrders, cancelOrder, confirmOrder, deleteOrder } from '@/api/order';
 import { ElMessage } from 'element-plus';
 
+const router = useRouter();
 const userStore = useUserStore();
+const cartStore = useCartStore();
 const orders = ref([]);
 const activeStatus = ref('');
 const total = ref(0);
@@ -272,6 +282,35 @@ async function handleConfirm(id) {
     ElMessage.success('确认收货成功');
     fetchOrders(page.value);
   } catch (err) {
+    console.error(err);
+  }
+}
+
+async function handleRepurchase(order) {
+  const details = order.details;
+  if (!details || details.length === 0) {
+    ElMessage.warning('订单商品信息不完整，无法再次购买');
+    return;
+  }
+  try {
+    for (const detail of details) {
+      await cartStore.addItem({ itemId: detail.itemId, num: detail.num || 1 });
+    }
+    ElMessage.success('已加入购物车，即将跳转');
+    router.push('/cart');
+  } catch (err) {
+    ElMessage.error('加购失败，请重试');
+    console.error(err);
+  }
+}
+
+async function handleDeleteOrder(id) {
+  try {
+    await deleteOrder(id);
+    ElMessage.success('订单已删除');
+    fetchOrders(page.value);
+  } catch (err) {
+    ElMessage.error('删除失败，请重试');
     console.error(err);
   }
 }

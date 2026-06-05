@@ -25,4 +25,11 @@ public interface IOrderService extends IService<Order> {
      * @param reason 审核原因
      */
     void refundAudit(Long orderId, boolean approved, String reason);
+
+    /**
+     * 逻辑删除订单（仅限已取消 status=5 或交易完成 status=4 状态）
+     * @param orderId 订单id
+     * @param userId 当前用户id，校验归属
+     */
+    void deleteOrder(Long orderId, Long userId);
 }

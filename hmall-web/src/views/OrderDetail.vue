@@ -140,19 +140,59 @@
       <el-empty v-else description="加载中..." style="margin-top: 40px" />
     </div>
   </div>
+
+  <!-- 支付弹窗 -->
+  <el-dialog
+    v-model="payDialogVisible"
+    title="余额支付"
+    width="380px"
+    :close-on-click-modal="false"
+  >
+    <div class="pay-dialog-body">
+      <div class="pay-amount">
+        应付金额：<span class="price"
+          >¥{{ order ? (order.totalFee / 100).toFixed(2) : '0.00' }}</span
+        >
+      </div>
+      <div class="pay-channel">支付方式：余额支付</div>
+      <el-input
+        v-model="payPassword"
+        type="password"
+        placeholder="请输入支付密码"
+        style="margin-top: 16px"
+        show-password
+        @keyup.enter="confirmPay"
+      />
+    </div>
+    <template #footer>
+      <el-button @click="payDialogVisible = false">取消</el-button>
+      <el-button type="primary" :loading="payLoading" @click="confirmPay">确认支付</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
-import { getOrderById, cancelOrder, confirmOrder } from '@/api/order';
+import {
+  getOrderById,
+  cancelOrder,
+  confirmOrder,
+  createPayOrder,
+  payOrderByBalance,
+} from '@/api/order';
 import { ElMessage } from 'element-plus';
 
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
 const order = ref(null);
+
+// 支付弹窗状态
+const payDialogVisible = ref(false);
+const payPassword = ref('');
+const payLoading = ref(false);
 
 const userName = computed(() => userStore.userInfo?.name || '用户');
 const userInitial = computed(() => userName.value.charAt(0));
@@ -251,9 +291,38 @@ async function fetchOrder() {
   }
 }
 
-async function handlePay() {
-  ElMessage.info('跳转支付...');
-  router.push(`/order/${order.value.id}?pay=1`);
+function handlePay() {
+  if (!order.value || order.value.status !== 1) return;
+  payPassword.value = '';
+  payDialogVisible.value = true;
+}
+
+async function confirmPay() {
+  if (!payPassword.value.trim()) {
+    ElMessage.warning('请输入支付密码');
+    return;
+  }
+  payLoading.value = true;
+  try {
+    // 第一步：创建支付单
+    const payOrderId = await createPayOrder({
+      bizOrderNo: order.value.id,
+      amount: order.value.totalFee,
+      payChannelCode: 'balance',
+      payType: 3,
+      orderInfo: `订单${order.value.id}`,
+    });
+    // 第二步：执行余额支付
+    await payOrderByBalance(payOrderId, payPassword.value);
+    payDialogVisible.value = false;
+    ElMessage.success('支付成功');
+    await fetchOrder();
+  } catch (err) {
+    ElMessage.error('支付失败，请检查支付密码或余额是否充足');
+    console.error(err);
+  } finally {
+    payLoading.value = false;
+  }
 }
 
 async function handleCancel() {
@@ -282,8 +351,12 @@ function copyId() {
   ElMessage.success('订单号已复制');
 }
 
-onMounted(() => {
-  fetchOrder();
+onMounted(async () => {
+  await fetchOrder();
+  // 若携带 ?pay=1 且订单为待付款状态，自动弹出支付弹窗
+  if (route.query.pay === '1' && order.value?.status === 1) {
+    handlePay();
+  }
 });
 </script>
 
@@ -544,5 +617,26 @@ onMounted(() => {
   color: var(--price);
   font-weight: 900;
   font-size: 22px;
+}
+
+.pay-dialog-body {
+  padding: 8px 0;
+}
+
+.pay-amount {
+  font-size: 15px;
+  color: var(--ink-2);
+  margin-bottom: 8px;
+}
+
+.pay-amount .price {
+  color: var(--price);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.pay-channel {
+  font-size: 13.5px;
+  color: var(--ink-3);
 }
 </style>
