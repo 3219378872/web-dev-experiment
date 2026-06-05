@@ -130,7 +130,7 @@ async function load() {
 async function removeFav(id) {
   try {
     await removeFavorite(id);
-    favorites.value = favorites.value.filter((f) => f.id !== id);
+    favorites.value = favorites.value.filter((f) => f.itemId !== id);
     ElMessage.success('已取消收藏');
   } catch (err) {
     console.error(err);

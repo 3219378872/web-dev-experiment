@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 321df6b
+last_synced_commit: 2ca6a5a
 last_synced_date: 2026-06-05
-sync_note: "修复收藏页面字段名与 FavoriteVO 匹配"
+sync_note: "修复收藏删除后本地状态过滤字段"
 ---
 
 # hmall-web
