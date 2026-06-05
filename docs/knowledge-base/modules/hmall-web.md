@@ -2,7 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 7b06a59
+last_synced_commit: 96cde0f
+last_synced_date: 2026-06-05
+sync_note: "ItemDetail.vue 立即购买按钮改为先添加购物车再跳转"
 last_synced_date: 2026-06-05
 sync_note: "fix(issue-71): Category.vue 筛选改为按 category 名称匹配，品类数量改为客户端计算 categoriesWithCount"
 ---

@@ -2,7 +2,9 @@
 title: cart-service
 tracks:
   - cart-service/
-last_synced_commit: 7b06a59
+last_synced_commit: 96cde0f
+last_synced_date: 2026-06-05
+sync_note: "CartFormDTO 添加 num 字段并添加验证"
 last_synced_date: 2026-06-03
 sync_note: "2026-06-03: 移除 /hi 配置残留（hm-service 清理）"
 ---

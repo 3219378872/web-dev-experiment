@@ -2,7 +2,9 @@
 title: hm-api
 tracks:
   - hm-api/
-last_synced_commit: 7b06a59
+last_synced_commit: 96cde0f
+last_synced_date: 2026-06-05
+sync_note: "CartFormDTO 添加 num 字段并添加验证"
 last_synced_date: 2026-06-04
 sync_note: "Phase 3: UserClient 新增 countNewUsers(days) 方法"
 ---
