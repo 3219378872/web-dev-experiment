@@ -94,7 +94,7 @@
               }}</span>
             </td>
             <td class="actions">
-              <span class="lk" @click="$message.info('详情')">详情</span>
+              <span class="lk" @click="showDetail(row)">详情</span>
               <span class="lk" @click="toggle(row)">{{
                 row.status === 'FROZEN' ? '启用' : '禁用'
               }}</span>
@@ -114,12 +114,53 @@
         />
       </div>
     </div>
+
+    <!-- 用户详情弹窗 -->
+    <el-dialog v-model="detailVisible" title="用户详情" width="520px">
+      <template v-if="detailData">
+        <div class="detail-header">
+          <span class="u-av-lg" :style="`background:${avatarColor(0)}`">{{
+            (detailData.username || '?')[0]
+          }}</span>
+          <div>
+            <div class="detail-name">{{ detailData.username }}</div>
+            <div class="detail-id">ID: {{ detailData.id }}</div>
+          </div>
+        </div>
+        <el-form label-width="100px" class="detail-form">
+          <el-form-item label="用户名">
+            <span>{{ detailData.username || '—' }}</span>
+          </el-form-item>
+          <el-form-item label="手机号">
+            <span>{{ detailData.phone || '—' }}</span>
+          </el-form-item>
+          <el-form-item label="邮箱">
+            <span>{{ detailData.email || '—' }}</span>
+          </el-form-item>
+          <el-form-item label="角色">
+            <span>{{ detailData.role === 'admin' ? '管理员' : '普通用户' }}</span>
+          </el-form-item>
+          <el-form-item label="状态">
+            <span class="sdot" :class="detailData.status === 'NORMAL' ? 'green' : 'red'">{{
+              detailData.status === 'NORMAL' ? '正常' : '已禁用'
+            }}</span>
+          </el-form-item>
+          <el-form-item label="注册时间">
+            <span>{{ detailData.createTime?.slice(0, 16) || '—' }}</span>
+          </el-form-item>
+          <el-form-item label="更新时间">
+            <span>{{ detailData.updateTime?.slice(0, 16) || '—' }}</span>
+          </el-form-item>
+        </el-form>
+      </template>
+      <div v-else class="detail-loading">加载中...</div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
-import { getUsers, toggleUserStatus } from '@/api/user';
+import { getUsers, toggleUserStatus, getUserById } from '@/api/user';
 import { ElMessage } from 'element-plus';
 
 const users = ref([]);
@@ -127,6 +168,10 @@ const page = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
 const filter = reactive({ keyword: '', status: '' });
+
+// 详情弹窗
+const detailVisible = ref(false);
+const detailData = ref(null);
 
 const avatarColors = [
   '#88A6B8',
@@ -146,13 +191,28 @@ function avatarColor(i) {
 
 const frozenCount = computed(() => users.value.filter((u) => u.status === 'FROZEN').length);
 
-async function fetch() {
+async function showDetail(row) {
+  detailVisible.value = true;
+  detailData.value = null;
+  try {
+    const r = await getUserById(row.id);
+    detailData.value = r;
+  } catch (err) {
+    console.error(err);
+    ElMessage.error('加载用户详情失败');
+    detailVisible.value = false;
+  }
+}
+
+async function fetch(p) {
+  if (p) page.value = p;
   try {
     const r = await getUsers({ page: page.value, pageSize: pageSize.value, ...filter });
     users.value = r.list || [];
     total.value = r.total || 0;
   } catch (err) {
     console.error(err);
+    ElMessage.error('用户列表加载失败');
   }
 }
 
@@ -170,6 +230,7 @@ async function toggle(row) {
     ElMessage.success('已更新');
   } catch (err) {
     console.error(err);
+    ElMessage.error('操作失败');
   }
 }
 
@@ -346,5 +407,43 @@ fetch();
 
 .dim {
   color: var(--ink-3);
+}
+
+/* 详情弹窗样式 */
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--admin-line);
+}
+.u-av-lg {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.detail-name {
+  font-size: 18px;
+  font-weight: 700;
+}
+.detail-id {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+.detail-loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--ink-3);
+}
+.detail-form .el-form-item {
+  margin-bottom: 12px;
 }
 </style>

@@ -9,11 +9,13 @@
       </div>
       <div class="mid">
         <h1>综合百货<br />运营管理后台</h1>
-        <p>商品、订单、用户、营销内容一站式管理。数据驱动决策，让运营更高效。</p>
+        <p>
+          好集是一个综合性百货电商平台，覆盖手机数码、家用电器、食品生鲜、服饰美妆等品类。管理后台提供商品、订单、用户、营销内容一站式管理，数据驱动决策，让运营更高效。
+        </p>
         <div class="al-stats">
-          <div class="s"><b>2.4万</b><span>在售商品</span></div>
-          <div class="s"><b>18.6万</b><span>注册用户</span></div>
-          <div class="s"><b>¥386万</b><span>本月成交</span></div>
+          <div class="s"><b>全品类</b><span>百货电商</span></div>
+          <div class="s"><b>微服务</b><span>Spring Cloud</span></div>
+          <div class="s"><b>双前端</b><span>Vue 3 + Element</span></div>
         </div>
       </div>
       <div class="copyright">© 2026 好集 HAOJI · 仅授权管理员访问</div>
@@ -21,14 +23,8 @@
 
     <div class="al-main">
       <div class="al-card">
-        <h2>欢迎登录 👋</h2>
+        <h2>欢迎登录</h2>
         <div class="sub">请输入管理员账号信息进入后台</div>
-
-        <div class="role-pick">
-          <div v-for="r in roles" :key="r" class="r" :class="{ on: role === r }" @click="role = r">
-            {{ r }}
-          </div>
-        </div>
 
         <div class="field">
           <label>管理员账号</label>
@@ -49,27 +45,15 @@
             @keyup.enter="doLogin"
           />
         </div>
-        <div class="field">
-          <label>验证码</label>
-          <div class="cap-row">
-            <input
-              v-model="form.captcha"
-              class="input"
-              placeholder="请输入右侧字符"
-              @keyup.enter="doLogin"
-            />
-            <span class="cap">7 H q 3</span>
-          </div>
-        </div>
 
         <div class="row-between">
           <label class="remember-label">
             <span class="checkbox" :class="{ on: remember }" @click="remember = !remember">
               {{ remember ? '✓' : '' }}
             </span>
-            记住登录状态
+            保持登录
           </label>
-          <a class="forgot-link">忘记密码？</a>
+          <a class="forgot-link" @click="forgotPwd">忘记密码？</a>
         </div>
 
         <button class="btn btn-hot btn-lg btn-block" :disabled="loading" @click="doLogin">
@@ -91,9 +75,7 @@ import { ElMessage } from 'element-plus';
 const router = useRouter();
 const loading = ref(false);
 const remember = ref(true);
-const role = ref('超级管理员');
-const roles = ['超级管理员', '运营专员', '客服专员'];
-const form = reactive({ username: 'admin@haoji.com', password: '', captcha: '' });
+const form = reactive({ username: 'admin@haoji.com', password: '' });
 
 async function doLogin() {
   if (!form.username || !form.password) {
@@ -116,6 +98,10 @@ async function doLogin() {
   } finally {
     loading.value = false;
   }
+}
+
+function forgotPwd() {
+  ElMessage.info('请联系超级管理员重置密码');
 }
 </script>
 
@@ -273,49 +259,6 @@ async function doLogin() {
   padding: 13px 14px;
 }
 
-.role-pick {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.role-pick .r {
-  flex: 1;
-  border: 1.5px solid var(--line-2);
-  border-radius: 10px;
-  padding: 11px;
-  text-align: center;
-  font-size: 13px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.role-pick .r.on {
-  border-color: var(--brand);
-  background: var(--brand-softer);
-  color: var(--brand-700);
-  font-weight: 700;
-}
-
-.cap-row {
-  display: flex;
-  gap: 10px;
-}
-
-.cap-row .cap {
-  width: 110px;
-  border-radius: 8px;
-  background: linear-gradient(110deg, #88a6b8, #b79cc4);
-  display: grid;
-  place-items: center;
-  color: #fff;
-  font-weight: 900;
-  letter-spacing: 3px;
-  font-style: italic;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
 .row-between {
   display: flex;
   justify-content: space-between;
@@ -329,6 +272,24 @@ async function doLogin() {
   gap: 8px;
   align-items: center;
   color: var(--ink-2);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--line-2);
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checkbox.on {
+  background: var(--brand);
+  border-color: var(--brand);
 }
 
 .forgot-link {

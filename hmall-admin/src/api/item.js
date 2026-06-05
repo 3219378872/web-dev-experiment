@@ -14,7 +14,7 @@ export const getCategories = () => request.get('/categories');
 export const saveCategory = (data) => request.post('/categories', data);
 export const updateCategory = (id, data) => request.put(`/categories/${id}`, data);
 export const deleteCategory = (id) => request.delete(`/categories/${id}`);
-export const getReviews = () => request.get('/admin/reviews');
+export const getReviews = (params) => request.get('/admin/reviews', { params });
 export const deleteReview = (id) => request.delete(`/admin/reviews/${id}`);
 
 // Banner APIs

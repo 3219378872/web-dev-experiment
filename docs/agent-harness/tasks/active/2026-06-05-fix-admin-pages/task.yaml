@@ -1,0 +1,7 @@
+slug: fix-admin-pages
+status: active
+task_branch: task/2026-06-05-fix-admin-pages
+spec: null
+plan: null
+spec_waiver: 6 个前端页面修复，无独立设计文档
+plan_waiver: 直接在 worktree 中修复，无需多步实施计划
