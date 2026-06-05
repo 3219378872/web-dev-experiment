@@ -7,7 +7,7 @@ tracks:
   - pay-service/
 last_synced_commit: b05c078
 last_synced_date: 2026-06-05
-sync_note: "Issue #89 跟进：trade-service OrderController.myOrders() 填充 details 字段；下单结算流程本身未变"
+sync_note: "Issue #89: trade-service OrderController.myOrders() 填充 details 字段；Issue #92: cart-service 加入/查询购物车时填充商品元数据"
 ---
 
 # order-checkout-flow

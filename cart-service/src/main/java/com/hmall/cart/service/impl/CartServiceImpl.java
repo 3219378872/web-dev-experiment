@@ -68,7 +68,18 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         if (cart.getNum() == null) {
             cart.setNum(1);
         }
-        // 3.4.保存到数据库
+        // 3.4.填充商品元数据（名称、图片、价格、规格）
+        List<ItemDTO> items = itemClient.queryItemByIds(java.util.Collections.singletonList(cartFormDTO.getItemId()));
+        if (!CollUtils.isEmpty(items)) {
+            ItemDTO item = items.get(0);
+            cart.setName(item.getName());
+            cart.setImage(item.getImage());
+            cart.setPrice(item.getPrice());
+            if (StrUtil.isBlank(cart.getSpec())) {
+                cart.setSpec(item.getSpec());
+            }
+        }
+        // 3.5.保存到数据库
         save(cart);
     }
 
@@ -135,6 +146,9 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             if (item == null) {
                 continue;
             }
+            v.setName(item.getName());
+            v.setSpec(item.getSpec());
+            v.setImage(item.getImage());
             v.setNewPrice(item.getPrice());
             v.setStatus(item.getStatus());
             v.setStock(item.getStock());

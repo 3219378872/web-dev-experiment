@@ -1,6 +1,6 @@
-slug: 2026-06-05-issue-89-order-list-missing-fields
+slug: 2026-06-05-issue-92-cart-missing-item-meta
 status: active
-task_branch: task/2026-06-05-issue-89-order-list-missing-fields
+task_branch: task/2026-06-05-issue-92-cart-missing-item-meta
 spec: null
 plan: null
 spec_waiver: 简单 bugfix，单文件单方法修改
