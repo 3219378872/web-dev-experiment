@@ -14,19 +14,33 @@
       <section class="pd">
         <div class="gallery">
           <div class="main">
-            <div class="ph" :class="mainShade" data-label="product · 1200×1200">
+            <img v-if="activeImage" :src="activeImage" :alt="item.name" />
+            <div v-else class="ph" :class="mainShade" data-label="product · 1200×1200">
               <span class="glyph">{{ item.glyph || '▣' }}</span>
             </div>
           </div>
           <div class="thumbs">
-            <div
-              v-for="(sh, n) in thumbShades"
-              :key="n"
-              class="ph"
-              :class="[sh, { on: activeThumb === n }]"
-              :data-label="''"
-              @click="activeThumb = n"
-            ></div>
+            <template v-if="itemImages.length">
+              <div
+                v-for="(url, n) in itemImages"
+                :key="url + n"
+                class="thumb"
+                :class="{ on: activeThumb === n }"
+                @click="activeThumb = n"
+              >
+                <img :src="url" :alt="item.name" />
+              </div>
+            </template>
+            <template v-else>
+              <div
+                v-for="(sh, n) in thumbShades"
+                :key="n"
+                class="ph"
+                :class="[sh, { on: activeThumb === n }]"
+                :data-label="''"
+                @click="activeThumb = n"
+              ></div>
+            </template>
           </div>
           <div class="acts">
             <a id="fav-btn" @click="toggleFavorite">
@@ -171,11 +185,22 @@
                 {{ item.description || '本商品为好集精选好物，品质保障，全场正品。' }}
               </p>
               <div class="detail-imgs">
-                <div class="ph s4" data-label="detail"><span class="glyph">▣</span></div>
-                <div class="ph s7" data-label="detail"><span class="glyph">◐</span></div>
-                <div class="ph s1" data-label="detail" style="margin-top: 12px">
-                  <span class="glyph">✦</span>
-                </div>
+                <template v-if="itemImages.length">
+                  <img
+                    v-for="(url, n) in itemImages"
+                    :key="url + n"
+                    :src="url"
+                    :alt="item.name"
+                    class="detail-img"
+                  />
+                </template>
+                <template v-else>
+                  <div class="ph s4" data-label="detail"><span class="glyph">▣</span></div>
+                  <div class="ph s7" data-label="detail"><span class="glyph">◐</span></div>
+                  <div class="ph s1" data-label="detail" style="margin-top: 12px">
+                    <span class="glyph">✦</span>
+                  </div>
+                </template>
               </div>
             </div>
 
@@ -255,15 +280,18 @@
                 </div>
               </div>
               <div class="rev-filters">
-                <span class="chip on">全部 {{ reviews.length }}</span>
-                <span class="chip">有图</span>
-                <span class="chip">好评</span>
-                <span class="chip">中评</span>
-                <span class="chip">差评</span>
+                <span
+                  v-for="f in reviewFilterDefs"
+                  :key="f.key"
+                  class="chip"
+                  :class="{ on: reviewFilter === f.key }"
+                  @click="setReviewFilter(f.key)"
+                  >{{ f.label }} {{ reviewCounts[f.key] || 0 }}</span
+                >
               </div>
 
-              <div v-if="reviews.length" id="rev-list">
-                <div v-for="r in reviews" :key="r.id" class="review">
+              <div v-if="visibleReviews.length" id="rev-list">
+                <div v-for="r in visibleReviews" :key="r.id" class="review">
                   <div class="av" :style="`background:${avatarColor(r.userId || r.id)}`">
                     {{ (r.nickname || r.userName || '用')[0] }}
                   </div>
@@ -276,15 +304,28 @@
                       }}</span>
                     </div>
                     <div class="body">{{ r.content }}</div>
+                    <div v-if="reviewImages(r).length" class="rev-imgs">
+                      <img
+                        v-for="(url, idx) in reviewImages(r)"
+                        :key="idx"
+                        :src="url"
+                        alt="评价图片"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
               <div v-else style="text-align: center; padding: 40px 0; color: var(--ink-3)">
-                暂无评价
+                {{ reviews.length ? '暂无符合条件的评价' : '暂无评价' }}
               </div>
 
-              <div style="text-align: center; margin-top: 18px">
-                <a class="btn btn-ghost" href="#">查看全部 {{ reviews.length }} 条评价 ›</a>
+              <div
+                v-if="filteredReviews.length > visibleReviews.length"
+                style="text-align: center; margin-top: 18px"
+              >
+                <a class="btn btn-ghost" @click="showMoreReviews"
+                  >查看更多评价（还有 {{ filteredReviews.length - visibleReviews.length }} 条）›</a
+                >
               </div>
 
               <!-- 写评价 -->
@@ -417,11 +458,14 @@
             </router-link>
           </div>
           <div
+            v-if="coupons.length"
             class="rail-box"
             style="background: linear-gradient(135deg, #fff3dc, #ffe2c0); border-color: #f3d9a0"
           >
             <h4 style="color: #8a5d00">🎟 本店优惠券</h4>
             <div
+              v-for="c in coupons"
+              :key="c.id"
               class="mini-coupon"
               style="
                 display: flex;
@@ -434,27 +478,16 @@
               "
             >
               <span
-                ><b style="color: var(--price); font-size: 17px">¥20</b>
-                <small class="dim">满199</small></span
+                ><b style="color: var(--price); font-size: 17px">{{ couponLabel(c) }}</b>
+                <small class="dim">{{ couponCond(c) }}</small></span
               >
-              <button class="btn btn-primary btn-sm">领取</button>
-            </div>
-            <div
-              class="mini-coupon"
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                background: #fff;
-                border-radius: 8px;
-                padding: 9px 12px;
-              "
-            >
-              <span
-                ><b style="color: var(--price); font-size: 17px">¥50</b>
-                <small class="dim">满399</small></span
+              <button
+                class="btn btn-primary btn-sm"
+                :disabled="claimingId === c.id"
+                @click="claim(c.id)"
               >
-              <button class="btn btn-primary btn-sm">领取</button>
+                {{ claimingId === c.id ? '领取中' : '领取' }}
+              </button>
             </div>
           </div>
         </aside>
@@ -471,7 +504,12 @@ import { useCartStore } from '@/stores/cart';
 import { ElMessage } from 'element-plus';
 import { getItemById, getReviews, submitReview as submitReviewApi, getItems } from '@/api/item';
 import { checkFavorite, addFavorite, removeFavorite, uploadImage } from '@/api/common';
+import { getCoupons, claimCoupon } from '@/api/order';
+import { parseItemImages } from '@/utils/itemImages';
+import { REVIEW_FILTERS, filterReviews, countReviews } from '@/utils/reviewFilters';
 import StarRating from '@/components/StarRating.vue';
+
+const REVIEW_PAGE_SIZE = 5;
 
 const route = useRoute();
 const router = useRouter();
@@ -552,6 +590,55 @@ function initSpecSelection(groups) {
   }
 }
 const reviews = ref([]);
+const reviewFilter = ref('all');
+const reviewVisibleCount = ref(REVIEW_PAGE_SIZE);
+const reviewFilterDefs = REVIEW_FILTERS;
+const coupons = ref([]);
+const claimingId = ref(null);
+
+const reviewCounts = computed(() => countReviews(reviews.value));
+const filteredReviews = computed(() => filterReviews(reviews.value, reviewFilter.value));
+const visibleReviews = computed(() => filteredReviews.value.slice(0, reviewVisibleCount.value));
+
+function setReviewFilter(key) {
+  reviewFilter.value = key;
+  reviewVisibleCount.value = REVIEW_PAGE_SIZE;
+}
+
+function showMoreReviews() {
+  reviewVisibleCount.value += REVIEW_PAGE_SIZE;
+}
+
+function reviewImages(r) {
+  return parseItemImages(r?.images);
+}
+
+function couponLabel(c) {
+  if (c?.discountType === 2) return `${(c.discountValue || 0) / 10}折`;
+  return `¥${Math.round((c?.discountValue || 0) / 100)}`;
+}
+
+function couponCond(c) {
+  const minYuan = c?.minAmount ? Math.round(c.minAmount / 100) : 0;
+  return minYuan > 0 ? `满${minYuan}可用` : '无门槛';
+}
+
+async function claim(id) {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录');
+    return;
+  }
+  claimingId.value = id;
+  try {
+    await claimCoupon(id);
+    ElMessage.success('领取成功');
+  } catch (err) {
+    /* error handled by interceptor */
+  } finally {
+    claimingId.value = null;
+  }
+}
+
 const reviewRating = ref(5);
 const reviewContent = ref('');
 const reviewImageUrls = ref([]);
@@ -560,6 +647,12 @@ const reviewFileInput = ref(null);
 const activeThumb = ref(0);
 const activeTab = ref('detail');
 const relatedItems = ref([]);
+
+// 后端真实图片（image 字段，逗号分隔可多图）；无图时降级到原型色块
+const itemImages = computed(() => parseItemImages(item.value?.image));
+const activeImage = computed(
+  () => itemImages.value[activeThumb.value] || itemImages.value[0] || ''
+);
 
 // 与原型一致的图库色块（主图 s4，缩略图 s4/s7/s1/s5/s3）
 const thumbShades = ['s4', 's7', 's1', 's5', 's3'];
@@ -591,6 +684,9 @@ function renderStars(rating) {
 }
 
 async function loadItem(id) {
+  activeThumb.value = 0;
+  reviewFilter.value = 'all';
+  reviewVisibleCount.value = REVIEW_PAGE_SIZE;
   try {
     item.value = await getItemById(id);
   } catch (err) {
@@ -600,6 +696,11 @@ async function loadItem(id) {
     reviews.value = await getReviews(id);
   } catch (err) {
     /* ignore */
+  }
+  try {
+    coupons.value = (await getCoupons()) || [];
+  } catch (err) {
+    coupons.value = [];
   }
   if (userStore.isLoggedIn) {
     try {
@@ -780,6 +881,23 @@ async function submitReview() {
 }
 .thumbs .ph.on {
   border-color: var(--brand);
+}
+.thumbs .thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  overflow: hidden;
+}
+.thumbs .thumb.on {
+  border-color: var(--brand);
+}
+.thumbs .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .gallery .acts {
   display: flex;
@@ -1022,6 +1140,25 @@ async function submitReview() {
 }
 .detail-imgs .ph .glyph {
   font-size: 60px;
+}
+.detail-imgs .detail-img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  display: block;
+}
+.rev-imgs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.rev-imgs img {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
 }
 
 /* reviews */

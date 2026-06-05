@@ -138,7 +138,8 @@
           :to="`/item/${p.id}`"
         >
           <div class="ph" :class="p.shade || `s${(p.id % 8) + 1}`" :data-label="p.category">
-            <span class="glyph">{{ p.glyph }}</span>
+            <img v-if="p.image" :src="p.image" :alt="p.name" />
+            <span v-else class="glyph">{{ p.glyph }}</span>
           </div>
           <div class="nm">{{ p.name }}</div>
           <div class="pr">
@@ -242,7 +243,9 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { getItems, getCategories, getBanners } from '@/api/item';
+import { getItems, getCategories, getBanners, getActiveSeckills } from '@/api/item';
+import { takeTagged, buildPromoItems } from '@/utils/homeSections';
+import { mapSeckillItem } from '@/utils/seckill';
 import ProductCard from '@/components/ProductCard.vue';
 import { useUserStore } from '@/stores/user';
 
@@ -251,8 +254,8 @@ const hotItems = ref([]);
 const newItems = ref([]);
 const promoItems = ref([]);
 const flashItems = ref([]);
+const flashPct = ref([]);
 const countdown = ref({ h: '02', m: '48', s: '13' });
-const flashPct = [78, 64, 90, 45, 82, 58];
 
 const banners = ref([]);
 const bannerIdx = ref(0);
@@ -321,26 +324,39 @@ onMounted(async () => {
     /* ignore */
   }
   try {
-    const data = await getItems({ page: 1, size: 10, sortBy: 'sold' });
-    hotItems.value = (data?.list || []).map((x) => ({ ...x, tag: x.tag || '热卖' })).slice(0, 5);
+    const data = await getItems({ page: 1, size: 10, sortBy: 'sold', isAsc: false });
+    hotItems.value = takeTagged(data?.list, '热卖', 5);
   } catch (e) {
     /* ignore */
   }
   try {
-    const data = await getItems({ page: 1, size: 10, sortBy: 'create_time' });
-    newItems.value = (data?.list || []).map((x) => ({ ...x, tag: x.tag || '新品' })).slice(0, 5);
+    const data = await getItems({ page: 1, size: 10, sortBy: 'create_time', isAsc: false });
+    newItems.value = takeTagged(data?.list, '新品', 5);
   } catch (e) {
     /* ignore */
   }
   try {
-    const data = await getItems({ page: 1, size: 10 });
-    const all = data?.list || [];
-    promoItems.value = all.slice(0, 5).map((x) => ({ ...x, tag: x.tag || '促销' }));
-    flashItems.value = all.slice(5, 11);
+    const data = await getItems({ page: 1, size: 20, sortBy: 'sold', isAsc: false });
+    promoItems.value = buildPromoItems(data?.list, 5);
   } catch (e) {
     /* ignore */
   }
+  await loadFlashItems();
 });
+
+/** 秒杀区接入 /seckill/active，与 FlashSale.vue 口径一致（issue #127） */
+async function loadFlashItems() {
+  try {
+    const data = await getActiveSeckills({ page: 1, size: 6 });
+    const list = data?.list || data || [];
+    const items = (Array.isArray(list) ? list : []).slice(0, 6).map(mapSeckillItem);
+    flashItems.value = items;
+    flashPct.value = items.map((p) => p.percent);
+  } catch (e) {
+    flashItems.value = [];
+    flashPct.value = [];
+  }
+}
 
 onUnmounted(() => {
   if (timer) clearInterval(timer);
@@ -643,6 +659,13 @@ onUnmounted(() => {
   aspect-ratio: 1;
   border-radius: 10px;
   margin-bottom: 10px;
+  overflow: hidden;
+}
+.flash-item .ph img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .flash-item .nm {
   font-size: 12.5px;

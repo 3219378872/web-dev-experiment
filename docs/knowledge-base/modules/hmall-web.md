@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 3819eff
+last_synced_commit: 287f6e0
 last_synced_date: 2026-06-06
-sync_note: "fix(#91): Category.vue 分类分页；fix(#93): ItemDetail.vue 动态 spec；fix(#94): 移除 dtabs sticky；fix(#99): Home/FlashSale/OrderList 硬编码数据修复；fix(#103): OrderConfirm/OrderDetail API集成/折扣券对齐后端含运费；fix(#105-#111): feature pages修复、backend images字段支持；codex-review findings全部修复"
+sync_note: "fix(#127): Home.vue 分页参数 page/size→pageNo/pageSize（api/pageParams.js）、促销区按 ItemDTO.isRecommend、秒杀区接 /seckill/active（utils/seckill.js）；fix(#128): ItemDetail.vue 渲染 ItemDTO.image 真实图片（utils/itemImages.js）、本店优惠券接 /coupons + /coupons/{id}/claim、评价筛选有图/好评/中评/差评（utils/reviewFilters.js）、查看全部改加载更多；新增 utils/homeSections.js 及对应 Vitest 单测"
 ---
 
 # hmall-web
