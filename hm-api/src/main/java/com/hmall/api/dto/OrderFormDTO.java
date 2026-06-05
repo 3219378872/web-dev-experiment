@@ -15,4 +15,8 @@ public class OrderFormDTO {
     private Integer paymentType;
     @ApiModelProperty("下单商品列表")
     private List<OrderDetailDTO> details;
+    @ApiModelProperty("运费，单位为分")
+    private Integer freight;
+    @ApiModelProperty("使用的优惠券id")
+    private Long couponId;
 }

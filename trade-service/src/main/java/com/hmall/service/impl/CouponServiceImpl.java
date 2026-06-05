@@ -96,4 +96,21 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon>
 
         return list(wrapper);
     }
+
+    @Override
+    @Transactional
+    public void useCoupon(Long userId, Long couponId, Long orderId) {
+        UserCoupon uc = userCouponMapper.selectOne(
+                new LambdaQueryWrapper<UserCoupon>()
+                        .eq(UserCoupon::getUserId, userId)
+                        .eq(UserCoupon::getCouponId, couponId)
+                        .eq(UserCoupon::getStatus, 1));
+        if (uc == null) {
+            throw new BadRequestException("优惠券不存在或已使用");
+        }
+        uc.setStatus(0);
+        uc.setUsedOrderId(orderId);
+        uc.setUseTime(LocalDateTime.now());
+        userCouponMapper.updateById(uc);
+    }
 }

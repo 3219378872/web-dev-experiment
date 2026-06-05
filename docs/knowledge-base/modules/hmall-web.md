@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 93d535b
+last_synced_commit: 3819eff
 last_synced_date: 2026-06-06
-sync_note: "fix(#105-#111): hmall-web feature pages修复；backend images字段支持；codex-review findings全部修复"
+sync_note: "fix(#91): Category.vue 分类分页；fix(#93): ItemDetail.vue 动态 spec；fix(#94): 移除 dtabs sticky；fix(#99): Home/FlashSale/OrderList 硬编码数据修复；fix(#103): OrderConfirm/OrderDetail API集成/折扣券对齐后端含运费；fix(#105-#111): feature pages修复、backend images字段支持；codex-review findings全部修复"
 ---
 
 # hmall-web

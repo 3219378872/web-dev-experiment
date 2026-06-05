@@ -1,0 +1,8 @@
+slug: 2026-06-05-fix-web-core-pages
+status: active
+task_branch: task/2026-06-05-fix-web-core-pages
+pull_request: https://github.com/3219378872/web-dev-experiment/pull/125
+spec: null
+plan: null
+spec_waiver: 后端变更属 Issue #103 已有功能(freight/coupon)的增量实现，无全新领域设计：OrderFormDTO 新增可选字段，createOrder 复现已有 Controller freigh 计算逻辑、复用现有 CouponService 方法。整体流程（选地址→下单→支付）及契约语义不变。
+plan_waiver: 5 issues 各自独立可依次修复，无需多步实施计划。

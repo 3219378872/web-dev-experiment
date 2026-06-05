@@ -69,52 +69,39 @@
             </div>
           </div>
 
-          <div class="spec">
-            <div class="line">
-              <span class="k">颜色</span>
+          <div v-if="specGroups.length" class="spec">
+            <div v-for="(group, gi) in specGroups" :key="gi" class="line">
+              <span class="k">{{ group.name }}</span>
               <div class="opts">
                 <span
+                  v-for="opt in group.options"
+                  :key="opt"
                   class="opt"
-                  :class="{ on: selectedColor === '曜石黑' }"
-                  @click="selectedColor = '曜石黑'"
-                  ><span class="sw" style="background: #221b17"></span>曜石黑</span
-                >
-                <span
-                  class="opt"
-                  :class="{ on: selectedColor === '云母白' }"
-                  @click="selectedColor = '云母白'"
-                  ><span class="sw" style="background: #f2f0ec; border: 1px solid #ddd"></span
-                  >云母白</span
-                >
-                <span
-                  class="opt"
-                  :class="{ on: selectedColor === '雾霾蓝' }"
-                  @click="selectedColor = '雾霾蓝'"
-                  ><span class="sw" style="background: #88a6b8"></span>雾霾蓝</span
+                  :class="{ on: selectedSpecs[gi] === opt }"
+                  @click="selectedSpecs[gi] = opt"
+                  >{{ opt }}</span
                 >
               </div>
             </div>
             <div class="line">
-              <span class="k">版本</span>
+              <span class="k">数量</span>
+              <div style="display: flex; align-items: center; gap: 14px">
+                <div class="qty">
+                  <button @click="quantity > 1 ? quantity-- : null">−</button>
+                  <input v-model.number="quantity" readonly />
+                  <button @click="quantity < item.stock ? quantity++ : null">+</button>
+                </div>
+                <span class="dim" style="font-size: 12.5px"
+                  >库存 <b style="color: var(--ink-2)">{{ item.stock }}</b> 件 · 上海仓 现货</span
+                >
+              </div>
+            </div>
+          </div>
+          <div v-else-if="item.spec" class="spec">
+            <div class="line">
+              <span class="k">规格</span>
               <div class="opts">
-                <span
-                  class="opt"
-                  :class="{ on: selectedVersion === '标准版' }"
-                  @click="selectedVersion = '标准版'"
-                  >标准版</span
-                >
-                <span
-                  class="opt"
-                  :class="{ on: selectedVersion === '降噪增强版 +¥80' }"
-                  @click="selectedVersion = '降噪增强版 +¥80'"
-                  >降噪增强版 +¥80</span
-                >
-                <span
-                  class="opt"
-                  :class="{ on: selectedVersion === '游戏专业版 +¥150' }"
-                  @click="selectedVersion = '游戏专业版 +¥150'"
-                  >游戏专业版 +¥150</span
-                >
+                <span class="opt on">{{ item.spec }}</span>
               </div>
             </div>
             <div class="line">
@@ -492,9 +479,78 @@ const userStore = useUserStore();
 const cartStore = useCartStore();
 const item = ref(null);
 const quantity = ref(1);
-const selectedColor = ref('曜石黑');
-const selectedVersion = ref('标准版');
+const selectedSpecs = ref([]);
 const isFavorited = ref(false);
+
+// 解析 item.spec 为规格组列表，支持 JSON / pipe key:value / "/" 分隔 / 纯文本
+const specGroups = computed(() => {
+  const raw = item.value?.spec;
+  if (!raw) return [];
+
+  // 1. JSON 格式：{"颜色":["曜石黑","云母白"],"版本":["标准版"]}
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed === 'object' && !Array.isArray(parsed)) {
+      const keys = Object.keys(parsed);
+      if (keys.length) {
+        const groups = [];
+        keys.forEach((k) => {
+          const opts = parsed[k];
+          if (Array.isArray(opts) && opts.length) {
+            groups.push({ name: k, options: opts.map(String) });
+          }
+        });
+        if (groups.length) {
+          initSpecSelection(groups);
+          return groups;
+        }
+      }
+    }
+  } catch {
+    /* not JSON */
+  }
+
+  // 2. pipe 分隔 key:value 格式：颜色:黑色|内存:128GB|版本:标准版
+  if (raw.includes('|')) {
+    const parts = raw.split('|').filter(Boolean);
+    const groups = parts
+      .map((part) => {
+        const [key, ...vals] = part.split(':');
+        const options = vals.length
+          ? vals
+              .join(':')
+              .split('/')
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [part.trim()];
+        return { name: key.trim(), options };
+      })
+      .filter((g) => g.options.length);
+    if (groups.length) {
+      initSpecSelection(groups);
+      return groups;
+    }
+  }
+
+  // 3. "/" 分隔的简单选项列表：黑色/白色/蓝色
+  if (raw.includes('/')) {
+    const options = raw
+      .split('/')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const groups = [{ name: '规格', options }];
+    initSpecSelection(groups);
+    return groups;
+  }
+
+  return [];
+});
+
+function initSpecSelection(groups) {
+  if (selectedSpecs.value.length !== groups.length) {
+    selectedSpecs.value = groups.map((g) => g.options[0] || '');
+  }
+}
 const reviews = ref([]);
 const reviewRating = ref(5);
 const reviewContent = ref('');
@@ -564,8 +620,7 @@ watch(
   () => route.params.id,
   async (newId) => {
     if (newId) {
-      selectedColor.value = '曜石黑';
-      selectedVersion.value = '标准版';
+      selectedSpecs.value = [];
       await loadItem(newId);
     }
   }
@@ -579,10 +634,13 @@ async function addCart() {
     return;
   }
   try {
+    const specStr = specGroups.value.length
+      ? selectedSpecs.value.join(' / ')
+      : item.value.spec || '';
     await cartStore.addItem({
       itemId: item.value.id,
       num: quantity.value,
-      spec: `${selectedColor.value} / ${selectedVersion.value}`,
+      spec: specStr,
     });
     ElMessage.success('已添加到购物车');
   } catch (err) {
@@ -596,10 +654,13 @@ async function buyNow() {
     return;
   }
   try {
+    const specStr = specGroups.value.length
+      ? selectedSpecs.value.join(' / ')
+      : item.value.spec || '';
     await cartStore.addItem({
       itemId: item.value.id,
       num: quantity.value,
-      spec: `${selectedColor.value} / ${selectedVersion.value}`,
+      spec: specStr,
     });
     router.push('/cart');
   } catch (err) {
@@ -931,8 +992,7 @@ async function submitReview() {
   gap: 20px;
 }
 .dtabs {
-  position: sticky;
-  top: 118px;
+  position: relative;
   z-index: 20;
   background: #fff;
   border: 1px solid var(--line);

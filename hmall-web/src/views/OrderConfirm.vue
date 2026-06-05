@@ -146,16 +146,28 @@
               <span>商品总额（{{ cartStore.totalCount }}件）</span>
               <span>¥{{ (cartStore.totalAmount / 100).toFixed(2) }}</span>
             </div>
-            <div class="sum-row"><span>运费</span><span>¥0.00</span></div>
-            <div class="sum-row"><span>满减优惠</span><span class="sum-discount">−¥0.00</span></div>
-            <div class="sum-row"><span>优惠券</span><span class="sum-discount">−¥0.00</span></div>
             <div class="sum-row">
-              <span>会员积分抵扣</span><span class="sum-discount">−¥0.00</span>
+              <span>运费</span>
+              <span>{{ freight > 0 ? '¥' + (freight / 100).toFixed(2) : '免运费' }}</span>
+            </div>
+            <div v-if="couponList.length" class="sum-row">
+              <span>优惠券</span>
+              <select v-model="selectedCoupon" style="font-size: 12px; max-width: 160px">
+                <option :value="null">不使用优惠券</option>
+                <option v-for="c in couponList" :key="c.id" :value="c.id">
+                  {{ c.name }}
+                </option>
+              </select>
+            </div>
+            <div v-if="couponDiscount" class="sum-row">
+              <span>优惠券减免</span>
+              <span class="sum-discount">−¥{{ (couponDiscount / 100).toFixed(2) }}</span>
             </div>
             <div class="sum-row big">
               <span style="align-self: flex-end; color: var(--ink)">应付总额</span>
               <span class="v">
-                <span style="font-size: 17px">¥</span>{{ (cartStore.totalAmount / 100).toFixed(2) }}
+                <span style="font-size: 17px">¥</span
+                >{{ ((cartStore.totalAmount + freight - couponDiscount) / 100).toFixed(2) }}
               </span>
             </div>
           </div>
@@ -181,12 +193,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cart';
 import { ElMessage } from 'element-plus';
 import { getAddresses } from '@/api/address';
-import { createOrder } from '@/api/order';
+import { createOrder, getFreight, getAvailableCoupons } from '@/api/order';
 
 const router = useRouter();
 const cartStore = useCartStore();
@@ -194,6 +206,10 @@ const addresses = ref([]);
 const selectedAddress = ref(null);
 const remark = ref('');
 const payType = ref(1);
+const freight = ref(0);
+const couponList = ref([]);
+const selectedCoupon = ref(null);
+const couponDiscount = ref(0);
 
 // 后端 Order.paymentType：1 支付宝 / 2 微信 / 3 余额
 const payOptions = [
@@ -221,6 +237,49 @@ function maskPhone(phone) {
   return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
 }
 
+async function loadFreight() {
+  try {
+    const addr = selectedAddr.value;
+    const amount = cartStore.totalAmount || 0;
+    const result = await getFreight({ addressId: addr?.id, amount });
+    freight.value = result?.freight || 0;
+  } catch (err) {
+    freight.value = 0;
+  }
+}
+
+async function loadCoupons() {
+  try {
+    const amount = cartStore.totalAmount || 0;
+    const list = await getAvailableCoupons({ amount });
+    couponList.value = list || [];
+  } catch (err) {
+    couponList.value = [];
+  }
+}
+
+// 监听优惠券选择变化，实时计算折扣金额
+watch(selectedCoupon, (newId) => {
+  if (!newId) {
+    couponDiscount.value = 0;
+    return;
+  }
+  const coupon = couponList.value.find((c) => c.id === newId);
+  if (!coupon) {
+    couponDiscount.value = 0;
+    return;
+  }
+  if (coupon.discountType === 2) {
+    // 折扣券
+    couponDiscount.value = Math.floor(
+      ((cartStore.totalAmount + freight.value) * (100 - coupon.discountValue)) / 100
+    );
+  } else {
+    // 满减券
+    couponDiscount.value = coupon.discountValue || 0;
+  }
+});
+
 onMounted(async () => {
   try {
     addresses.value = await getAddresses();
@@ -235,6 +294,13 @@ onMounted(async () => {
   } catch (err) {
     console.error(err);
   }
+  loadFreight();
+  loadCoupons();
+});
+
+// 地址变化时重新计算运费
+watch(selectedAddress, () => {
+  loadFreight();
 });
 
 async function submitOrder() {
@@ -243,7 +309,12 @@ async function submitOrder() {
     num: i.num,
   }));
   try {
-    await createOrder({ addressId: selectedAddress.value, paymentType: payType.value, details });
+    await createOrder({
+      addressId: selectedAddress.value,
+      paymentType: payType.value,
+      details,
+      couponId: selectedCoupon.value || undefined,
+    });
     ElMessage.success('下单成功');
     router.push('/orders');
   } catch (err) {

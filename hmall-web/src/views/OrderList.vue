@@ -104,7 +104,7 @@
                   <button class="btn btn-ghost btn-sm" @click="handleCancel(order.id)">
                     取消订单
                   </button>
-                  <span class="dim" style="font-size: 11px">剩 23:48 自动关闭</span>
+                  <span class="dim" style="font-size: 11px">{{ order.countdownText }}</span>
                 </template>
                 <template v-else-if="order.status === 3">
                   <button class="btn btn-hot btn-sm" @click="handleConfirm(order.id)">
@@ -166,7 +166,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useCartStore } from '@/stores/cart';
@@ -326,8 +326,39 @@ async function handleDeleteOrder(id) {
   }
 }
 
+let countdownTimer = null;
+
+function updateCountdowns() {
+  const now = Date.now();
+  orders.value.forEach((order) => {
+    if (order.status === 1) {
+      const createTime = order.createTime
+        ? new Date(order.createTime.replace(' ', 'T')).getTime()
+        : null;
+      if (createTime) {
+        const expireTime = createTime + 30 * 60 * 1000; // 默认30分钟过期
+        const remaining = Math.max(0, expireTime - now);
+        if (remaining > 0) {
+          const m = Math.floor(remaining / 60000);
+          const s = Math.floor((remaining % 60000) / 1000);
+          order.countdownText = `剩 ${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} 自动关闭`;
+        } else {
+          order.countdownText = '已超时';
+        }
+      } else {
+        order.countdownText = '等待支付中';
+      }
+    }
+  });
+}
+
 onMounted(() => {
   fetchOrders();
+  countdownTimer = setInterval(updateCountdowns, 1000);
+});
+
+onUnmounted(() => {
+  if (countdownTimer) clearInterval(countdownTimer);
 });
 </script>
 

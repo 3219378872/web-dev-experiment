@@ -19,6 +19,8 @@ import com.hmall.domain.po.OrderDetail;
 import com.hmall.domain.po.OrderLogistics;
 import com.hmall.domain.po.LogisticsTrace;
 import com.hmall.mapper.OrderMapper;
+import com.hmall.domain.po.Coupon;
+import com.hmall.service.ICouponService;
 import com.hmall.service.IOrderDetailService;
 import com.hmall.service.IOrderLogisticsService;
 import com.hmall.service.ILogisticsTraceService;
@@ -54,6 +56,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private final IOrderLogisticsService logisticsService;
     private final ILogisticsTraceService logisticsTraceService;
     private final ItemClient itemClient;
+    private final ICouponService couponService;
     private final MqMessagePublisher mqMessagePublisher;
     private final MqConsumerSupport mqConsumerSupport;
 
@@ -79,13 +82,53 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         for (ItemDTO item : items) {
             total += item.getPrice() * itemNumMap.get(item.getId());
         }
-        order.setTotalFee(total);
+        // 1.4a.加运费：服务端重新计算（不信任客户端提交值）
+        Long addressId = orderFormDTO.getAddressId();
+        int calcedFreight = 0;
+        int freeShippingThreshold = 9900; // 满99元包邮
+        if (total < freeShippingThreshold) {
+            if (addressId == null) {
+                calcedFreight = 1000;     // 默认10元
+            } else if (addressId <= 10) {
+                calcedFreight = 1500;     // 偏远15元
+            } else if (addressId <= 50) {
+                calcedFreight = 1000;     // 一般10元
+            } else {
+                calcedFreight = 500;      // 附近5元
+            }
+        }
+        total += calcedFreight;
+
+        // 1.4b.减优惠券：服务端校验有效性后再应用折扣
+        if (orderFormDTO.getCouponId() != null) {
+            List<Coupon> available = couponService.getAvailableCouponsForAmount(
+                    UserContext.getUser(), total);
+            Coupon coupon = available.stream()
+                    .filter(c -> c.getId().equals(orderFormDTO.getCouponId()))
+                    .findFirst()
+                    .orElseThrow(() -> new BadRequestException("优惠券不可用或已过期"));
+            if (coupon.getDiscountType() == 2) {
+                total = total * coupon.getDiscountValue() / 100;
+            } else {
+                total -= coupon.getDiscountValue();
+            }
+        }
+        order.setTotalFee(Math.max(0, total));
         // 1.5.其它属性
         order.setPaymentType(orderFormDTO.getPaymentType());
         order.setUserId(UserContext.getUser());
         order.setStatus(1);
         // 1.6.将Order写入数据库order表中
         save(order);
+
+        // 1.7.标记优惠券已使用
+        if (orderFormDTO.getCouponId() != null) {
+            try {
+                couponService.useCoupon(order.getUserId(), orderFormDTO.getCouponId(), order.getId());
+            } catch (Exception e) {
+                throw new RuntimeException("优惠券使用失败", e);
+            }
+        }
 
         // 2.保存订单详情
         List<OrderDetail> details = buildDetails(order.getId(), items, itemNumMap);

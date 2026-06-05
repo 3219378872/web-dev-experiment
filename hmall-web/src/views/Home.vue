@@ -13,30 +13,52 @@
         </router-link>
       </div>
 
-      <div class="carousel">
-        <span class="blob b1"></span><span class="blob b2"></span>
-        <span class="eyebrow">好集 618 年中狂欢</span>
-        <h1>万物好集<br />低价开抢</h1>
-        <p>全场最高直降 60%，每满 300 减 50，叠加平台券更划算。</p>
-        <div class="cta">
-          <router-link class="btn btn-gold btn-lg" to="/flashsale">⚡ 进入会场</router-link>
-          <router-link
-            class="btn btn-lg"
-            style="background: rgba(255, 255, 255, 0.18); color: #fff"
-            to="/coupons"
-            >领券中心</router-link
+      <div
+        class="carousel"
+        @mouseenter="bannerTimer && clearInterval(bannerTimer)"
+        @mouseleave="startBannerTimer"
+      >
+        <template v-if="banners.length">
+          <a
+            v-for="(b, i) in banners"
+            :key="b.id"
+            :href="b.linkUrl || '#'"
+            class="banner-slide"
+            :class="{ active: bannerIdx === i }"
           >
-        </div>
-        <div class="price-burst">
-          <div>
-            <div style="font-size: 12px">立减</div>
-            <div class="big">¥50</div>
-            <div style="font-size: 11px">满300可用</div>
+            <img :src="b.imageUrl" :alt="b.title || '轮播图'" />
+          </a>
+          <div class="dots">
+            <i
+              v-for="(b, i) in banners"
+              :key="b.id"
+              :class="{ on: bannerIdx === i }"
+              @click="bannerIdx = i"
+            ></i>
           </div>
-        </div>
-        <div class="dots">
-          <i v-for="n in 4" :key="n" :class="{ on: n === 1 }"></i>
-        </div>
+        </template>
+        <template v-else>
+          <span class="blob b1"></span><span class="blob b2"></span>
+          <span class="eyebrow">好集 618 年中狂欢</span>
+          <h1>万物好集<br />低价开抢</h1>
+          <p>全场最高直降 60%，每满 300 减 50，叠加平台券更划算。</p>
+          <div class="cta">
+            <router-link class="btn btn-gold btn-lg" to="/flashsale">⚡ 进入会场</router-link>
+            <router-link
+              class="btn btn-lg"
+              style="background: rgba(255, 255, 255, 0.18); color: #fff"
+              to="/coupons"
+              >领券中心</router-link
+            >
+          </div>
+          <div class="price-burst">
+            <div>
+              <div style="font-size: 12px">立减</div>
+              <div class="big">¥50</div>
+              <div style="font-size: 11px">满300可用</div>
+            </div>
+          </div>
+        </template>
       </div>
 
       <div class="side-stack">
@@ -121,7 +143,7 @@
           <div class="nm">{{ p.name }}</div>
           <div class="pr">
             <small style="font-size: 12px">¥</small>{{ (p.price / 100).toFixed(0) }}
-            <span class="price-old" style="font-size: 11px"
+            <span v-if="p.originalPrice" class="price-old" style="font-size: 11px"
               >¥{{ (p.originalPrice / 100).toFixed(0) }}</span
             >
           </div>
@@ -220,7 +242,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { getItems, getCategories } from '@/api/item';
+import { getItems, getCategories, getBanners } from '@/api/item';
 import ProductCard from '@/components/ProductCard.vue';
 import { useUserStore } from '@/stores/user';
 
@@ -231,6 +253,18 @@ const promoItems = ref([]);
 const flashItems = ref([]);
 const countdown = ref({ h: '02', m: '48', s: '13' });
 const flashPct = [78, 64, 90, 45, 82, 58];
+
+const banners = ref([]);
+const bannerIdx = ref(0);
+let bannerTimer = null;
+function startBannerTimer() {
+  if (bannerTimer) clearInterval(bannerTimer);
+  if (banners.value.length > 1) {
+    bannerTimer = setInterval(() => {
+      bannerIdx.value = (bannerIdx.value + 1) % banners.value.length;
+    }, 4000);
+  }
+}
 
 const categories = ref([]);
 const kkIcons = ['▣', '▤', '◈', '✿', '◉', '▦', '❀', '◐', '▥', '◆'];
@@ -280,6 +314,13 @@ onMounted(async () => {
     /* ignore */
   }
   try {
+    const bannerList = await getBanners();
+    banners.value = (bannerList || []).filter((b) => b.status !== 0);
+    startBannerTimer();
+  } catch (e) {
+    /* ignore */
+  }
+  try {
     const data = await getItems({ page: 1, size: 10, sortBy: 'sold' });
     hotItems.value = (data?.list || []).map((x) => ({ ...x, tag: x.tag || '热卖' })).slice(0, 5);
   } catch (e) {
@@ -303,6 +344,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (timer) clearInterval(timer);
+  if (bannerTimer) clearInterval(bannerTimer);
 });
 </script>
 
@@ -725,5 +767,28 @@ onUnmounted(() => {
   .twocol {
     grid-template-columns: 1fr;
   }
+}
+
+.carousel {
+  position: relative;
+  overflow: hidden;
+}
+.banner-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.banner-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+  position: relative;
+}
+.banner-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 </style>

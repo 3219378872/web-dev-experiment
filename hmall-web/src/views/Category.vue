@@ -13,13 +13,12 @@
             <h4>商品分类</h4>
             <div class="ftree">
               <a
-                v-for="cat in categoriesWithCount"
+                v-for="cat in categories"
                 :key="cat.id"
                 :class="{ on: activeCatId === cat.id }"
                 @click="selectCategory(cat.id)"
               >
                 {{ cat.name }}
-                <span>{{ cat.count }}</span>
               </a>
             </div>
           </div>
@@ -108,27 +107,8 @@ const sortOptions = [
   { key: 'new', label: '新品' },
 ];
 
-// 基于已加载的 items 客户端计算每个分类商品数，渲染带 count 字段的分类列表
-const categoriesWithCount = computed(() =>
-  categories.value.map((cat) => ({
-    ...cat,
-    count: items.value.filter((i) => i.category === cat.name).length,
-  }))
-);
-
-// 按分类名称匹配商品（后端 item 只有 category 字段，值为分类名称字符串）
-const filteredItems = computed(() => {
-  const activeCatName =
-    activeCatId.value != null
-      ? categories.value.find((c) => c.id === activeCatId.value)?.name
-      : null;
-
-  const baseList = activeCatName
-    ? items.value.filter((i) => i.category === activeCatName)
-    : [...items.value];
-
-  return sortItems(baseList, sortKey.value);
-});
+// 从已加载的商品中做内存排序（后端已按分类过滤）
+const filteredItems = computed(() => sortItems(items.value, sortKey.value));
 
 function sortItems(list, key) {
   const sorted = [...list];
