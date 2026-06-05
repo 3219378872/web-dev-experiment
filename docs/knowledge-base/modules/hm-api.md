@@ -2,9 +2,9 @@
 title: hm-api
 tracks:
   - hm-api/
-last_synced_commit: 673384d
+last_synced_commit: aa63abd
 last_synced_date: 2026-06-05
-sync_note: "fix(issue-73): 支付安全修复；OrderClient 服务名修正为 trade-service；PayApplyDTO/PayOrderFormDTO 加 @NoArgsConstructor/@AllArgsConstructor 支持 Jackson 反序列化"
+sync_note: "Issue #86: 添加 feign-slf4j 依赖，修复启动期 NoClassDefFoundError"
 ---
 
 # hm-api

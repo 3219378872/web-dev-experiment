@@ -2,9 +2,9 @@
 title: item-service
 tracks:
   - item-service/
-last_synced_commit: 6842c1b7cc0e6be245520166c9395d947a932081
-last_synced_date: 2026-06-04
-sync_note: "Phase 2 codex-review 修复：GET /ads 强制过滤 type=ad"
+last_synced_commit: aa63abd
+last_synced_date: 2026-06-05
+sync_note: "Issue #86: 添加 actuator 依赖，配合 docker-compose healthcheck"
 ---
 
 # item-service

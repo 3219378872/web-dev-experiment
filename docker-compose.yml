@@ -1,5 +1,11 @@
 x-java-service: &java-service
   restart: unless-stopped
+  healthcheck:
+    test: ["CMD-SHELL", "curl -sf http://localhost:8080/actuator/health || exit 1"]
+    interval: 10s
+    timeout: 5s
+    retries: 20
+    start_period: 30s
   environment: &java-env
     hm.db.host: mysql
     hm.db.port: "3306"

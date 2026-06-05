@@ -2,9 +2,9 @@
 title: cart-service
 tracks:
   - cart-service/
-last_synced_commit: 76cd364
+last_synced_commit: aa63abd
 last_synced_date: 2026-06-05
-sync_note: "CartFormDTO num 设为可选并保留 @Min(1) 校验，更新 API 文档"
+sync_note: "Issue #86: 添加 actuator 依赖，配合 docker-compose healthcheck"
 ---
 
 # cart-service

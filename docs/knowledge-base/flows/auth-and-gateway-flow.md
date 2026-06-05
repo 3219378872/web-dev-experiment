@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: HEAD
+last_synced_commit: aa63abd
 last_synced_date: 2026-06-05
-sync_note: "Issue #76: UserLoginVO 增加 role 字段，login() 将 role 回填到 VO；登录响应体现在包含用户角色，管理端可据此区分 admin/user"
+sync_note: "Issue #86: CI smoke job 加固（去掉 || true，增加 mvn package）；gateway 添加 actuator + healthcheck"
 ---
 
 # auth-and-gateway-flow

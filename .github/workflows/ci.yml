@@ -117,11 +117,13 @@ jobs:
           npm run build
       - name: Compose smoke (parse + render)
         run: docker compose -f docker-compose.yml config -q
+      - name: Package backend jars for Docker build
+        run: mvn -B -ntp -q -DskipTests package
       - name: HTTP smoke tests (stack)
         run: |
-          docker compose -f docker-compose.yml up -d --wait --wait-timeout 180 2>&1 || true
+          docker compose -f docker-compose.yml up -d --wait --wait-timeout 180
           sleep 60
-          bash scripts/smoke/smoke.sh http://localhost:8080 || true
+          bash scripts/smoke/smoke.sh http://localhost:8080
           docker compose -f docker-compose.yml down -v 2>&1 || true
 
   codex-review:

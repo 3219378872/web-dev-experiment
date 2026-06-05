@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 1987935
+last_synced_commit: aa63abd
 last_synced_date: 2026-06-05
-sync_note: "fix(issue-73): 支付安全修复——双重校验；修复 PayServiceTestBase/PayOrderServiceImplTest OrderClient mock 重复定义"
+sync_note: "Issue #86: 业务服务统一添加 actuator + docker-compose healthcheck；CI smoke 加固"
 ---
 
 # order-checkout-flow

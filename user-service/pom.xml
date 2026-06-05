@@ -95,6 +95,12 @@
             <version>1.0.0</version>
             <scope>compile</scope>
         </dependency>
+        <!-- actuator for healthcheck -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
     </dependencies>
     <build>
         <finalName>${project.artifactId}</finalName>

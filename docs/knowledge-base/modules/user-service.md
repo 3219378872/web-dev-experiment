@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: HEAD
+last_synced_commit: aa63abd
 last_synced_date: 2026-06-05
-sync_note: "Issue #76: UserLoginVO 增加 role 字段，login() 将用户角色写入 VO，管理端 Login.vue 的 data.role !== 'admin' 检查现在可正常工作"
+sync_note: "Issue #86: 添加 actuator 依赖；新增 UserServiceFeignContextLoadTest 非 mock Feign 上下文加载测试"
 ---
 
 # user-service
