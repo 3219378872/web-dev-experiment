@@ -11,9 +11,13 @@ import com.hmall.common.mq.consumer.MqConsumerSupport;
 import com.hmall.common.mq.event.OrderCreatedEvent;
 import com.hmall.common.mq.event.OrderStatusChangedEvent;
 import com.hmall.common.mq.outbox.MqMessagePublisher;
+import com.hmall.domain.po.Coupon;
 import com.hmall.domain.po.Order;
 import com.hmall.domain.po.OrderLogistics;
+import com.hmall.domain.po.UserCoupon;
+import com.hmall.mapper.CouponMapper;
 import com.hmall.mapper.OrderMapper;
+import com.hmall.mapper.UserCouponMapper;
 import com.hmall.service.IOrderDetailService;
 import com.hmall.service.IOrderLogisticsService;
 import com.hmall.service.ILogisticsTraceService;
@@ -65,6 +69,12 @@ class OrderServiceImplTest extends TradeServiceTestBase {
 
     @Autowired
     private MqConsumerSupport mqConsumerSupport;
+
+    @Autowired
+    private CouponMapper couponMapper;
+
+    @Autowired
+    private UserCouponMapper userCouponMapper;
 
     @Test
     void createOrder_validOrder_success() {
@@ -118,6 +128,132 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         assertThatThrownBy(() -> orderService.createOrder(form))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("商品不存在");
+    }
+
+    @Test
+    void createOrder_withFreight_appliesRegionalFreight() {
+        // 总价 5000 分 = ¥50，未到包邮门槛 ¥99，应加运费
+        ItemDTO item = new ItemDTO();
+        item.setId(200L);
+        item.setPrice(2500);
+        item.setName("低单价商品");
+        item.setSpec("标准");
+        item.setImage("/img/t.png");
+        when(itemClient.queryItemByIds(anySet())).thenReturn(List.of(item));
+
+        OrderFormDTO form = new OrderFormDTO();
+        form.setPaymentType(1);
+        form.setAddressId(20L); // addressId <= 50 → 运费 1000 分
+        OrderDetailDTO detail = new OrderDetailDTO();
+        detail.setItemId(200L);
+        detail.setNum(2);
+        form.setDetails(List.of(detail));
+
+        Long orderId = orderService.createOrder(form);
+
+        assertThat(orderId).isNotNull();
+        Order order = orderService.getById(orderId);
+        // 2500*2 = 5000 + 运费 1000 = 6000
+        assertThat(order.getTotalFee()).isEqualTo(6000);
+    }
+
+    @Test
+    void createOrder_amountAboveThreshold_freeShipping() {
+        // 总价 10000 分 = ¥100，超过包邮门槛 ¥99，免运费
+        ItemDTO item = new ItemDTO();
+        item.setId(300L);
+        item.setPrice(10000);
+        item.setName("高价商品");
+        item.setSpec("标准");
+        item.setImage("/img/t.png");
+        when(itemClient.queryItemByIds(anySet())).thenReturn(List.of(item));
+
+        OrderFormDTO form = new OrderFormDTO();
+        form.setPaymentType(1);
+        form.setAddressId(20L);
+        OrderDetailDTO detail = new OrderDetailDTO();
+        detail.setItemId(300L);
+        detail.setNum(1);
+        form.setDetails(List.of(detail));
+
+        Long orderId = orderService.createOrder(form);
+
+        assertThat(orderId).isNotNull();
+        Order order = orderService.getById(orderId);
+        // 10000, 无运费
+        assertThat(order.getTotalFee()).isEqualTo(10000);
+    }
+
+    @Test
+    void createOrder_withValidCoupon_appliesDiscount() {
+        // 设置商品 + 优惠券
+        ItemDTO item = new ItemDTO();
+        item.setId(400L);
+        item.setPrice(10000);
+        item.setName("券后商品");
+        item.setSpec("标准");
+        item.setImage("/img/t.png");
+        when(itemClient.queryItemByIds(anySet())).thenReturn(List.of(item));
+
+        // 创建优惠券（满减券，满5000减1000）
+        Coupon coupon = new Coupon();
+        coupon.setName("测试满减券");
+        coupon.setDiscountType(1);
+        coupon.setDiscountValue(1000);
+        coupon.setMinAmount(5000);
+        coupon.setTotalStock(10);
+        coupon.setRemainingStock(10);
+        coupon.setStatus(1);
+        coupon.setStartTime(LocalDateTime.now().minusDays(1));
+        coupon.setEndTime(LocalDateTime.now().plusDays(1));
+        couponMapper.insert(coupon);
+
+        // 领取优惠券
+        UserCoupon uc = new UserCoupon();
+        uc.setUserId(TEST_USER_ID);
+        uc.setCouponId(coupon.getId());
+        uc.setStatus(1);
+        uc.setCreateTime(LocalDateTime.now());
+        userCouponMapper.insert(uc);
+
+        OrderFormDTO form = new OrderFormDTO();
+        form.setPaymentType(1);
+        form.setCouponId(coupon.getId());
+        OrderDetailDTO detail = new OrderDetailDTO();
+        detail.setItemId(400L);
+        detail.setNum(1);
+        form.setDetails(List.of(detail));
+
+        Long orderId = orderService.createOrder(form);
+
+        assertThat(orderId).isNotNull();
+        Order order = orderService.getById(orderId);
+        // 10000 - 1000 = 9000
+        assertThat(order.getTotalFee()).isEqualTo(9000);
+    }
+
+    @Test
+    void createOrder_withInvalidCoupon_throwsBadRequest() {
+        ItemDTO item = new ItemDTO();
+        item.setId(500L);
+        item.setPrice(10000);
+        item.setName("商品");
+        item.setSpec("标准");
+        item.setImage("/img/t.png");
+        when(itemClient.queryItemByIds(anySet())).thenReturn(List.of(item));
+
+        // 未领取也未创建的优惠券id，不应通过校验
+        OrderFormDTO form = new OrderFormDTO();
+        form.setPaymentType(1);
+        form.setCouponId(999999L);
+        OrderDetailDTO detail = new OrderDetailDTO();
+        detail.setItemId(500L);
+        detail.setNum(1);
+        form.setDetails(List.of(detail));
+
+        assertThatThrownBy(() -> orderService.createOrder(form))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("不可用");
     }
 
     @Test

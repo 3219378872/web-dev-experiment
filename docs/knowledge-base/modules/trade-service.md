@@ -4,7 +4,7 @@ tracks:
   - trade-service/
 last_synced_commit: e6a9848
 last_synced_date: 2026-06-06
-sync_note: "fix(#103): OrderFormDTO 新增 couponId 字段；OrderServiceImpl.createOrder 服务端重新计算运费、校验优惠券有效性；CouponServiceImpl 新增 useCoupon；OrderServiceImplTest 适配新构造函数"
+sync_note: "fix(#103): OrderFormDTO 新增 couponId 字段；OrderServiceImpl.createOrder 服务端重新计算运费、校验优惠券有效性；CouponServiceImpl 新增 useCoupon；OrderServiceImplTest 适配新构造函数 + 4 个新测试覆盖运费/优惠券"
 ---
 
 # trade-service
