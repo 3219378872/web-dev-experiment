@@ -6,7 +6,12 @@
         <p>欢迎回来，管理员 · 今天是 {{ today }}</p>
       </div>
       <div class="acts">
-        <el-select v-model="dateRange" style="width: 130px" size="small" @change="loadTrend">
+        <el-select
+          v-model="dateRange"
+          style="width: 130px"
+          size="small"
+          @change="onDateRangeChange"
+        >
           <el-option label="近 7 天" value="7" />
           <el-option label="近 30 天" value="30" />
         </el-select>
@@ -215,7 +220,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, nextTick, computed } from 'vue';
 import * as echarts from 'echarts';
 import {
   getSummary,
@@ -340,58 +345,33 @@ function initChart() {
 }
 
 async function loadSummary() {
-  try {
-    summary.value = await getSummary();
-  } catch (err) {
-    console.error('加载概览失败', err);
-    summary.value = {};
-  }
+  const res = await getSummary();
+  summary.value = res;
 }
 
 async function loadTrend() {
-  try {
-    trend.value = await getTrend(parseInt(dateRange.value));
-    initChart();
-  } catch (err) {
-    console.error('加载趋势失败', err);
-    trend.value = [];
-  }
+  const res = await getTrend(parseInt(dateRange.value));
+  trend.value = res;
 }
 
 async function loadCategoryShare() {
-  try {
-    categoryShare.value = await getCategoryShare();
-  } catch (err) {
-    console.error('加载品类占比失败', err);
-    categoryShare.value = [];
-  }
+  const res = await getCategoryShare();
+  categoryShare.value = res;
 }
 
 async function loadTopItems() {
-  try {
-    topItems.value = await getTopItems();
-  } catch (err) {
-    console.error('加载热销商品失败', err);
-    topItems.value = [];
-  }
+  const res = await getTopItems();
+  topItems.value = res;
 }
 
 async function loadTodo() {
-  try {
-    todo.value = await getTodo();
-  } catch (err) {
-    console.error('加载待办失败', err);
-    todo.value = {};
-  }
+  const res = await getTodo();
+  todo.value = res;
 }
 
 async function loadLatestOrders() {
-  try {
-    latestOrders.value = await getLatestOrders();
-  } catch (err) {
-    console.error('加载最新订单失败', err);
-    latestOrders.value = [];
-  }
+  const res = await getLatestOrders();
+  latestOrders.value = res;
 }
 
 async function loadAll() {
@@ -407,15 +387,29 @@ async function loadAll() {
       loadLatestOrders(),
     ]);
   } catch (err) {
+    console.error('数据加载失败', err);
     error.value = '数据加载失败，请稍后重试';
-    console.error(err);
   } finally {
     loading.value = false;
+    // 等 DOM 更新后初始化图表（此时 loading=false，chartRef 已挂载）
+    await nextTick();
+    initChart();
   }
 }
 
 function exportReport() {
   ElMessage.info('导出功能开发中');
+}
+
+async function onDateRangeChange() {
+  try {
+    await loadTrend();
+    await nextTick();
+    initChart();
+  } catch (err) {
+    console.error('加载趋势失败', err);
+    trend.value = [];
+  }
 }
 
 onMounted(() => {

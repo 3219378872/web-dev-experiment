@@ -179,8 +179,9 @@ const statusMap = {
   6: { text: '退款中', cls: 'red' },
 };
 
-// 统计数据来源于当前分页（无独立统计接口时暂用本地过滤）
-const todayCount = computed(() => orders.value.length);
+// 统计数据：total 为全局总数（来自后端分页响应）
+// 待发货/退款等分状态计数仅基于当前分页数据，完整统计需专用 API
+const todayCount = computed(() => total.value);
 const pendingShipCount = computed(() => orders.value.filter((o) => o.status === 2).length);
 const refundCount = computed(() => orders.value.filter((o) => o.status === 6).length);
 

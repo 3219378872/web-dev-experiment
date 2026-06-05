@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { getReviews, deleteReview } from '@/api/item';
 import { ElMessage } from 'element-plus';
 
@@ -143,14 +143,23 @@ const goodRate = computed(() => {
   return reviews.value.filter((r) => r.rating >= 4).length / reviews.value.length;
 });
 
-// 待处理评价：根据后端回复字段（reply===null）或 status 判定
-// ReviewVO 目前不包含 status/reply 字段，此处暂计 0
-// 当后端增加字段后更新此计算逻辑
-const pendingCount = computed(() => {
-  return reviews.value.filter(
-    (r) => r.status === 'pending' || r.reply === null || r.reply === undefined
-  ).length;
-});
+// 待处理评价计数
+// ReviewVO 仅有 id/username/content/images/rating/createTime，不含 status/reply
+// 当后端增加 status/reply 字段后应改为：
+//   reviews.value.filter(r => r.status === 'pending' || r.reply === null).length
+// 目前无待处理判定依据，暂返回 0
+const pendingCount = ref(0);
+watch(
+  reviews,
+  (val) => {
+    if (val.length && ('status' in val[0] || 'reply' in val[0])) {
+      pendingCount.value = val.filter((r) => r.status === 'pending' || r.reply == null).length;
+    } else {
+      pendingCount.value = 0;
+    }
+  },
+  { immediate: true }
+);
 
 const filteredReviews = computed(() => {
   if (tab.value === 'all') return reviews.value;
