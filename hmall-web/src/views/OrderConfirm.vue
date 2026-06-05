@@ -271,7 +271,9 @@ watch(selectedCoupon, (newId) => {
   }
   if (coupon.discountType === 2) {
     // 折扣券
-    couponDiscount.value = Math.floor((cartStore.totalAmount * (100 - coupon.discountValue)) / 100);
+    couponDiscount.value = Math.floor(
+      ((cartStore.totalAmount + freight.value) * (100 - coupon.discountValue)) / 100
+    );
   } else {
     // 满减券
     couponDiscount.value = coupon.discountValue || 0;
