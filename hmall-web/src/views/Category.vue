@@ -48,7 +48,7 @@
               >{{ s.label }}</span
             >
             <span class="right"
-              >共 <b>{{ filteredItems.length }}</b> 件商品</span
+              >共 <b>{{ total }}</b> 件商品</span
             >
           </div>
 
@@ -62,6 +62,14 @@
           >
             该分类下暂无商品
           </div>
+
+          <div v-if="totalPages > 1" class="pager">
+            <span :class="{ disabled: page <= 1 }" @click="prevPage">‹ 上一页</span>
+            <a v-for="n in pageRange" :key="n" :class="{ cur: n === page }" @click="goPage(n)">{{
+              n
+            }}</a>
+            <span :class="{ disabled: page >= totalPages }" @click="nextPage">下一页 ›</span>
+          </div>
         </main>
       </div>
     </div>
@@ -69,14 +77,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { getCategories, getItems } from '@/api/item';
+import { ref, onMounted, computed, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { getCategories, searchItems } from '@/api/item';
 import ProductCard from '@/components/ProductCard.vue';
+
+const route = useRoute();
 
 const categories = ref([]);
 const items = ref([]);
 const activeCatId = ref(null);
 const sortKey = ref('default');
+const page = ref(1);
+const size = ref(20);
+const total = ref(0);
+const totalPages = computed(() => Math.max(1, Math.ceil(total.value / size.value)));
+const pageRange = computed(() => {
+  const pages = [];
+  const start = Math.max(1, page.value - 2);
+  const end = Math.min(totalPages.value, start + 4);
+  for (let i = start; i <= end; i++) pages.push(i);
+  return pages;
+});
 
 const sortOptions = [
   { key: 'default', label: '综合' },
@@ -131,6 +153,46 @@ function sortItems(list, key) {
 
 function selectCategory(id) {
   activeCatId.value = activeCatId.value === id ? null : id;
+  page.value = 1;
+  loadItems();
+}
+
+async function loadItems() {
+  const activeCatName =
+    activeCatId.value != null
+      ? categories.value.find((c) => c.id === activeCatId.value)?.name
+      : null;
+
+  const params = {
+    pageNo: page.value,
+    pageSize: size.value,
+  };
+
+  if (activeCatName) {
+    params.category = activeCatName;
+  }
+
+  try {
+    const data = await searchItems(params);
+    items.value = data?.list || [];
+    total.value = data?.total || items.value.length;
+  } catch (err) {
+    items.value = [];
+    total.value = 0;
+  }
+}
+
+function goPage(n) {
+  if (n < 1 || n > totalPages.value || n === page.value) return;
+  page.value = n;
+  loadItems();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function prevPage() {
+  if (page.value > 1) goPage(page.value - 1);
+}
+function nextPage() {
+  if (page.value < totalPages.value) goPage(page.value + 1);
 }
 
 onMounted(async () => {
@@ -139,13 +201,31 @@ onMounted(async () => {
   } catch (err) {
     /* ignore */
   }
-  try {
-    const data = await getItems({ page: 1, size: 100 });
-    items.value = data?.list || [];
-  } catch (err) {
-    /* ignore */
+  // 从 URL query 参数读取分类
+  const catFromQuery = route.query.cat;
+  if (catFromQuery) {
+    const found = categories.value.find((c) => c.name === catFromQuery);
+    if (found) {
+      activeCatId.value = found.id;
+    }
   }
+  await loadItems();
 });
+
+// 监听 URL cat 参数变化
+watch(
+  () => route.query.cat,
+  (newCat) => {
+    if (newCat && categories.value.length) {
+      const found = categories.value.find((c) => c.name === newCat);
+      if (found) {
+        activeCatId.value = found.id;
+        page.value = 1;
+        loadItems();
+      }
+    }
+  }
+);
 </script>
 
 <style scoped>

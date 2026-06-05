@@ -1,0 +1,7 @@
+slug: 2026-06-05-issue-89-order-list-missing-fields
+status: active
+task_branch: task/2026-06-05-issue-89-order-list-missing-fields
+spec: null
+plan: null
+spec_waiver: 简单 bugfix，单文件单方法修改
+plan_waiver: 简单 bugfix，不需要多步计划
