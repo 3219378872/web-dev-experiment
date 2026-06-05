@@ -1,0 +1,7 @@
+slug: 2026-06-05-issue-113-address-zip-tag
+status: active
+task_branch: task/2026-06-05-issue-113-address-zip-tag
+spec: null
+plan: null
+spec_waiver: Simple frontend-backend alignment fix; no spec needed.
+plan_waiver: Single file change with clear scope; no plan needed.
