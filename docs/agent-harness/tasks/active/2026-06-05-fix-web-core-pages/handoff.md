@@ -13,9 +13,14 @@
 - **OrderDetail.vue**: Real logistics tracking from `GET /orders/{id}/logistics`
 - **item.js**: Added `getBanners()` API
 - **order.js**: Added `getFreight()`, `getAvailableCoupons()`, `getLogistics()` APIs
+- **hm-api/OrderFormDTO.java**: Added `freight` (Integer), `couponId` (Long) fields
+- **ICouponService.java**: Added `useCoupon()` method
+- **CouponServiceImpl.java**: Implemented `useCoupon()` to mark UserCoupon as used
+- **OrderServiceImpl.java**: Server-side freight recalculation, coupon validation via `getAvailableCouponsForAmount`, percentage coupon applied after freight, coupon marking on use
+- **OrderServiceImplTest.java**: 5 new tests covering freight, free shipping, fixed coupon, percentage coupon, invalid coupon
 
 ## CI
-Build succeeds. No integration tests needed for pure frontend changes.
+Build and tests pass. 63 trade-service tests (5 new), coverage gate passes.
 
 ## PR
 ```bash
