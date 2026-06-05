@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 96cde0f
+last_synced_commit: 65c22d8
 last_synced_date: 2026-06-05
-sync_note: "fix(issue-71): Category.vue 筛选按 category 名称匹配，品类数量客户端计算；fix(issue-70): ItemDetail.vue buyNow 先加购再跳转，CartFormDTO 支持 num 字段"
+sync_note: "fix(issue-71): Category.vue 筛选；fix(issue-70): buyNow+num；fix(issue-73): 订单操作+支付安全修复；fix(issue-75): ItemDetail.vue 颜色/版本选择器交互+推荐导航刷新"
 ---
 
 # hmall-web
