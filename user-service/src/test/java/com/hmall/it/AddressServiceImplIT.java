@@ -19,7 +19,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(properties = {"spring.cloud.bootstrap.enabled=false"})
+@SpringBootTest(properties = {
+    "spring.cloud.bootstrap.enabled=false",
+    "spring.main.allow-bean-definition-overriding=true"
+})
 @ActiveProfiles("test")
 @Transactional
 @Sql(scripts = "/sql/data-address.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)

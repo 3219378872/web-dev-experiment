@@ -28,7 +28,10 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest(properties = {"spring.cloud.bootstrap.enabled=false"})
+@SpringBootTest(properties = {
+    "spring.cloud.bootstrap.enabled=false",
+    "spring.main.allow-bean-definition-overriding=true"
+})
 @ActiveProfiles("test")
 @Transactional
 class UserServiceImplIT {
