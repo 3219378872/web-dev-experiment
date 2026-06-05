@@ -1,5 +1,6 @@
 package com.hmall;
 
+import com.hmall.api.client.ItemClient;
 import com.hmall.common.utils.UserContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,9 @@ public abstract class UserServiceTestBase {
 
     @MockBean
     protected org.springframework.mail.javamail.JavaMailSender mailSender;
+
+    @MockBean
+    protected ItemClient itemClient;
 
     @Autowired
     protected org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;

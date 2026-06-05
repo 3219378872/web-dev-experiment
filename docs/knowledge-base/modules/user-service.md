@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: 8cf14d8116ab2c563e5c51858da3fb2d533d2897
-last_synced_date: 2026-06-04
-sync_note: "Fix #57: login 异常类型调整（Assert.notNull → BadRequestException），无需文档更新"
+last_synced_commit: ee308f3
+last_synced_date: 2026-06-05
+sync_note: "修复收藏页面缺少商品信息：添加 FavoriteVO"
 ---
 
 # user-service
@@ -50,6 +50,7 @@ sync_note: "Fix #57: login 异常类型调整（Assert.notNull → BadRequestExc
 - `controller/AdminUserController.java` / `AdminProfileController.java`（Phase 1 新增）。
 - `service/IUserService.java` 与其 impl。
 - `domain/vo/UserVO.java`（Phase 1 新增）。
+- `domain/vo/FavoriteVO.java`（收藏商品VO，包含商品信息）。
 - `enums/UserStatus.java`（枚举值调整：NORMAL=1, FROZEN=2）。
 - `utils/JwtTool.java` —— JWT 颁发。
 - `mapper/UserMapper.java` / `AddressMapper.java` / `UserFavoriteMapper.java`。

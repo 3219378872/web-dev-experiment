@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 8cf14d8116ab2c563e5c51858da3fb2d533d2897
-last_synced_date: 2026-06-04
-sync_note: "Fix #57: login 异常类型调整（Assert.notNull → BadRequestException），无需文档更新"
+last_synced_commit: ee308f3
+last_synced_date: 2026-06-05
+sync_note: "修复收藏页面缺少商品信息，无需文档更新"
 ---
 
 # auth-and-gateway-flow
