@@ -138,7 +138,7 @@ public class ItemController {
     @GetMapping("/admin/items/stats")
     public Map<String, Object> adminItemStats() {
         Map<String, Object> stats = new HashMap<>();
-        stats.put("total", itemService.count());
+        stats.put("total", itemService.lambdaQuery().ne(Item::getStatus, 3).count());
         stats.put("onSale", itemService.lambdaQuery().eq(Item::getStatus, 1).count());
         stats.put("offSale", itemService.lambdaQuery().eq(Item::getStatus, 2).count());
         stats.put("lowStock", itemService.lambdaQuery().lt(Item::getStock, 20).eq(Item::getStatus, 1).count());
