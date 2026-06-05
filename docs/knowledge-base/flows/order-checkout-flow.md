@@ -7,7 +7,7 @@ tracks:
   - pay-service/
 last_synced_commit: 96cde0f
 last_synced_date: 2026-06-05
-sync_note: "购物车添加数量字段"
+sync_note: "购物车添加数量字段并为 num 加最小值校验"
 ---
 
 # order-checkout-flow

@@ -4,7 +4,7 @@ tracks:
   - hm-api/
 last_synced_commit: 96cde0f
 last_synced_date: 2026-06-05
-sync_note: "CartFormDTO 添加 num 字段"
+sync_note: "CartFormDTO 添加 num 字段并为 num 加 @Min(1)/@NotNull 校验"
 ---
 
 # hm-api
