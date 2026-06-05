@@ -2,7 +2,7 @@
 title: item-service
 tracks:
   - item-service/
-last_synced_commit: bffeb9f
+last_synced_commit: 99ab98b
 last_synced_date: 2026-06-05
 sync_note: "Issue #95: ItemController 新增 /admin/items/stats 接口返回商品统计（total/onSale/offSale/lowStock）；adminQueryItemByPage 新增 minPrice/maxPrice 参数支持，并排除 status=3（已删除）商品。"
 ---

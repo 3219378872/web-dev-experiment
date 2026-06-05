@@ -5,7 +5,7 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: bffeb9f
+last_synced_commit: 99ab98b
 last_synced_date: 2026-06-05
 sync_note: "Issue #89: trade-service OrderController.myOrders() 填充 details 字段；Issue #92: cart-service 加入/查询购物车时填充商品元数据；Issue #95: item-service ItemController 新增 /admin/items/stats 和 minPrice/maxPrice 查询，adminQueryItemByPage 排除 status=3（已删除）商品。下单结算流程本身未变"
 ---

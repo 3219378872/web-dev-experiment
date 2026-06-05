@@ -98,13 +98,13 @@
                   style="padding: 0; background: transparent; border: 0"
                 >
                   <el-input
+                    ref="specInputRefs"
                     v-model="group.newValue"
                     size="small"
                     style="width: 100px"
                     placeholder="输入值"
                     @keyup.enter="confirmSpecValue(gIdx)"
                     @blur="confirmSpecValue(gIdx)"
-                    ref="specInputRefs"
                   />
                 </span>
                 <span v-else class="chip" @click="startAddSpecValue(gIdx)">＋</span>
@@ -195,6 +195,48 @@
                 @click="form.status = form.status === 1 ? 2 : 1"
               />
             </div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 13px;
+              "
+            >
+              <span>加入秒杀</span>
+              <span
+                :class="['switch', form.isSeckill ? 'on' : '']"
+                @click="form.isSeckill = !form.isSeckill"
+              />
+            </div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 13px;
+              "
+            >
+              <span>推荐到首页</span>
+              <span
+                :class="['switch', form.isRecommend ? 'on' : '']"
+                @click="form.isRecommend = !form.isRecommend"
+              />
+            </div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 13px;
+              "
+            >
+              <span>支持七天无理由</span>
+              <span
+                :class="['switch', form.isSevenDayReturn ? 'on' : '']"
+                @click="form.isSevenDayReturn = !form.isSevenDayReturn"
+              />
+            </div>
             <hr class="divider" />
             <div class="field">
               <label>运费模板</label>
@@ -239,6 +281,9 @@ const form = reactive({
   detail: '',
   status: 1,
   shippingTemplate: '全国包邮',
+  isSeckill: false,
+  isRecommend: false,
+  isSevenDayReturn: true,
 });
 
 const imageList = ref([]);

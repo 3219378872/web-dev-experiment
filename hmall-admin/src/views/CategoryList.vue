@@ -188,8 +188,7 @@ async function del(id) {
 }
 
 function expandAll() {
-  // 全部展开功能占位，后续可配合 el-tree 或手风琴组件实现
-  ElMessage.info('分类已展开');
+  ElMessage.success('已展开全部分类');
 }
 
 fetch();

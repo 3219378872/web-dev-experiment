@@ -43,7 +43,7 @@
       </div>
     </div>
 
-    <div class="adm-pager" v-if="total > pageSize">
+    <div v-if="total > pageSize" class="adm-pager">
       <el-pagination
         background
         layout="prev, pager, next"
