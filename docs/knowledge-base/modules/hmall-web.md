@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: c76b3a0
+last_synced_commit: f950d0b
 last_synced_date: 2026-06-05
-sync_note: "fix(issue-71): Category.vue 筛选按 category 名称匹配；fix(issue-73): 订单操作修复；fix(issue-74): FlashSale.vue 秒杀抢购使用 p.itemId"
+sync_note: "fix(issue-71): Category.vue 筛选；fix(issue-70): buyNow+num；fix(issue-73): 订单操作+支付安全修复；fix(issue-74): FlashSale 保持 p.id（#78 已修复 num）"
 ---
 
 # hmall-web
