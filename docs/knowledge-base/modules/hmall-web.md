@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 2d5a2f7
+last_synced_commit: f8438d6
 last_synced_date: 2026-06-05
-sync_note: "fix(#105): Login.vue 移除未实现功能；fix(#106): Feedback/Service vue 图片上传+FAQ API；fix(#107): ItemDetail.vue 评价图片上传；fix(#110): FlashSale.vue 接入 /seckill/active；fix(#111): Search.vue 服务端排序"
+sync_note: "fix(#105-#111): hmall-web feature pages修复；fix(codex): uploadImage URL提取、SeckillVO字段修正、Feedback images字段移除"
 ---
 
 # hmall-web

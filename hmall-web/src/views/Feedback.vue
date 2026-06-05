@@ -199,7 +199,6 @@ async function submit() {
       content: content.value,
       type: type.value,
       contact: contact.value,
-      images: imageUrls.value.join(','),
     });
     content.value = '';
     contact.value = '';
