@@ -42,7 +42,21 @@ public class OrderController {
     @ApiOperation("根据id查询订单")
     @GetMapping("/orders/{id}")
     public OrderVO queryOrderById(@PathVariable("id") Long orderId) {
-        return BeanUtils.copyBean(orderService.getById(orderId), OrderVO.class);
+        Order order = orderService.getById(orderId);
+        if (order == null) {
+            throw new BadRequestException("订单不存在");
+        }
+        OrderVO orderVO = BeanUtils.copyBean(order, OrderVO.class);
+
+        // 查询订单详情
+        List<OrderDetail> details = orderDetailService.lambdaQuery()
+                .eq(OrderDetail::getOrderId, orderId)
+                .list();
+        if (details != null && !details.isEmpty()) {
+            orderVO.setDetails(BeanUtils.copyList(details, OrderDetailVO.class));
+        }
+
+        return orderVO;
     }
 
     @ApiOperation("创建订单")
@@ -146,6 +160,23 @@ public class OrderController {
         wrapper.orderByDesc(Order::getCreateTime);
         Page<Order> result = orderService.page(new Page<>(page, size), wrapper);
         return PageDTO.of(result, OrderVO.class);
+    }
+
+    @ApiOperation("管理端根据id查询订单")
+    @GetMapping("/admin/orders/{id}")
+    public OrderVO adminQueryOrderById(@PathVariable("id") Long orderId) {
+        Order order = orderService.getById(orderId);
+        if (order == null) {
+            throw new BadRequestException("订单不存在");
+        }
+        OrderVO orderVO = BeanUtils.copyBean(order, OrderVO.class);
+        List<OrderDetail> details = orderDetailService.lambdaQuery()
+                .eq(OrderDetail::getOrderId, orderId)
+                .list();
+        if (details != null && !details.isEmpty()) {
+            orderVO.setDetails(BeanUtils.copyList(details, OrderDetailVO.class));
+        }
+        return orderVO;
     }
 
     @ApiOperation("修改订单状态")

@@ -12,6 +12,7 @@ spring:
       - com.alibaba.cloud.nacos.NacosConfigAutoConfiguration
       - org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.cloud.openfeign.FeignAutoConfiguration
   datasource:
     url: jdbc:h2:mem:user_test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=true;NON_KEYWORDS=USER
     driver-class-name: org.h2.Driver

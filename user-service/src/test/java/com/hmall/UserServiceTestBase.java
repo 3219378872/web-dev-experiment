@@ -1,5 +1,6 @@
 package com.hmall;
 
+import com.hmall.api.client.ItemClient;
 import com.hmall.common.utils.UserContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(properties = {"spring.cloud.bootstrap.enabled=false"})
+@SpringBootTest(properties = {
+    "spring.cloud.bootstrap.enabled=false",
+    "spring.main.allow-bean-definition-overriding=true"
+})
 @Transactional
 public abstract class UserServiceTestBase {
 
@@ -21,6 +25,9 @@ public abstract class UserServiceTestBase {
 
     @MockBean
     protected org.springframework.mail.javamail.JavaMailSender mailSender;
+
+    @MockBean
+    protected ItemClient itemClient;
 
     @Autowired
     protected org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
