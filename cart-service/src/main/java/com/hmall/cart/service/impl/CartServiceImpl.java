@@ -52,7 +52,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         // 2.判断是否已经存在
         if(checkItemExists(cartFormDTO.getItemId(), userId)){
             // 2.1.存在，则更新数量
-            baseMapper.updateNum(cartFormDTO.getItemId(), userId);
+            Integer num = cartFormDTO.getNum() != null ? cartFormDTO.getNum() : 1;
+            baseMapper.updateNum(cartFormDTO.getItemId(), userId, num);
             return;
         }
         // 2.2.不存在，判断是否超过购物车数量
@@ -63,7 +64,11 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         Cart cart = BeanUtils.copyBean(cartFormDTO, Cart.class);
         // 3.2.保存当前用户
         cart.setUserId(userId);
-        // 3.3.保存到数据库
+        // 3.3.设置数量，默认为1
+        if (cart.getNum() == null) {
+            cart.setNum(1);
+        }
+        // 3.4.保存到数据库
         save(cart);
     }
 

@@ -2,9 +2,9 @@
 title: cart-service
 tracks:
   - cart-service/
-last_synced_commit: 497554c
-last_synced_date: 2026-06-03
-sync_note: "2026-06-03: 移除 /hi 配置残留（hm-service 清理）"
+last_synced_commit: 76cd364
+last_synced_date: 2026-06-05
+sync_note: "CartFormDTO num 设为可选并保留 @Min(1) 校验，更新 API 文档"
 ---
 
 # cart-service

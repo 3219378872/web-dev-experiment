@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: f499742
+last_synced_commit: 76cd364
 last_synced_date: 2026-06-05
-sync_note: "修复订单详情缺少商品信息，无需文档更新"
+sync_note: "购物车 num 设为可选并保留 @Min(1) 校验"
 ---
 
 # order-checkout-flow

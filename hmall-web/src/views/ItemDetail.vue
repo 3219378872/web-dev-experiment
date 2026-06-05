@@ -108,7 +108,7 @@
 
           <div class="buy-row">
             <a class="btn btn-hot btn-lg" @click="addCart">🛒 加入购物车</a>
-            <router-link class="btn btn-gold btn-lg" to="/cart">⚡ 立即购买</router-link>
+            <a class="btn btn-gold btn-lg" @click="buyNow">⚡ 立即购买</a>
           </div>
           <div class="svc-row">
             <span>好集自营</span><span>当日发货</span><span>七天无理由</span><span>假一赔十</span
@@ -430,7 +430,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useCartStore } from '@/stores/cart';
 import { ElMessage } from 'element-plus';
@@ -439,6 +439,7 @@ import { checkFavorite, addFavorite, removeFavorite } from '@/api/common';
 import StarRating from '@/components/StarRating.vue';
 
 const route = useRoute();
+const router = useRouter();
 const userStore = useUserStore();
 const cartStore = useCartStore();
 const item = ref(null);
@@ -516,6 +517,19 @@ async function addCart() {
   try {
     await cartStore.addItem({ itemId: item.value.id, num: quantity.value });
     ElMessage.success('已添加到购物车');
+  } catch (err) {
+    /* ignore */
+  }
+}
+
+async function buyNow() {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录');
+    return;
+  }
+  try {
+    await cartStore.addItem({ itemId: item.value.id, num: quantity.value });
+    router.push('/cart');
   } catch (err) {
     /* ignore */
   }

@@ -2,9 +2,9 @@
 title: hm-api
 tracks:
   - hm-api/
-last_synced_commit: d7b580c
-last_synced_date: 2026-06-04
-sync_note: "Phase 3: UserClient 新增 countNewUsers(days) 方法"
+last_synced_commit: 76cd364
+last_synced_date: 2026-06-05
+sync_note: "CartFormDTO num 设为可选并保留 @Min(1) 校验，更新 API 文档"
 ---
 
 # hm-api
