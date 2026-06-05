@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 
 class PayOrderServiceImplTest extends PayServiceTestBase {
 
@@ -249,6 +250,44 @@ class PayOrderServiceImplTest extends PayServiceTestBase {
             assertThatThrownBy(() -> payOrderService.tryPayOrderByBalance(form))
                     .isInstanceOf(BizIllegalException.class)
                     .hasMessageContaining("已支付或关闭");
+        }
+
+        @Test
+        @DisplayName("支付单不存在 → BizIllegalException")
+        void payOrderNotFound_throws() {
+            PayOrderFormDTO form = PayOrderFormDTO.builder()
+                    .id(99999L)
+                    .pw("admin123")
+                    .build();
+
+            assertThatThrownBy(() -> payOrderService.tryPayOrderByBalance(form))
+                    .isInstanceOf(BizIllegalException.class)
+                    .hasMessageContaining("支付单不存在");
+        }
+
+        @Test
+        @DisplayName("MQ发布失败-支付单状态已更新，不抛出异常")
+        void mqPublishFails_payStatusStillUpdated() {
+            insertPayOrder(5003L, 600004L, "balance", PayStatus.WAIT_BUYER_PAY.getValue());
+
+            // Mock MQ 发布抛出异常
+            doThrow(new RuntimeException("MQ unavailable"))
+                    .when(mqMessagePublisher)
+                    .publish(org.mockito.ArgumentMatchers.anyString(),
+                            org.mockito.ArgumentMatchers.anyString(),
+                            org.mockito.ArgumentMatchers.any());
+
+            PayOrderFormDTO form = PayOrderFormDTO.builder()
+                    .id(5003L)
+                    .pw("admin123")
+                    .build();
+
+            // 不抛出异常
+            payOrderService.tryPayOrderByBalance(form);
+
+            // 支付单状态仍然已更新
+            PayOrder po = payOrderService.getById(5003L);
+            assertThat(po.getStatus()).isEqualTo(PayStatus.TRADE_SUCCESS.getValue());
         }
     }
 

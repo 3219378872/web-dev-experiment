@@ -4,7 +4,7 @@ tracks:
   - pay-service/
 last_synced_commit: d418693
 last_synced_date: 2026-06-05
-sync_note: "Issue #100: PayOrderServiceImpl 增加空值检查、MQ 发布降级、feign.circuitbreaker.enabled 配置；设计未变，无需内容更新"
+sync_note: "Issue #100: PayOrderServiceImpl 新增测试覆盖；设计未变，无需内容更新"
 ---
 
 # pay-service
