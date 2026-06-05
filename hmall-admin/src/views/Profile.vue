@@ -40,12 +40,8 @@
                   <el-input v-model="profileForm.account" readonly style="background: var(--bg)" />
                 </div>
                 <div class="field">
-                  <label>姓名</label>
-                  <el-input v-model="profileForm.name" />
-                </div>
-                <div class="field">
-                  <label>手机号</label>
-                  <el-input v-model="profileForm.phone" />
+                  <label>昵称</label>
+                  <el-input v-model="profileForm.nickname" />
                 </div>
                 <div class="field">
                   <label>邮箱</label>
@@ -153,8 +149,7 @@ const adminInfo = JSON.parse(localStorage.getItem('adminInfo') || '{}');
 
 const profileForm = reactive({
   account: adminInfo.username || adminInfo.account || 'admin',
-  name: adminInfo.name || '管理员',
-  phone: adminInfo.phone || '—',
+  nickname: adminInfo.nickname || adminInfo.name || '管理员',
   email: adminInfo.email || '',
 });
 
@@ -162,16 +157,14 @@ const pwdForm = reactive({ current: '', newPwd: '', confirm: '' });
 
 function permissionLabel(code) {
   const labels = {
-    dashboard: '数据看板',
-    'item:read': '商品查看',
-    'item:write': '商品管理（增删改）',
-    'order:read': '订单查看',
-    'order:write': '订单管理（发货/退款）',
-    'user:read': '用户查看',
-    'user:write': '用户管理（禁用/启用）',
-    'review:write': '评价管理（删除）',
-    'content:write': '内容管理（轮播/公告）',
-    'system:write': '系统设置 / 管理员管理',
+    'dashboard:view': '数据看板',
+    'item:manage': '商品管理',
+    'order:manage': '订单管理',
+    'user:manage': '用户管理',
+    'coupon:manage': '优惠券管理',
+    'notification:manage': '公告管理',
+    'feedback:manage': '反馈管理',
+    'banner:manage': '轮播管理',
   };
   return labels[code] || code;
 }
@@ -180,8 +173,7 @@ async function saveProfile() {
   savingProfile.value = true;
   try {
     await updateAdminProfile({
-      username: profileForm.account,
-      phone: profileForm.phone,
+      nickname: profileForm.nickname,
       email: profileForm.email,
     });
     ElMessage.success('信息已保存');
@@ -209,7 +201,6 @@ async function savePwd() {
   savingPwd.value = true;
   try {
     await updateAdminProfile({
-      oldPassword: pwdForm.current,
       password: pwdForm.newPwd,
     });
     ElMessage.success('密码已修改');

@@ -157,6 +157,15 @@ const updatingId = ref(null);
 const allChecked = ref(false);
 const partialChecked = ref(false);
 
+// 全局统计（从 API 获取，不分页）
+const globalTotal = ref(0);
+const globalPendingShip = ref(0);
+const globalRefund = ref(0);
+const globalPendingPay = ref(0);
+const globalShipped = ref(0);
+const globalDone = ref(0);
+const globalClosed = ref(0);
+
 function toggleAll(val) {
   orders.value.forEach((o) => {
     o.checked = val;
@@ -179,34 +188,58 @@ const statusMap = {
   6: { text: '退款中', cls: 'red' },
 };
 
-// 统计数据：total 为全局总数（来自后端分页响应）
-// 待发货/退款等分状态计数仅基于当前分页数据，完整统计需专用 API
-const todayCount = computed(() => total.value);
-const pendingShipCount = computed(() => orders.value.filter((o) => o.status === 2).length);
-const refundCount = computed(() => orders.value.filter((o) => o.status === 6).length);
+// 全局统计数据：通过独立 API 请求获取，不受当前分页影响
+const todayCount = computed(() => globalTotal.value);
+const pendingShipCount = computed(() => globalPendingShip.value);
+const refundCount = computed(() => globalRefund.value);
+
+// 并发加载各状态全局统计总数（page=1&size=1 仅取 total，不拉列表）
+async function loadStats() {
+  try {
+    const [allRes, pendingPayRes, pendingShipRes, shippedRes, doneRes, closedRes, refundRes] =
+      await Promise.all([
+        getOrders({ page: 1, size: 1 }),
+        getOrders({ page: 1, size: 1, status: 1 }),
+        getOrders({ page: 1, size: 1, status: 2 }),
+        getOrders({ page: 1, size: 1, status: 3 }),
+        getOrders({ page: 1, size: 1, status: 4 }),
+        getOrders({ page: 1, size: 1, status: 5 }),
+        getOrders({ page: 1, size: 1, status: 6 }),
+      ]);
+    globalTotal.value = allRes.total || 0;
+    globalPendingPay.value = pendingPayRes.total || 0;
+    globalPendingShip.value = pendingShipRes.total || 0;
+    globalShipped.value = shippedRes.total || 0;
+    globalDone.value = doneRes.total || 0;
+    globalClosed.value = closedRes.total || 0;
+    globalRefund.value = refundRes.total || 0;
+  } catch (err) {
+    console.error('加载全局统计失败', err);
+  }
+}
 
 const tabs = computed(() => [
-  { label: '全部订单', value: 'all', badge: total.value },
+  { label: '全部订单', value: 'all', badge: globalTotal.value },
   {
     label: '待付款',
     value: 'pendingPay',
-    badge: orders.value.filter((o) => o.status === 1).length,
+    badge: globalPendingPay.value,
   },
   {
     label: '待发货',
     value: 'pendingShip',
-    badge: pendingShipCount.value,
+    badge: globalPendingShip.value,
     badgeStyle: 'color:var(--warn)',
   },
-  { label: '待收货', value: 'shipped', badge: orders.value.filter((o) => o.status === 3).length },
-  { label: '已完成', value: 'done', badge: orders.value.filter((o) => o.status === 4).length },
+  { label: '待收货', value: 'shipped', badge: globalShipped.value },
+  { label: '已完成', value: 'done', badge: globalDone.value },
   {
     label: '退款/售后',
     value: 'refund',
-    badge: refundCount.value,
+    badge: globalRefund.value,
     badgeStyle: 'color:var(--danger)',
   },
-  { label: '已关闭', value: 'closed', badge: orders.value.filter((o) => o.status === 5).length },
+  { label: '已关闭', value: 'closed', badge: globalClosed.value },
 ]);
 
 function statusText(s) {
@@ -261,7 +294,10 @@ async function fetch(p = 1) {
     if (activeTab.value === 'done') params.status = 4;
     if (activeTab.value === 'closed') params.status = 5;
     if (activeTab.value === 'refund') params.status = 6;
-    const r = await getOrders(params);
+    const [r] = await Promise.all([
+      getOrders(params),
+      loadStats(),
+    ]);
     const list = (r.list || []).map((o) => ({
       ...o,
       checked: false,
