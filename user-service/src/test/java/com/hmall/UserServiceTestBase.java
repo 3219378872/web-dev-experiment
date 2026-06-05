@@ -13,7 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(properties = {"spring.cloud.bootstrap.enabled=false"})
+@SpringBootTest(properties = {
+    "spring.cloud.bootstrap.enabled=false",
+    "spring.autoconfigure.exclude=org.springframework.cloud.openfeign.FeignAutoConfiguration"
+})
 @Transactional
 public abstract class UserServiceTestBase {
 
