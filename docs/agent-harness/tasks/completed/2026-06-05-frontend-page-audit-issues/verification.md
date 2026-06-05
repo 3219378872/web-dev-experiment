@@ -9,6 +9,6 @@
 | `rg -n "@RestController|@.*Mapping" user-service item-service trade-service notify-service file-service pay-service -g '*Controller.java'` | pass | Confirmed backend endpoint availability. |
 | `gh issue list --state open --limit 120 --json number,title,url` | pass | Verified open issues #89-#113 after submissions. |
 | `python3 scripts/agent_harness.py check` | initial fail | Before waiver update, failed on missing spec_waiver/plan_waiver for this new audit task. |
-| `python3 scripts/agent_harness.py check` | blocked by unrelated untracked task | After this task waiver was fixed, the command fails only on `2026-06-05-batch4-pay-order-admin` missing spec/plan waiver; that directory is untracked and not part of this audit task. |
+| `python3 scripts/agent_harness.py check` | pass in PR CI | Passed on PR #114 clean checkout after the task was completed; local worktree remains affected by unrelated untracked `2026-06-05-batch4-pay-order-admin`. |
 | `python3 scripts/knowledge_base.py check` | pass | `knowledge base check passed (K005 skipped: no --base)`. |
-| `python3 scripts/engineering-lint.py` | blocked by unrelated untracked task | Fails because it invokes harness check, which is blocked by `2026-06-05-batch4-pay-order-admin`; KB portion passes. |
+| `python3 scripts/engineering-lint.py` | pass in PR CI | Passed on PR #114 clean checkout after the task was completed; local worktree remains affected by unrelated untracked `2026-06-05-batch4-pay-order-admin`. |
