@@ -1,0 +1,7 @@
+slug: issue-75-item-detail-selector
+task_branch: task/2026-06-05-fix-issue-75-item-detail-selector
+status: active
+spec: null
+spec_waiver: "Bugfix per Issue #75, no spec needed"
+plan: null
+plan_waiver: "Single-file frontend fix, no plan needed"

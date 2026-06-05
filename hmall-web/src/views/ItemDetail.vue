@@ -73,22 +73,48 @@
             <div class="line">
               <span class="k">颜色</span>
               <div class="opts">
-                <span class="opt on"
+                <span
+                  class="opt"
+                  :class="{ on: selectedColor === '曜石黑' }"
+                  @click="selectedColor = '曜石黑'"
                   ><span class="sw" style="background: #221b17"></span>曜石黑</span
                 >
-                <span class="opt"
+                <span
+                  class="opt"
+                  :class="{ on: selectedColor === '云母白' }"
+                  @click="selectedColor = '云母白'"
                   ><span class="sw" style="background: #f2f0ec; border: 1px solid #ddd"></span
                   >云母白</span
                 >
-                <span class="opt"><span class="sw" style="background: #88a6b8"></span>雾霾蓝</span>
+                <span
+                  class="opt"
+                  :class="{ on: selectedColor === '雾霾蓝' }"
+                  @click="selectedColor = '雾霾蓝'"
+                  ><span class="sw" style="background: #88a6b8"></span>雾霾蓝</span
+                >
               </div>
             </div>
             <div class="line">
               <span class="k">版本</span>
               <div class="opts">
-                <span class="opt on">标准版</span>
-                <span class="opt">降噪增强版 +¥80</span>
-                <span class="opt">游戏专业版 +¥150</span>
+                <span
+                  class="opt"
+                  :class="{ on: selectedVersion === '标准版' }"
+                  @click="selectedVersion = '标准版'"
+                  >标准版</span
+                >
+                <span
+                  class="opt"
+                  :class="{ on: selectedVersion === '降噪增强版 +¥80' }"
+                  @click="selectedVersion = '降噪增强版 +¥80'"
+                  >降噪增强版 +¥80</span
+                >
+                <span
+                  class="opt"
+                  :class="{ on: selectedVersion === '游戏专业版 +¥150' }"
+                  @click="selectedVersion = '游戏专业版 +¥150'"
+                  >游戏专业版 +¥150</span
+                >
               </div>
             </div>
             <div class="line">
@@ -429,7 +455,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useCartStore } from '@/stores/cart';
@@ -444,6 +470,8 @@ const userStore = useUserStore();
 const cartStore = useCartStore();
 const item = ref(null);
 const quantity = ref(1);
+const selectedColor = ref('曜石黑');
+const selectedVersion = ref('标准版');
 const isFavorited = ref(false);
 const reviews = ref([]);
 const reviewRating = ref(5);
@@ -481,33 +509,44 @@ function renderStars(rating) {
   return s;
 }
 
-onMounted(async () => {
+async function loadItem(id) {
   try {
-    item.value = await getItemById(route.params.id);
+    item.value = await getItemById(id);
   } catch (err) {
     /* ignore */
   }
   try {
-    reviews.value = await getReviews(route.params.id);
+    reviews.value = await getReviews(id);
   } catch (err) {
     /* ignore */
   }
   if (userStore.isLoggedIn) {
     try {
-      isFavorited.value = await checkFavorite(route.params.id);
+      isFavorited.value = await checkFavorite(id);
     } catch (err) {
       /* ignore */
     }
   }
   try {
     const data = await getItems({ page: 1, size: 4 });
-    relatedItems.value = (data?.list || [])
-      .filter((x) => String(x.id) !== String(route.params.id))
-      .slice(0, 4);
+    relatedItems.value = (data?.list || []).filter((x) => String(x.id) !== String(id)).slice(0, 4);
   } catch (err) {
     /* ignore */
   }
-});
+}
+
+watch(
+  () => route.params.id,
+  async (newId) => {
+    if (newId) {
+      selectedColor.value = '曜石黑';
+      selectedVersion.value = '标准版';
+      await loadItem(newId);
+    }
+  }
+);
+
+onMounted(() => loadItem(route.params.id));
 
 async function addCart() {
   if (!userStore.isLoggedIn) {
@@ -515,7 +554,11 @@ async function addCart() {
     return;
   }
   try {
-    await cartStore.addItem({ itemId: item.value.id, num: quantity.value });
+    await cartStore.addItem({
+      itemId: item.value.id,
+      num: quantity.value,
+      spec: `${selectedColor.value} / ${selectedVersion.value}`,
+    });
     ElMessage.success('已添加到购物车');
   } catch (err) {
     /* ignore */
@@ -528,7 +571,11 @@ async function buyNow() {
     return;
   }
   try {
-    await cartStore.addItem({ itemId: item.value.id, num: quantity.value });
+    await cartStore.addItem({
+      itemId: item.value.id,
+      num: quantity.value,
+      spec: `${selectedColor.value} / ${selectedVersion.value}`,
+    });
     router.push('/cart');
   } catch (err) {
     /* ignore */
