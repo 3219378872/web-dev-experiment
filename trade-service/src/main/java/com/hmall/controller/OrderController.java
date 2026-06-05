@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Api(tags = "订单管理接口")
@@ -82,7 +83,25 @@ public class OrderController {
         if (status != null) wrapper.eq(Order::getStatus, status);
         wrapper.orderByDesc(Order::getCreateTime);
         Page<Order> result = orderService.page(new Page<>(page, size), wrapper);
-        return PageDTO.of(result, OrderVO.class);
+        List<OrderVO> voList = BeanUtils.copyList(result.getRecords(), OrderVO.class);
+
+        // 批量查询订单详情并填充
+        if (!voList.isEmpty()) {
+            List<Long> orderIds = voList.stream().map(OrderVO::getId).collect(Collectors.toList());
+            List<OrderDetail> allDetails = orderDetailService.lambdaQuery()
+                    .in(OrderDetail::getOrderId, orderIds)
+                    .list();
+            Map<Long, List<OrderDetail>> detailMap = allDetails.stream()
+                    .collect(Collectors.groupingBy(OrderDetail::getOrderId));
+            for (OrderVO vo : voList) {
+                List<OrderDetail> details = detailMap.get(vo.getId());
+                if (details != null && !details.isEmpty()) {
+                    vo.setDetails(BeanUtils.copyList(details, OrderDetailVO.class));
+                }
+            }
+        }
+
+        return new PageDTO<>(result.getTotal(), result.getPages(), voList);
     }
 
     @ApiOperation("取消订单")
