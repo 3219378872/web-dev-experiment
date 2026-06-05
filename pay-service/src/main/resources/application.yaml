@@ -53,4 +53,7 @@ seata:
       application: seata-server
       username: nacos
       password: nacos
+feign:
+  circuitbreaker:
+    enabled: true
 # keytool -genkeypair -alias hmall -keyalg RSA -keypass hmall123 -keystore hmall.jks -storepass hmall123

@@ -3,10 +3,10 @@
     <div class="adm-ph">
       <div>
         <h1>轮播图管理</h1>
-        <p>首页轮播位 · 共 {{ banners.length }} 张 · 拖拽调整顺序</p>
+        <p>首页轮播位 · 共 {{ total }} 张 · 拖拽调整顺序</p>
       </div>
       <div class="acts">
-        <a class="btn btn-primary" href="#" @click.prevent="dialogVisible = true">＋ 新增轮播图</a>
+        <a class="btn btn-primary" href="#" @click.prevent="openDialog()">＋ 新增轮播图</a>
       </div>
     </div>
 
@@ -16,7 +16,7 @@
           class="preview"
           :style="`background:${b.gradient || 'linear-gradient(120deg,#FF7A45,#D62E10)'}`"
         >
-          <span class="order">{{ b.sortOrder || 1 }}</span>
+          <span class="order">{{ b.sort || 1 }}</span>
           <h3>{{ b.title }}</h3>
           <p>{{ b.subtitle || '轮播图' }}</p>
         </div>
@@ -27,13 +27,13 @@
             </div>
             <div class="dim" style="margin-top: 4px">
               {{ b.timeRange || '长期有效' }} ·
-              <span class="sdot" :class="b.enabled ? 'green' : 'gray'">{{
-                b.enabled ? '展示中' : '已下线'
+              <span class="sdot" :class="b.status === 1 ? 'green' : 'gray'">{{
+                b.status === 1 ? '展示中' : '已下线'
               }}</span>
             </div>
           </div>
           <div class="acts" style="flex-direction: column; align-items: flex-end; gap: 8px">
-            <span class="switch" :class="{ on: b.enabled }" @click="b.enabled = !b.enabled"></span>
+            <span class="switch" :class="{ on: b.status === 1 }" @click="toggleStatus(b)"></span>
             <span>
               <a class="lk" href="#" @click.prevent="editBanner(b)">编辑</a>
               <a class="lk" href="#" @click.prevent="del(b.id)">删除</a>
@@ -43,14 +43,29 @@
       </div>
     </div>
 
+    <div v-if="total > pageSize" class="adm-pager">
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :total="total"
+        :page-size="pageSize"
+        :current-page="page"
+        @current-change="(p) => fetch(p)"
+      />
+    </div>
+
     <el-dialog v-model="dialogVisible" :title="editing ? '编辑轮播图' : '新增轮播图'" width="520px">
       <el-form :model="form" label-width="80px">
         <el-form-item label="标题"><el-input v-model="form.title" /></el-form-item>
         <el-form-item label="图片URL"><el-input v-model="form.imageUrl" /></el-form-item>
         <el-form-item label="链接"><el-input v-model="form.linkUrl" /></el-form-item>
-        <el-form-item label="排序"
-          ><el-input-number v-model="form.sortOrder" :min="0"
-        /></el-form-item>
+        <el-form-item label="排序"><el-input-number v-model="form.sort" :min="0" /></el-form-item>
+        <el-form-item label="类型">
+          <el-select v-model="form.type" placeholder="选择类型" style="width: 100%">
+            <el-option label="轮播图" value="carousel" />
+            <el-option label="广告位" value="ad" />
+          </el-select>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -61,89 +76,72 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ref, reactive, onMounted } from 'vue';
+import { getBanners, saveBanner, updateBanner, deleteBanner, updateBannerStatus } from '@/api/item';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
-const banners = ref([
-  {
-    id: 1,
-    title: '618 年中狂欢',
-    subtitle: '全场最高直降 60%',
-    gradient: 'linear-gradient(120deg,#FF7A45,#D62E10)',
-    linkUrl: '/flashsale',
-    timeRange: '2026-06-01 ~ 2026-06-20',
-    sortOrder: 1,
-    enabled: true,
-  },
-  {
-    id: 2,
-    title: '数码焕新季',
-    subtitle: '耳机投影键盘低至5折',
-    gradient: 'linear-gradient(120deg,#88A6B8,#5d7f93)',
-    linkUrl: '/category?c=digital',
-    timeRange: '长期有效',
-    sortOrder: 2,
-    enabled: true,
-  },
-  {
-    id: 3,
-    title: '食品生鲜节',
-    subtitle: '坚果牛排水果产地直发',
-    gradient: 'linear-gradient(120deg,#B0BE92,#8aa05f)',
-    linkUrl: '/category?c=food',
-    timeRange: '2026-05-20 ~ 2026-06-10',
-    sortOrder: 3,
-    enabled: true,
-  },
-  {
-    id: 4,
-    title: '新人专享礼包',
-    subtitle: '注册立得90元券',
-    gradient: 'linear-gradient(120deg,#B79CC4,#9d7fb0)',
-    linkUrl: '/coupons',
-    timeRange: '长期有效',
-    sortOrder: 4,
-    enabled: true,
-  },
-  {
-    id: 5,
-    title: '母婴狂欢周',
-    subtitle: '奶粉纸尿裤满减',
-    gradient: 'linear-gradient(120deg,#E9B775,#c9912f)',
-    linkUrl: '/category?c=baby',
-    timeRange: '2026-06-05 ~ 2026-06-12',
-    sortOrder: 5,
-    enabled: false,
-  },
-]);
+const banners = ref([]);
+const total = ref(0);
+const page = ref(1);
+const pageSize = ref(10);
 const dialogVisible = ref(false);
 const editing = ref(null);
 const form = reactive({
   title: '',
   imageUrl: '',
   linkUrl: '',
-  sortOrder: 0,
+  sort: 0,
+  type: 'carousel',
   subtitle: '',
   gradient: '',
 });
 
-function save() {
-  if (editing.value) {
-    const idx = banners.value.findIndex((b) => b.id === editing.value.id);
-    if (idx !== -1) {
-      banners.value[idx] = { ...banners.value[idx], ...form };
-    }
-  } else {
-    banners.value.push({
-      ...form,
-      id: Date.now(),
-      gradient: form.gradient || 'linear-gradient(120deg,#FF7A45,#D62E10)',
-      timeRange: '长期有效',
-      enabled: true,
-    });
+async function fetch(p = 1) {
+  page.value = p;
+  try {
+    const r = await getBanners({ page: p, size: pageSize.value, type: 'carousel' });
+    banners.value = (r.list || []).map((b) => ({
+      ...b,
+      subtitle: b.subtitle || '轮播图',
+      gradient: b.gradient || 'linear-gradient(120deg,#FF7A45,#D62E10)',
+      timeRange: b.timeRange || '长期有效',
+      enabled: b.status === 1,
+    }));
+    total.value = r.total || 0;
+  } catch (err) {
+    console.error(err);
   }
-  dialogVisible.value = false;
-  ElMessage.success('已保存');
+}
+
+function openDialog() {
+  editing.value = null;
+  form.title = '';
+  form.imageUrl = '';
+  form.linkUrl = '';
+  form.sort = 0;
+  form.type = 'carousel';
+  form.subtitle = '';
+  form.gradient = '';
+  dialogVisible.value = true;
+}
+
+async function save() {
+  try {
+    const payload = {
+      ...form,
+      status: editing.value ? editing.value.status : 1,
+    };
+    if (editing.value) {
+      await updateBanner(editing.value.id, payload);
+    } else {
+      await saveBanner(payload);
+    }
+    dialogVisible.value = false;
+    fetch(page.value);
+    ElMessage.success('已保存');
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 function editBanner(b) {
@@ -152,10 +150,30 @@ function editBanner(b) {
   dialogVisible.value = true;
 }
 
-function del(id) {
-  banners.value = banners.value.filter((b) => b.id !== id);
-  ElMessage.success('已删除');
+async function toggleStatus(b) {
+  const newStatus = b.status === 1 ? 0 : 1;
+  try {
+    await updateBannerStatus(b.id, newStatus);
+    b.status = newStatus;
+    b.enabled = newStatus === 1;
+    ElMessage.success('已更新');
+  } catch (err) {
+    console.error(err);
+  }
 }
+
+async function del(id) {
+  try {
+    await ElMessageBox.confirm('确认删除?', '提示', { type: 'warning' });
+    await deleteBanner(id);
+    fetch(page.value);
+    ElMessage.success('已删除');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+onMounted(() => fetch());
 </script>
 
 <style scoped>
@@ -329,5 +347,11 @@ function del(id) {
 
 .dim {
   color: var(--ink-3);
+}
+
+.adm-pager {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
