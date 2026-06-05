@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 6f3c2a0
+last_synced_commit: b05c078
 last_synced_date: 2026-06-05
-sync_note: "Issue #86 跟进：cart 补 hm.cart.max-items 默认值修复 POST /carts NPE、trade/pay feign contextId；下单结算流程本身未变"
+sync_note: "Issue #89 跟进：trade-service OrderController.myOrders() 填充 details 字段；下单结算流程本身未变"
 ---
 
 # order-checkout-flow
