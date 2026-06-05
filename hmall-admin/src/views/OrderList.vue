@@ -4,7 +4,7 @@
       <div>
         <h1>订单管理</h1>
         <p>
-          今日新增 {{ todayCount }} 单 · 待发货 {{ pendingShipCount }} · 待处理售后
+          共 {{ todayCount }} 单 · 待发货 {{ pendingShipCount }} · 待处理售后
           {{ refundCount }}
         </p>
       </div>
