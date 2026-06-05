@@ -36,7 +36,7 @@
     </div>
 
     <div class="acard">
-      <div class="ab" id="rev-rows">
+      <div id="rev-rows" class="ab">
         <div v-for="(r, i) in filteredReviews" :key="r.id" class="rev-row">
           <div class="av" :style="`background:${avatarColor(i)}`">
             {{ (r.userName || '匿')[0] }}

@@ -11,17 +11,17 @@
       <div class="acard">
         <div class="ah">
           <h3>商品分类树</h3>
-          <a class="btn btn-ghost btn-sm">全部展开</a>
+          <a class="btn btn-ghost btn-sm" @click="expandAll">全部展开</a>
         </div>
         <div class="ab ctree">
           <div v-for="cat in tree" :key="cat.id" class="lv1">
             <div class="row">
               <span class="handle">⠿</span>
-              <span class="d" :style="`background:${cat.color}`">{{ cat.icon }}</span>
+              <span class="d" :style="`background:${cat.color || '#999'}`">{{
+                cat.icon || '▣'
+              }}</span>
               {{ cat.name }}
-              <span class="cnt"
-                >{{ cat.count }} 件商品 · {{ cat.children?.length || 0 }} 个子类</span
-              >
+              <span class="cnt">{{ cat.children?.length || 0 }} 个子类</span>
               <span class="acts">
                 <a @click="addChild(cat)">＋ 子类</a>
                 <a @click="editCat(cat)">编辑</a>
@@ -31,7 +31,6 @@
             <div class="lv2">
               <span v-for="sub in cat.children" :key="sub.id" class="c">
                 {{ sub.name }}
-                <span class="cnt">{{ sub.count }}</span>
                 <span class="e" @click="editCat(sub)">✎</span>
               </span>
             </div>
@@ -118,30 +117,10 @@ const form = reactive({ name: '', sortOrder: 0, status: 1, parentId: null, icon:
 
 const icons = ['▣', '▤', '◈', '✿', '◉', '▦'];
 
-// 与原型 admin/categories.html 对齐：固定的一级分类配色与商品数
-const PALETTE = [
-  '#FF6A45',
-  '#88A6B8',
-  '#B79CC4',
-  '#DE9696',
-  '#B0BE92',
-  '#C9A66B',
-  '#E9B775',
-  '#7FB6A6',
-];
-const LV1_COUNTS = [2480, 1860, 3240, 1520, 2180, 1940, 1280, 980];
-
-/** 确定性子类计数（原型用 Math.random，此处用稳定哈希避免跨运行抖动） */
-function subCount(name, i, j) {
-  let h = i * 131 + j * 17;
-  for (let k = 0; k < name.length; k++) h = (h * 31 + name.charCodeAt(k)) % 400;
-  return (Math.abs(h) % 400) + 50;
-}
-
 const tree = computed(() => {
   const map = {};
   categories.value.forEach((c) => {
-    map[c.id] = { ...c, children: [], icon: c.icon || '▣' };
+    map[c.id] = { ...c, children: [] };
   });
   const roots = [];
   categories.value.forEach((c) => {
@@ -152,19 +131,11 @@ const tree = computed(() => {
       roots.push(node);
     }
   });
-  roots.forEach((r, i) => {
-    r.color = r.color || PALETTE[i % PALETTE.length];
-    r.count = LV1_COUNTS[i] ?? 980;
-    r.children.forEach((s, j) => {
-      s.count = subCount(s.name, i, j);
-    });
-  });
   return roots;
 });
 
-// 原型副标题为固定文案（共 10 个一级分类 · 68 个二级分类）
-const level1Count = computed(() => 10);
-const level2Count = computed(() => 68);
+const level1Count = computed(() => categories.value.filter((c) => !c.parentId).length);
+const level2Count = computed(() => categories.value.filter((c) => c.parentId).length);
 
 async function fetch() {
   try {
@@ -214,6 +185,10 @@ async function del(id) {
   } catch (err) {
     console.error(err);
   }
+}
+
+function expandAll() {
+  ElMessage.success('已展开全部分类');
 }
 
 fetch();

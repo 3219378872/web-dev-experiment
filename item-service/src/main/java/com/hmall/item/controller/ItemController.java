@@ -11,6 +11,7 @@ import com.hmall.item.domain.dto.ItemIdsDTO;
 import com.hmall.item.domain.dto.ItemStatusDTO;
 import com.hmall.item.domain.dto.OrderDetailDTO;
 import com.hmall.item.domain.po.Item;
+import com.hmall.item.domain.vo.ItemStatsVO;
 import com.hmall.item.domain.vo.ItemVO;
 import com.hmall.item.service.IItemService;
 import io.swagger.annotations.Api;
@@ -64,12 +65,17 @@ public class ItemController {
             @RequestParam(value = "size", defaultValue = "10") Integer size,
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "status", required = false) Integer status) {
+            @RequestParam(value = "status", required = false) Integer status,
+            @RequestParam(value = "minPrice", required = false) Integer minPrice,
+            @RequestParam(value = "maxPrice", required = false) Integer maxPrice) {
         Page<Item> p = new Page<>(page, size);
         LambdaQueryWrapper<Item> wrapper = new LambdaQueryWrapper<>();
         if (name != null && !name.isEmpty()) wrapper.like(Item::getName, name);
         if (category != null && !category.isEmpty()) wrapper.eq(Item::getCategory, category);
         if (status != null) wrapper.eq(Item::getStatus, status);
+        if (minPrice != null) wrapper.ge(Item::getPrice, minPrice);
+        if (maxPrice != null) wrapper.le(Item::getPrice, maxPrice);
+        wrapper.ne(Item::getStatus, 3);
         wrapper.orderByDesc(Item::getUpdateTime);
         return PageDTO.of(itemService.page(p, wrapper), ItemDTO.class);
     }
@@ -125,5 +131,18 @@ public class ItemController {
     @PutMapping("/items/stock/deduct")
     public void deductStock(@RequestBody List<OrderDetailDTO> items) {
         itemService.deductStock(items);
+    }
+
+    @ApiOperation("管理端商品统计")
+    @GetMapping("/admin/items/stats")
+    public ItemStatsVO adminItemStats() {
+        LambdaQueryWrapper<Item> nonDeleted = new LambdaQueryWrapper<>();
+        nonDeleted.ne(Item::getStatus, 3);
+        return ItemStatsVO.builder()
+                .total(itemService.count(nonDeleted))
+                .onSale(itemService.lambdaQuery().eq(Item::getStatus, 1).count())
+                .offSale(itemService.lambdaQuery().eq(Item::getStatus, 2).count())
+                .lowStock(itemService.lambdaQuery().lt(Item::getStock, 20).eq(Item::getStatus, 1).count())
+                .build();
     }
 }
