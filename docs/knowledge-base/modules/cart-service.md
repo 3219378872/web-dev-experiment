@@ -2,9 +2,9 @@
 title: cart-service
 tracks:
   - cart-service/
-last_synced_commit: 6f3c2a0
+last_synced_commit: d418693
 last_synced_date: 2026-06-05
-sync_note: "Issue #86: application.yaml 补 hm.cart.max-items 默认值，修复 CartProperties.maxItems 为 null 导致 POST /carts 拆箱 NPE"
+sync_note: "Issue #92: CartServiceImpl 添加商品信息填充和测试覆盖；设计未变，无需内容更新"
 ---
 
 # cart-service

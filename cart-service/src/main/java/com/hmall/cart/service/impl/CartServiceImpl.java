@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +69,15 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         if (cart.getNum() == null) {
             cart.setNum(1);
         }
-        // 3.4.保存到数据库
+        // 3.4.查询商品信息，填充名称、图片、价格
+        List<ItemDTO> items = itemClient.queryItemByIds(Collections.singletonList(cartFormDTO.getItemId()));
+        if (CollUtils.isNotEmpty(items)) {
+            ItemDTO item = items.get(0);
+            cart.setName(item.getName());
+            cart.setImage(item.getImage());
+            cart.setPrice(item.getPrice());
+        }
+        // 3.5.保存到数据库
         save(cart);
     }
 
@@ -138,6 +147,16 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
             v.setNewPrice(item.getPrice());
             v.setStatus(item.getStatus());
             v.setStock(item.getStock());
+            // 回填名称和图片，确保前端能正确展示
+            if (v.getName() == null) {
+                v.setName(item.getName());
+            }
+            if (v.getImage() == null) {
+                v.setImage(item.getImage());
+            }
+            if (v.getPrice() == null) {
+                v.setPrice(item.getPrice());
+            }
         }
     }
 

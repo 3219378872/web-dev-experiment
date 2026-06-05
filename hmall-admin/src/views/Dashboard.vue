@@ -6,305 +6,321 @@
         <p>欢迎回来，管理员 · 今天是 {{ today }}</p>
       </div>
       <div class="acts">
-        <el-select v-model="dateRange" style="width: 130px" size="small">
-          <el-option label="今日" value="today" />
-          <el-option label="近 7 天" value="week" />
-          <el-option label="近 30 天" value="month" />
+        <el-select
+          v-model="dateRange"
+          style="width: 130px"
+          size="small"
+          @change="onDateRangeChange"
+        >
+          <el-option label="近 7 天" value="7" />
+          <el-option label="近 30 天" value="30" />
         </el-select>
-        <el-button size="small">导出报表</el-button>
         <el-button type="primary" size="small" @click="$router.push('/items/add')"
           >＋ 发布商品</el-button
         >
       </div>
     </div>
 
-    <!-- 核心指标 -->
-    <div class="stat-row">
-      <div class="stat">
-        <div class="ic" style="background: linear-gradient(135deg, #ff7a45, var(--brand))">💰</div>
-        <div class="lab">今日成交额</div>
-        <div class="val"><small>¥</small>128,640</div>
-        <div class="delta up">▲ 12.4% <span style="color: var(--ink-3)">较昨日</span></div>
-      </div>
-      <div class="stat">
-        <div class="ic" style="background: linear-gradient(135deg, #3b82f6, #1257c4)">▤</div>
-        <div class="lab">今日订单数</div>
-        <div class="val">1,286</div>
-        <div class="delta up">▲ 8.2% <span style="color: var(--ink-3)">较昨日</span></div>
-      </div>
-      <div class="stat">
-        <div class="ic" style="background: linear-gradient(135deg, #10b981, #137a40)">👥</div>
-        <div class="lab">今日新增用户</div>
-        <div class="val">486</div>
-        <div class="delta up">▲ 5.6% <span style="color: var(--ink-3)">较昨日</span></div>
-      </div>
-      <div class="stat">
-        <div class="ic" style="background: linear-gradient(135deg, #f59e0b, var(--gold))">👁</div>
-        <div class="lab">今日访客量</div>
-        <div class="val">42,180</div>
-        <div class="delta down">▼ 2.1% <span style="color: var(--ink-3)">较昨日</span></div>
-      </div>
+    <!-- 加载状态 -->
+    <div v-if="loading" style="text-align: center; padding: 60px 0; color: var(--ink-3)">
+      加载中...
     </div>
 
-    <!-- 销量趋势 + 分类占比 -->
-    <div class="dash-grid">
-      <div class="acard">
-        <div class="ah">
-          <h3>销售趋势 <span class="sub">近 7 日成交额（元）</span></h3>
-          <div style="display: flex; gap: 8px">
-            <span class="chip on" style="padding: 5px 12px; font-size: 12px">成交额</span>
-            <span class="chip" style="padding: 5px 12px; font-size: 12px">订单数</span>
+    <!-- 错误状态 -->
+    <div v-else-if="error" style="text-align: center; padding: 60px 0; color: var(--danger)">
+      <p>{{ error }}</p>
+      <el-button style="margin-top: 12px" @click="loadAll">重新加载</el-button>
+    </div>
+
+    <!-- 正常内容 -->
+    <template v-else>
+      <!-- 核心指标 -->
+      <div class="stat-row">
+        <div class="stat">
+          <div class="ic" style="background: linear-gradient(135deg, #ff7a45, var(--brand))">
+            💰
           </div>
+          <div class="lab">累计成交额</div>
+          <div class="val"><small>¥</small>{{ formatAmount(summary.totalAmount) }}</div>
         </div>
-        <div class="ab">
-          <div ref="chartRef" style="width: 100%; height: 200px"></div>
+        <div class="stat">
+          <div class="ic" style="background: linear-gradient(135deg, #3b82f6, #1257c4)">▤</div>
+          <div class="lab">总订单数</div>
+          <div class="val">{{ (summary.totalOrders || 0).toLocaleString() }}</div>
+        </div>
+        <div class="stat">
+          <div class="ic" style="background: linear-gradient(135deg, #10b981, #137a40)">👥</div>
+          <div class="lab">新增用户(近30天)</div>
+          <div class="val">{{ (summary.newUsers || 0).toLocaleString() }}</div>
+        </div>
+        <div class="stat">
+          <div class="ic" style="background: linear-gradient(135deg, #f59e0b, var(--gold))">👁</div>
+          <div class="lab">访客量</div>
+          <div class="val">{{ (summary.visitors || 0).toLocaleString() }}</div>
         </div>
       </div>
 
-      <div class="acard">
-        <div class="ah"><h3>品类销售占比</h3></div>
-        <div class="ab" style="display: flex; align-items: center; gap: 22px">
-          <div
-            class="donut"
-            style="
-              background: conic-gradient(
-                #ff4d2e 0 32%,
-                #3b82f6 32% 54%,
-                #10b981 54% 72%,
-                #f59e0b 72% 86%,
-                #b79cc4 86% 100%
-              );
-              position: relative;
-            "
-          >
+      <!-- 销量趋势 + 分类占比 -->
+      <div class="dash-grid">
+        <div class="acard">
+          <div class="ah">
+            <h3>
+              销售趋势 <span class="sub">近 {{ dateRange }} 日成交额（元）</span>
+            </h3>
+          </div>
+          <div class="ab">
+            <div ref="chartRef" style="width: 100%; height: 200px"></div>
+          </div>
+        </div>
+
+        <div class="acard">
+          <div class="ah"><h3>品类销售占比</h3></div>
+          <div class="ab" style="display: flex; align-items: center; gap: 22px">
             <div
-              style="
-                position: absolute;
-                inset: 30px;
-                background: #fff;
-                border-radius: 50%;
-                display: grid;
-                place-items: center;
-                text-align: center;
-              "
+              v-if="categoryShare.length === 0"
+              style="color: var(--ink-3); font-size: 13px; padding: 20px"
             >
-              <div>
-                <div style="font-size: 20px; font-weight: 900">2.4万</div>
-                <div style="font-size: 10px; color: var(--ink-3)">在售SKU</div>
+              暂无数据
+            </div>
+            <template v-else>
+              <div class="donut" :style="{ background: categoryConic }">
+                <div
+                  style="
+                    position: absolute;
+                    inset: 30px;
+                    background: #fff;
+                    border-radius: 50%;
+                    display: grid;
+                    place-items: center;
+                    text-align: center;
+                  "
+                >
+                  <div>
+                    <div style="font-size: 20px; font-weight: 900">{{ inStockSku }}</div>
+                    <div style="font-size: 10px; color: var(--ink-3)">在售SKU</div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div class="legend" style="flex: 1">
-            <div class="l">
-              <span class="sw" style="background: #ff4d2e"></span><span class="nm">手机数码</span
-              ><span class="v">32%</span>
-            </div>
-            <div class="l">
-              <span class="sw" style="background: #3b82f6"></span><span class="nm">家用电器</span
-              ><span class="v">22%</span>
-            </div>
-            <div class="l">
-              <span class="sw" style="background: #10b981"></span><span class="nm">食品生鲜</span
-              ><span class="v">18%</span>
-            </div>
-            <div class="l">
-              <span class="sw" style="background: #f59e0b"></span><span class="nm">服饰美妆</span
-              ><span class="v">14%</span>
-            </div>
-            <div class="l">
-              <span class="sw" style="background: #b79cc4"></span><span class="nm">其他品类</span
-              ><span class="v">14%</span>
-            </div>
+              <div class="legend" style="flex: 1">
+                <div v-for="(c, i) in categoryShare" :key="c.category" class="l">
+                  <span
+                    class="sw"
+                    :style="{ background: categoryColors[i % categoryColors.length] }"
+                  ></span>
+                  <span class="nm">{{ c.category }}</span>
+                  <span class="v">{{ (c.percentage || 0).toFixed(0) }}%</span>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- 热销榜 + 待办 -->
-    <div class="dash-grid">
-      <div class="acard">
+      <!-- 热销榜 + 待办 -->
+      <div class="dash-grid">
+        <div class="acard">
+          <div class="ah">
+            <h3>热销商品 TOP 5</h3>
+            <router-link class="lk" to="/items" style="font-size: 12.5px; color: var(--info)"
+              >查看全部 ›</router-link
+            >
+          </div>
+          <div v-if="topItems.length === 0" class="ab" style="color: var(--ink-3); font-size: 13px">
+            暂无数据
+          </div>
+          <div v-else class="ab rank">
+            <div v-for="(p, i) in topItems" :key="p.itemId || i" class="r">
+              <span class="no">{{ i + 1 }}</span>
+              <div
+                class="ph"
+                :class="`s${((p.itemId || i) % 8) + 1}`"
+                style="width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0"
+              >
+                <div class="shape round"></div>
+              </div>
+              <span class="nm">{{ p.name }}</span>
+              <span class="v">{{ formatSales(p.sold) }}<small> 销量</small></span>
+            </div>
+          </div>
+        </div>
+        <div class="acard">
+          <div class="ah"><h3>待办事项</h3></div>
+          <div class="ab" style="display: flex; flex-direction: column; gap: 0">
+            <router-link class="qa" style="margin-bottom: 10px" to="/orders">
+              <span class="d" style="background: var(--warn)">▤</span>
+              <div style="flex: 1">
+                <div>待发货订单</div>
+                <span style="font-size: 11.5px; font-weight: 400; color: var(--ink-3)"
+                  >需尽快处理</span
+                >
+              </div>
+              <b style="color: var(--warn); font-size: 20px">{{ todo.pendingShipment || 0 }}</b>
+            </router-link>
+            <router-link class="qa" style="margin-bottom: 10px" to="/orders">
+              <span class="d" style="background: var(--danger)">↺</span>
+              <div style="flex: 1">
+                <div>退款/售后申请</div>
+                <span style="font-size: 11.5px; font-weight: 400; color: var(--ink-3)">待审核</span>
+              </div>
+              <b style="color: var(--danger); font-size: 20px">{{ todo.pendingRefund || 0 }}</b>
+            </router-link>
+            <router-link class="qa" style="margin-bottom: 10px" to="/orders">
+              <span class="d" style="background: var(--info)">★</span>
+              <div style="flex: 1">
+                <div>待付款订单</div>
+                <span style="font-size: 11.5px; font-weight: 400; color: var(--ink-3)">待处理</span>
+              </div>
+              <b style="color: var(--info); font-size: 20px">{{ todo.pendingPayment || 0 }}</b>
+            </router-link>
+          </div>
+        </div>
+      </div>
+
+      <!-- 最新订单 -->
+      <div class="acard" style="margin-top: 16px">
         <div class="ah">
-          <h3>热销商品 TOP 5</h3>
-          <router-link class="lk" to="/items" style="font-size: 12.5px; color: var(--info)"
+          <h3>最新订单</h3>
+          <router-link class="lk" to="/orders" style="font-size: 12.5px; color: var(--info)"
             >查看全部 ›</router-link
           >
         </div>
-        <div class="ab rank">
-          <div v-for="(p, i) in topProducts" :key="p.id" class="r">
-            <span class="no">{{ i + 1 }}</span>
-            <div
-              class="ph"
-              :class="`s${(p.id % 8) + 1}`"
-              style="width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0"
-            >
-              <div class="shape round"></div>
-            </div>
-            <span class="nm">{{ p.name }}</span>
-            <span class="v">{{ formatSales(p.sales) }}<small> 销量</small></span>
-          </div>
-        </div>
-      </div>
-      <div class="acard">
-        <div class="ah"><h3>待办事项</h3></div>
-        <div class="ab" style="display: flex; flex-direction: column; gap: 0">
-          <router-link class="qa" style="margin-bottom: 10px" to="/orders">
-            <span class="d" style="background: var(--warn)">▤</span>
-            <div style="flex: 1">
-              <div>待发货订单</div>
-              <span style="font-size: 11.5px; font-weight: 400; color: var(--ink-3)"
-                >需尽快处理</span
-              >
-            </div>
-            <b style="color: var(--warn); font-size: 20px">28</b>
-          </router-link>
-          <router-link class="qa" style="margin-bottom: 10px" to="/orders">
-            <span class="d" style="background: var(--danger)">↺</span>
-            <div style="flex: 1">
-              <div>退款/售后申请</div>
-              <span style="font-size: 11.5px; font-weight: 400; color: var(--ink-3)">待审核</span>
-            </div>
-            <b style="color: var(--danger); font-size: 20px">6</b>
-          </router-link>
-          <router-link class="qa" style="margin-bottom: 10px" to="/reviews">
-            <span class="d" style="background: var(--info)">★</span>
-            <div style="flex: 1">
-              <div>待审核评价</div>
-              <span style="font-size: 11.5px; font-weight: 400; color: var(--ink-3)"
-                >含 2 条疑似违规</span
-              >
-            </div>
-            <b style="color: var(--info); font-size: 20px">14</b>
-          </router-link>
-          <router-link class="qa" to="/items">
-            <span class="d" style="background: #b79cc4">📦</span>
-            <div style="flex: 1">
-              <div>库存预警商品</div>
-              <span style="font-size: 11.5px; font-weight: 400; color: var(--ink-3)"
-                >库存低于 10 件</span
-              >
-            </div>
-            <b style="color: #9d7fb0; font-size: 20px">9</b>
-          </router-link>
-        </div>
-      </div>
-    </div>
-
-    <!-- 最新订单 -->
-    <div class="acard" style="margin-top: 16px">
-      <div class="ah">
-        <h3>最新订单</h3>
-        <router-link class="lk" to="/orders" style="font-size: 12.5px; color: var(--info)"
-          >查看全部 ›</router-link
+        <div
+          v-if="latestOrders.length === 0"
+          class="ab"
+          style="color: var(--ink-3); font-size: 13px"
         >
+          暂无最新订单
+        </div>
+        <table v-else class="atable">
+          <thead>
+            <tr>
+              <th>订单号</th>
+              <th>金额</th>
+              <th>支付方式</th>
+              <th>下单时间</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="o in latestOrders" :key="o.id">
+              <td class="mono" style="font-size: 12px">{{ o.id }}</td>
+              <td class="amount">&yen;{{ (o.totalFee / 100).toFixed(2) }}</td>
+              <td>{{ payLabel(o.paymentType) }}</td>
+              <td style="color: var(--ink-3)">{{ o.createTime?.slice(0, 16) || '—' }}</td>
+              <td>
+                <span class="sdot" :class="statusClass(o.status)">{{ statusText(o.status) }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <table class="atable">
-        <thead>
-          <tr>
-            <th>订单号</th>
-            <th>客户</th>
-            <th>商品</th>
-            <th>金额</th>
-            <th>支付方式</th>
-            <th>下单时间</th>
-            <th>状态</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="o in recentOrders" :key="o[0]">
-            <td class="mono" style="font-size: 12px">{{ o[0] }}</td>
-            <td>
-              <span class="u-cell">
-                <span class="u-av" :style="`background:${o[2]}`">{{ o[1][0] }}</span>
-                <span class="nm">{{ o[1] }}</span>
-              </span>
-            </td>
-            <td style="color: var(--ink-3)">{{ o[3] }}</td>
-            <td class="amount">{{ o[4] }}</td>
-            <td>{{ o[5] }}</td>
-            <td style="color: var(--ink-3)">{{ o[6] }}</td>
-            <td>
-              <span class="sdot" :class="o[8]">{{ o[7] }}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    </template>
   </div>
 </template>
 
 <script setup>
-/*
- * 说明（重要）：本看板的运营统计（成交额/订单/新增用户/访客/销售趋势/品类占比/
- * 热销 TOP/待办/最新订单）所需的后端统计接口当前【尚未提供】，详见
- * docs/backend-api.md「B4 全新领域 - 数据看板」。
- * 本页为高保真原型的【视觉对齐 + 演示数据】实现，运营数据为代表性示例，
- * 待后端统计接口接入后再替换为真实数据；此为本 PR 已知且已披露的范围限制，
- * 不属于"破坏既有 API/数据逻辑"（main 版本同样不含任何后端数据调用）。
- */
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick, computed } from 'vue';
 import * as echarts from 'echarts';
+import {
+  getSummary,
+  getTrend,
+  getCategoryShare,
+  getTopItems,
+  getTodo,
+  getLatestOrders,
+} from '@/api/dashboard';
 
-const dateRange = ref('today');
+const dateRange = ref('7');
 const today = ref('');
 const chartRef = ref(null);
-const topProducts = ref([]);
+const loading = ref(true);
+const error = ref('');
 
-const recentOrders = [
-  [
-    '202605281588',
-    '林晓',
-    '#88A6B8',
-    'TWS蓝牙耳机 等2件',
-    '¥817',
-    '微信',
-    '14:32',
-    '待付款',
-    'orange',
-  ],
-  ['202605281587', '陈一鸣', '#DE9696', '空气炸锅6L', '¥269', '支付宝', '14:28', '待发货', 'blue'],
-  [
-    '202605281586',
-    '王悦',
-    '#B0BE92',
-    '每日坚果礼盒 等3件',
-    '¥356',
-    '余额',
-    '14:15',
-    '已发货',
-    'blue',
-  ],
-  [
-    '202605281585',
-    '刘洋',
-    '#C9A66B',
-    '办公椅 等2件',
-    '¥1,198',
-    '银行卡',
-    '13:58',
-    '已完成',
-    'green',
-  ],
-  ['202605281584', '赵敏', '#B79CC4', '烟酰胺精华', '¥129', '微信', '13:42', '已完成', 'green'],
-  ['202605281583', '孙浩', '#7FB6A6', '登山徒步杖', '¥129', '支付宝', '13:30', '已取消', 'gray'],
+const summary = ref({});
+const trend = ref([]);
+const categoryShare = ref([]);
+const topItems = ref([]);
+const todo = ref({});
+const latestOrders = ref([]);
+
+const categoryColors = [
+  '#ff4d2e',
+  '#3b82f6',
+  '#10b981',
+  '#f59e0b',
+  '#b79cc4',
+  '#88a6b8',
+  '#de9696',
+  '#b0be92',
 ];
+
+const categoryConic = computed(() => {
+  if (!categoryShare.value.length) return 'none';
+  let cone = 'conic-gradient(';
+  let start = 0;
+  categoryShare.value.forEach((c, i) => {
+    const pct = c.percentage || 0;
+    const end = start + pct;
+    const color = categoryColors[i % categoryColors.length];
+    if (i === 0) {
+      cone += `${color} 0 ${end}%`;
+    } else {
+      cone += `, ${color} ${start}% ${end}%`;
+    }
+    start = end;
+  });
+  cone += ')';
+  return cone;
+});
+
+const inStockSku = computed(() => {
+  // 从品类占比推估总SKU数，无准确数据时展示合计品类数
+  if (!categoryShare.value.length) return '0';
+  return categoryShare.value.length + '+';
+});
+
+function formatAmount(val) {
+  if (!val) return '0';
+  return (val / 100).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
 
 function formatSales(n) {
   if (n >= 10000) return (n / 10000).toFixed(1) + '万';
-  return n;
+  return (n || 0).toLocaleString();
 }
 
-onMounted(() => {
-  const d = new Date();
-  today.value = `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日，星期${['日', '一', '二', '三', '四', '五', '六'][d.getDay()]}`;
+const payLabel = (t) => ({ 1: '支付宝', 2: '微信', 3: '余额' })[t] || '-';
 
-  // Chart
+const statusMap = {
+  1: { text: '待付款', cls: 'orange' },
+  2: { text: '待发货', cls: 'orange' },
+  3: { text: '已发货', cls: 'blue' },
+  4: { text: '已完成', cls: 'green' },
+  5: { text: '已关闭', cls: 'gray' },
+  6: { text: '退款中', cls: 'red' },
+};
+
+function statusText(s) {
+  return statusMap[s]?.text || '-';
+}
+function statusClass(s) {
+  return statusMap[s]?.cls || 'gray';
+}
+
+function initChart() {
+  if (!chartRef.value) return;
   const chart = echarts.init(chartRef.value);
+  const labels = trend.value.map((t) => t.date?.slice(5) || '');
+  const amounts = trend.value.map((t) => (t.amount || 0) / 100);
   chart.setOption({
     tooltip: { trigger: 'axis' },
     grid: { left: 0, right: 0, top: 10, bottom: 20 },
     xAxis: {
       type: 'category',
-      data: ['05-22', '05-23', '05-24', '05-25', '05-26', '05-27', '今日'],
+      data: labels.length ? labels : ['—'],
       axisLine: { lineStyle: { color: '#E8EAED' } },
       axisLabel: { color: '#938A83', fontSize: 11 },
     },
@@ -312,7 +328,7 @@ onMounted(() => {
     series: [
       {
         type: 'bar',
-        data: [98000, 112000, 86000, 135000, 121000, 104000, 129000],
+        data: amounts.length ? amounts : [0],
         itemStyle: {
           borderRadius: [6, 6, 0, 0],
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -324,15 +340,76 @@ onMounted(() => {
       },
     ],
   });
+}
 
-  // Mock top products
-  topProducts.value = [
-    { id: 1, name: 'TWS蓝牙耳机 Pro', sales: 12450 },
-    { id: 2, name: '空气炸锅 6L 智能款', sales: 8320 },
-    { id: 3, name: '每日坚果礼盒 750g', sales: 7650 },
-    { id: 4, name: '烟酰胺焕亮精华液', sales: 5420 },
-    { id: 5, name: '办公人体工学椅', sales: 3890 },
-  ];
+async function loadSummary() {
+  const res = await getSummary();
+  summary.value = res;
+}
+
+async function loadTrend() {
+  const res = await getTrend(parseInt(dateRange.value));
+  trend.value = res;
+}
+
+async function loadCategoryShare() {
+  const res = await getCategoryShare();
+  categoryShare.value = res;
+}
+
+async function loadTopItems() {
+  const res = await getTopItems();
+  topItems.value = res;
+}
+
+async function loadTodo() {
+  const res = await getTodo();
+  todo.value = res;
+}
+
+async function loadLatestOrders() {
+  const res = await getLatestOrders();
+  latestOrders.value = res;
+}
+
+async function loadAll() {
+  loading.value = true;
+  error.value = '';
+  try {
+    await Promise.all([
+      loadSummary(),
+      loadTrend(),
+      loadCategoryShare(),
+      loadTopItems(),
+      loadTodo(),
+      loadLatestOrders(),
+    ]);
+  } catch (err) {
+    console.error('数据加载失败', err);
+    error.value = '数据加载失败，请稍后重试';
+  } finally {
+    loading.value = false;
+    // 等 DOM 更新后初始化图表（此时 loading=false，chartRef 已挂载）
+    await nextTick();
+    initChart();
+  }
+}
+
+async function onDateRangeChange() {
+  try {
+    await loadTrend();
+    await nextTick();
+    initChart();
+  } catch (err) {
+    console.error('加载趋势失败', err);
+    trend.value = [];
+  }
+}
+
+onMounted(() => {
+  const d = new Date();
+  today.value = `${d.getFullYear()} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日，星期${['日', '一', '二', '三', '四', '五', '六'][d.getDay()]}`;
+  loadAll();
 });
 </script>
 
@@ -381,19 +458,6 @@ onMounted(() => {
   font-size: 14px;
   color: var(--ink-3);
   font-weight: 500;
-}
-.stat .delta {
-  font-size: 12px;
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.stat .delta.up {
-  color: var(--success);
-}
-.stat .delta.down {
-  color: var(--danger);
 }
 
 .acard {
@@ -450,6 +514,7 @@ onMounted(() => {
   height: 160px;
   border-radius: 50%;
   flex-shrink: 0;
+  position: relative;
 }
 .legend {
   display: flex;
@@ -622,20 +687,20 @@ onMounted(() => {
   border-radius: 50%;
   background: currentColor;
 }
-.sdot.green {
-  color: var(--success);
-}
 .sdot.orange {
   color: var(--warn);
 }
 .sdot.blue {
   color: var(--info);
 }
-.sdot.red {
-  color: var(--danger);
+.sdot.green {
+  color: var(--success);
 }
 .sdot.gray {
   color: var(--ink-3);
+}
+.sdot.red {
+  color: var(--danger);
 }
 
 .amount {

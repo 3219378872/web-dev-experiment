@@ -20,6 +20,7 @@ import com.hmall.mapper.PayOrderMapper;
 import com.hmall.service.IPayOrderService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ import java.time.LocalDateTime;
  * @author 虎哥
  * @since 2023-05-16
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> implements IPayOrderService {
@@ -69,6 +71,10 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
     public void tryPayOrderByBalance(PayOrderFormDTO payOrderFormDTO) {
         // 1.查询支付单
         PayOrder po = getById(payOrderFormDTO.getId());
+        // 1.1.校验支付单是否存在
+        if (po == null) {
+            throw new BizIllegalException("支付单不存在");
+        }
         // 2.判断状态
         if(!PayStatus.WAIT_BUYER_PAY.equalsValue(po.getStatus())){
             // 订单不是未支付，状态异常
@@ -99,10 +105,14 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
             throw new BizIllegalException("交易已支付或关闭！");
         }
         // 6.发布支付成功事件，由 trade-service 异步修改订单状态
-        mqMessagePublisher.publish(
-                MqConstants.PAY_EXCHANGE,
-                MqConstants.PAY_SUCCESS_KEY,
-                new PaySuccessEvent(po.getId(), po.getBizOrderNo(), po.getBizUserId(), LocalDateTime.now()));
+        try {
+            mqMessagePublisher.publish(
+                    MqConstants.PAY_EXCHANGE,
+                    MqConstants.PAY_SUCCESS_KEY,
+                    new PaySuccessEvent(po.getId(), po.getBizOrderNo(), po.getBizUserId(), LocalDateTime.now()));
+        } catch (Exception e) {
+            log.error("发布支付成功事件失败，支付单[id={}]状态已更新，订单状态将由补偿任务处理", po.getId(), e);
+        }
     }
 
     public boolean markPayOrderSuccess(Long id, LocalDateTime successTime) {
