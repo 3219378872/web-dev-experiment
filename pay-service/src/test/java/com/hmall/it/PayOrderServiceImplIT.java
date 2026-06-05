@@ -1,6 +1,8 @@
 package com.hmall.it;
 
+import com.hmall.api.client.OrderClient;
 import com.hmall.api.client.UserClient;
+import com.hmall.api.dto.OrderDTO;
 import com.hmall.api.dto.PayApplyDTO;
 import com.hmall.api.dto.PayOrderFormDTO;
 import com.hmall.common.exception.BizIllegalException;
@@ -34,6 +36,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(properties = {"spring.cloud.bootstrap.enabled=false"})
 @ActiveProfiles("test")
@@ -54,7 +57,20 @@ class PayOrderServiceImplIT {
     private UserClient userClient;
 
     @MockBean
+    private OrderClient orderClient;
+
+    @MockBean
     private RabbitTemplate rabbitTemplate;
+
+    @BeforeEach
+    void mockOrder() {
+        OrderDTO defaultOrder = new OrderDTO();
+        defaultOrder.setId(9999L);
+        defaultOrder.setUserId(1L);
+        defaultOrder.setStatus(1);
+        defaultOrder.setTotalFee(50000);
+        when(orderClient.queryOrderById(org.mockito.ArgumentMatchers.anyLong())).thenReturn(defaultOrder);
+    }
 
     @Test
     void applyPayOrder_new_shouldCreatePayOrder() {

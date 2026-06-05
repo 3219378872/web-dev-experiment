@@ -307,7 +307,6 @@ async function confirmPay() {
     // 第一步：创建支付单
     const payOrderId = await createPayOrder({
       bizOrderNo: order.value.id,
-      amount: order.value.totalFee,
       payChannelCode: 'balance',
       payType: 5,
       orderInfo: `订单${order.value.id}`,

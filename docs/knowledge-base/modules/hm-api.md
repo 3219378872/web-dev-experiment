@@ -2,9 +2,9 @@
 title: hm-api
 tracks:
   - hm-api/
-last_synced_commit: 76cd364
+last_synced_commit: 673384d
 last_synced_date: 2026-06-05
-sync_note: "CartFormDTO num 设为可选并保留 @Min(1) 校验，更新 API 文档"
+sync_note: "fix(issue-73): 支付安全修复；OrderClient 服务名修正为 trade-service；PayApplyDTO/PayOrderFormDTO 加 @NoArgsConstructor/@AllArgsConstructor 支持 Jackson 反序列化"
 ---
 
 # hm-api

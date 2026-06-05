@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 65c22d8
+last_synced_commit: 1987935
 last_synced_date: 2026-06-05
-sync_note: "购物车 num 可选+@Min(1)；新增 DELETE /orders/{id}；支付安全修复——后端校验订单金额/归属/状态"
+sync_note: "fix(issue-73): 支付安全修复——双重校验；修复 PayServiceTestBase/PayOrderServiceImplTest OrderClient mock 重复定义"
 ---
 
 # order-checkout-flow

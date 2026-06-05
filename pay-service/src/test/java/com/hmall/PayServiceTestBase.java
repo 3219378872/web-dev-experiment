@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,9 @@ public abstract class PayServiceTestBase {
 
     @MockBean
     protected RedisConnectionFactory redisConnectionFactory;
+
+    @MockBean
+    protected ReactiveRedisConnectionFactory reactiveRedisConnectionFactory;
 
     protected static final Long TEST_USER_ID = 1L;
 

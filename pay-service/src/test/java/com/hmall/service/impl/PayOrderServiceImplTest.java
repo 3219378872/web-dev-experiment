@@ -1,6 +1,8 @@
 package com.hmall.service.impl;
 
 import com.hmall.PayServiceTestBase;
+import com.hmall.api.client.OrderClient;
+import com.hmall.api.dto.OrderDTO;
 import com.hmall.api.dto.PayApplyDTO;
 import com.hmall.api.dto.PayOrderFormDTO;
 import com.hmall.common.exception.BizIllegalException;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -23,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class PayOrderServiceImplTest extends PayServiceTestBase {
 
@@ -34,6 +38,15 @@ class PayOrderServiceImplTest extends PayServiceTestBase {
 
     @Autowired
     private PayOrderMapper payOrderMapper;
+
+    @MockBean
+    private OrderClient orderClient;
+
+    @org.junit.jupiter.api.BeforeEach
+    void mockOrderClient() {
+        when(orderClient.queryOrderById(org.mockito.ArgumentMatchers.anyLong()))
+                .thenAnswer(inv -> orderDTO(inv.getArgument(0), TEST_USER_ID, 1, 10000));
+    }
 
     private PayOrder insertPayOrder(Long id, Long bizOrderNo, String channel, int status) {
         PayOrder po = new PayOrder();
@@ -54,11 +67,20 @@ class PayOrderServiceImplTest extends PayServiceTestBase {
     private PayApplyDTO applyDTO(Long bizOrderNo, String channel) {
         return PayApplyDTO.builder()
                 .bizOrderNo(bizOrderNo)
-                .amount(10000)
+                .amount(1) // 故意传错误金额，验证后端会覆盖
                 .payChannelCode(channel)
                 .payType(5)
                 .orderInfo("test order")
                 .build();
+    }
+
+    private OrderDTO orderDTO(Long id, Long userId, int status, int totalFee) {
+        OrderDTO dto = new OrderDTO();
+        dto.setId(id);
+        dto.setUserId(userId);
+        dto.setStatus(status);
+        dto.setTotalFee(totalFee);
+        return dto;
     }
 
     // ───────────────────── applyPayOrder ─────────────────────
@@ -68,16 +90,52 @@ class PayOrderServiceImplTest extends PayServiceTestBase {
     class ApplyPayOrderTests {
 
         @Test
-        @DisplayName("首次申请-创建新支付单")
-        void newOrder_createsPayOrder() {
+        @DisplayName("首次申请-创建新支付单并使用后端订单金额")
+        void newOrder_createsPayOrder_withBackendAmount() {
+            when(orderClient.queryOrderById(99999L))
+                    .thenReturn(orderDTO(99999L, TEST_USER_ID, 1, 25000));
+
             String id = payOrderService.applyPayOrder(applyDTO(99999L, "balance"));
 
             assertThat(id).isNotBlank();
             PayOrder po = payOrderService.getById(Long.valueOf(id));
             assertThat(po.getBizOrderNo()).isEqualTo(99999L);
+            assertThat(po.getAmount()).isEqualTo(25000); // 后端金额覆盖前端
             assertThat(po.getStatus()).isEqualTo(PayStatus.WAIT_BUYER_PAY.getValue());
             assertThat(po.getPayOrderNo()).isNotNull();
             assertThat(po.getPayOverTime()).isAfter(LocalDateTime.now());
+        }
+
+        @Test
+        @DisplayName("订单不存在 → BizIllegalException")
+        void orderNotFound_throws() {
+            when(orderClient.queryOrderById(99998L)).thenReturn(null);
+
+            assertThatThrownBy(() -> payOrderService.applyPayOrder(applyDTO(99998L, "balance")))
+                    .isInstanceOf(BizIllegalException.class)
+                    .hasMessageContaining("订单不存在");
+        }
+
+        @Test
+        @DisplayName("订单归属错误 → BizIllegalException")
+        void orderOwnerMismatch_throws() {
+            when(orderClient.queryOrderById(99997L))
+                    .thenReturn(orderDTO(99997L, 999L, 1, 10000));
+
+            assertThatThrownBy(() -> payOrderService.applyPayOrder(applyDTO(99997L, "balance")))
+                    .isInstanceOf(BizIllegalException.class)
+                    .hasMessageContaining("归属错误");
+        }
+
+        @Test
+        @DisplayName("订单状态不是未付款 → BizIllegalException")
+        void orderStatusNotPending_throws() {
+            when(orderClient.queryOrderById(99996L))
+                    .thenReturn(orderDTO(99996L, TEST_USER_ID, 4, 10000));
+
+            assertThatThrownBy(() -> payOrderService.applyPayOrder(applyDTO(99996L, "balance")))
+                    .isInstanceOf(BizIllegalException.class)
+                    .hasMessageContaining("状态异常");
         }
 
         @Test
