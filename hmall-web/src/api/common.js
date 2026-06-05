@@ -7,11 +7,13 @@ export const addFavorite = (itemId) => request.post('/favorites', null, { params
 export const removeFavorite = (itemId) => request.delete(`/favorites/${itemId}`);
 export const getFavorites = () => request.get('/favorites');
 export const checkFavorite = (itemId) => request.get(`/favorites/check/${itemId}`);
-export const uploadImage = (file) => {
+export const uploadImage = async (file) => {
   const formData = new FormData();
   formData.append('file', file);
-  return request.post('/upload/image', formData, {
+  const res = await request.post('/upload/image', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
+  // file-service returns R<UploadVO> with {id, url} in data, or bare {id, url}
+  return res?.url || res?.data?.url || res;
 };
 export const getFaqs = () => request.get('/faqs');

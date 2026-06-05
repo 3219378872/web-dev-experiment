@@ -24,8 +24,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 ```
 
 ## PR
-Create PR against `main` with title:
-"fix(hmall-web): resolve feature page issues #105 #106 #107 #110 #111"
+https://github.com/3219378872/web-dev-experiment/pull/123
 
 ## Post-Merge
 - Delete remote branch `task/2026-06-05-fix-web-feature-pages`

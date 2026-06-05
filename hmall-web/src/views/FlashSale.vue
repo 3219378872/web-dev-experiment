@@ -96,12 +96,13 @@ const glyphMap = {
 
 /**
  * 从秒杀活动列表构建时间段和商品
- * 后端 SeckillVO 字段：itemId, seckillPrice, startTime, endTime, stock, sold, status, percent
+ * 后端 SeckillVO 字段：itemId, itemName, seckillPrice, originalPrice, startTime, endTime, stock, sold, stockPercent, status
  */
 function buildFromSeckillData(list) {
   const now = Date.now();
   const activeItems = [];
   const sessions = [];
+  let activeEndTime = null;
 
   // 按 startTime 分组为时间段
   const grouped = {};
@@ -128,9 +129,13 @@ function buildFromSeckillData(list) {
       active: isActive,
       onClick: () => {
         activeSessionIndex.value = idx;
-        loadFlash();
+        buildFromSeckillData(list);
       },
     });
+
+    if (isActive && !activeEndTime) {
+      activeEndTime = first.endTime;
+    }
 
     // 收集该时间段的商品
     for (const item of grouped[key]) {
@@ -146,17 +151,27 @@ function buildFromSeckillData(list) {
   timeSlots.value = sessions;
   flashItems.value = activeItems;
   total.value = activeItems.length;
+
+  // 更新倒计时基于活跃场次的 endTime
+  if (activeEndTime) {
+    updateCountdownFromEndTime(activeEndTime);
+  }
 }
 
 function parseSeckillItem(x) {
   const sold = x.sold || 0;
   const stock = x.stock || 1;
-  const percent = x.percent != null ? x.percent : Math.min(100, Math.round((sold / stock) * 100));
+  const percent =
+    x.stockPercent != null
+      ? x.stockPercent
+      : x.percent != null
+        ? x.percent
+        : Math.min(100, Math.round((sold / stock) * 100));
   return {
     id: x.itemId || x.id,
-    name: x.name || '秒杀商品',
+    name: x.itemName || x.name || '秒杀商品',
     seckillPrice: x.seckillPrice || 0,
-    originalPrice: x.price || 0,
+    originalPrice: x.originalPrice || x.price || 0,
     stock,
     sold,
     percent,
@@ -192,7 +207,30 @@ async function loadFlash() {
 watch(page, loadFlash);
 
 let timer = null;
-function startCountdown() {
+
+function updateCountdownFromEndTime(endTime) {
+  if (timer) clearInterval(timer);
+  const end = new Date(endTime).getTime();
+  timer = setInterval(() => {
+    const remaining = Math.max(0, Math.floor((end - Date.now()) / 1000));
+    if (remaining <= 0) {
+      countdown.value = { h: '00', m: '00', s: '00' };
+      return;
+    }
+    const h = Math.floor(remaining / 3600);
+    const m = Math.floor((remaining % 3600) / 60);
+    const s = remaining % 60;
+    countdown.value = {
+      h: String(h).padStart(2, '0'),
+      m: String(m).padStart(2, '0'),
+      s: String(s).padStart(2, '0'),
+    };
+  }, 1000);
+}
+
+/** 回退倒计时：当无活跃场次时使用固定时长 */
+function startFallbackCountdown() {
+  if (timer) clearInterval(timer);
   let remaining = 1 * 3600 + 48 * 60 + 13;
   timer = setInterval(() => {
     remaining--;
@@ -223,7 +261,7 @@ function handleBuy(p) {
 
 onMounted(() => {
   loadFlash();
-  startCountdown();
+  startFallbackCountdown();
   document.body.style.background = '#2A1410';
 });
 
