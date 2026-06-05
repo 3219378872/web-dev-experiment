@@ -211,8 +211,8 @@ const stateHint = computed(() => statusHintMap[order.value?.status] || '-');
 const goodsList = computed(() => {
   const o = order.value;
   if (!o) return [];
-  if (o.orderDetails?.length) {
-    return o.orderDetails.map((d, i) => ({
+  if (o.details?.length) {
+    return o.details.map((d, i) => ({
       name: d.name || '-',
       spec: d.spec || '默认规格',
       price: d.price || 0,
