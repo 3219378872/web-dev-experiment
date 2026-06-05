@@ -225,6 +225,7 @@
                                     <systemPropertyVariables>
                                         <spring.cloud.bootstrap.enabled>false</spring.cloud.bootstrap.enabled>
                                         <spring.cloud.nacos.config.enabled>false</spring.cloud.nacos.config.enabled>
+                                        <knife4j.enable>false</knife4j.enable>
                                     </systemPropertyVariables>
                                 </configuration>
                             </execution>
