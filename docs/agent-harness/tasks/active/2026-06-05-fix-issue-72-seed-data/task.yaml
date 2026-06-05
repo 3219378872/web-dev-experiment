@@ -3,7 +3,7 @@ status: active
 base_branch: main
 task_branch: task/2026-06-05-fix-issue-72-seed-data
 remote_branch: origin/task/2026-06-05-fix-issue-72-seed-data
-pull_request: null
+pull_request: https://github.com/3219378872/web-dev-experiment/pull/80
 ci_status: pending
 codex_review: pending
 remote_cleanup: pending

@@ -46,4 +46,4 @@
 - Base branch: main
 - Task branch: task/2026-06-05-fix-issue-72-seed-data
 - Remote branch: origin/task/2026-06-05-fix-issue-72-seed-data
-- Pull request: to be opened after push
+- Pull request: https://github.com/3219378872/web-dev-experiment/pull/80
