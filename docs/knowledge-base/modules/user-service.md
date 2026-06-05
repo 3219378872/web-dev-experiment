@@ -2,9 +2,9 @@
 title: user-service
 tracks:
   - user-service/
-last_synced_commit: 7a49026
+last_synced_commit: HEAD
 last_synced_date: 2026-06-05
-sync_note: "修复收藏页面缺少商品信息：添加 FavoriteVO，在集成测试中添加 ItemClient 模拟，添加 @EnableFeignClients"
+sync_note: "Issue #76: UserLoginVO 增加 role 字段，login() 将用户角色写入 VO，管理端 Login.vue 的 data.role !== 'admin' 检查现在可正常工作"
 ---
 
 # user-service
@@ -30,6 +30,7 @@ sync_note: "修复收藏页面缺少商品信息：添加 FavoriteVO，在集成
 - `GET /admin/profile/permissions` → `List<String>`：获取管理员权限码
 
 ### 数据模型
+- `UserLoginVO`：登录响应 VO，包含 token、userId、username、balance、**role**（Issue #76 新增）。`role` 值与数据库 `user.role` 字段一致（`"admin"` / `"user"`），`role` 为 null 时默认返回 `"user"`。`hmall-admin` Login.vue 用此字段做管理员身份校验（`data.role !== 'admin'`）。
 - `UserVO`：用户脱敏 VO，包含 id、username、phone、status、balance、role、email、avatar、nickname、createTime、updateTime（不含 password）
 - `UserStatusDTO`：用户状态修改 DTO，包含 status 字段（1=正常/2=冻结）
 - `UserStatus` 枚举：NORMAL(1, "正常")、FROZEN(2, "冻结")

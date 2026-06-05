@@ -78,7 +78,7 @@ class UserServiceImplTest extends UserServiceTestBase {
     class LoginTests {
 
         @Test
-        @DisplayName("正常登录-返回token和用户信息")
+        @DisplayName("正常登录-返回token和用户信息及角色")
         void login_success() {
             UserLoginVO vo = userService.login(loginForm("testuser", "admin123"));
 
@@ -86,6 +86,18 @@ class UserServiceImplTest extends UserServiceTestBase {
             assertThat(vo.getUserId()).isEqualTo(1L);
             assertThat(vo.getUsername()).isEqualTo("testuser");
             assertThat(vo.getBalance()).isEqualTo(10000);
+            assertThat(vo.getRole()).isEqualTo("user");
+        }
+
+        @Test
+        @DisplayName("管理员登录-VO中role为admin")
+        void login_adminUser_roleIsAdmin() {
+            insertTestUser(4L, "adminuser", "admin@test.com", "admin", UserStatus.NORMAL, 0);
+
+            UserLoginVO vo = userService.login(loginForm("adminuser", "admin123"));
+
+            assertThat(vo.getToken()).isNotBlank();
+            assertThat(vo.getRole()).isEqualTo("admin");
         }
 
         @Test
@@ -113,7 +125,7 @@ class UserServiceImplTest extends UserServiceTestBase {
         }
 
         @Test
-        @DisplayName("role为null-默认使用user")
+        @DisplayName("role为null-默认使用user且VO中role为user")
         void login_nullRole_defaultsToUser() {
             // 将 testuser 的 role 设为 null
             User user = userService.getById(1L);
@@ -124,6 +136,7 @@ class UserServiceImplTest extends UserServiceTestBase {
 
             assertThat(vo.getToken()).isNotBlank();
             assertThat(vo.getUserId()).isEqualTo(1L);
+            assertThat(vo.getRole()).isEqualTo("user");
         }
     }
 
