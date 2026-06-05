@@ -4,7 +4,7 @@ tracks:
   - cart-service/
 last_synced_commit: d418693
 last_synced_date: 2026-06-05
-sync_note: "Issue #92: CartServiceImpl.addItem2Cart 通过 itemClient 获取商品名称/图片/价格；handleCartItems 回填 name/image；设计未变，无需内容更新"
+sync_note: "Issue #92: CartServiceImpl 添加商品信息填充和测试覆盖；设计未变，无需内容更新"
 ---
 
 # cart-service

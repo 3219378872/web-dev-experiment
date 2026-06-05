@@ -7,7 +7,7 @@ tracks:
   - pay-service/
 last_synced_commit: d418693
 last_synced_date: 2026-06-05
-sync_note: "Issue #92: cart-service 修复商品数据填充，下单结算流程本身未变，无需内容更新"
+sync_note: "Issue #92: cart-service 新增测试覆盖；下单结算流程本身未变，无需内容更新"
 ---
 
 # order-checkout-flow
