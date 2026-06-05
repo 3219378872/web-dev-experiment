@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 6acd015
+last_synced_commit: c22931c
 last_synced_date: 2026-06-05
-sync_note: "fix(issue-91): Category.vue 添加分页控件；fix(issue-71): Category.vue 筛选；fix(issue-70): buyNow+num；fix(issue-73): 订单操作+支付安全修复；fix(issue-75): ItemDetail.vue 颜色/版本选择器交互+推荐导航刷新"
+sync_note: "fix(issue-91): Category.vue 添加分页控件+排序映射；fix(#90): 首页分类按钮跳转至分类页；fix(issue-71): Category.vue 筛选；fix(issue-70): buyNow+num；fix(issue-73): 订单操作+支付安全修复；fix(issue-75): ItemDetail.vue 颜色/版本选择器交互+推荐导航刷新"
 ---
 
 # hmall-web

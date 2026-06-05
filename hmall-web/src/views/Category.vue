@@ -53,11 +53,11 @@
           </div>
 
           <div class="grid g4">
-            <ProductCard v-for="item in filteredItems" :key="item.id" :item="item" />
+            <ProductCard v-for="item in items" :key="item.id" :item="item" />
           </div>
 
           <div
-            v-if="!filteredItems.length"
+            v-if="!items.length"
             style="text-align: center; padding: 60px 0; color: var(--ink-3)"
           >
             该分类下暂无商品
@@ -78,8 +78,11 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
-import { getCategories, getItems } from '@/api/item';
+import { useRoute } from 'vue-router';
+import { getCategories, searchItems } from '@/api/item';
 import ProductCard from '@/components/ProductCard.vue';
+
+const route = useRoute();
 
 const categories = ref([]);
 const items = ref([]);
@@ -88,14 +91,6 @@ const sortKey = ref('default');
 const page = ref(1);
 const size = ref(20);
 const total = ref(0);
-
-const sortOptions = [
-  { key: 'default', label: '综合' },
-  { key: 'sold', label: '销量 ↓' },
-  { key: 'priceAsc', label: '价格 ↑' },
-  { key: 'priceDesc', label: '价格 ↓' },
-  { key: 'new', label: '新品' },
-];
 
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / size.value)));
 const pageRange = computed(() => {
@@ -106,6 +101,14 @@ const pageRange = computed(() => {
   return pages;
 });
 
+const sortOptions = [
+  { key: 'default', label: '综合' },
+  { key: 'sold', label: '销量 ↓' },
+  { key: 'priceAsc', label: '价格 ↑' },
+  { key: 'priceDesc', label: '价格 ↓' },
+  { key: 'new', label: '新品' },
+];
+
 // 基于已加载的 items 客户端计算每个分类商品数，渲染带 count 字段的分类列表
 const categoriesWithCount = computed(() =>
   categories.value.map((cat) => ({
@@ -114,57 +117,46 @@ const categoriesWithCount = computed(() =>
   }))
 );
 
-// 按分类名称匹配商品（后端 item 只有 category 字段，值为分类名称字符串）
-const filteredItems = computed(() => {
+function selectCategory(id) {
+  activeCatId.value = activeCatId.value === id ? null : id;
+  page.value = 1;
+  loadItems();
+}
+
+async function loadItems() {
   const activeCatName =
     activeCatId.value != null
       ? categories.value.find((c) => c.id === activeCatId.value)?.name
       : null;
 
-  const baseList = activeCatName
-    ? items.value.filter((i) => i.category === activeCatName)
-    : [...items.value];
+  const params = {
+    pageNo: page.value,
+    pageSize: size.value,
+  };
 
-  return sortItems(baseList, sortKey.value);
-});
-
-function sortItems(list, key) {
-  const sorted = [...list];
-  switch (key) {
-    case 'sold':
-      sorted.sort((a, b) => (b.sold || 0) - (a.sold || 0));
-      break;
-    case 'priceAsc':
-      sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
-      break;
-    case 'priceDesc':
-      sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
-      break;
-    case 'new':
-      sorted.sort((a, b) => (b.createTime || '').localeCompare(a.createTime || ''));
-      break;
-    default:
-      break;
+  if (activeCatName) {
+    params.category = activeCatName;
   }
-  return sorted;
-}
 
-function selectCategory(id) {
-  activeCatId.value = activeCatId.value === id ? null : id;
-  page.value = 1;
-}
+  // 排序映射：前端 key → 后端字段名
+  const sortMap = {
+    sold: 'sold',
+    priceAsc: 'price',
+    priceDesc: 'price',
+    new: 'create_time',
+  };
+  if (sortKey.value !== 'default' && sortMap[sortKey.value]) {
+    params.sortBy = sortMap[sortKey.value];
+    params.isAsc = sortKey.value === 'priceAsc';
+  }
 
-async function loadItems() {
   try {
-    const params = { pageNo: page.value, pageSize: size.value };
-    if (sortKey.value !== 'default') {
-      params.sortBy = sortKey.value;
-    }
-    const data = await getItems(params);
+    const data = await searchItems(params);
     items.value = data?.list || [];
     total.value = data?.total || items.value.length;
   } catch (err) {
-    /* ignore */
+    items.value = [];
+    total.value = 0;
   }
 }
 
@@ -192,8 +184,31 @@ onMounted(async () => {
   } catch (err) {
     /* ignore */
   }
+  // 从 URL query 参数读取分类
+  const catFromQuery = route.query.cat;
+  if (catFromQuery) {
+    const found = categories.value.find((c) => c.name === catFromQuery);
+    if (found) {
+      activeCatId.value = found.id;
+    }
+  }
   await loadItems();
 });
+
+// 监听 URL cat 参数变化
+watch(
+  () => route.query.cat,
+  (newCat) => {
+    if (newCat && categories.value.length) {
+      const found = categories.value.find((c) => c.name === newCat);
+      if (found) {
+        activeCatId.value = found.id;
+        page.value = 1;
+        loadItems();
+      }
+    }
+  }
+);
 </script>
 
 <style scoped>

@@ -7,7 +7,7 @@
           v-for="c in categories"
           :key="c.name"
           class="it"
-          :to="`/search?q=${encodeURIComponent(c.name)}`"
+          :to="`/category?cat=${encodeURIComponent(c.name)}`"
         >
           <b>{{ c.name }}</b> <span class="sub">{{ c.sub }} ›</span>
         </router-link>
@@ -140,7 +140,12 @@
       </div>
     </div>
     <div class="kingkong">
-      <router-link v-for="k in kingKong" :key="k[0]" class="kk" to="/category">
+      <router-link
+        v-for="k in kingKong"
+        :key="k[0]"
+        class="kk"
+        :to="`/category?cat=${encodeURIComponent(k[0])}`"
+      >
         <span class="d" :style="`background:${k[2]}`">{{ k[1] }}</span
         ><span>{{ k[0] }}</span>
       </router-link>
