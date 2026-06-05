@@ -84,7 +84,7 @@ async function confirmPayFn(order, payPassword) {
     bizOrderNo: order.id,
     amount: order.totalFee,
     payChannelCode: 'balance',
-    payType: 3,
+    payType: 5,
     orderInfo: `订单${order.id}`,
   });
   await payOrderByBalance(payOrderId, payPassword);
@@ -176,7 +176,7 @@ describe('confirmPay', () => {
       bizOrderNo: 42,
       amount: 9900,
       payChannelCode: 'balance',
-      payType: 3,
+      payType: 5,
       orderInfo: '订单42',
     });
     expect(payOrderByBalance).toHaveBeenCalledWith('pay-order-001', '123456');

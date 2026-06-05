@@ -309,7 +309,7 @@ async function confirmPay() {
       bizOrderNo: order.value.id,
       amount: order.value.totalFee,
       payChannelCode: 'balance',
-      payType: 3,
+      payType: 5,
       orderInfo: `订单${order.value.id}`,
     });
     // 第二步：执行余额支付
