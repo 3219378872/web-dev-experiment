@@ -1,7 +1,9 @@
 # Handoff: C 端首页与商品详情接入真实后端数据
 
 ## Status
-In progress —— 实现完成，本地验收全绿，待开 PR 过 CI 合并。
+Done —— 经 PR #144 squash 合并到 main（mergeCommit e2c12f4，2026-06-05T23:52:47Z）；
+远程分支 task/2026-06-06-cwh-home-detail 已删除；任务归档至 completed/。CI 5 个 job
+（lint/test/integration/smoke/codex-review）全部通过。
 
 ## Files Changed
 前端视图（2 个）：
