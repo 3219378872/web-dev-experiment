@@ -1,0 +1,7 @@
+slug: 2026-06-05-fix-web-core-pages
+status: active
+task_branch: task/2026-06-05-fix-web-core-pages
+spec: null
+plan: null
+spec_waiver: 前端仅修复已有的视图/API调用逻辑，无新设计决策需 spec。
+plan_waiver: 5 issues 各自独立可依次修复，无需多步实施计划。

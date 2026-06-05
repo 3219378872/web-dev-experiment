@@ -48,14 +48,15 @@
           </router-link>
         </div>
         <div class="pager">
+          <a :class="{ disabled: page <= 1 }" @click.prevent="prevPage">‹</a>
           <a
-            v-for="n in totalPages"
+            v-for="n in pageRange"
             :key="n"
             :class="{ cur: page === n }"
             @click.prevent="page = n"
             >{{ n }}</a
           >
-          <a v-if="page < totalPages" @click.prevent="page++">›</a>
+          <a v-if="page < totalPages" @click.prevent="nextPage">›</a>
         </div>
       </div>
     </div>
@@ -78,9 +79,43 @@ const size = ref(10);
 const total = ref(0);
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / size.value)));
 const activeSessionIndex = ref(0);
-
-const timeSlots = ref([]);
 const flashItems = ref([]);
+
+const pageRange = computed(() => {
+  const pages = [];
+  const start = Math.max(1, page.value - 2);
+  const end = Math.min(totalPages.value, start + 4);
+  for (let i = start; i <= end; i++) pages.push(i);
+  return pages;
+});
+function prevPage() {
+  if (page.value > 1) page.value--;
+}
+function nextPage() {
+  if (page.value < totalPages.value) page.value++;
+}
+
+const timeSlots = computed(() => {
+  const now = new Date();
+  const slotHours = [8, 10, 12, 14, 16, 18, 20, 22];
+  return slotHours.map((h) => {
+    const slotTime = `${String(h).padStart(2, '0')}:00`;
+    const slotDate = new Date(now);
+    slotDate.setHours(h, 0, 0, 0);
+    const diff = (slotDate.getTime() - now.getTime()) / 3600000;
+    let status = '敬请期待';
+    let active = false;
+    if (diff < -2) {
+      status = '已结束';
+    } else if (diff < 0) {
+      status = '疯抢中';
+      active = true;
+    } else if (diff < 2) {
+      status = '即将开始';
+    }
+    return { time: slotTime, status, active };
+  });
+});
 
 /** 占位图标映射（后端商品未配真实图片时使用） */
 const glyphMap = {
@@ -420,6 +455,10 @@ onUnmounted(() => {
   margin: 10px 12px 12px;
 }
 
+.pager a.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 @media (max-width: 1024px) {
   .g5 {
     grid-template-columns: repeat(3, 1fr);

@@ -51,13 +51,8 @@
 
         <!-- 物流时间轴 -->
         <div v-if="order.status >= 3" class="track">
-          <h3>
-            物流跟踪
-            <span class="dim" style="font-weight: 400; font-size: 12.5px">
-              顺丰速运 · {{ order.trackingNo || 'SF' + String(order.id).slice(-12) }}
-            </span>
-          </h3>
-          <div class="tl">
+          <h3>物流跟踪</h3>
+          <div v-if="logistics.length" class="tl">
             <div v-for="(log, idx) in logistics" :key="idx" class="ti" :class="{ on: idx === 0 }">
               <span class="dot"></span>
               <div class="txt">
@@ -67,6 +62,7 @@
               </div>
             </div>
           </div>
+          <div v-else class="muted" style="margin-top: 12px; font-size: 13px">暂无物流信息</div>
         </div>
 
         <!-- 收货信息 + 订单信息 -->
@@ -181,6 +177,7 @@ import {
   confirmOrder,
   createPayOrder,
   payOrderByBalance,
+  getLogistics,
 } from '@/api/order';
 import { ElMessage } from 'element-plus';
 
@@ -188,6 +185,7 @@ const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
 const order = ref(null);
+const logistics = ref([]);
 
 // 支付弹窗状态
 const payDialogVisible = ref(false);
@@ -244,33 +242,21 @@ const orderItems = computed(() => {
   return [{ name: '商品', price: order.value?.totalFee || 0, num: 1, image: '', spec: '' }];
 });
 
-const logistics = computed(() => {
-  const o = order.value;
-  if (!o) return [];
-  // 物流轨迹明细接口后端暂未提供（见 docs/backend-api.md B3），此处依据订单状态与真实时间节点展示概要轨迹，不杜撰快递员/网点信息
-  const logs = [];
-  if (o.status === 5) {
-    logs.push({ text: '订单已取消', time: o.updateTime?.slice(0, 16) || '' });
-  } else {
-    if (o.status >= 4) {
-      logs.push({ text: '已确认收货，交易完成', time: o.updateTime?.slice(0, 16) || '' });
-    }
-    if (o.status >= 3) {
-      logs.push({
-        text: '商家已发货，包裹运输中',
-        time: o.updateTime?.slice(0, 16) || o.payTime?.slice(0, 16) || '',
-      });
-    }
-    if (o.status >= 2) {
-      logs.push({
-        text: '买家已付款，商家备货中',
-        time: o.payTime?.slice(0, 16) || o.createTime?.slice(0, 16) || '',
-      });
-    }
+async function loadLogistics() {
+  if (!order.value || (order.value.status !== 3 && order.value.status !== 4)) {
+    logistics.value = [];
+    return;
   }
-  logs.push({ text: '订单已提交', time: o.createTime?.slice(0, 16) || '' });
-  return logs;
-});
+  try {
+    const traces = await getLogistics(order.value.id);
+    logistics.value = (traces || []).map((t) => ({
+      text: t.description || t.node || '',
+      time: t.traceTime?.slice(0, 16) || '',
+    }));
+  } catch (err) {
+    logistics.value = [];
+  }
+}
 
 function maskPhone(phone) {
   if (!phone) return '';
@@ -282,6 +268,7 @@ async function fetchOrder() {
     const data = await getOrderById(route.params.id);
     if (data && data.id) {
       order.value = data;
+      await loadLogistics();
     } else {
       ElMessage.error('订单不存在');
       router.push('/orders');
