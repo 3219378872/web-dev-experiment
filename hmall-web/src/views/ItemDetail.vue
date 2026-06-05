@@ -70,51 +70,19 @@
           </div>
 
           <div class="spec">
-            <div class="line">
-              <span class="k">颜色</span>
+            <div v-for="(opts, key) in parsedSpecs" :key="key" class="line">
+              <span class="k">{{ key }}</span>
               <div class="opts">
                 <span
+                  v-for="opt in opts"
+                  :key="opt"
                   class="opt"
-                  :class="{ on: selectedColor === '曜石黑' }"
-                  @click="selectedColor = '曜石黑'"
-                  ><span class="sw" style="background: #221b17"></span>曜石黑</span
+                  :class="{ on: selectedSpecs[key] === opt }"
+                  @click="selectSpec(key, opt)"
                 >
-                <span
-                  class="opt"
-                  :class="{ on: selectedColor === '云母白' }"
-                  @click="selectedColor = '云母白'"
-                  ><span class="sw" style="background: #f2f0ec; border: 1px solid #ddd"></span
-                  >云母白</span
-                >
-                <span
-                  class="opt"
-                  :class="{ on: selectedColor === '雾霾蓝' }"
-                  @click="selectedColor = '雾霾蓝'"
-                  ><span class="sw" style="background: #88a6b8"></span>雾霾蓝</span
-                >
-              </div>
-            </div>
-            <div class="line">
-              <span class="k">版本</span>
-              <div class="opts">
-                <span
-                  class="opt"
-                  :class="{ on: selectedVersion === '标准版' }"
-                  @click="selectedVersion = '标准版'"
-                  >标准版</span
-                >
-                <span
-                  class="opt"
-                  :class="{ on: selectedVersion === '降噪增强版 +¥80' }"
-                  @click="selectedVersion = '降噪增强版 +¥80'"
-                  >降噪增强版 +¥80</span
-                >
-                <span
-                  class="opt"
-                  :class="{ on: selectedVersion === '游戏专业版 +¥150' }"
-                  @click="selectedVersion = '游戏专业版 +¥150'"
-                  >游戏专业版 +¥150</span
-                >
+                  <span v-if="isColorKey(key)" class="sw" :style="swatchStyle(opt)"></span>
+                  {{ opt }}
+                </span>
               </div>
             </div>
             <div class="line">
@@ -470,8 +438,7 @@ const userStore = useUserStore();
 const cartStore = useCartStore();
 const item = ref(null);
 const quantity = ref(1);
-const selectedColor = ref('曜石黑');
-const selectedVersion = ref('标准版');
+const selectedSpecs = ref({});
 const isFavorited = ref(false);
 const reviews = ref([]);
 const reviewRating = ref(5);
@@ -483,6 +450,55 @@ const relatedItems = ref([]);
 // 与原型一致的图库色块（主图 s4，缩略图 s4/s7/s1/s5/s3）
 const thumbShades = ['s4', 's7', 's1', 's5', 's3'];
 const mainShade = computed(() => item.value?.shade || `s${((item.value?.id || 0) % 8) + 1}`);
+
+// 解析后端 spec 字段为规格选择器数据
+// 格式示例: "颜色:黑色/白色/蓝色,内存:128GB/256GB"
+const parsedSpecs = computed(() => {
+  const raw = item.value?.spec;
+  if (!raw || typeof raw !== 'string') return {};
+  const result = {};
+  raw.split(',').forEach((segment) => {
+    const [key, values] = segment.split(':');
+    if (key && values) {
+      result[key.trim()] = values
+        .split('/')
+        .map((v) => v.trim())
+        .filter(Boolean);
+    }
+  });
+  return result;
+});
+
+function isColorKey(key) {
+  return /颜色|色|color/i.test(key);
+}
+
+const colorSwatches = {
+  黑: '#221b17',
+  白: '#f2f0ec',
+  蓝: '#88a6b8',
+  红: '#de4d4d',
+  绿: '#5cb85c',
+  灰: '#888888',
+  金: '#d4af37',
+  银: '#c0c0c0',
+};
+
+function swatchStyle(opt) {
+  for (const [k, v] of Object.entries(colorSwatches)) {
+    if (opt.includes(k)) return { background: v };
+  }
+  return { background: '#ddd' };
+}
+
+function selectSpec(key, opt) {
+  selectedSpecs.value = { ...selectedSpecs.value, [key]: opt };
+}
+
+function formatSelectedSpec() {
+  const parts = Object.entries(selectedSpecs.value).map(([k, v]) => `${k}:${v}`);
+  return parts.length ? parts.join(',') : '';
+}
 
 const avatarColors = ['#88A6B8', '#DE9696', '#B0BE92', '#E9B775', '#B79CC4', '#7FB6A6'];
 
@@ -539,8 +555,7 @@ watch(
   () => route.params.id,
   async (newId) => {
     if (newId) {
-      selectedColor.value = '曜石黑';
-      selectedVersion.value = '标准版';
+      selectedSpecs.value = {};
       await loadItem(newId);
     }
   }
@@ -557,7 +572,7 @@ async function addCart() {
     await cartStore.addItem({
       itemId: item.value.id,
       num: quantity.value,
-      spec: `${selectedColor.value} / ${selectedVersion.value}`,
+      spec: formatSelectedSpec() || item.value?.spec || '',
     });
     ElMessage.success('已添加到购物车');
   } catch (err) {
@@ -574,7 +589,7 @@ async function buyNow() {
     await cartStore.addItem({
       itemId: item.value.id,
       num: quantity.value,
-      spec: `${selectedColor.value} / ${selectedVersion.value}`,
+      spec: formatSelectedSpec() || item.value?.spec || '',
     });
     router.push('/cart');
   } catch (err) {
