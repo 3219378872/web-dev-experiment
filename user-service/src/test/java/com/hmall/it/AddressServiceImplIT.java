@@ -1,5 +1,6 @@
 package com.hmall.it;
 
+import com.hmall.api.client.ItemClient;
 import com.hmall.common.utils.UserContext;
 import com.hmall.domain.po.Address;
 import com.hmall.service.IAddressService;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
@@ -22,6 +24,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 @Sql(scripts = "/sql/data-address.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class AddressServiceImplIT {
+
+    @MockBean
+    private ItemClient itemClient;
 
     @BeforeEach
     void setUp() { UserContext.setUser(1L); }

@@ -1,5 +1,6 @@
 package com.hmall.it;
 
+import com.hmall.api.client.ItemClient;
 import com.hmall.api.dto.LoginFormDTO;
 import com.hmall.common.exception.BadRequestException;
 import com.hmall.common.exception.ForbiddenException;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +32,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ActiveProfiles("test")
 @Transactional
 class UserServiceImplIT {
+
+    @MockBean
+    private ItemClient itemClient;
 
     private static final String TEST_PASSWORD = "admin123";
 
