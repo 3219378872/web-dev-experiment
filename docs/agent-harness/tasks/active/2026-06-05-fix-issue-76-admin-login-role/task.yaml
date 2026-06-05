@@ -1,0 +1,7 @@
+slug: 2026-06-05-fix-issue-76-admin-login-role
+status: active
+task_branch: task/2026-06-05-fix-issue-76-admin-login-role
+spec: null
+plan: null
+spec_waiver: Minimal bugfix — root cause and fix are unambiguous, no separate spec required
+plan_waiver: Single-file VO change plus one set() call, no multi-step plan required

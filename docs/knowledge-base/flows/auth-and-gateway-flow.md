@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 7a49026
+last_synced_commit: HEAD
 last_synced_date: 2026-06-05
-sync_note: "修复收藏页面缺少商品信息，无需文档更新"
+sync_note: "Issue #76: UserLoginVO 增加 role 字段，login() 将 role 回填到 VO；登录响应体现在包含用户角色，管理端可据此区分 admin/user"
 ---
 
 # auth-and-gateway-flow
