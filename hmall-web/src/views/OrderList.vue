@@ -170,7 +170,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useCartStore } from '@/stores/cart';
-import { getOrders, cancelOrder, confirmOrder, deleteOrder } from '@/api/order';
+import { getOrders, cancelOrder, confirmOrder, deleteOrder, getOrderById } from '@/api/order';
 import { ElMessage } from 'element-plus';
 
 const router = useRouter();
@@ -287,10 +287,21 @@ async function handleConfirm(id) {
 }
 
 async function handleRepurchase(order) {
-  const details = order.details;
+  let details = order.details;
   if (!details || details.length === 0) {
-    ElMessage.warning('订单商品信息不完整，无法再次购买');
-    return;
+    ElMessage.info('正在获取订单商品...');
+    try {
+      const fullOrder = await getOrderById(order.id);
+      details = fullOrder?.details;
+    } catch (err) {
+      ElMessage.error('获取订单详情失败');
+      console.error(err);
+      return;
+    }
+    if (!details || details.length === 0) {
+      ElMessage.warning('订单商品信息不完整，无法再次购买');
+      return;
+    }
   }
   try {
     for (const detail of details) {
