@@ -2,9 +2,9 @@
 title: trade-service
 tracks:
   - trade-service/
-last_synced_commit: f499742
+last_synced_commit: 7b06a59
 last_synced_date: 2026-06-05
-sync_note: "修复订单详情缺少商品信息：添加 OrderDetailVO"
+sync_note: "新增 DELETE /orders/{id} 端点（校验归属与状态，返回 R<Void>），修复 Issue #73"
 ---
 
 # trade-service
@@ -17,7 +17,7 @@ sync_note: "修复订单详情缺少商品信息：添加 OrderDetailVO"
 
 ## 公开接口与契约
 
-- HTTP API（C 端）：`/orders`（创建/查询/取消/运费/物流轨迹）、
+- HTTP API（C 端）：`/orders`（创建/查询/取消/删除/运费/物流轨迹）、
   `/coupons/**`（领取/使用/列表）、`/my-coupons/available?amount`（按金额过滤可用券）。
 - HTTP API（管理端）：`/admin/orders/**`（列表/详情/发货/退款审核/导出 CSV）、
   `/admin/coupons/**`、`/admin/dashboard/**`（概览/趋势/品类/热销/待办/最新订单）。
@@ -84,5 +84,8 @@ sync_note: "修复订单详情缺少商品信息：添加 OrderDetailVO"
 - 退款必须先核对状态机：仅 `已支付`/`已发货` 可发起；不可对未支付订单退款。
 - 管理端发货操作必须幂等，并发布 `order.status.shipped`。
 - 订单号生成用雪花/号段，禁止自增 ID 暴露给前端。
+- `DELETE /orders/{id}` 删除订单：仅允许 `status=4`（交易完成）或 `status=5`（已取消）的订单被
+  当前用户删除，越权或状态不合法时抛异常。当前为物理删除（`removeById`），因 `Order` 表无
+  软删除字段；如需软删需另加 DDL migration 与 `@TableLogic`。
 
 详见 [order-checkout-flow](../flows/order-checkout-flow.md)。

@@ -479,6 +479,90 @@ class OrderServiceImplTest extends TradeServiceTestBase {
                 .hasMessageContaining("不可审核退款");
     }
 
+    // ===== deleteOrder tests =====
+
+    @Test
+    void deleteOrder_cancelledOrder_deletesSuccessfully() {
+        Order order = new Order();
+        order.setUserId(1L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(5); // 已取消
+        orderService.save(order);
+        Long orderId = order.getId();
+
+        orderService.deleteOrder(orderId, 1L);
+
+        assertThat(orderService.getById(orderId)).isNull();
+    }
+
+    @Test
+    void deleteOrder_completedOrder_deletesSuccessfully() {
+        Order order = new Order();
+        order.setUserId(1L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(4); // 交易完成
+        orderService.save(order);
+        Long orderId = order.getId();
+
+        orderService.deleteOrder(orderId, 1L);
+
+        assertThat(orderService.getById(orderId)).isNull();
+    }
+
+    @Test
+    void deleteOrder_wrongUser_throwsBadRequest() {
+        Order order = new Order();
+        order.setUserId(999L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(5);
+        orderService.save(order);
+        Long orderId = order.getId();
+
+        assertThatThrownBy(() -> orderService.deleteOrder(orderId, 1L))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("不存在");
+    }
+
+    @Test
+    void deleteOrder_nonExistentOrder_throwsBadRequest() {
+        assertThatThrownBy(() -> orderService.deleteOrder(999999L, 1L))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("不存在");
+    }
+
+    @Test
+    void deleteOrder_pendingOrder_throwsBizIllegal() {
+        Order order = new Order();
+        order.setUserId(1L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(1); // 待付款，不可删除
+        orderService.save(order);
+        Long orderId = order.getId();
+
+        assertThatThrownBy(() -> orderService.deleteOrder(orderId, 1L))
+                .isInstanceOf(BizIllegalException.class)
+                .hasMessageContaining("不可删除");
+    }
+
+    @Test
+    void deleteOrder_paidOrder_throwsBizIllegal() {
+        Order order = new Order();
+        order.setUserId(1L);
+        order.setTotalFee(10000);
+        order.setPaymentType(1);
+        order.setStatus(2); // 已付款，不可删除
+        orderService.save(order);
+        Long orderId = order.getId();
+
+        assertThatThrownBy(() -> orderService.deleteOrder(orderId, 1L))
+                .isInstanceOf(BizIllegalException.class)
+                .hasMessageContaining("不可删除");
+    }
+
     private void runAfterCommitCallbacks() {
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.getSynchronizations()

@@ -49,3 +49,8 @@ sync_note: "fix(issue-71): Category.vue 筛选；fix(issue-70): buyNow+num；fix
 - 商品图懒加载；首屏 LCP 关注度高。
 - 路由 meta 标记是否需登录，由全局守卫统一处理。
 - 提交前运行 `npm run lint` 和 `npm run format`；pre-commit hook 自动检查。
+- 订单页支付流程（OrderDetail.vue）：`?pay=1` 参数自动弹出余额支付弹窗；支付走两步——
+  先 `POST /pay-orders`（`createPayOrder`）拿到支付单ID，再 `POST /pay-orders/{id}`
+  （`payOrderByBalance`）执行扣款。支付密码由用户填写，后端校验。
+- 再次购买（OrderList.vue / OrderDetail.vue）：遍历 `order.details` 逐条调 `cartStore.addItem`
+  后跳转 `/cart`；若 `details` 为空则提示用户商品信息不完整。

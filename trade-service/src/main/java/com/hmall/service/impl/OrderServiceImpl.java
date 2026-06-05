@@ -239,6 +239,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         logisticsTraceService.save(trace);
     }
 
+    @Override
+    public void deleteOrder(Long orderId, Long userId) {
+        Order order = getById(orderId);
+        if (order == null || !order.getUserId().equals(userId)) {
+            throw new BadRequestException("订单不存在");
+        }
+        if (order.getStatus() != 4 && order.getStatus() != 5) {
+            throw new BizIllegalException("当前状态不可删除，仅已完成或已取消的订单可删除");
+        }
+        removeById(orderId);
+    }
+
     private List<OrderDetail> buildDetails(Long orderId, List<ItemDTO> items, Map<Long, Integer> numMap) {
         List<OrderDetail> details = new ArrayList<>(items.size());
         for (ItemDTO item : items) {

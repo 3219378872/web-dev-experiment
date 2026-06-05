@@ -106,6 +106,13 @@ public class OrderController {
         return R.ok();
     }
 
+    @ApiOperation("删除订单（仅已完成或已取消）")
+    @DeleteMapping("/orders/{id}")
+    public R<Void> deleteOrder(@PathVariable Long id) {
+        orderService.deleteOrder(id, UserContext.getUser());
+        return R.ok();
+    }
+
     @ApiOperation("查询运费")
     @GetMapping("/orders/freight")
     public FreightVO freight(

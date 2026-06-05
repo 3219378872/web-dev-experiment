@@ -3,7 +3,9 @@ package com.hmall.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hmall.api.client.OrderClient;
 import com.hmall.api.client.UserClient;
+import com.hmall.api.dto.OrderDTO;
 import com.hmall.api.dto.PayApplyDTO;
 import com.hmall.api.dto.PayOrderFormDTO;
 import com.hmall.common.exception.BizIllegalException;
@@ -35,10 +37,26 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> implements IPayOrderService {
     private final UserClient userClient;
+    private final OrderClient orderClient;
     private final MqMessagePublisher mqMessagePublisher;
 
     @Override
     public String applyPayOrder(PayApplyDTO applyDTO) {
+        // 校验订单归属、状态与金额，防止前端篡改
+        OrderDTO order = orderClient.queryOrderById(applyDTO.getBizOrderNo());
+        if (order == null) {
+            throw new BizIllegalException("订单不存在");
+        }
+        Long userId = UserContext.getUser();
+        if (!order.getUserId().equals(userId)) {
+            throw new BizIllegalException("订单归属错误");
+        }
+        if (order.getStatus() != 1) {
+            throw new BizIllegalException("订单状态异常，无法支付");
+        }
+        // 使用后端订单真实金额，覆盖前端传入值
+        applyDTO.setAmount(order.getTotalFee());
+
         // 1.幂等性校验
         PayOrder payOrder = checkIdempotent(applyDTO);
         // 2.返回结果
@@ -56,14 +74,31 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
             // 订单不是未支付，状态异常
             throw new BizIllegalException("交易已支付或关闭！");
         }
-        // 3.尝试扣减余额
+        // 3.支付前重新校验订单归属、状态与金额，防止过期/伪造支付单
+        OrderDTO order = orderClient.queryOrderById(po.getBizOrderNo());
+        if (order == null) {
+            throw new BizIllegalException("订单不存在");
+        }
+        Long userId = UserContext.getUser();
+        if (!order.getUserId().equals(userId)) {
+            throw new BizIllegalException("订单归属错误");
+        }
+        if (order.getStatus() != 1) {
+            throw new BizIllegalException("订单状态异常，无法支付");
+        }
+        if (!order.getTotalFee().equals(po.getAmount())) {
+            // 金额不一致，更新为订单真实金额后重新校验
+            po.setAmount(order.getTotalFee());
+            updateById(po);
+        }
+        // 4.尝试扣减余额
         userClient.deductMoney(payOrderFormDTO.getPw(), po.getAmount());
-        // 4.修改支付单状态
+        // 5.修改支付单状态
         boolean success = markPayOrderSuccess(payOrderFormDTO.getId(), LocalDateTime.now());
         if (!success) {
             throw new BizIllegalException("交易已支付或关闭！");
         }
-        // 5.发布支付成功事件，由 trade-service 异步修改订单状态
+        // 6.发布支付成功事件，由 trade-service 异步修改订单状态
         mqMessagePublisher.publish(
                 MqConstants.PAY_EXCHANGE,
                 MqConstants.PAY_SUCCESS_KEY,

@@ -2,9 +2,9 @@
 title: pay-service
 tracks:
   - pay-service/
-last_synced_commit: 87b1acb30b772f96d3afe2f0e9aaa2e5aeaa4c5c
+last_synced_commit: 1987935
 last_synced_date: 2026-06-03
-sync_note: "JaCoCo 门控 70%→80%，trade-service 测试增强（仅测试和配置改动，KB 内容不变）"
+sync_note: "fix(issue-73): 支付安全修复——双重校验；修复 PayServiceTestBase/PayOrderServiceImplTest OrderClient mock 重复定义"
 ---
 
 # pay-service
