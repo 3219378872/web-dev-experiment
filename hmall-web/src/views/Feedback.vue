@@ -53,6 +53,20 @@
                     >
                   </div>
                 </div>
+                <input
+                  ref="fileInput"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  style="display: none"
+                  @change="onFileChange"
+                />
+                <div v-if="imageUrls.length" class="uploaded-imgs">
+                  <div v-for="(url, idx) in imageUrls" :key="idx" class="uploaded-img">
+                    <img :src="url" alt="截图" />
+                    <span class="remove" @click="removeImage(idx)">×</span>
+                  </div>
+                </div>
               </div>
               <div class="field" style="margin-bottom: 18px">
                 <label>联系方式（选填）</label>
@@ -98,7 +112,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { submitFeedback, getMyFeedbacks } from '@/api/common';
+import { submitFeedback, getMyFeedbacks, uploadImage } from '@/api/common';
 import { ElMessage } from 'element-plus';
 import AccountSidebar from '@/components/AccountSidebar.vue';
 
@@ -113,6 +127,9 @@ const types = [
 const type = ref('bug');
 const content = ref('');
 const contact = ref('');
+const imageUrls = ref([]);
+const uploading = ref(false);
+const fileInput = ref(null);
 
 const history = ref([]);
 
@@ -139,7 +156,37 @@ async function loadHistory() {
 onMounted(loadHistory);
 
 function triggerUpload() {
-  ElMessage.info('图片上传功能开发中');
+  fileInput.value?.click();
+}
+
+async function onFileChange(e) {
+  const files = e.target.files;
+  if (!files?.length) return;
+  if (imageUrls.value.length + files.length > 4) {
+    ElMessage.warning('最多上传 4 张图片');
+    return;
+  }
+  uploading.value = true;
+  try {
+    for (const file of files) {
+      if (file.size > 5 * 1024 * 1024) {
+        ElMessage.warning(`图片 ${file.name} 超过 5MB，已跳过`);
+        continue;
+      }
+      const url = await uploadImage(file);
+      imageUrls.value.push(url);
+    }
+  } catch (err) {
+    ElMessage.error('图片上传失败，请重试');
+  } finally {
+    uploading.value = false;
+    // 重置 input 以便重复选择同一文件
+    if (fileInput.value) fileInput.value.value = '';
+  }
+}
+
+function removeImage(idx) {
+  imageUrls.value.splice(idx, 1);
 }
 
 async function submit() {
@@ -148,9 +195,15 @@ async function submit() {
     return;
   }
   try {
-    await submitFeedback({ content: content.value, type: type.value, contact: contact.value });
+    await submitFeedback({
+      content: content.value,
+      type: type.value,
+      contact: contact.value,
+      images: imageUrls.value.join(','),
+    });
     content.value = '';
     contact.value = '';
+    imageUrls.value = [];
     ElMessage.success('反馈已提交');
     loadHistory();
   } catch (err) {
@@ -205,6 +258,42 @@ async function submit() {
 }
 .up-zone .ic {
   font-size: 32px;
+}
+.uploaded-imgs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.uploaded-img {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.uploaded-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.uploaded-img .remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+}
+.uploaded-img .remove:hover {
+  background: rgba(0, 0, 0, 0.8);
 }
 .hist {
   display: flex;

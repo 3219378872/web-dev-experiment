@@ -57,7 +57,8 @@
         </div>
         <div class="chat-input">
           <div class="chat-tools">
-            <span>😊</span><span>🖼</span><span>📎</span><span>📦 订单</span>
+            <span class="disabled">😊</span><span class="disabled">🖼</span
+            ><span class="disabled">📎</span><span class="disabled">📦 订单</span>
           </div>
           <div class="chat-send">
             <textarea
@@ -77,35 +78,44 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue';
-import { sendCustomerMessage } from '@/api/common';
+import { ref, nextTick, onMounted } from 'vue';
+import { sendCustomerMessage, getFaqs } from '@/api/common';
 import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore();
 const inputText = ref('');
 const chatBody = ref(null);
 
-const quickQuestions = [
-  '📦 我的订单什么时候发货？',
-  '↺ 如何申请退货退款？',
-  '🎟 优惠券怎么使用？',
-  '🚚 支持哪些配送方式？',
-  '💳 支持哪些支付方式？',
-  '📞 人工客服热线 400-888-0099',
-];
+const quickQuestions = ref([]);
 
 const messages = ref([
-  { type: 'daySep', text: '今天 14:28' },
+  { type: 'daySep', text: '今天' },
   { type: 'text', text: '您好，欢迎来到好集！很高兴为您服务，请问有什么可以帮您？😊', me: false },
-  { type: 'text', text: '我买的蓝牙耳机什么时候能发货呀？', me: true },
-  {
-    type: 'text',
-    text: '已为您查询到订单 202605281588001，商品为现货，将在付款后 24 小时内发出，请您放心～',
-    me: false,
-  },
-  { type: 'card', title: 'TWS 主动降噪蓝牙耳机 入耳式', price: 299, me: false },
-  { type: 'text', text: '好的，谢谢！', me: true },
 ]);
+
+async function loadFaqs() {
+  try {
+    const data = await getFaqs();
+    // 后端返回格式可能是 [{question, answer}] 或字符串数组
+    if (Array.isArray(data)) {
+      quickQuestions.value = data.map((f) =>
+        typeof f === 'string' ? f : f.question || f.title || ''
+      );
+    }
+  } catch (err) {
+    // FAQ 加载失败时保留默认常用问题
+    quickQuestions.value = [
+      '📦 我的订单什么时候发货？',
+      '↺ 如何申请退货退款？',
+      '🎟 优惠券怎么使用？',
+      '🚚 支持哪些配送方式？',
+      '💳 支持哪些支付方式？',
+      '📞 人工客服热线 400-888-0099',
+    ];
+  }
+}
+
+onMounted(loadFaqs);
 
 function scrollToBottom() {
   nextTick(() => {
@@ -339,6 +349,13 @@ function sendQuick(q) {
 }
 .chat-tools span:hover {
   color: var(--brand);
+}
+.chat-tools span.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.chat-tools span.disabled:hover {
+  color: var(--ink-3);
 }
 .chat-send {
   display: flex;

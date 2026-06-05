@@ -35,6 +35,13 @@
               <div class="nm">{{ p.name }}</div>
               <div class="pr">
                 <span class="now">¥{{ priceYuan(p) }}</span>
+                <span v-if="p.originalPrice" class="old"
+                  >¥{{ Math.round(p.originalPrice / 100) }}</span
+                >
+              </div>
+              <div class="bar">
+                <i :style="{ width: p.percent + '%' }"></i>
+                <span>已售 {{ p.percent }}%</span>
               </div>
             </div>
             <button class="btn btn-hot btn-block" @click.prevent="handleBuy(p)">立即抢购</button>
@@ -57,30 +64,25 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { getItems } from '@/api/item';
-import { useCartStore } from '@/stores/cart';
+import { getActiveSeckills } from '@/api/item';
 import { useUserStore } from '@/stores/user';
 
-const cartStore = useCartStore();
+const router = useRouter();
 const userStore = useUserStore();
 
-const countdown = ref({ h: '01', m: '48', s: '13' });
+const countdown = ref({ h: '00', m: '00', s: '00' });
 const page = ref(1);
 const size = ref(10);
 const total = ref(0);
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / size.value)));
+const activeSessionIndex = ref(0);
 
-const timeSlots = [
-  { time: '12:00', status: '疯抢中', active: true },
-  { time: '14:00', status: '即将开始', active: false },
-  { time: '16:00', status: '即将开始', active: false },
-  { time: '18:00', status: '敬请期待', active: false },
-  { time: '20:00', status: '敬请期待', active: false },
-  { time: '22:00', status: '敬请期待', active: false },
-];
+const timeSlots = ref([]);
+const flashItems = ref([]);
 
-/** 按品类映射占位图标（当前后端商品未配真实图片，沿用全站占位视觉） */
+/** 占位图标映射（后端商品未配真实图片时使用） */
 const glyphMap = {
   手机数码: '▣',
   家用电器: '▤',
@@ -92,14 +94,74 @@ const glyphMap = {
   运动户外: '◐',
 };
 
-const flashItems = ref([]);
+/**
+ * 从秒杀活动列表构建时间段和商品
+ * 后端 SeckillVO 字段：itemId, seckillPrice, startTime, endTime, stock, sold, status, percent
+ */
+function buildFromSeckillData(list) {
+  const now = Date.now();
+  const activeItems = [];
+  const sessions = [];
 
-function mapItem(x) {
+  // 按 startTime 分组为时间段
+  const grouped = {};
+  for (const item of list) {
+    if (!item.startTime) continue;
+    const key = item.startTime.slice(0, 13); // 按小时分组
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(item);
+  }
+
+  const sortedKeys = Object.keys(grouped).sort();
+  let activeFound = false;
+
+  sortedKeys.forEach((key, idx) => {
+    const first = grouped[key][0];
+    const start = new Date(first.startTime).getTime();
+    const end = new Date(first.endTime || first.startTime).getTime();
+    const isActive = now >= start && now < end;
+    if (isActive) activeFound = true;
+
+    sessions.push({
+      time: first.startTime.slice(11, 16),
+      status: isActive ? '疯抢中' : now < start ? '即将开始' : '已结束',
+      active: isActive,
+      onClick: () => {
+        activeSessionIndex.value = idx;
+        loadFlash();
+      },
+    });
+
+    // 收集该时间段的商品
+    for (const item of grouped[key]) {
+      activeItems.push(parseSeckillItem(item));
+    }
+  });
+
+  // 如果没有活跃场次，默认选中第一个
+  if (!activeFound && sessions.length) {
+    sessions[0].active = false;
+  }
+
+  timeSlots.value = sessions;
+  flashItems.value = activeItems;
+  total.value = activeItems.length;
+}
+
+function parseSeckillItem(x) {
+  const sold = x.sold || 0;
+  const stock = x.stock || 1;
+  const percent = x.percent != null ? x.percent : Math.min(100, Math.round((sold / stock) * 100));
   return {
-    id: x.id,
-    name: x.name,
-    price: x.price,
-    phStyle: `s${(x.id % 8) + 1}`,
+    id: x.itemId || x.id,
+    name: x.name || '秒杀商品',
+    seckillPrice: x.seckillPrice || 0,
+    originalPrice: x.price || 0,
+    stock,
+    sold,
+    percent,
+    status: x.status,
+    phStyle: `s${((x.itemId || x.id || 0) % 8) + 1}`,
     phLabel: x.category || '好物',
     phGlyph: glyphMap[x.category] || '◆',
   };
@@ -107,11 +169,23 @@ function mapItem(x) {
 
 async function loadFlash() {
   try {
-    const data = await getItems({ page: page.value, size: size.value, sortBy: 'sold' });
-    flashItems.value = (data?.list || []).map(mapItem);
-    total.value = data?.total || flashItems.value.length;
+    const data = await getActiveSeckills({ page: page.value, size: size.value });
+    const list = data?.list || data || [];
+    if (Array.isArray(list)) {
+      buildFromSeckillData(list);
+    } else {
+      flashItems.value = [];
+    }
   } catch (err) {
     flashItems.value = [];
+    timeSlots.value = [
+      { time: '12:00', status: '疯抢中', active: true },
+      { time: '14:00', status: '即将开始', active: false },
+      { time: '16:00', status: '即将开始', active: false },
+      { time: '18:00', status: '敬请期待', active: false },
+      { time: '20:00', status: '敬请期待', active: false },
+      { time: '22:00', status: '敬请期待', active: false },
+    ];
   }
 }
 
@@ -119,13 +193,13 @@ watch(page, loadFlash);
 
 let timer = null;
 function startCountdown() {
-  let total = 1 * 3600 + 48 * 60 + 13;
+  let remaining = 1 * 3600 + 48 * 60 + 13;
   timer = setInterval(() => {
-    total--;
-    if (total <= 0) total = 2 * 3600;
-    const h = Math.floor(total / 3600);
-    const m = Math.floor((total % 3600) / 60);
-    const s = total % 60;
+    remaining--;
+    if (remaining <= 0) remaining = 2 * 3600;
+    const h = Math.floor(remaining / 3600);
+    const m = Math.floor((remaining % 3600) / 60);
+    const s = remaining % 60;
     countdown.value = {
       h: String(h).padStart(2, '0'),
       m: String(m).padStart(2, '0'),
@@ -134,22 +208,17 @@ function startCountdown() {
   }, 1000);
 }
 
-// 无秒杀后端，展示真实商品价格（与加入购物车的成交价一致）
 function priceYuan(p) {
-  return Math.round((p.price || 0) / 100);
+  return Math.round((p.seckillPrice || 0) / 100);
 }
 
-async function handleBuy(p) {
+function handleBuy(p) {
   if (!userStore.isLoggedIn) {
     ElMessage.warning('请先登录');
     return;
   }
-  try {
-    await cartStore.addItem({ itemId: p.id, num: 1 });
-    ElMessage.success('已加入购物车');
-  } catch (err) {
-    /* 错误已由响应拦截器统一提示 */
-  }
+  // 后端无秒杀下单接口，跳转商品详情页
+  router.push(`/item/${p.id}`);
 }
 
 onMounted(() => {

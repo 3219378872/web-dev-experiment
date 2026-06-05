@@ -331,6 +331,28 @@
                   rows="3"
                   placeholder="说说这件商品怎么样，分享给想买的小伙伴～"
                 ></textarea>
+                <div style="display: flex; align-items: center; gap: 12px; margin-top: 10px">
+                  <span class="upload-btn" @click="triggerReviewUpload">
+                    <span>📷</span>
+                    <span v-if="uploading">上传中...</span>
+                    <span v-else>上传图片</span>
+                  </span>
+                  <input
+                    ref="reviewFileInput"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    style="display: none"
+                    @change="onReviewFilesChange"
+                  />
+                  <span class="dim" style="font-size: 12px">最多 4 张，单张不超 5MB</span>
+                </div>
+                <div v-if="reviewImageUrls.length" class="review-imgs">
+                  <div v-for="(url, idx) in reviewImageUrls" :key="idx" class="review-img">
+                    <img :src="url" alt="评价图片" />
+                    <span class="remove" @click="removeReviewImage(idx)">×</span>
+                  </div>
+                </div>
                 <div
                   style="
                     display: flex;
@@ -461,7 +483,7 @@ import { useUserStore } from '@/stores/user';
 import { useCartStore } from '@/stores/cart';
 import { ElMessage } from 'element-plus';
 import { getItemById, getReviews, submitReview as submitReviewApi, getItems } from '@/api/item';
-import { checkFavorite, addFavorite, removeFavorite } from '@/api/common';
+import { checkFavorite, addFavorite, removeFavorite, uploadImage } from '@/api/common';
 import StarRating from '@/components/StarRating.vue';
 
 const route = useRoute();
@@ -476,6 +498,9 @@ const isFavorited = ref(false);
 const reviews = ref([]);
 const reviewRating = ref(5);
 const reviewContent = ref('');
+const reviewImageUrls = ref([]);
+const uploading = ref(false);
+const reviewFileInput = ref(null);
 const activeThumb = ref(0);
 const activeTab = ref('detail');
 const relatedItems = ref([]);
@@ -600,14 +625,49 @@ async function toggleFavorite() {
   }
 }
 
+function triggerReviewUpload() {
+  reviewFileInput.value?.click();
+}
+
+async function onReviewFilesChange(e) {
+  const files = e.target.files;
+  if (!files?.length) return;
+  if (reviewImageUrls.value.length + files.length > 4) {
+    ElMessage.warning('最多上传 4 张图片');
+    return;
+  }
+  uploading.value = true;
+  try {
+    for (const file of files) {
+      if (file.size > 5 * 1024 * 1024) {
+        ElMessage.warning(`图片 ${file.name} 超过 5MB，已跳过`);
+        continue;
+      }
+      const url = await uploadImage(file);
+      reviewImageUrls.value.push(url);
+    }
+  } catch (err) {
+    ElMessage.error('图片上传失败');
+  } finally {
+    uploading.value = false;
+    if (reviewFileInput.value) reviewFileInput.value.value = '';
+  }
+}
+
+function removeReviewImage(idx) {
+  reviewImageUrls.value.splice(idx, 1);
+}
+
 async function submitReview() {
   try {
     await submitReviewApi(item.value.id, {
       rating: reviewRating.value,
       content: reviewContent.value,
+      images: reviewImageUrls.value.join(','),
     });
     ElMessage.success('评价已提交');
     reviewContent.value = '';
+    reviewImageUrls.value = [];
     reviews.value = await getReviews(route.params.id);
   } catch (err) {
     /* ignore */
@@ -980,6 +1040,58 @@ async function submitReview() {
   color: var(--ink);
   margin: 7px 0;
   line-height: 1.6;
+}
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--ink-2);
+  cursor: pointer;
+  background: #fff;
+}
+.upload-btn:hover {
+  border-color: var(--brand);
+  color: var(--brand);
+}
+.review-imgs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.review-img {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.review-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.review-img .remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+}
+.review-img .remove:hover {
+  background: rgba(0, 0, 0, 0.8);
 }
 .review .spec-buy {
   font-size: 12px;

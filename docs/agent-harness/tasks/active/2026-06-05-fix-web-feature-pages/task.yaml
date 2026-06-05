@@ -1,0 +1,7 @@
+slug: fix-web-feature-pages
+task_branch: task/2026-06-05-fix-web-feature-pages
+status: active
+spec: null
+spec_waiver: "Fixes for hmall-web feature pages: #105 Login, #106 Feedback/Service, #107 Review upload, #110 FlashSale, #111 Search sorting"
+plan: null
+plan_waiver: "Frontend-only fixes following existing patterns, no multi-step plan needed"
