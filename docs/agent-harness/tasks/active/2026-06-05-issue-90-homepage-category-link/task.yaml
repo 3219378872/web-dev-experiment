@@ -1,0 +1,7 @@
+slug: 2026-06-05-issue-90-homepage-category-link
+status: active
+task_branch: task/2026-06-05-issue-90-homepage-category-link
+spec: null
+plan: null
+spec_waiver: Single-line router-link fix; no design spec needed.
+plan_waiver: Single-file frontend fix; no multi-step plan needed.
