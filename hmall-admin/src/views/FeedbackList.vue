@@ -35,38 +35,47 @@
             </button>
           </div>
         </div>
-        <div id="fb-list">
-          <div
-            v-for="(f, i) in filteredFeedbacks"
-            :key="f.id"
-            class="fb-item"
-            :class="{ on: selected?.id === f.id }"
-            @click="select(f)"
-          >
-            <div class="top">
-              <span class="u-av" :style="`background:${avatarColor(i)}`">{{
-                (f.userName || '匿')[0]
-              }}</span>
-              <b>{{ f.userName || '匿名用户' }}</b>
-              <span class="tag tag-ghost" style="font-size: 11px">{{ f.type || '反馈' }}</span>
-              <span class="sdot" :class="statusDot(f.status)" style="margin-left: auto">{{
-                statusText(f.status)
-              }}</span>
-            </div>
-            <div class="q">{{ f.content }}</div>
-            <div class="bt">
-              <span>{{ f.createTime?.slice(0, 16) || '—' }}</span>
+        <div v-if="loading" style="padding: 40px; text-align: center; color: var(--ink-3)">
+          加载中...
+        </div>
+        <div v-else-if="feedbacks.length === 0" style="padding: 40px">
+          <el-empty description="暂无反馈" />
+        </div>
+        <template v-else>
+          <div id="fb-list">
+            <div
+              v-for="(f, i) in filteredFeedbacks"
+              :key="f.id"
+              class="fb-item"
+              :class="{ on: selected?.id === f.id }"
+              @click="select(f)"
+            >
+              <div class="top">
+                <span class="u-av" :style="`background:${avatarColor(i)}`">{{
+                  (f.username || '匿')[0]
+                }}</span>
+                <b>{{ f.username || '匿名用户' }}</b>
+                <span class="sdot" :class="statusDot(f.status)" style="margin-left: auto">{{
+                  statusText(f.status)
+                }}</span>
+              </div>
+              <div class="q">{{ f.content }}</div>
+              <div class="bt">
+                <span>{{ f.createTime?.slice(0, 16) || '—' }}</span>
+              </div>
             </div>
           </div>
-        </div>
+        </template>
         <div class="adm-pager">
           <span>共 {{ total }} 条</span>
-          <div class="pgs">
-            <a :class="{ on: page === 1 }" @click="page = 1">1</a>
-            <a v-if="total > pageSize">2</a>
-            <a v-if="total > pageSize * 2">3</a>
-            <a v-if="total > pageSize">›</a>
-          </div>
+          <el-pagination
+            v-model:current-page="page"
+            :page-size="pageSize"
+            :total="total"
+            background
+            layout="prev, pager, next"
+            @current-change="fetch"
+          />
         </div>
       </div>
 
@@ -78,36 +87,18 @@
         <div v-if="selected" class="ab">
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px">
             <span class="u-av" :style="`background:${avatarColor(0)}`">{{
-              (selected.userName || '匿')[0]
+              (selected.username || '匿')[0]
             }}</span>
             <div>
               <div style="font-weight: 700; font-size: 14px">
-                {{ selected.userName || '匿名用户' }}
+                {{ selected.username || '匿名用户' }}
               </div>
               <div class="dim" style="font-size: 12px">
                 {{ selected.createTime?.slice(0, 16) || '—' }}
               </div>
             </div>
           </div>
-          <div style="display: flex; gap: 8px; margin-bottom: 12px">
-            <span class="tag tag-new">{{ selected.type || '反馈' }}</span>
-            <span class="dim" style="font-size: 12px; align-self: center">{{
-              selected.createTime?.slice(0, 16) || '—'
-            }}</span>
-          </div>
           <div class="detail-msg">{{ selected.content }}</div>
-          <div style="display: flex; gap: 8px; margin-top: 12px">
-            <div
-              class="ph s4"
-              style="width: 64px; height: 64px; border-radius: 8px"
-              data-label=""
-            ></div>
-            <div
-              class="ph s7"
-              style="width: 64px; height: 64px; border-radius: 8px"
-              data-label=""
-            ></div>
-          </div>
 
           <div class="reply-box">
             <div class="field">
@@ -120,8 +111,9 @@
               ></textarea>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 14px">
-              <button class="btn btn-primary btn-block" @click="doReply">提交回复</button>
-              <button class="btn btn-ghost">转技术</button>
+              <button class="btn btn-primary btn-block" :disabled="replying" @click="doReply">
+                {{ replying ? '提交中...' : '提交回复' }}
+              </button>
             </div>
           </div>
         </div>
@@ -145,6 +137,8 @@ const total = ref(0);
 const tab = ref('all');
 const selected = ref(null);
 const replyContent = ref('');
+const loading = ref(false);
+const replying = ref(false);
 
 const avatarColors = [
   '#88A6B8',
@@ -181,22 +175,32 @@ function select(row) {
   replyContent.value = row.reply || '';
 }
 
-async function fetch() {
+async function fetch(p) {
+  if (p) page.value = p;
+  loading.value = true;
   try {
-    const r = await getFeedbacks();
+    const r = await getFeedbacks({ page: page.value, size: pageSize.value });
     feedbacks.value = r.list || [];
-    total.value = r.total || feedbacks.value.length;
+    total.value = r.total || 0;
     if (feedbacks.value.length && !selected.value) {
       selected.value = feedbacks.value[0];
       replyContent.value = selected.value.reply || '';
     }
   } catch (err) {
     console.error(err);
+    ElMessage.error('加载反馈失败');
+  } finally {
+    loading.value = false;
   }
 }
 
 async function doReply() {
   if (!selected.value) return;
+  if (!replyContent.value) {
+    ElMessage.warning('请输入回复内容');
+    return;
+  }
+  replying.value = true;
   try {
     // 后端回复接口固定将状态置为 1（已回复），不接受自定义状态
     await replyFeedback(selected.value.id, { reply: replyContent.value });
@@ -204,6 +208,9 @@ async function doReply() {
     fetch();
   } catch (err) {
     console.error(err);
+    ElMessage.error('回复失败');
+  } finally {
+    replying.value = false;
   }
 }
 
@@ -356,29 +363,6 @@ fetch();
   color: var(--ink-2);
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  border: 1px solid var(--admin-line);
-  border-radius: 999px;
-  font-size: 13px;
-  background: #fff;
-  color: var(--ink-2);
-  cursor: pointer;
-}
-.chip:hover {
-  border-color: var(--brand);
-  color: var(--brand);
-}
-.chip.on {
-  background: var(--brand);
-  border-color: var(--brand);
-  color: #fff;
-  font-weight: 700;
-}
-
 .tag {
   display: inline-flex;
   align-items: center;
@@ -389,17 +373,9 @@ fetch();
   font-weight: 700;
   line-height: 1.6;
 }
-.tag-new {
-  background: var(--info-soft);
-  color: #1257c4;
-}
 .tag-warn {
   background: var(--warn-soft);
   color: #9a5e00;
-}
-.tag-ghost {
-  background: var(--bg-2);
-  color: var(--ink-2);
 }
 
 .sdot {
@@ -420,12 +396,6 @@ fetch();
 }
 .sdot.warn {
   color: var(--warn);
-}
-.sdot.blue {
-  color: var(--info);
-}
-.sdot.gray {
-  color: var(--ink-3);
 }
 
 .adm-pager {

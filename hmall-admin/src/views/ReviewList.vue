@@ -14,15 +14,19 @@
       </div>
       <div class="stat" style="padding: 16px">
         <div class="lab">平均评分</div>
-        <div class="val" style="font-size: 24px; color: var(--gold)">— ★</div>
+        <div class="val" style="font-size: 24px; color: var(--gold)">
+          {{ avgRating > 0 ? avgRating.toFixed(1) : '—' }} ★
+        </div>
       </div>
       <div class="stat" style="padding: 16px">
         <div class="lab">好评率</div>
-        <div class="val" style="font-size: 24px; color: var(--success)">—</div>
+        <div class="val" style="font-size: 24px; color: var(--success)">
+          {{ goodRate > 0 ? (goodRate * 100).toFixed(0) + '%' : '—' }}
+        </div>
       </div>
       <div class="stat" style="padding: 16px">
         <div class="lab">待处理</div>
-        <div class="val" style="font-size: 24px; color: var(--danger)">—</div>
+        <div class="val" style="font-size: 24px; color: var(--danger)">{{ pendingCount }}</div>
       </div>
     </div>
 
@@ -36,14 +40,20 @@
     </div>
 
     <div class="acard">
-      <div class="ab" id="rev-rows">
+      <div v-if="loading" style="padding: 40px 20px; text-align: center; color: var(--ink-3)">
+        加载中...
+      </div>
+      <div v-else-if="reviews.length === 0" style="padding: 40px 20px">
+        <el-empty description="暂无评价数据" />
+      </div>
+      <div v-else id="rev-rows" class="ab">
         <div v-for="(r, i) in filteredReviews" :key="r.id" class="rev-row">
           <div class="av" :style="`background:${avatarColor(i)}`">
-            {{ (r.userName || '匿')[0] }}
+            {{ (r.username || r.userName || '匿')[0] }}
           </div>
           <div class="main">
             <div class="who">
-              <b>{{ r.userName || '匿名用户' }}</b>
+              <b>{{ r.username || r.userName || '匿名用户' }}</b>
               <span class="stars"
                 >{{ starStr(r.rating) }}<span class="off">{{ offStars(r.rating) }}</span></span
               >
@@ -65,7 +75,7 @@
                 class="ph"
                 style="width: 28px; height: 28px; border-radius: 5px; background: var(--line-2)"
               />
-              <span>商品ID: {{ r.itemId || '—' }}</span>
+              <span>{{ r.itemName ? r.itemName : '商品ID: ' + (r.itemId || '—') }}</span>
             </div>
           </div>
           <div class="side">
@@ -105,6 +115,7 @@ const page = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
 const tab = ref('all');
+const loading = ref(false);
 
 const avatarColors = [
   '#88A6B8',
@@ -122,6 +133,25 @@ function avatarColor(i) {
   return avatarColors[i % avatarColors.length];
 }
 
+const avgRating = computed(() => {
+  if (!reviews.value.length) return 0;
+  return reviews.value.reduce((s, r) => s + (r.rating || 0), 0) / reviews.value.length;
+});
+
+const goodRate = computed(() => {
+  if (!reviews.value.length) return 0;
+  return reviews.value.filter((r) => r.rating >= 4).length / reviews.value.length;
+});
+
+// 待处理评价：根据后端回复字段（reply===null）或 status 判定
+// ReviewVO 目前不包含 status/reply 字段，此处暂计 0
+// 当后端增加字段后更新此计算逻辑
+const pendingCount = computed(() => {
+  return reviews.value.filter(
+    (r) => r.status === 'pending' || r.reply === null || r.reply === undefined
+  ).length;
+});
+
 const filteredReviews = computed(() => {
   if (tab.value === 'all') return reviews.value;
   if (tab.value === 'good') return reviews.value.filter((r) => r.rating >= 4);
@@ -137,13 +167,18 @@ function offStars(n) {
   return '★★★★★'.slice(Math.max(0, Math.min(5, n || 0)));
 }
 
-async function fetch() {
+async function fetch(p) {
+  if (p) page.value = p;
+  loading.value = true;
   try {
-    const r = await getReviews();
-    reviews.value = r.list || r || [];
-    total.value = reviews.value.length;
+    const r = await getReviews({ page: page.value, pageSize: pageSize.value });
+    reviews.value = r.list || [];
+    total.value = r.total || 0;
   } catch (err) {
     console.error(err);
+    ElMessage.error('评价加载失败');
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -154,6 +189,7 @@ async function del(id) {
     ElMessage.success('已删除');
   } catch (err) {
     console.error(err);
+    ElMessage.error('删除失败');
   }
 }
 

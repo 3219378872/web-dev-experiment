@@ -40,7 +40,7 @@
         />
       </div>
       <div class="grow" />
-      <a class="btn btn-primary btn-sm" @click="fetch">查询</a>
+      <a class="btn btn-primary btn-sm" :class="{ disabled: loading }" @click="fetch">查询</a>
       <a class="btn btn-ghost btn-sm" @click="resetFilter">重置</a>
     </div>
 
@@ -48,7 +48,13 @@
       <table class="atable">
         <thead>
           <tr>
-            <th style="width: 30px"><span class="checkbox"></span></th>
+            <th style="width: 30px">
+              <el-checkbox
+                v-model="allChecked"
+                :indeterminate="partialChecked"
+                @change="toggleAll"
+              />
+            </th>
             <th>订单号</th>
             <th>客户</th>
             <th>商品</th>
@@ -61,7 +67,7 @@
         </thead>
         <tbody>
           <tr v-for="row in orders" :key="row.id">
-            <td><span class="checkbox"></span></td>
+            <td><el-checkbox v-model="row.checked" @change="onCheckChange" /></td>
             <td class="mono" style="font-size: 11.5px">{{ row.id }}</td>
             <td>
               <span class="u-cell">
@@ -82,18 +88,32 @@
             </td>
             <td class="actions">
               <span class="lk" @click="$router.push(`/orders/${row.id}`)">详情</span>
-              <span v-if="row.status === 2" class="lk" @click="showShip(row)">发货</span>
+              <span
+                v-if="row.status === 2"
+                class="lk"
+                :class="{ disabled: shippingId === row.id }"
+                @click="showShip(row)"
+                >{{ shippingId === row.id ? '发货中...' : '发货' }}</span
+              >
               <span v-if="row.status === 3" class="lk" @click="$router.push(`/orders/${row.id}`)"
                 >物流</span
               >
-              <span class="lk" @click="updateStatus(row, 5)">取消</span>
+              <span
+                class="lk"
+                :class="{ disabled: updatingId === row.id }"
+                @click="updateStatus(row, 5)"
+                >{{ updatingId === row.id ? '处理中...' : '取消' }}</span
+              >
             </td>
           </tr>
         </tbody>
       </table>
-      <div class="adm-pager">
+      <div v-if="orders.length === 0 && !loading" class="empty-state">
+        <el-empty description="暂无订单数据" />
+      </div>
+      <div v-else class="adm-pager">
         <span>共 {{ total.toLocaleString() }} 条 · 每页 {{ size }} 条</span>
-        <div v-if="totalPages > 1" class="pgs">
+        <div class="pgs">
           <a :class="{ disabled: page === 1 }" @click="prevPage">‹</a>
           <a v-for="p in pageRange" :key="p" :class="{ on: page === p }" @click="fetch(p)">{{
             p
@@ -107,7 +127,9 @@
       <input v-model="trackingNumber" class="input" placeholder="物流单号" />
       <template #footer>
         <button class="btn btn-ghost" @click="shipVisible = false">取消</button>
-        <button class="btn btn-primary" @click="doShip">确认发货</button>
+        <button class="btn btn-primary" :disabled="!trackingNumber" @click="doShip">
+          确认发货
+        </button>
       </template>
     </el-dialog>
   </div>
@@ -127,6 +149,26 @@ const activeTab = ref('all');
 const shipVisible = ref(false);
 const trackingNumber = ref('');
 const currentOrder = ref(null);
+const loading = ref(false);
+const shippingId = ref(null);
+const updatingId = ref(null);
+
+// 全选状态
+const allChecked = ref(false);
+const partialChecked = ref(false);
+
+function toggleAll(val) {
+  orders.value.forEach((o) => {
+    o.checked = val;
+  });
+  partialChecked.value = false;
+}
+
+function onCheckChange() {
+  const checked = orders.value.filter((o) => o.checked);
+  allChecked.value = checked.length === orders.value.length;
+  partialChecked.value = checked.length > 0 && checked.length < orders.value.length;
+}
 
 const statusMap = {
   1: { text: '待付款', cls: 'orange' },
@@ -137,6 +179,7 @@ const statusMap = {
   6: { text: '退款中', cls: 'red' },
 };
 
+// 统计数据来源于当前分页（无独立统计接口时暂用本地过滤）
 const todayCount = computed(() => orders.value.length);
 const pendingShipCount = computed(() => orders.value.filter((o) => o.status === 2).length);
 const refundCount = computed(() => orders.value.filter((o) => o.status === 6).length);
@@ -207,6 +250,7 @@ function resetFilter() {
 
 async function fetch(p = 1) {
   page.value = p;
+  loading.value = true;
   try {
     const params = { page: p, size: size.value };
     if (searchId.value) params.orderId = searchId.value;
@@ -224,8 +268,13 @@ async function fetch(p = 1) {
     }));
     orders.value = list;
     total.value = r.total || 0;
+    allChecked.value = false;
+    partialChecked.value = false;
   } catch (err) {
     console.error(err);
+    ElMessage.error('订单加载失败，请稍后重试');
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -244,27 +293,41 @@ function nextPage() {
 
 function showShip(row) {
   currentOrder.value = row;
+  trackingNumber.value = '';
   shipVisible.value = true;
 }
 
 async function doShip() {
+  if (!trackingNumber.value) {
+    ElMessage.warning('请输入物流单号');
+    return;
+  }
+  const id = currentOrder.value.id;
+  shippingId.value = id;
   try {
-    await shipOrder(currentOrder.value.id, trackingNumber.value);
+    await shipOrder(id, trackingNumber.value);
     shipVisible.value = false;
-    fetch();
     ElMessage.success('已发货');
+    fetch();
   } catch (err) {
     console.error(err);
+    ElMessage.error('发货失败，请稍后重试');
+  } finally {
+    shippingId.value = null;
   }
 }
 
 async function updateStatus(row, status) {
+  updatingId.value = row.id;
   try {
     await updateOrderStatus(row.id, status);
     row.status = status;
     ElMessage.success('已更新');
   } catch (err) {
     console.error(err);
+    ElMessage.error('操作失败，请稍后重试');
+  } finally {
+    updatingId.value = null;
   }
 }
 
@@ -340,6 +403,12 @@ fetch();
   font-size: 12.5px;
 }
 
+.atable .actions .lk.disabled {
+  color: var(--ink-3);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* pager button sizing */
 .adm-pager .pgs {
   display: flex;
@@ -364,6 +433,11 @@ fetch();
   border-color: var(--brand);
   color: #fff;
   font-weight: 700;
+}
+
+.adm-pager .pgs a.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* avatar sizing */
@@ -393,5 +467,11 @@ fetch();
 }
 .u-cell .nm {
   font-weight: 600;
+}
+
+.empty-state {
+  padding: 40px 0;
+  display: flex;
+  justify-content: center;
 }
 </style>
