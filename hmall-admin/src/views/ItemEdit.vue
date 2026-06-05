@@ -25,12 +25,7 @@
               <div class="field">
                 <label>商品分类</label>
                 <el-select v-model="form.category" placeholder="选择分类" style="width: 100%">
-                  <el-option
-                    label="手机数码 / 影音娱乐 / 蓝牙耳机"
-                    value="手机数码 / 影音娱乐 / 蓝牙耳机"
-                  />
-                  <el-option label="家用电器" value="家用电器" />
-                  <el-option label="食品生鲜" value="食品生鲜" />
+                  <el-option v-for="cat in categoryOptions" :key="cat" :label="cat" :value="cat" />
                 </el-select>
               </div>
               <div class="field">
@@ -74,26 +69,49 @@
         <div class="acard" style="margin-bottom: 16px">
           <div class="ah">
             <h3>规格设置 <span class="sub">SKU 多规格</span></h3>
-            <el-button size="small">＋ 添加规格</el-button>
+            <el-button size="small" @click="addSpecGroup">＋ 添加规格组</el-button>
           </div>
           <div class="ab">
-            <div style="margin-bottom: 14px">
-              <div class="dim" style="font-size: 12px; margin-bottom: 8px">颜色</div>
-              <div style="display: flex; gap: 8px">
-                <span class="chip on">曜石黑</span>
-                <span class="chip on">云母白</span>
-                <span class="chip on">雾霾蓝</span>
-                <span class="chip">＋</span>
+            <div v-for="(group, gIdx) in specGroups" :key="gIdx" style="margin-bottom: 18px">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px">
+                <el-input
+                  v-model="group.name"
+                  placeholder="规格名称（如：颜色）"
+                  style="width: 160px"
+                  size="small"
+                />
+                <el-button size="small" text @click="removeSpecGroup(gIdx)">删除</el-button>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <span
+                  v-for="(val, vIdx) in group.values"
+                  :key="vIdx"
+                  class="chip on"
+                  style="position: relative; padding-right: 22px"
+                >
+                  {{ val }}
+                  <span class="x" @click="removeSpecValue(gIdx, vIdx)">✕</span>
+                </span>
+                <span
+                  v-if="group.adding"
+                  class="chip"
+                  style="padding: 0; background: transparent; border: 0"
+                >
+                  <el-input
+                    v-model="group.newValue"
+                    size="small"
+                    style="width: 100px"
+                    placeholder="输入值"
+                    @keyup.enter="confirmSpecValue(gIdx)"
+                    @blur="confirmSpecValue(gIdx)"
+                    ref="specInputRefs"
+                  />
+                </span>
+                <span v-else class="chip" @click="startAddSpecValue(gIdx)">＋</span>
               </div>
             </div>
-            <div>
-              <div class="dim" style="font-size: 12px; margin-bottom: 8px">版本</div>
-              <div style="display: flex; gap: 8px">
-                <span class="chip on">标准版</span>
-                <span class="chip on">降噪增强版</span>
-                <span class="chip on">游戏专业版</span>
-                <span class="chip">＋</span>
-              </div>
+            <div v-if="specGroups.length === 0" class="dim" style="font-size: 13px">
+              暂无规格，点击上方按钮添加
             </div>
           </div>
         </div>
@@ -143,10 +161,17 @@
               >
                 <span class="x" @click="removeImage(idx)">✕</span>
               </div>
-              <div class="add" @click="addImage">
+              <div class="add" @click="triggerUpload">
                 <div style="text-align: center">＋<small>上传</small></div>
               </div>
             </div>
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              style="display: none"
+              @change="handleFileChange"
+            />
             <p class="dim" style="font-size: 11px; margin-top: 10px">
               建议 800×800，支持 JPG/PNG，最多 8 张
             </p>
@@ -170,39 +195,6 @@
                 @click="form.status = form.status === 1 ? 2 : 1"
               />
             </div>
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 13px;
-              "
-            >
-              <span>加入秒杀</span>
-              <span class="switch" />
-            </div>
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 13px;
-              "
-            >
-              <span>推荐到首页</span>
-              <span class="switch on" />
-            </div>
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 13px;
-              "
-            >
-              <span>支持七天无理由</span>
-              <span class="switch on" />
-            </div>
             <hr class="divider" />
             <div class="field">
               <label>运费模板</label>
@@ -223,9 +215,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { getItemById, saveItem, updateItem } from '@/api/item';
+import { getItemById, saveItem, updateItem, getCategories } from '@/api/item';
+import { uploadImage } from '@/api/upload';
 import { ElMessage } from 'element-plus';
 
 const route = useRoute();
@@ -250,6 +243,9 @@ const form = reactive({
 
 const imageList = ref([]);
 const lastUpdate = ref('-');
+const categoryOptions = ref([]);
+const specGroups = ref([]);
+const fileInput = ref(null);
 
 const skuSuffix = computed(() => {
   const id = route.params.id || 0;
@@ -257,12 +253,12 @@ const skuSuffix = computed(() => {
 });
 
 onMounted(async () => {
+  await fetchCategories();
   if (isEdit.value) {
     try {
       const item = await getItemById(route.params.id);
       if (item && item.id) {
         Object.assign(form, item);
-        // 价格以「分」存储，编辑表单按「元」展示（与原型 299.00 / 499.00 一致）
         if (typeof item.price === 'number') form.price = (item.price / 100).toFixed(2);
         const mp = item.marketPrice ?? item.originalPrice;
         if (typeof mp === 'number') form.marketPrice = (mp / 100).toFixed(2);
@@ -271,9 +267,19 @@ onMounted(async () => {
         } else if (item.image) {
           imageList.value = [item.image];
         }
-        // 商品无图时留空（不再填充无效图片路径）
         if (imageList.value.length === 0) {
           imageList.value = [];
+        }
+        // Parse spec string to groups if available
+        if (item.spec) {
+          try {
+            const parsed = JSON.parse(item.spec);
+            if (Array.isArray(parsed)) {
+              specGroups.value = parsed;
+            }
+          } catch {
+            // spec is not JSON, ignore
+          }
         }
         lastUpdate.value = item.updateTime?.slice(0, 16) || '-';
       }
@@ -282,6 +288,15 @@ onMounted(async () => {
     }
   }
 });
+
+async function fetchCategories() {
+  try {
+    const list = await getCategories();
+    categoryOptions.value = (list || []).map((c) => c.name).filter(Boolean);
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 const placeholderClasses = ['s4', 's7', 's1', 's2', 's3', 's5', 's6', 's8'];
 
@@ -299,26 +314,78 @@ function getImageStyle(img) {
   return '';
 }
 
-function addImage() {
+function triggerUpload() {
   if (imageList.value.length >= 8) {
     ElMessage.warning('最多上传 8 张图片');
     return;
   }
-  imageList.value.push('/placeholder.png');
+  fileInput.value?.click();
+}
+
+async function handleFileChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const r = await uploadImage(file);
+    if (r && r.url) {
+      imageList.value.push(r.url);
+    } else {
+      ElMessage.error('上传失败');
+    }
+  } catch (err) {
+    console.error(err);
+    ElMessage.error('上传失败');
+  }
+  e.target.value = '';
 }
 
 function removeImage(idx) {
   imageList.value.splice(idx, 1);
 }
 
+// Spec management
+function addSpecGroup() {
+  specGroups.value.push({ name: '', values: [], adding: false, newValue: '' });
+}
+
+function removeSpecGroup(idx) {
+  specGroups.value.splice(idx, 1);
+}
+
+function startAddSpecValue(gIdx) {
+  specGroups.value[gIdx].adding = true;
+  specGroups.value[gIdx].newValue = '';
+  nextTick(() => {
+    const inputs = document.querySelectorAll('.chip input');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  });
+}
+
+function confirmSpecValue(gIdx) {
+  const group = specGroups.value[gIdx];
+  const val = group.newValue?.trim();
+  if (val) {
+    group.values.push(val);
+  }
+  group.adding = false;
+  group.newValue = '';
+}
+
+function removeSpecValue(gIdx, vIdx) {
+  specGroups.value[gIdx].values.splice(vIdx, 1);
+}
+
 async function save() {
   try {
-    // 表单以「元」展示/编辑，后端 ItemDTO.price 为整数「分」，提交前换算
     const priceYuan = parseFloat(form.price);
+    const specStr =
+      specGroups.value.length > 0 ? JSON.stringify(specGroups.value) : form.spec || '';
     const payload = {
       ...form,
       image: imageList.value[0] || '',
+      images: imageList.value,
       price: Number.isFinite(priceYuan) ? Math.round(priceYuan * 100) : 0,
+      spec: specStr,
     };
     if (isEdit.value) await updateItem(route.params.id, payload);
     else await saveItem(payload);
@@ -426,6 +493,18 @@ async function save() {
   border-color: var(--brand);
   color: #fff;
   font-weight: 700;
+}
+.chip .x {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.chip .x:hover {
+  opacity: 1;
 }
 
 .upload-grid {

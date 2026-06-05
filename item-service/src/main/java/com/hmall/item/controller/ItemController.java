@@ -19,7 +19,9 @@ import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Api(tags = "商品管理相关接口")
 @RestController
@@ -64,12 +66,17 @@ public class ItemController {
             @RequestParam(value = "size", defaultValue = "10") Integer size,
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "status", required = false) Integer status) {
+            @RequestParam(value = "status", required = false) Integer status,
+            @RequestParam(value = "minPrice", required = false) Integer minPrice,
+            @RequestParam(value = "maxPrice", required = false) Integer maxPrice) {
         Page<Item> p = new Page<>(page, size);
         LambdaQueryWrapper<Item> wrapper = new LambdaQueryWrapper<>();
         if (name != null && !name.isEmpty()) wrapper.like(Item::getName, name);
         if (category != null && !category.isEmpty()) wrapper.eq(Item::getCategory, category);
         if (status != null) wrapper.eq(Item::getStatus, status);
+        if (minPrice != null) wrapper.ge(Item::getPrice, minPrice);
+        if (maxPrice != null) wrapper.le(Item::getPrice, maxPrice);
+        wrapper.ne(Item::getStatus, 3);
         wrapper.orderByDesc(Item::getUpdateTime);
         return PageDTO.of(itemService.page(p, wrapper), ItemDTO.class);
     }
@@ -125,5 +132,16 @@ public class ItemController {
     @PutMapping("/items/stock/deduct")
     public void deductStock(@RequestBody List<OrderDetailDTO> items) {
         itemService.deductStock(items);
+    }
+
+    @ApiOperation("管理端商品统计")
+    @GetMapping("/admin/items/stats")
+    public Map<String, Object> adminItemStats() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("total", itemService.count());
+        stats.put("onSale", itemService.lambdaQuery().eq(Item::getStatus, 1).count());
+        stats.put("offSale", itemService.lambdaQuery().eq(Item::getStatus, 2).count());
+        stats.put("lowStock", itemService.lambdaQuery().lt(Item::getStock, 20).eq(Item::getStatus, 1).count());
+        return stats;
     }
 }

@@ -4,8 +4,8 @@
       <div>
         <h1>商品管理</h1>
         <p>
-          共 {{ total.toLocaleString() }} 件商品 · 在售 {{ onSaleCount }} · 已下架
-          {{ offSaleCount }}
+          共 {{ stats.total.toLocaleString() }} 件商品 · 在售 {{ stats.onSale }} · 已下架
+          {{ stats.offSale }}
         </p>
       </div>
       <div class="acts">
@@ -50,9 +50,7 @@
           @change="fetch"
         >
           <el-option label="全部分类" value="" />
-          <el-option label="手机数码" value="手机数码" />
-          <el-option label="家用电器" value="家用电器" />
-          <el-option label="食品生鲜" value="食品生鲜" />
+          <el-option v-for="cat in categoryOptions" :key="cat" :label="cat" :value="cat" />
         </el-select>
       </div>
       <div class="field-inline">
@@ -70,9 +68,11 @@
       <div class="ah">
         <h3>商品列表</h3>
         <div style="display: flex; gap: 8px">
-          <el-button size="small">批量上架</el-button>
-          <el-button size="small">批量下架</el-button>
-          <el-button size="small" style="color: var(--danger)">批量删除</el-button>
+          <el-button size="small" @click="batchOnSale">批量上架</el-button>
+          <el-button size="small" @click="batchOffSale">批量下架</el-button>
+          <el-button size="small" style="color: var(--danger)" @click="batchDelete"
+            >批量删除</el-button
+          >
         </div>
       </div>
       <table class="atable">
@@ -116,7 +116,7 @@
                 <span v-if="row.stock < 20"> ⚠</span>
               </span>
             </td>
-            <td>{{ formatSales(row.sales || 0) }}</td>
+            <td>{{ formatSales(row.sold || 0) }}</td>
             <td>
               <span :class="['switch', row.status === 1 ? 'on' : '']" @click="toggleStatus(row)" />
               <div class="dim" style="font-size: 11px; margin-top: 3px">
@@ -149,8 +149,16 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { getItems, updateItemStatus, deleteItem } from '@/api/item';
+import { ref, computed, onMounted } from 'vue';
+import {
+  getItems,
+  updateItemStatus,
+  batchUpdateItemStatus,
+  deleteItem,
+  batchDeleteItems,
+  getItemStats,
+  getCategories,
+} from '@/api/item';
 import { ElMessage, ElMessageBox } from 'element-plus';
 
 const items = ref([]);
@@ -162,15 +170,14 @@ const searchCategory = ref('');
 const minPrice = ref('');
 const maxPrice = ref('');
 const activeTab = ref('all');
-
-const onSaleCount = computed(() => items.value.filter((i) => i.status === 1).length);
-const offSaleCount = computed(() => items.value.filter((i) => i.status === 2).length);
+const categoryOptions = ref([]);
+const stats = ref({ total: 0, onSale: 0, offSale: 0, lowStock: 0 });
 
 const tabs = computed(() => [
-  { label: '全部', value: 'all', badge: total.value },
-  { label: '在售中', value: 'on', badge: onSaleCount.value },
-  { label: '已下架', value: 'off', badge: offSaleCount.value },
-  { label: '库存预警', value: 'low', badge: items.value.filter((i) => i.stock < 20).length },
+  { label: '全部', value: 'all', badge: stats.value.total },
+  { label: '在售中', value: 'on', badge: stats.value.onSale },
+  { label: '已下架', value: 'off', badge: stats.value.offSale },
+  { label: '库存预警', value: 'low', badge: stats.value.lowStock },
   { label: '待审核', value: 'pending', badge: 0 },
 ]);
 
@@ -181,6 +188,8 @@ const allChecked = computed({
       i.checked = v;
     }),
 });
+
+const selectedIds = computed(() => items.value.filter((i) => i.checked).map((i) => i.id));
 
 function switchTab(val) {
   activeTab.value = val;
@@ -203,10 +212,38 @@ function formatSales(n) {
   return n;
 }
 
+async function fetchStats() {
+  try {
+    const r = await getItemStats();
+    if (r) {
+      stats.value = {
+        total: r.total || 0,
+        onSale: r.onSale || 0,
+        offSale: r.offSale || 0,
+        lowStock: r.lowStock || 0,
+      };
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function fetchCategories() {
+  try {
+    const list = await getCategories();
+    categoryOptions.value = (list || []).map((c) => c.name).filter(Boolean);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 async function fetch(p = 1) {
   page.value = p;
   try {
     const params = { page: p, size: size.value, name: searchName.value };
+    if (searchCategory.value) params.category = searchCategory.value;
+    if (minPrice.value) params.minPrice = Math.round(parseFloat(minPrice.value) * 100);
+    if (maxPrice.value) params.maxPrice = Math.round(parseFloat(maxPrice.value) * 100);
     if (activeTab.value === 'on') params.status = 1;
     if (activeTab.value === 'off') params.status = 2;
     const r = await getItems(params);
@@ -224,6 +261,7 @@ async function toggleStatus(row) {
     await updateItemStatus(row.id, newStatus);
     row.status = newStatus;
     ElMessage.success('已更新');
+    fetchStats();
   } catch (err) {
     console.error(err);
   }
@@ -234,13 +272,67 @@ async function del(id) {
     await ElMessageBox.confirm('确认删除?', '提示', { type: 'warning' });
     await deleteItem(id);
     fetch(page.value);
+    fetchStats();
     ElMessage.success('已删除');
   } catch (err) {
     console.error(err);
   }
 }
 
-fetch();
+async function batchOnSale() {
+  const ids = selectedIds.value;
+  if (ids.length === 0) {
+    ElMessage.warning('请先选择商品');
+    return;
+  }
+  try {
+    await batchUpdateItemStatus(ids, 1);
+    ElMessage.success('批量上架成功');
+    fetch(page.value);
+    fetchStats();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function batchOffSale() {
+  const ids = selectedIds.value;
+  if (ids.length === 0) {
+    ElMessage.warning('请先选择商品');
+    return;
+  }
+  try {
+    await batchUpdateItemStatus(ids, 2);
+    ElMessage.success('批量下架成功');
+    fetch(page.value);
+    fetchStats();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function batchDelete() {
+  const ids = selectedIds.value;
+  if (ids.length === 0) {
+    ElMessage.warning('请先选择商品');
+    return;
+  }
+  try {
+    await ElMessageBox.confirm(`确认删除选中的 ${ids.length} 件商品?`, '提示', { type: 'warning' });
+    await batchDeleteItems(ids);
+    ElMessage.success('批量删除成功');
+    fetch(page.value);
+    fetchStats();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+onMounted(() => {
+  fetch();
+  fetchStats();
+  fetchCategories();
+});
 </script>
 
 <style scoped>
