@@ -2,7 +2,7 @@
 title: hmall-admin
 tracks:
   - hmall-admin/
-last_synced_commit: 98828f8
+last_synced_commit: f499742
 last_synced_date: 2026-06-04
 sync_note: "对齐全部管理后台页至高保真原型视觉：全局样式/AdminLayout、Dashboard/Login/ItemList/ItemEdit/CategoryList/OrderList/OrderDetail/UserList/ReviewList/BannerList/NotificationList/FeedbackList/Profile；保持 API 与数据逻辑不变。额外更新：Login.vue 完全重写对齐原型（深色侧边栏、统计数字、角色选择、验证码）。2026-06-04 收尾：修复 OrderList 分页功能回归（装饰性→功能性 prev/next/fetch(p)）；AdminLayout topbar 恢复退出登录按钮；删除 OrderList 死代码 allChecked。codex-review 修正：FeedbackList 状态对齐后端真实两态（0 待处理/1 已回复），移除无法持久化的自定义状态编辑与 0/2/3 过滤，回复仅提交 reply。第 4 轮：ItemEdit 改用 getItemById 直连 GET /items/{id}（原先 size:1 列表查找必然漏数据）。第 8 轮：ItemEdit 保存时价格由「元」换算回整数「分」（后端 ItemDTO.price 为 Integer 分，原样回传"299.00"会反序列化失败/价格错乱）。第 11 轮：OrderList 搜索接入真实过滤（orderId 走后端，客户/支付/日期客户端过滤），支付列按 paymentType(1支付宝/2微信/3余额) 映射（第 12 轮：移除后端不支持的客户/支付/日期搜索控件，仅保留订单号后端过滤+状态 tab，避免分页下不正确的伪过滤）；AdminLayout 顶栏徽标改真实接口（待发货数/待处理反馈数）、身份取自 adminInfo，去硬编码。Dashboard 说明：看板运营统计（成交额/趋势/品类/访客/新增用户/待办/最新订单/热销）后端接口暂不存在（见 docs/backend-api.md B4），本页为视觉对齐+演示数据，待后端统计接口接入后替换为真实数据。"
 ---

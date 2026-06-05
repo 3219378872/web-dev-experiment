@@ -162,6 +162,23 @@ public class OrderController {
         return PageDTO.of(result, OrderVO.class);
     }
 
+    @ApiOperation("管理端根据id查询订单")
+    @GetMapping("/admin/orders/{id}")
+    public OrderVO adminQueryOrderById(@PathVariable("id") Long orderId) {
+        Order order = orderService.getById(orderId);
+        if (order == null) {
+            throw new BadRequestException("订单不存在");
+        }
+        OrderVO orderVO = BeanUtils.copyBean(order, OrderVO.class);
+        List<OrderDetail> details = orderDetailService.lambdaQuery()
+                .eq(OrderDetail::getOrderId, orderId)
+                .list();
+        if (details != null && !details.isEmpty()) {
+            orderVO.setDetails(BeanUtils.copyList(details, OrderDetailVO.class));
+        }
+        return orderVO;
+    }
+
     @ApiOperation("修改订单状态")
     @PutMapping("/admin/orders/{id}/status")
     public R<Void> updateStatus(@PathVariable Long id, @RequestParam Integer status) {

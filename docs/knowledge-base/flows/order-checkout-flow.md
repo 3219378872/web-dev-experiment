@@ -5,7 +5,7 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: ee308f3
+last_synced_commit: f499742
 last_synced_date: 2026-06-05
 sync_note: "修复订单详情缺少商品信息，无需文档更新"
 ---

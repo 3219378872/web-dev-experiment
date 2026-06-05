@@ -47,7 +47,8 @@
               <tr v-for="(g, idx) in goodsList" :key="idx">
                 <td>
                   <span class="prod-cell">
-                    <div class="ph" :class="g.shade" :data-label="g.category">
+                    <img v-if="g.image" :src="g.image" :alt="g.name" class="prod-img" />
+                    <div v-else class="ph" :class="g.shade" :data-label="g.category">
                       <span class="glyph">{{ g.glyph }}</span>
                     </div>
                     <span class="nm">{{ g.name }}</span>
@@ -179,7 +180,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { getOrders, shipOrder } from '@/api/order';
+import { getOrderById, shipOrder } from '@/api/order';
 import { ElMessage } from 'element-plus';
 
 const route = useRoute();
@@ -252,8 +253,7 @@ async function doShip() {
 
 onMounted(async () => {
   try {
-    const r = await getOrders({ orderId: route.params.id });
-    order.value = r.list?.[0] || null;
+    order.value = await getOrderById(route.params.id);
   } catch (err) {
     console.error(err);
   }
@@ -303,6 +303,13 @@ onMounted(async () => {
   display: grid;
   place-items: center;
   overflow: hidden;
+}
+.atable .prod-cell .prod-img {
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 .atable .prod-cell .nm {
   font-weight: 500;
