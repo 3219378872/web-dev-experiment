@@ -17,6 +17,7 @@ import com.hmall.mapper.OrderMapper;
 import com.hmall.service.IOrderDetailService;
 import com.hmall.service.IOrderLogisticsService;
 import com.hmall.service.ILogisticsTraceService;
+import com.hmall.service.ICouponService;
 import com.hmall.service.IOrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
@@ -188,8 +189,9 @@ class OrderServiceImplTest extends TradeServiceTestBase {
     @Test
     void handleOrderClose_usesAtomicPendingStatusGuard() {
         OrderMapper orderMapper = mock(OrderMapper.class);
+        ICouponService couponService = mock(ICouponService.class);
         OrderServiceImpl service = new OrderServiceImpl(
-                detailService, logisticsService, logisticsTraceService, itemClient, mqMessagePublisher, mqConsumerSupport);
+                detailService, logisticsService, logisticsTraceService, itemClient, couponService, mqMessagePublisher, mqConsumerSupport);
         ReflectionTestUtils.setField(service, "baseMapper", orderMapper);
 
         service.handleOrderClose(new OrderCreatedEvent(123L, 1L, List.of(100L)));
