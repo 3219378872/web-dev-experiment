@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 97e8267
+last_synced_commit: fb8d5f5
 last_synced_date: 2026-06-06
-sync_note: "fix(#129): FavoriteList.vue 加购接 cartStore.addItem（utils/cartFromFavorite.js）；fix(#130): Profile.vue 头像上传接 /upload/image+PUT /users/profile、gender/birthday 真实持久化、订单统计分页汇总（utils/profileStats.js、utils/avatarUpload.js）、新增 api/user.js getProfile；fix(#133): Login.vue 文案校正（记住账号、邮箱找回），登录标识三态由后端支持；新增三个 utils 对应 Vitest 单测"
+sync_note: "fix(#131): OrderConfirm.vue 结算页仅暴露后端支持的余额支付，配送/发票改为只读说明，提交负载由 utils/checkoutOptions.js 限定为 OrderFormDTO 支持字段；新增 checkoutOptions 与 OrderConfirm Vitest 回归测试"
 ---
 
 # hmall-web
@@ -52,6 +52,9 @@ sync_note: "fix(#129): FavoriteList.vue 加购接 cartStore.addItem（utils/cart
 - 订单页支付流程（OrderDetail.vue）：`?pay=1` 参数自动弹出余额支付弹窗；支付走两步——
   先 `POST /pay-orders`（`createPayOrder`）拿到支付单ID，再 `POST /pay-orders/{id}`
   （`payOrderByBalance`）执行扣款。支付密码由用户填写，后端校验。
+- 结算页支付方式（OrderConfirm.vue）：当前只展示余额支付（`paymentType=3`），避免展示
+  pay-service 尚不支持的支付宝/微信渠道。配送方式与发票能力按只读说明呈现；提交订单时
+  `utils/checkoutOptions.js` 只构造 `OrderFormDTO` 支持的 addressId/paymentType/freight/details/couponId。
 - 再次购买（OrderList.vue / OrderDetail.vue）：遍历 `order.details` 逐条调 `cartStore.addItem`
   后跳转 `/cart`；若 `details` 为空则提示用户商品信息不完整。
 - 收藏页加购（FavoriteList.vue）：按收藏记录 `itemId` 调 `cartStore.addItem`（payload 由

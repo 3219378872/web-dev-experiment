@@ -1,0 +1,7 @@
+slug: 2026-06-06-issue-131-order-payment
+status: active
+task_branch: task/2026-06-06-issue-131-order-payment
+spec: null
+plan: null
+spec_waiver: "Issue #131 gives concrete bug evidence and acceptance direction; fix is a narrow frontend contract correction."
+plan_waiver: "Single-page frontend change with focused tests; context/audit files capture the implementation steps."
