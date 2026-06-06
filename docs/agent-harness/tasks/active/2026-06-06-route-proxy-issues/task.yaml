@@ -1,0 +1,7 @@
+slug: 2026-06-06-route-proxy-issues
+status: active
+task_branch: task/2026-06-06-route-proxy-issues
+spec: null
+plan: null
+spec_waiver: "Small grouped bugfix for GitHub issues #155 and #156; issue bodies plus harness context define the accepted requirements."
+plan_waiver: "Implementation is limited to frontend proxy/nginx route entries, Nacos route seed entry, and focused regression tests."
