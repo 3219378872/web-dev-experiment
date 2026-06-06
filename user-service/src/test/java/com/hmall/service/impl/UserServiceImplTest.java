@@ -125,6 +125,37 @@ class UserServiceImplTest extends UserServiceTestBase {
         }
 
         @Test
+        @DisplayName("邮箱登录-命中同一用户")
+        void login_byEmail_success() {
+            UserLoginVO vo = userService.login(loginForm("testuser@test.com", "admin123"));
+
+            assertThat(vo.getUserId()).isEqualTo(1L);
+            assertThat(vo.getUsername()).isEqualTo("testuser");
+            assertThat(vo.getToken()).isNotBlank();
+        }
+
+        @Test
+        @DisplayName("手机号登录-命中同一用户")
+        void login_byPhone_success() {
+            User user = userService.getById(1L);
+            user.setPhone("13800138000");
+            userService.updateById(user);
+
+            UserLoginVO vo = userService.login(loginForm("13800138000", "admin123"));
+
+            assertThat(vo.getUserId()).isEqualTo(1L);
+            assertThat(vo.getUsername()).isEqualTo("testuser");
+        }
+
+        @Test
+        @DisplayName("标识为空 → BadRequestException")
+        void blankIdentifier_throws() {
+            assertThatThrownBy(() -> userService.login(loginForm("", "admin123")))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("用户名或密码错误");
+        }
+
+        @Test
         @DisplayName("role为null-默认使用user且VO中role为user")
         void login_nullRole_defaultsToUser() {
             // 将 testuser 的 role 设为 null
@@ -389,6 +420,65 @@ class UserServiceImplTest extends UserServiceTestBase {
             User after = userService.getById(1L);
             assertThat(after.getNickname()).isEqualTo("新昵称");
             assertThat(after.getAvatar()).isEqualTo(origAvatar);
+        }
+
+        @Test
+        @DisplayName("性别与生日-持久化")
+        void genderAndBirthday_persisted() {
+            User profile = new User();
+            profile.setGender("F");
+            profile.setBirthday(java.time.LocalDate.of(1995, 6, 1));
+
+            userService.updateProfile(profile);
+
+            User after = userService.getById(1L);
+            assertThat(after.getGender()).isEqualTo("F");
+            assertThat(after.getBirthday()).isEqualTo(java.time.LocalDate.of(1995, 6, 1));
+        }
+
+        @Test
+        @DisplayName("性别为空白/生日为null-不修改")
+        void genderBlankBirthdayNull_noChange() {
+            User seed = new User();
+            seed.setGender("M");
+            seed.setBirthday(java.time.LocalDate.of(1990, 1, 1));
+            userService.updateProfile(seed);
+
+            User profile = new User();
+            profile.setGender("  ");
+            profile.setBirthday(null);
+            userService.updateProfile(profile);
+
+            User after = userService.getById(1L);
+            assertThat(after.getGender()).isEqualTo("M");
+            assertThat(after.getBirthday()).isEqualTo(java.time.LocalDate.of(1990, 1, 1));
+        }
+    }
+
+    @Nested
+    @DisplayName("getCurrentUserProfile")
+    class GetCurrentUserProfileTests {
+
+        @Test
+        @DisplayName("返回当前登录用户脱敏资料")
+        void returnsCurrentUserVO() {
+            // UserContext 在 setUp 中设为 TEST_USER_ID=1
+            UserVO vo = userService.getCurrentUserProfile();
+
+            assertThat(vo).isNotNull();
+            assertThat(vo.getId()).isEqualTo(1L);
+            assertThat(vo.getUsername()).isEqualTo("testuser");
+            assertThat(vo.getEmail()).isEqualTo("testuser@test.com");
+        }
+
+        @Test
+        @DisplayName("用户不存在-抛出BadRequestException")
+        void userNotFound_throws() {
+            com.hmall.common.utils.UserContext.setUser(999L);
+
+            assertThatThrownBy(() -> userService.getCurrentUserProfile())
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("用户不存在");
         }
     }
 

@@ -6,6 +6,7 @@ import com.hmall.domain.dto.RegisterFormDTO;
 import com.hmall.domain.dto.ResetPasswordDTO;
 import com.hmall.domain.po.User;
 import com.hmall.domain.vo.UserLoginVO;
+import com.hmall.domain.vo.UserVO;
 import com.hmall.service.IUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -58,6 +59,12 @@ public class UserController {
     public R<Void> resetPassword(@RequestBody @Validated ResetPasswordDTO form) {
         userService.resetPassword(form);
         return R.ok();
+    }
+
+    @ApiOperation("获取当前登录用户个人信息")
+    @GetMapping("/profile")
+    public UserVO getCurrentUserProfile() {
+        return userService.getCurrentUserProfile();
     }
 
     @ApiOperation("修改个人信息")

@@ -4,9 +4,9 @@ tracks:
   - hm-gateway/
   - user-service/
   - hm-common/
-last_synced_commit: 6f3c2a0
-last_synced_date: 2026-06-05
-sync_note: "Issue #86 跟进：hm-common 加 SpringfoxCompatibilityConfig（actuator×springfox NPE 补丁，@ConditionalOnWebApplication(SERVLET) 不影响 reactive 网关）、user-service feign contextId；鉴权/网关流程本身未变"
+last_synced_commit: 97e8267
+last_synced_date: 2026-06-06
+sync_note: "Issue #133：登录校验由仅 username 扩展为用户名/邮箱/手机号三标识（service 层 or 匹配），JWT 颁发与网关鉴权链本身未变；/users/login 仍在 excludePaths 白名单"
 ---
 
 # auth-and-gateway-flow
@@ -20,7 +20,8 @@ sync_note: "Issue #86 跟进：hm-common 加 SpringfoxCompatibilityConfig（actu
    [hmall-admin](../modules/hmall-admin.md) → [hm-gateway](../modules/hm-gateway.md)
    `POST /users/login`（白名单路径放行）。
 2. **颁发 JWT** —— Gateway 转发到 [user-service](../modules/user-service.md)。
-   user-service 校验用户名/密码（BCrypt），颁发 JWT（含 userId、role、过期）。
+   user-service 按用户名/邮箱/手机号任一标识定位用户（`username=? or email=? or phone=?`），
+   校验密码（BCrypt），颁发 JWT（含 userId、role、过期）。返回形态仍为 `UserLoginVO`。
 3. **前端持久化** —— 返回 token，前端存 localStorage，后续 axios 请求自动注入
    `Authorization: Bearer <token>`。
 4. **鉴权拦截** —— 后续请求经 Gateway，`AuthGlobalFilter` 校验 JWT：

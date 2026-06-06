@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -81,5 +82,15 @@ public class User implements Serializable {
      * 昵称
      */
     private String nickname;
+
+    /**
+     * 性别：M男 F女 N保密
+     */
+    private String gender;
+
+    /**
+     * 生日
+     */
+    private LocalDate birthday;
 
 }

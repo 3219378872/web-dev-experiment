@@ -26,6 +26,12 @@ public interface IUserService extends IService<User> {
     void updateProfile(User profile);
 
     /**
+     * 获取当前登录用户的个人资料（脱敏）
+     * @return 当前用户脱敏信息
+     */
+    UserVO getCurrentUserProfile();
+
+    /**
      * 分页查询用户列表（管理端）
      * @param page 页码
      * @param size 每页大小

@@ -14,9 +14,21 @@
             <div class="panel-head"><h3>个人信息</h3></div>
             <div class="panel-pad">
               <div class="avatar-up">
-                <div class="av">{{ avatarLetter }}</div>
+                <div class="av">
+                  <img v-if="form.avatar" :src="form.avatar" alt="头像" class="av-img" />
+                  <span v-else>{{ avatarLetter }}</span>
+                </div>
                 <div>
-                  <button class="btn btn-ghost btn-sm" @click="triggerAvatar">更换头像</button>
+                  <input
+                    ref="avatarInput"
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    style="display: none"
+                    @change="onAvatarChange"
+                  />
+                  <button class="btn btn-ghost btn-sm" :disabled="uploading" @click="triggerAvatar">
+                    {{ uploading ? '上传中...' : '更换头像' }}
+                  </button>
                   <p class="dim" style="font-size: 12px; margin-top: 8px">
                     支持 JPG / PNG，建议 200×200，不超过 2MB
                   </p>
@@ -69,8 +81,8 @@
                 <div class="field">
                   <label>绑定手机</label>
                   <div class="input-group">
-                    <input v-model="form.phone" class="input" readonly />
-                    <a class="pre" style="color: var(--brand); cursor: pointer">更换</a>
+                    <input v-model="form.phone" class="input" readonly placeholder="未绑定手机号" />
+                    <span class="pre dim" style="font-size: 12px">暂不支持在线更换</span>
                   </div>
                 </div>
                 <div style="display: flex; gap: 12px; margin-top: 6px">
@@ -129,15 +141,19 @@
 </template>
 
 <script setup>
-import { reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useUserStore } from '@/stores/user';
-import { updateProfile } from '@/api/user';
-import { getFavorites } from '@/api/common';
+import { getProfile, updateProfile } from '@/api/user';
+import { getFavorites, uploadImage } from '@/api/common';
 import { getOrders, getMyCoupons } from '@/api/order';
 import { ElMessage } from 'element-plus';
 import AccountSidebar from '@/components/AccountSidebar.vue';
+import { countOrderPage, mergeOrderStats, hasNextPage } from '@/utils/profileStats';
+import { validateAvatarFile } from '@/utils/avatarUpload';
 
 const userStore = useUserStore();
+const avatarInput = ref(null);
+const uploading = ref(false);
 
 const form = reactive({
   username: userStore.userInfo?.username || '',
@@ -159,6 +175,29 @@ const stats = reactive({
   orders: 0,
 });
 
+// 从后端拉取当前用户真实资料并填充表单（登录态仅缓存了少量字段）
+async function loadProfile() {
+  try {
+    const profile = await getProfile();
+    if (!profile) return;
+    form.username = profile.username || form.username;
+    form.nickname = profile.nickname || '';
+    form.email = profile.email || '';
+    form.phone = profile.phone || '';
+    form.avatar = profile.avatar || '';
+    form.gender = profile.gender || 'N';
+    form.birthday = profile.birthday || '';
+    if (profile.balance != null) stats.balance = profile.balance;
+    // 同步到全局 userStore，使其它页面也能读到最新资料
+    userStore.userInfo = { ...userStore.userInfo, ...profile };
+    localStorage.setItem('userInfo', JSON.stringify(userStore.userInfo));
+  } catch (err) {
+    /* 未登录或失败时沿用缓存值，错误已由拦截器提示 */
+  }
+}
+
+const PAGE_SIZE = 100;
+
 async function loadStats() {
   try {
     const favs = await getFavorites();
@@ -173,17 +212,31 @@ async function loadStats() {
     /* 忽略 */
   }
   try {
-    const all = await getOrders({ page: 1, size: 100 });
-    const list = all?.list || [];
-    stats.orders = all?.total || list.length;
-    stats.pendingPay = list.filter((o) => o.status === 1).length;
-    stats.pendingRecv = list.filter((o) => o.status === 3).length;
+    // 分页汇总全部订单，避免只统计第一页导致超过 100 单时计数不准
+    let page = 1;
+    let pages = 1;
+    let total = 0;
+    let agg = { pendingPay: 0, pendingRecv: 0 };
+    do {
+      const resp = await getOrders({ page, size: PAGE_SIZE });
+      const list = resp?.list || [];
+      total = resp?.total || total || list.length;
+      pages = resp?.pages || 1;
+      agg = mergeOrderStats(agg, countOrderPage(list));
+      page += 1;
+    } while (hasNextPage(page - 1, pages));
+    stats.orders = total;
+    stats.pendingPay = agg.pendingPay;
+    stats.pendingRecv = agg.pendingRecv;
   } catch (err) {
     /* 忽略 */
   }
 }
 
-onMounted(loadStats);
+onMounted(() => {
+  loadProfile();
+  loadStats();
+});
 
 const avatarLetter = computed(() => {
   const name = form.nickname || form.username || '用户';
@@ -191,7 +244,37 @@ const avatarLetter = computed(() => {
 });
 
 function triggerAvatar() {
-  ElMessage.info('头像上传功能开发中');
+  avatarInput.value?.click();
+}
+
+async function onAvatarChange(event) {
+  const file = event.target.files?.[0];
+  // 清空 input 以便再次选择同一文件也能触发 change
+  event.target.value = '';
+  const { ok, reason } = validateAvatarFile(file);
+  if (!ok) {
+    if (reason === 'type') ElMessage.warning('仅支持 JPG / PNG 格式图片');
+    else if (reason === 'size') ElMessage.warning('图片大小不能超过 2MB');
+    return;
+  }
+  uploading.value = true;
+  try {
+    const url = await uploadImage(file);
+    if (!url) {
+      ElMessage.error('头像上传失败');
+      return;
+    }
+    form.avatar = url;
+    // 上传成功后立即持久化头像，避免用户忘记点保存而丢失
+    await updateProfile({ avatar: url });
+    userStore.userInfo = { ...userStore.userInfo, avatar: url };
+    localStorage.setItem('userInfo', JSON.stringify(userStore.userInfo));
+    ElMessage.success('头像已更新');
+  } catch (err) {
+    console.error(err);
+  } finally {
+    uploading.value = false;
+  }
 }
 
 async function save() {
@@ -200,7 +283,18 @@ async function save() {
       nickname: form.nickname,
       email: form.email,
       avatar: form.avatar,
+      gender: form.gender,
+      birthday: form.birthday || null,
     });
+    userStore.userInfo = {
+      ...userStore.userInfo,
+      nickname: form.nickname,
+      email: form.email,
+      avatar: form.avatar,
+      gender: form.gender,
+      birthday: form.birthday,
+    };
+    localStorage.setItem('userInfo', JSON.stringify(userStore.userInfo));
     ElMessage.success('已更新');
   } catch (err) {
     console.error(err);
@@ -237,6 +331,12 @@ async function save() {
   place-items: center;
   font-size: 34px;
   font-weight: 900;
+  overflow: hidden;
+}
+.avatar-up .av .av-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .gender {
   display: flex;

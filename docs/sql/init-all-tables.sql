@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS `user` (
     email VARCHAR(128),
     avatar VARCHAR(512),
     nickname VARCHAR(64),
+    gender VARCHAR(1) DEFAULT 'N' COMMENT '性别：M男 F女 N保密',
+    birthday DATE NULL COMMENT '生日',
     role VARCHAR(16) DEFAULT 'user',
     status INT DEFAULT 1 COMMENT '0=FROZEN 1=NORMAL',
     balance INT DEFAULT 0,
