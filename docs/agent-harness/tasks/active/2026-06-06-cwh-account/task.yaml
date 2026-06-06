@@ -1,7 +1,0 @@
-slug: 2026-06-06-cwh-account
-status: active
-task_branch: task/2026-06-06-cwh-account
-spec: null
-plan: null
-spec_waiver: "前端审查类 bug 修复（#129/#130/#133），验收点已在 issue 内明确，无需独立 spec"
-plan_waiver: "单 PR 范围内的接线/字段补齐改动，步骤直观，无需独立多步实施计划"
