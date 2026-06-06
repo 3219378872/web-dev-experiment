@@ -6,6 +6,7 @@ import com.hmall.api.dto.OrderDetailDTO;
 import com.hmall.api.dto.OrderFormDTO;
 import com.hmall.common.exception.BadRequestException;
 import com.hmall.common.exception.BizIllegalException;
+import com.hmall.common.domain.PageDTO;
 import com.hmall.common.mq.MqConstants;
 import com.hmall.common.mq.consumer.MqConsumerSupport;
 import com.hmall.common.mq.event.OrderCreatedEvent;
@@ -13,8 +14,10 @@ import com.hmall.common.mq.event.OrderStatusChangedEvent;
 import com.hmall.common.mq.outbox.MqMessagePublisher;
 import com.hmall.domain.po.Coupon;
 import com.hmall.domain.po.Order;
+import com.hmall.domain.po.OrderDetail;
 import com.hmall.domain.po.OrderLogistics;
 import com.hmall.domain.po.UserCoupon;
+import com.hmall.domain.vo.OrderVO;
 import com.hmall.mapper.CouponMapper;
 import com.hmall.mapper.OrderMapper;
 import com.hmall.mapper.UserCouponMapper;
@@ -745,6 +748,64 @@ class OrderServiceImplTest extends TradeServiceTestBase {
         assertThatThrownBy(() -> orderService.deleteOrder(orderId, 1L))
                 .isInstanceOf(BizIllegalException.class)
                 .hasMessageContaining("不可删除");
+    }
+
+    @Test
+    void queryUserOrders_keywordMatchesOrderIdOrDetailName() {
+        Order phoneOrder = new Order();
+        phoneOrder.setUserId(TEST_USER_ID);
+        phoneOrder.setTotalFee(10000);
+        phoneOrder.setPaymentType(3);
+        phoneOrder.setStatus(2);
+        phoneOrder.setCreateTime(LocalDateTime.now().minusMinutes(2));
+        orderService.save(phoneOrder);
+        OrderDetail phoneDetail = new OrderDetail();
+        phoneDetail.setOrderId(phoneOrder.getId());
+        phoneDetail.setItemId(100L);
+        phoneDetail.setName("旗舰手机");
+        phoneDetail.setNum(1);
+        phoneDetail.setPrice(10000);
+        detailService.save(phoneDetail);
+
+        Order otherOrder = new Order();
+        otherOrder.setUserId(TEST_USER_ID);
+        otherOrder.setTotalFee(2000);
+        otherOrder.setPaymentType(3);
+        otherOrder.setStatus(2);
+        otherOrder.setCreateTime(LocalDateTime.now().minusMinutes(1));
+        orderService.save(otherOrder);
+        OrderDetail otherDetail = new OrderDetail();
+        otherDetail.setOrderId(otherOrder.getId());
+        otherDetail.setItemId(200L);
+        otherDetail.setName("家居用品");
+        otherDetail.setNum(1);
+        otherDetail.setPrice(2000);
+        detailService.save(otherDetail);
+
+        Order foreignOrder = new Order();
+        foreignOrder.setUserId(999L);
+        foreignOrder.setTotalFee(3000);
+        foreignOrder.setPaymentType(3);
+        foreignOrder.setStatus(2);
+        foreignOrder.setCreateTime(LocalDateTime.now());
+        orderService.save(foreignOrder);
+        OrderDetail foreignDetail = new OrderDetail();
+        foreignDetail.setOrderId(foreignOrder.getId());
+        foreignDetail.setItemId(300L);
+        foreignDetail.setName("旗舰手机");
+        foreignDetail.setNum(1);
+        foreignDetail.setPrice(3000);
+        detailService.save(foreignDetail);
+
+        PageDTO<OrderVO> byName = orderService.queryUserOrders(TEST_USER_ID, 1, 10, null, "手机");
+        assertThat(byName.getTotal()).isEqualTo(1);
+        assertThat(byName.getList()).extracting(OrderVO::getId).containsExactly(phoneOrder.getId());
+        assertThat(byName.getList().get(0).getDetails()).hasSize(1);
+
+        PageDTO<OrderVO> byOrderId = orderService.queryUserOrders(
+                TEST_USER_ID, 1, 10, null, String.valueOf(otherOrder.getId()));
+        assertThat(byOrderId.getTotal()).isEqualTo(1);
+        assertThat(byOrderId.getList()).extracting(OrderVO::getId).containsExactly(otherOrder.getId());
     }
 
     private void runAfterCommitCallbacks() {

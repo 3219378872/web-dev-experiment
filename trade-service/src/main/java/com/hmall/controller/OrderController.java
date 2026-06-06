@@ -27,8 +27,6 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Api(tags = "订单管理接口")
 @RestController
@@ -77,31 +75,9 @@ public class OrderController {
     public PageDTO<OrderVO> myOrders(
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "size", defaultValue = "10") Integer size,
-            @RequestParam(value = "status", required = false) Integer status) {
-        LambdaQueryWrapper<Order> wrapper = new LambdaQueryWrapper<Order>()
-                .eq(Order::getUserId, UserContext.getUser());
-        if (status != null) wrapper.eq(Order::getStatus, status);
-        wrapper.orderByDesc(Order::getCreateTime);
-        Page<Order> result = orderService.page(new Page<>(page, size), wrapper);
-        List<OrderVO> voList = BeanUtils.copyList(result.getRecords(), OrderVO.class);
-
-        // 批量查询订单详情并填充
-        if (!voList.isEmpty()) {
-            List<Long> orderIds = voList.stream().map(OrderVO::getId).collect(Collectors.toList());
-            List<OrderDetail> allDetails = orderDetailService.lambdaQuery()
-                    .in(OrderDetail::getOrderId, orderIds)
-                    .list();
-            Map<Long, List<OrderDetail>> detailMap = allDetails.stream()
-                    .collect(Collectors.groupingBy(OrderDetail::getOrderId));
-            for (OrderVO vo : voList) {
-                List<OrderDetail> details = detailMap.get(vo.getId());
-                if (details != null && !details.isEmpty()) {
-                    vo.setDetails(BeanUtils.copyList(details, OrderDetailVO.class));
-                }
-            }
-        }
-
-        return new PageDTO<>(result.getTotal(), result.getPages(), voList);
+            @RequestParam(value = "status", required = false) Integer status,
+            @RequestParam(value = "keyword", required = false) String keyword) {
+        return orderService.queryUserOrders(UserContext.getUser(), page, size, status, keyword);
     }
 
     @ApiOperation("取消订单")

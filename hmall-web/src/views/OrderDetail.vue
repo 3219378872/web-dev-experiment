@@ -42,15 +42,14 @@
               确认收货
             </button>
             <button v-if="order.status === 1" class="btn" @click="handleCancel">取消订单</button>
-            <button v-if="order.status === 3" class="btn">延长收货</button>
-            <router-link v-if="order.status === 2 || order.status === 3" class="btn" to="/service"
-              >申请售后</router-link
-            >
+            <button v-if="canRequestRefund(order.status)" class="btn" @click="handleRefund">
+              申请售后
+            </button>
           </div>
         </div>
 
         <!-- 物流时间轴 -->
-        <div v-if="order.status >= 3" class="track">
+        <div v-if="order.status === 3 || order.status === 4" class="track">
           <h3>物流跟踪</h3>
           <div v-if="logistics.length" class="tl">
             <div v-for="(log, idx) in logistics" :key="idx" class="ti" :class="{ on: idx === 0 }">
@@ -175,10 +174,12 @@ import {
   getOrderById,
   cancelOrder,
   confirmOrder,
+  refundOrder,
   createPayOrder,
   payOrderByBalance,
   getLogistics,
 } from '@/api/order';
+import { canRequestRefund } from '@/utils/orderStatus';
 import { ElMessage } from 'element-plus';
 
 const route = useRoute();
@@ -202,6 +203,7 @@ const statusTitle = computed(() => {
     3: '卖家已发货，待收货',
     4: '交易完成',
     5: '交易关闭',
+    6: '退款处理中',
   };
   return map[order.value?.status] || '订单详情';
 });
@@ -213,6 +215,7 @@ const statusDesc = computed(() => {
     3: '商品正在配送途中，收到商品请及时确认收货～',
     4: '感谢您的购买，欢迎再次光临',
     5: '订单已关闭，如有疑问请联系客服',
+    6: '售后申请已提交，请等待商家审核',
   };
   return map[order.value?.status] || '';
 });
@@ -326,6 +329,17 @@ async function handleConfirm() {
     await confirmOrder(order.value.id);
     ElMessage.success('确认收货成功');
     fetchOrder();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function handleRefund() {
+  if (!order.value) return;
+  try {
+    await refundOrder(order.value.id);
+    ElMessage.success('售后申请已提交');
+    await fetchOrder();
   } catch (err) {
     console.error(err);
   }

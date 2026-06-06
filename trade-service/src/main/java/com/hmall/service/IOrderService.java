@@ -2,13 +2,17 @@ package com.hmall.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hmall.api.dto.OrderFormDTO;
+import com.hmall.common.domain.PageDTO;
 import com.hmall.domain.po.Order;
+import com.hmall.domain.vo.OrderVO;
 
 public interface IOrderService extends IService<Order> {
 
     Long createOrder(OrderFormDTO orderFormDTO);
 
     void markOrderPaySuccess(Long orderId);
+
+    PageDTO<OrderVO> queryUserOrders(Long userId, Integer page, Integer size, Integer status, String keyword);
 
     void cancelOrder(Long orderId, Long userId);
 

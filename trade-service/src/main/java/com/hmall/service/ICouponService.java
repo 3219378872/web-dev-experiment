@@ -2,12 +2,14 @@ package com.hmall.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hmall.domain.po.Coupon;
+import com.hmall.domain.vo.UserCouponVO;
 import java.util.List;
 
 public interface ICouponService extends IService<Coupon> {
     List<Coupon> getAvailableCoupons();
     void claimCoupon(Long userId, Long couponId);
     List<Coupon> getUserCoupons(Long userId);
+    List<UserCouponVO> getUserCouponViews(Long userId);
 
     /**
      * 获取用户可用的优惠券（过滤满减门槛、有效期、未使用）

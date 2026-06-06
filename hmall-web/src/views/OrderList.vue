@@ -113,13 +113,34 @@
                   <router-link class="btn btn-ghost btn-sm" :to="`/order/${order.id}`"
                     >查看物流</router-link
                   >
-                  <router-link class="btn btn-ghost btn-sm" to="/service">联系卖家</router-link>
+                  <button class="btn btn-ghost btn-sm" @click="handleRefund(order.id)">
+                    申请售后
+                  </button>
+                </template>
+                <template v-else-if="canRequestRefund(order.status)">
+                  <button class="btn btn-ghost btn-sm" @click="handleRefund(order.id)">
+                    申请售后
+                  </button>
+                  <router-link class="btn btn-ghost btn-sm" :to="`/order/${order.id}`"
+                    >订单详情</router-link
+                  >
                 </template>
                 <template v-else-if="order.status === 4">
-                  <router-link class="btn btn-gold btn-sm" to="/feedback">评价晒单</router-link>
+                  <router-link
+                    v-if="primaryReviewItemRoute(order)"
+                    class="btn btn-gold btn-sm"
+                    :to="primaryReviewItemRoute(order)"
+                    >评价晒单</router-link
+                  >
                   <button class="btn btn-ghost btn-sm" @click="handleRepurchase(order)">
                     再次购买
                   </button>
+                  <router-link class="btn btn-ghost btn-sm" :to="`/order/${order.id}`"
+                    >订单详情</router-link
+                  >
+                </template>
+                <template v-else-if="order.status === 6">
+                  <span class="dim" style="font-size: 12px">退款处理中</span>
                   <router-link class="btn btn-ghost btn-sm" :to="`/order/${order.id}`"
                     >订单详情</router-link
                   >
@@ -170,7 +191,21 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { useCartStore } from '@/stores/cart';
-import { getOrders, cancelOrder, confirmOrder, deleteOrder, getOrderById } from '@/api/order';
+import {
+  getOrders,
+  cancelOrder,
+  confirmOrder,
+  refundOrder,
+  deleteOrder,
+  getOrderById,
+} from '@/api/order';
+import {
+  canRequestRefund,
+  orderStatusClass,
+  orderStatusText,
+  orderTabs,
+  primaryReviewItemRoute,
+} from '@/utils/orderStatus';
 import { ElMessage } from 'element-plus';
 
 const router = useRouter();
@@ -183,14 +218,7 @@ const size = ref(5);
 const page = ref(1);
 const searchKeyword = ref('');
 
-const tabs = [
-  { label: '全部订单', value: '' },
-  { label: '待付款', value: '1', badge: '1', badgeColor: 'var(--price)' },
-  { label: '待发货', value: '2' },
-  { label: '待收货', value: '3', badge: '1', badgeColor: 'var(--info)' },
-  { label: '待评价', value: '4' },
-  { label: '退款/售后', value: '5' },
-];
+const tabs = orderTabs;
 
 const userName = computed(() => userStore.userInfo?.name || '用户');
 const userInitial = computed(() => userName.value.charAt(0));
@@ -206,13 +234,11 @@ function shopName(order) {
 }
 
 function statusText(status) {
-  const map = { 1: '待付款', 2: '待发货', 3: '卖家已发货', 4: '交易完成', 5: '交易关闭' };
-  return map[status] || '-';
+  return orderStatusText(status);
 }
 
 function statusClass(status) {
-  const map = { 1: 'wait-pay', 2: 'wait-send', 3: 'wait-recv', 4: 'done', 5: 'closed' };
-  return map[status] || '';
+  return orderStatusClass(status);
 }
 
 function orderItems(order) {
@@ -280,6 +306,16 @@ async function handleConfirm(id) {
   try {
     await confirmOrder(id);
     ElMessage.success('确认收货成功');
+    fetchOrders(page.value);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function handleRefund(id) {
+  try {
+    await refundOrder(id);
+    ElMessage.success('售后申请已提交');
     fetchOrders(page.value);
   } catch (err) {
     console.error(err);
@@ -501,6 +537,10 @@ onUnmounted(() => {
 
 .status.closed {
   color: var(--ink-3);
+}
+
+.status.refund {
+  color: var(--warn);
 }
 
 .pager span.disabled {

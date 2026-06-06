@@ -6,6 +6,7 @@ import com.hmall.common.exception.BadRequestException;
 import com.hmall.common.exception.BizIllegalException;
 import com.hmall.domain.po.Coupon;
 import com.hmall.domain.po.UserCoupon;
+import com.hmall.domain.vo.UserCouponVO;
 import com.hmall.mapper.CouponMapper;
 import com.hmall.mapper.UserCouponMapper;
 import com.hmall.service.ICouponService;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,6 +74,26 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon>
     }
 
     @Override
+    public List<UserCouponVO> getUserCouponViews(Long userId) {
+        List<UserCoupon> userCoupons = userCouponMapper.selectList(
+                new LambdaQueryWrapper<UserCoupon>()
+                        .eq(UserCoupon::getUserId, userId)
+                        .orderByDesc(UserCoupon::getCreateTime));
+        if (userCoupons.isEmpty()) return List.of();
+
+        List<Long> couponIds = userCoupons.stream()
+                .map(UserCoupon::getCouponId)
+                .collect(Collectors.toList());
+        Map<Long, Coupon> couponMap = listByIds(couponIds).stream()
+                .collect(Collectors.toMap(Coupon::getId, c -> c));
+
+        return userCoupons.stream()
+                .map(uc -> toUserCouponVO(uc, couponMap.get(uc.getCouponId())))
+                .filter(vo -> vo != null)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Coupon> getAvailableCouponsForAmount(Long userId, Integer amount) {
         // 获取用户已领取且未使用的优惠券id
         List<Long> claimedCouponIds = userCouponMapper.selectList(
@@ -112,5 +134,24 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon>
         uc.setUsedOrderId(orderId);
         uc.setUseTime(LocalDateTime.now());
         userCouponMapper.updateById(uc);
+    }
+
+    private UserCouponVO toUserCouponVO(UserCoupon userCoupon, Coupon coupon) {
+        if (coupon == null) return null;
+        UserCouponVO vo = new UserCouponVO();
+        vo.setId(coupon.getId());
+        vo.setName(coupon.getName());
+        vo.setDescription(coupon.getDescription());
+        vo.setDiscountType(coupon.getDiscountType());
+        vo.setDiscountValue(coupon.getDiscountValue());
+        vo.setMinAmount(coupon.getMinAmount());
+        vo.setRemainingStock(coupon.getRemainingStock());
+        vo.setStartTime(coupon.getStartTime());
+        vo.setEndTime(coupon.getEndTime());
+        vo.setUserCouponStatus(userCoupon.getStatus());
+        vo.setUsedOrderId(userCoupon.getUsedOrderId());
+        vo.setUseTime(userCoupon.getUseTime());
+        vo.setClaimTime(userCoupon.getCreateTime());
+        return vo;
     }
 }

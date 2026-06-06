@@ -7,6 +7,7 @@ import com.hmall.common.exception.BizIllegalException;
 import com.hmall.common.utils.UserContext;
 import com.hmall.domain.po.Coupon;
 import com.hmall.domain.po.UserCoupon;
+import com.hmall.domain.vo.UserCouponVO;
 import com.hmall.mapper.CouponMapper;
 import com.hmall.mapper.UserCouponMapper;
 import com.hmall.service.ICouponService;
@@ -168,6 +169,49 @@ class CouponServiceImplTest {
         List<Coupon> result = couponService.getUserCoupons(TEST_USER_ID);
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(c1.getId());
+    }
+
+    @Test
+    void getUserCouponViews_returnsCouponWithUserStatus() {
+        LocalDateTime now = LocalDateTime.now();
+        Coupon unused = coupon("未使用券", 1000, 10, 1, now.minusDays(1), now.plusDays(1));
+        Coupon used = coupon("已使用券", 500, 10, 1, now.minusDays(1), now.plusDays(1));
+        couponMapper.insert(unused);
+        couponMapper.insert(used);
+
+        UserCoupon uc1 = new UserCoupon();
+        uc1.setUserId(TEST_USER_ID);
+        uc1.setCouponId(unused.getId());
+        uc1.setStatus(1);
+        uc1.setCreateTime(now.minusHours(2));
+        userCouponMapper.insert(uc1);
+
+        UserCoupon uc2 = new UserCoupon();
+        uc2.setUserId(TEST_USER_ID);
+        uc2.setCouponId(used.getId());
+        uc2.setStatus(0);
+        uc2.setUsedOrderId(9001L);
+        uc2.setUseTime(now.minusHours(1));
+        uc2.setCreateTime(now.minusHours(3));
+        userCouponMapper.insert(uc2);
+
+        List<UserCouponVO> result = couponService.getUserCouponViews(TEST_USER_ID);
+
+        assertThat(result).hasSize(2);
+        UserCouponVO unusedVo = result.stream()
+                .filter(c -> c.getId().equals(unused.getId()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(unusedVo.getUserCouponStatus()).isEqualTo(1);
+        assertThat(unusedVo.getClaimTime()).isEqualToIgnoringNanos(uc1.getCreateTime());
+
+        UserCouponVO usedVo = result.stream()
+                .filter(c -> c.getId().equals(used.getId()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(usedVo.getUserCouponStatus()).isEqualTo(0);
+        assertThat(usedVo.getUsedOrderId()).isEqualTo(9001L);
+        assertThat(usedVo.getUseTime()).isEqualToIgnoringNanos(uc2.getUseTime());
     }
 
     // ===== getAvailableCouponsForAmount tests =====

@@ -5,6 +5,7 @@ import com.hmall.common.utils.BeanUtils;
 import com.hmall.common.utils.UserContext;
 import com.hmall.domain.po.Coupon;
 import com.hmall.domain.vo.CouponVO;
+import com.hmall.domain.vo.UserCouponVO;
 import com.hmall.service.ICouponService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,8 +38,8 @@ public class CouponController {
 
     @ApiOperation("我的优惠券列表")
     @GetMapping("/my-coupons")
-    public List<Coupon> myCoupons() {
-        return couponService.getUserCoupons(UserContext.getUser());
+    public List<UserCouponVO> myCoupons() {
+        return couponService.getUserCouponViews(UserContext.getUser());
     }
 
     @ApiOperation("我的可用优惠券（按订单金额过滤）")
