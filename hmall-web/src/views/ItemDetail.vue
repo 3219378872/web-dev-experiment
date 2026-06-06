@@ -506,6 +506,7 @@ import { getItemById, getReviews, submitReview as submitReviewApi, getItems } fr
 import { checkFavorite, addFavorite, removeFavorite, uploadImage } from '@/api/common';
 import { getCoupons, claimCoupon } from '@/api/order';
 import { parseItemImages } from '@/utils/itemImages';
+import { productTabFromRouteQuery } from '@/utils/itemDetailTabs';
 import { REVIEW_FILTERS, filterReviews, countReviews } from '@/utils/reviewFilters';
 import StarRating from '@/components/StarRating.vue';
 
@@ -645,7 +646,7 @@ const reviewImageUrls = ref([]);
 const uploading = ref(false);
 const reviewFileInput = ref(null);
 const activeThumb = ref(0);
-const activeTab = ref('detail');
+const activeTab = ref(productTabFromRouteQuery(route.query));
 const relatedItems = ref([]);
 
 // 后端真实图片（image 字段，逗号分隔可多图）；无图时降级到原型色块
@@ -724,6 +725,13 @@ watch(
       selectedSpecs.value = [];
       await loadItem(newId);
     }
+  }
+);
+
+watch(
+  () => route.query.tab,
+  () => {
+    activeTab.value = productTabFromRouteQuery(route.query);
   }
 );
 

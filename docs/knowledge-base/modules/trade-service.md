@@ -2,9 +2,9 @@
 title: trade-service
 tracks:
   - trade-service/
-last_synced_commit: e6a9848
+last_synced_commit: 1b58c3b
 last_synced_date: 2026-06-06
-sync_note: "fix(#103): OrderFormDTO 新增 couponId 字段；OrderServiceImpl.createOrder 服务端重新计算运费(对齐 Controller)、校验优惠券有效性、修正折扣券计算(discountType=2)；CouponServiceImpl 新增 useCoupon；OrderServiceImplTest +5 测试覆盖运费/优惠券"
+sync_note: "fix(#132,#134): C端 GET /orders 支持 keyword 按订单号/商品名过滤并填充 details；GET /my-coupons 返回 UserCouponVO，携带 userCouponStatus/usedOrderId/useTime/claimTime 供前端区分券包状态"
 ---
 
 # trade-service
@@ -17,8 +17,10 @@ sync_note: "fix(#103): OrderFormDTO 新增 couponId 字段；OrderServiceImpl.cr
 
 ## 公开接口与契约
 
-- HTTP API（C 端）：`/orders`（创建/查询/取消/删除/运费/物流轨迹）、
-  `/coupons/**`（领取/使用/列表）、`/my-coupons/available?amount`（按金额过滤可用券）。
+- HTTP API（C 端）：`/orders`（创建/查询/取消/删除/运费/物流轨迹；列表支持
+  `keyword` 按订单号或商品名过滤）、`/coupons/**`（领取/使用/列表）、
+  `/my-coupons`（返回 `UserCouponVO`，含用户券状态）、`/my-coupons/available?amount`
+  （按金额过滤可用券）。
 - HTTP API（管理端）：`/admin/orders/**`（列表/详情/发货/退款审核/导出 CSV）、
   `/admin/coupons/**`、`/admin/dashboard/**`（概览/趋势/品类/热销/待办/最新订单）。
 - 对外 Feign：[hm-api](hm-api.md) `TradeClient` 暴露订单查询给其它服务；
@@ -57,6 +59,7 @@ sync_note: "fix(#103): OrderFormDTO 新增 couponId 字段；OrderServiceImpl.cr
   `UserCouponMapper.java` / `OrderLogisticsMapper.java` / `LogisticsTraceMapper.java`。
 - `domain/po/LogisticsTrace.java` —— 物流轨迹 PO。
 - `domain/vo/FreightVO.java` / `CouponVO.java` / `LogisticsTraceVO.java` /
+  `UserCouponVO.java` /
   `DashboardSummaryVO.java` / `TrendPointVO.java` / `CategoryShareVO.java` /
   `TopItemVO.java` / `DashboardTodoVO.java` / `RefundAuditDTO.java` /
   `OrderDetailVO.java`。
@@ -81,6 +84,10 @@ sync_note: "fix(#103): OrderFormDTO 新增 couponId 字段；OrderServiceImpl.cr
 - RabbitMQ 消费失败交给 [hm-common](hm-common.md) `MqConsumerSupport`：先延迟重试，
   达到上限后进入死信队列。
 - 优惠券面额校验放服务端，前端传值仅作展示。
+- `/my-coupons` 是券包展示接口，必须携带 `UserCoupon.status` 到 `UserCouponVO.userCouponStatus`；
+  下单筛选可用券继续使用 `/my-coupons/available?amount`，只返回仍可使用的券。
+- `GET /orders` C 端列表的 `keyword` 同时匹配订单号和 `order_detail.name`，并返回
+  `OrderVO.details`，供前端展示、再次购买和评价入口使用。
 - 退款必须先核对状态机：仅 `已支付`/`已发货` 可发起；不可对未支付订单退款。
 - 管理端发货操作必须幂等，并发布 `order.status.shipped`。
 - 订单号生成用雪花/号段，禁止自增 ID 暴露给前端。

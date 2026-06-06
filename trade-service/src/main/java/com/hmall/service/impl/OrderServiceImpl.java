@@ -1,12 +1,15 @@
 package com.hmall.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hmall.api.client.ItemClient;
 import com.hmall.api.dto.ItemDTO;
 import com.hmall.api.dto.OrderDetailDTO;
 import com.hmall.api.dto.OrderFormDTO;
 import com.hmall.common.exception.BadRequestException;
 import com.hmall.common.exception.BizIllegalException;
+import com.hmall.common.domain.PageDTO;
 import com.hmall.common.mq.MqConstants;
 import com.hmall.common.mq.consumer.MqConsumerSupport;
 import com.hmall.common.mq.event.OrderCreatedEvent;
@@ -18,6 +21,8 @@ import com.hmall.domain.po.Order;
 import com.hmall.domain.po.OrderDetail;
 import com.hmall.domain.po.OrderLogistics;
 import com.hmall.domain.po.LogisticsTrace;
+import com.hmall.domain.vo.OrderDetailVO;
+import com.hmall.domain.vo.OrderVO;
 import com.hmall.mapper.OrderMapper;
 import com.hmall.domain.po.Coupon;
 import com.hmall.service.ICouponService;
@@ -38,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 /**
@@ -155,6 +161,20 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .eq(Order::getId, orderId)
                 .eq(Order::getStatus, 1)
                 .update();
+    }
+
+    @Override
+    public PageDTO<OrderVO> queryUserOrders(Long userId, Integer page, Integer size, Integer status, String keyword) {
+        LambdaQueryWrapper<Order> wrapper = new LambdaQueryWrapper<Order>()
+                .eq(Order::getUserId, userId);
+        if (status != null) wrapper.eq(Order::getStatus, status);
+        applyKeywordFilter(wrapper, keyword);
+        wrapper.orderByDesc(Order::getCreateTime);
+
+        Page<Order> result = page(new Page<>(page, size), wrapper);
+        List<OrderVO> voList = com.hmall.common.utils.BeanUtils.copyList(result.getRecords(), OrderVO.class);
+        fillDetails(voList);
+        return new PageDTO<>(result.getTotal(), result.getPages(), voList);
     }
 
     @RabbitListener(queues = MqConstants.TRADE_PAY_SUCCESS_QUEUE)
@@ -308,6 +328,46 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             details.add(detail);
         }
         return details;
+    }
+
+    private void applyKeywordFilter(LambdaQueryWrapper<Order> wrapper, String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) return;
+        String kw = keyword.trim();
+        Set<Long> matchedOrderIds = new LinkedHashSet<>();
+        try {
+            matchedOrderIds.add(Long.valueOf(kw));
+        } catch (NumberFormatException ignored) {
+            // Non-numeric keyword can still match product names below.
+        }
+        List<Long> detailOrderIds = detailService.lambdaQuery()
+                .like(OrderDetail::getName, kw)
+                .list()
+                .stream()
+                .map(OrderDetail::getOrderId)
+                .collect(Collectors.toList());
+        matchedOrderIds.addAll(detailOrderIds);
+
+        if (matchedOrderIds.isEmpty()) {
+            wrapper.eq(Order::getId, -1L);
+        } else {
+            wrapper.in(Order::getId, matchedOrderIds);
+        }
+    }
+
+    private void fillDetails(List<OrderVO> voList) {
+        if (voList == null || voList.isEmpty()) return;
+        List<Long> orderIds = voList.stream().map(OrderVO::getId).collect(Collectors.toList());
+        List<OrderDetail> allDetails = detailService.lambdaQuery()
+                .in(OrderDetail::getOrderId, orderIds)
+                .list();
+        Map<Long, List<OrderDetail>> detailMap = allDetails.stream()
+                .collect(Collectors.groupingBy(OrderDetail::getOrderId));
+        for (OrderVO vo : voList) {
+            List<OrderDetail> details = detailMap.get(vo.getId());
+            if (details != null && !details.isEmpty()) {
+                vo.setDetails(com.hmall.common.utils.BeanUtils.copyList(details, OrderDetailVO.class));
+            }
+        }
     }
 
     private void publishStatusChanged(Long orderId, Long userId, String status) {

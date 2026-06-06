@@ -119,6 +119,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { getCoupons, claimCoupon, getMyCoupons } from '@/api/order';
+import { mapCoupon, mapMyCoupon } from '@/utils/couponStatus';
 
 const platformCoupons = ref([]);
 const categoryCoupons = ref([]);
@@ -156,27 +157,6 @@ function isCategoryCoupon(c) {
   return CATEGORY_KEYWORDS.some((k) => text.includes(k));
 }
 
-/**
- * 将后端 Coupon（name/description/discountType/discountValue/minAmount/endTime）
- * 映射为页面展示结构。discountType: 2=折扣（discountValue 为 10 倍折扣值），其余=满减（分）。
- */
-function mapCoupon(c, state) {
-  const isPct = c.discountType === 2;
-  const minYuan = c.minAmount ? Math.round(c.minAmount / 100) : 0;
-  let resolved = state;
-  if (state !== '' && c.endTime && new Date(c.endTime) < new Date()) resolved = 'expired';
-  return {
-    id: c.id,
-    value: isPct ? (c.discountValue || 0) / 10 : Math.round((c.discountValue || 0) / 100),
-    unit: isPct ? '折' : '',
-    condition: minYuan > 0 ? `满${minYuan}可用` : '无门槛',
-    name: c.name || '优惠券',
-    scope: c.description || '全场商品可用',
-    expiry: c.endTime ? String(c.endTime).slice(0, 10) : '长期有效',
-    state: resolved,
-  };
-}
-
 async function handleClaim(id) {
   try {
     await claimCoupon(id);
@@ -202,7 +182,7 @@ async function loadCoupons() {
 
   try {
     const data = await getMyCoupons();
-    myCoupons.value = (data || []).map((c) => mapCoupon(c, 'use'));
+    myCoupons.value = (data || []).map((c) => mapMyCoupon(c));
   } catch (err) {
     myCoupons.value = [];
   }
