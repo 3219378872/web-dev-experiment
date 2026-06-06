@@ -126,6 +126,15 @@ class ItemReviewServiceImplTest extends ItemServiceTestBase {
         }
 
         @Test
+        @DisplayName("管理端分页查询评价列表-按评分范围过滤")
+        void queryReviewsPage_filtersByRatingRange() {
+            PageDTO<ReviewVO> result = reviewService.queryReviewsPage(1, 10, null, 4, 5);
+
+            assertThat(result.getList()).hasSize(1);
+            assertThat(result.getList().get(0).getRating()).isEqualTo(5);
+        }
+
+        @Test
         @DisplayName("管理端分页查询评价列表-无评分过滤")
         void queryReviewsPage_noRatingFilter_returnsAll() {
             PageDTO<ReviewVO> result = reviewService.queryReviewsPage(1, 10, null);

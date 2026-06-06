@@ -35,10 +35,20 @@ public interface IUserService extends IService<User> {
      * 分页查询用户列表（管理端）
      * @param page 页码
      * @param size 每页大小
-     * @param keyword 搜索关键词（模糊匹配 username/phone）
+     * @param keyword 搜索关键词（模糊匹配 username/phone/email）
      * @return 用户分页数据
      */
     PageDTO<UserVO> queryUsersPage(Integer page, Integer size, String keyword);
+
+    /**
+     * 分页查询用户列表（管理端）
+     * @param page 页码
+     * @param size 每页大小
+     * @param keyword 搜索关键词（模糊匹配 username/phone/email）
+     * @param status 用户状态（1=正常，2=冻结）
+     * @return 用户分页数据
+     */
+    PageDTO<UserVO> queryUsersPage(Integer page, Integer size, String keyword, Integer status);
 
     /**
      * 修改用户状态（管理端）

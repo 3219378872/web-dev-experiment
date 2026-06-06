@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: f68eaef
+last_synced_commit: 4a14a2b
 last_synced_date: 2026-06-06
-sync_note: "fix(#138): item-service 本次只新增管理端分类读取接口 /admin/categories 并同步测试 schema，不改变下单扣库存、购物车清理、支付或订单状态流。"
+sync_note: "fix(#139): item-service 本次只新增管理端评价 rating 区间过滤，不改变下单扣库存、购物车清理、支付或订单状态流。"
 ---
 
 # order-checkout-flow

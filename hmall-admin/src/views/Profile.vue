@@ -18,20 +18,22 @@
             <div class="ah"><h3>账号信息</h3></div>
             <div class="ab">
               <div style="display: flex; align-items: center; gap: 18px; margin-bottom: 20px">
-                <span
-                  class="u-av"
-                  style="
-                    width: 72px;
-                    height: 72px;
-                    font-size: 30px;
-                    border-radius: 16px;
-                    background: linear-gradient(135deg, #ff7a45, var(--brand));
-                  "
-                  >管</span
-                >
+                <span class="u-av profile-avatar">
+                  <img v-if="profileForm.avatar" :src="profileForm.avatar" alt="" />
+                  <span v-else>管</span>
+                </span>
                 <div>
-                  <el-button class="btn-ghost" size="small">更换头像</el-button>
+                  <el-button class="btn-ghost" size="small" @click="triggerAvatarUpload"
+                    >更换头像</el-button
+                  >
                   <p class="dim" style="font-size: 12px; margin-top: 8px">JPG/PNG，不超过 2MB</p>
+                  <input
+                    ref="avatarInput"
+                    type="file"
+                    accept="image/*"
+                    style="display: none"
+                    @change="handleAvatarChange"
+                  />
                 </div>
               </div>
               <div class="form-grid">
@@ -116,16 +118,6 @@
               </tbody>
             </table>
           </div>
-
-          <div class="acard">
-            <div class="ah"><h3>最近登录记录</h3></div>
-            <div
-              class="ab"
-              style="text-align: center; padding: 20px; color: var(--ink-3); font-size: 13px"
-            >
-              暂无数据
-            </div>
-          </div>
         </div>
       </div>
     </template>
@@ -135,6 +127,8 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { updateAdminProfile, getAdminPermissions } from '@/api/user';
+import { uploadImage } from '@/api/upload';
+import { buildAdminPasswordPayload, buildAdminProfilePayload } from '@/utils/adminOpsActions';
 import { ElMessage } from 'element-plus';
 
 const loading = ref(true);
@@ -143,6 +137,7 @@ const savingPwd = ref(false);
 const permissionsLoading = ref(true);
 const permissions = ref([]);
 const roleName = ref('超级管理员');
+const avatarInput = ref(null);
 
 // 从 localStorage 加载管理员信息
 const adminInfo = JSON.parse(localStorage.getItem('adminInfo') || '{}');
@@ -151,6 +146,7 @@ const profileForm = reactive({
   account: adminInfo.username || adminInfo.account || 'admin',
   nickname: adminInfo.nickname || adminInfo.name || '管理员',
   email: adminInfo.email || '',
+  avatar: adminInfo.avatar || '',
 });
 
 const pwdForm = reactive({ current: '', newPwd: '', confirm: '' });
@@ -172,10 +168,7 @@ function permissionLabel(code) {
 async function saveProfile() {
   savingProfile.value = true;
   try {
-    await updateAdminProfile({
-      nickname: profileForm.nickname,
-      email: profileForm.email,
-    });
+    await updateAdminProfile(buildAdminProfilePayload(profileForm));
     ElMessage.success('信息已保存');
   } catch (err) {
     console.error(err);
@@ -200,9 +193,7 @@ async function savePwd() {
   }
   savingPwd.value = true;
   try {
-    await updateAdminProfile({
-      password: pwdForm.newPwd,
-    });
+    await updateAdminProfile(buildAdminPasswordPayload(pwdForm));
     ElMessage.success('密码已修改');
     pwdForm.current = '';
     pwdForm.newPwd = '';
@@ -212,6 +203,30 @@ async function savePwd() {
     ElMessage.error('密码修改失败');
   } finally {
     savingPwd.value = false;
+  }
+}
+
+function triggerAvatarUpload() {
+  avatarInput.value?.click();
+}
+
+async function handleAvatarChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const r = await uploadImage(file);
+    if (!r?.url) {
+      ElMessage.error('头像上传失败');
+      return;
+    }
+    profileForm.avatar = r.url;
+    await updateAdminProfile(buildAdminProfilePayload(profileForm));
+    ElMessage.success('头像已更新');
+  } catch (err) {
+    console.error(err);
+    ElMessage.error('头像上传失败');
+  } finally {
+    e.target.value = '';
   }
 }
 
@@ -306,6 +321,19 @@ onMounted(async () => {
   font-weight: 700;
   font-size: 13px;
   flex-shrink: 0;
+}
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  font-size: 30px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ff7a45, var(--brand));
+  overflow: hidden;
+}
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .atable {

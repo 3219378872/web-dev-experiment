@@ -18,4 +18,16 @@ public interface IItemReviewService extends IService<ItemReview> {
      * @return 分页数据
      */
     PageDTO<ReviewVO> queryReviewsPage(Integer page, Integer size, Integer rating);
+
+    /**
+     * 管理端分页查询评价列表
+     * @param page 页码
+     * @param size 每页大小
+     * @param rating 精确评分（可选）
+     * @param minRating 最低评分（可选）
+     * @param maxRating 最高评分（可选）
+     * @return 分页数据
+     */
+    PageDTO<ReviewVO> queryReviewsPage(
+            Integer page, Integer size, Integer rating, Integer minRating, Integer maxRating);
 }

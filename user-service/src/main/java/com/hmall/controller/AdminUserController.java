@@ -26,8 +26,9 @@ public class AdminUserController {
     public PageDTO<UserVO> queryUsersPage(
             @ApiParam("页码") @RequestParam(defaultValue = "1") Integer page,
             @ApiParam("每页大小") @RequestParam(defaultValue = "10") Integer size,
-            @ApiParam("搜索关键词") @RequestParam(required = false) String keyword) {
-        return userService.queryUsersPage(page, size, keyword);
+            @ApiParam("搜索关键词") @RequestParam(required = false) String keyword,
+            @ApiParam("用户状态") @RequestParam(required = false) Integer status) {
+        return userService.queryUsersPage(page, size, keyword, status);
     }
 
     @ApiOperation("修改用户状态")
