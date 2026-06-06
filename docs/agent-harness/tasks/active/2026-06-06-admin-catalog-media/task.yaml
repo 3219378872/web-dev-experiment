@@ -1,0 +1,7 @@
+slug: 2026-06-06-admin-catalog-media
+status: active
+task_branch: task/2026-06-06-admin-catalog-media
+spec: null
+plan: null
+spec_waiver: "GitHub issues #136, #137, #138, and #142 provide bounded acceptance criteria for existing admin catalog/media pages; no separate design spec needed."
+plan_waiver: "Grouped bugfix is tracked through this harness record with focused tests and verification; no separate multi-step implementation plan needed."

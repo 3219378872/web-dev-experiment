@@ -9,7 +9,6 @@
         </p>
       </div>
       <div class="acts">
-        <el-button size="small">批量导入</el-button>
         <el-button type="primary" size="small" @click="$router.push('/items/add')"
           >＋ 发布商品</el-button
         >
@@ -159,6 +158,7 @@ import {
   getItemStats,
   getCategories,
 } from '@/api/item';
+import { catalogItemTabs } from '@/utils/adminCatalogActions';
 import { ElMessage, ElMessageBox } from 'element-plus';
 
 const items = ref([]);
@@ -173,13 +173,7 @@ const activeTab = ref('all');
 const categoryOptions = ref([]);
 const stats = ref({ total: 0, onSale: 0, offSale: 0, lowStock: 0 });
 
-const tabs = computed(() => [
-  { label: '全部', value: 'all', badge: stats.value.total },
-  { label: '在售中', value: 'on', badge: stats.value.onSale },
-  { label: '已下架', value: 'off', badge: stats.value.offSale },
-  { label: '库存预警', value: 'low', badge: stats.value.lowStock },
-  { label: '待审核', value: 'pending', badge: 0 },
-]);
+const tabs = computed(() => catalogItemTabs(stats.value));
 
 const allChecked = computed({
   get: () => items.value.length > 0 && items.value.every((i) => i.checked),

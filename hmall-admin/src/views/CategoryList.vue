@@ -3,7 +3,7 @@
     <div class="adm-ph">
       <div>
         <h1>分类管理</h1>
-        <p>共 {{ level1Count }} 个一级分类 · {{ level2Count }} 个二级分类 · 拖拽 ⠿ 可调整排序</p>
+        <p>共 {{ level1Count }} 个一级分类 · {{ level2Count }} 个二级分类 · 按排序权重展示</p>
       </div>
     </div>
 
@@ -11,16 +11,16 @@
       <div class="acard">
         <div class="ah">
           <h3>商品分类树</h3>
-          <a class="btn btn-ghost btn-sm" @click="expandAll">全部展开</a>
+          <a class="btn btn-ghost btn-sm" @click="fetch">刷新</a>
         </div>
         <div class="ab ctree">
           <div v-for="cat in tree" :key="cat.id" class="lv1">
             <div class="row">
-              <span class="handle">⠿</span>
-              <span class="d" :style="`background:${cat.color || '#999'}`">{{
-                cat.icon || '▣'
-              }}</span>
+              <span class="d">{{ categoryGlyph(cat) }}</span>
               {{ cat.name }}
+              <span class="sdot" :class="cat.status === 1 ? 'green' : 'gray'">{{
+                cat.status === 1 ? '启用' : '禁用'
+              }}</span>
               <span class="cnt">{{ cat.children?.length || 0 }} 个子类</span>
               <span class="acts">
                 <a @click="addChild(cat)">＋ 子类</a>
@@ -57,33 +57,13 @@
             <input v-model="form.name" class="input" placeholder="如：智能穿戴" />
           </div>
           <div class="field">
-            <label>分类图标</label>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap">
-              <span
-                v-for="ic in icons"
-                :key="ic"
-                :class="['chip', form.icon === ic ? 'on' : '']"
-                @click="form.icon = ic"
-                >{{ ic }}</span
-              >
-            </div>
-          </div>
-          <div class="field">
             <label>排序权重</label>
             <input
               v-model="form.sortOrder"
               class="input"
               type="number"
-              placeholder="数字越大越靠前"
+              placeholder="数字越小越靠前"
             />
-          </div>
-          <div class="field">
-            <label>分类图片</label>
-            <div class="upload-grid">
-              <div class="add">
-                <div style="text-align: center">＋<small>上传</small></div>
-              </div>
-            </div>
           </div>
           <div
             style="
@@ -108,22 +88,21 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
-import { getCategories, saveCategory, updateCategory, deleteCategory } from '@/api/item';
+import { getAdminCategories, saveCategory, updateCategory, deleteCategory } from '@/api/item';
 import { ElMessage, ElMessageBox } from 'element-plus';
 
 const categories = ref([]);
 const editing = ref(null);
-const form = reactive({ name: '', sortOrder: 0, status: 1, parentId: null, icon: '▣' });
-
-const icons = ['▣', '▤', '◈', '✿', '◉', '▦'];
+const form = reactive({ name: '', sortOrder: 0, status: 1, parentId: null });
 
 const tree = computed(() => {
   const map = {};
-  categories.value.forEach((c) => {
+  const sorted = [...categories.value].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  sorted.forEach((c) => {
     map[c.id] = { ...c, children: [] };
   });
   const roots = [];
-  categories.value.forEach((c) => {
+  sorted.forEach((c) => {
     const node = map[c.id];
     if (c.parentId && map[c.parentId]) {
       map[c.parentId].children.push(node);
@@ -137,9 +116,13 @@ const tree = computed(() => {
 const level1Count = computed(() => categories.value.filter((c) => !c.parentId).length);
 const level2Count = computed(() => categories.value.filter((c) => c.parentId).length);
 
+function categoryGlyph(category) {
+  return category.parentId ? '▤' : '▣';
+}
+
 async function fetch() {
   try {
-    categories.value = await getCategories();
+    categories.value = await getAdminCategories();
   } catch (err) {
     console.error(err);
   }
@@ -151,7 +134,6 @@ function addChild(parent) {
   form.sortOrder = 0;
   form.status = 1;
   form.parentId = parent.id;
-  form.icon = '▣';
 }
 
 function editCat(row) {
@@ -161,14 +143,19 @@ function editCat(row) {
 
 async function save() {
   try {
-    if (editing.value) await updateCategory(editing.value.id, form);
-    else await saveCategory(form);
+    const payload = {
+      name: form.name,
+      parentId: form.parentId,
+      sortOrder: Number(form.sortOrder) || 0,
+      status: form.status,
+    };
+    if (editing.value) await updateCategory(editing.value.id, payload);
+    else await saveCategory(payload);
     editing.value = null;
     form.name = '';
     form.sortOrder = 0;
     form.status = 1;
     form.parentId = null;
-    form.icon = '▣';
     fetch();
     ElMessage.success('已保存');
   } catch (err) {
@@ -185,10 +172,6 @@ async function del(id) {
   } catch (err) {
     console.error(err);
   }
-}
-
-function expandAll() {
-  ElMessage.success('已展开全部分类');
 }
 
 fetch();
@@ -260,6 +243,7 @@ fetch();
   place-items: center;
   color: #fff;
   font-size: 16px;
+  background: #6c8da1;
 }
 .ctree .lv2 {
   padding: 4px 16px 12px 62px;
@@ -302,15 +286,31 @@ fetch();
 .ctree .lv1 .row .acts a:hover {
   color: var(--brand);
 }
-.ctree .lv1 .row .handle {
-  color: var(--line-2);
-  cursor: grab;
-  font-size: 16px;
-}
 .ctree .lv1 .row .cnt {
   color: var(--ink-3);
   font-weight: 400;
   font-size: 12px;
+}
+
+.sdot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.sdot::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.sdot.green {
+  color: var(--success);
+}
+.sdot.gray {
+  color: var(--ink-3);
 }
 
 .field {
@@ -382,31 +382,6 @@ fetch();
   border-color: var(--brand);
   color: #fff;
   font-weight: 700;
-}
-
-.upload-grid {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.upload-grid .add {
-  width: 88px;
-  height: 88px;
-  border: 2px dashed var(--line-2);
-  border-radius: 10px;
-  display: grid;
-  place-items: center;
-  color: var(--ink-3);
-  font-size: 24px;
-  cursor: pointer;
-}
-.upload-grid .add:hover {
-  border-color: var(--brand);
-  color: var(--brand);
-}
-.upload-grid .add small {
-  font-size: 10px;
-  display: block;
 }
 
 .switch {

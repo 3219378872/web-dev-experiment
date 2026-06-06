@@ -7,7 +7,6 @@
       </div>
       <div class="acts">
         <el-button size="small" @click="$router.push('/items')">← 返回列表</el-button>
-        <el-button size="small">预览</el-button>
         <el-button type="primary" size="small" @click="save">保存并上架</el-button>
       </div>
     </div>
@@ -34,10 +33,6 @@
                   <el-option label="好集严选 HAOJI" value="好集严选 HAOJI" />
                 </el-select>
               </div>
-              <div class="field full">
-                <label>商品卖点（副标题）</label>
-                <el-input v-model="form.subTitle" placeholder="输入副标题" />
-              </div>
             </div>
           </div>
         </div>
@@ -51,16 +46,8 @@
                 <el-input v-model="form.price" />
               </div>
               <div class="field">
-                <label>市场价（¥）</label>
-                <el-input v-model="form.marketPrice" />
-              </div>
-              <div class="field">
                 <label>总库存</label>
                 <el-input v-model="form.stock" />
-              </div>
-              <div class="field">
-                <label>库存预警值</label>
-                <el-input v-model="form.stockAlert" />
               </div>
             </div>
           </div>
@@ -115,42 +102,13 @@
             </div>
           </div>
         </div>
-
-        <div class="acard">
-          <div class="ah"><h3>商品详情</h3></div>
-          <div class="ab">
-            <div style="border: 1px solid var(--line); border-radius: 8px; overflow: hidden">
-              <div
-                style="
-                  background: var(--bg);
-                  padding: 8px 12px;
-                  display: flex;
-                  gap: 14px;
-                  font-size: 14px;
-                  color: var(--ink-2);
-                  border-bottom: 1px solid var(--line);
-                "
-              >
-                <b>B</b><i>I</i><span>U</span><span>🖼</span><span>🔗</span><span>≡</span
-                ><span>表格</span>
-              </div>
-              <el-input
-                v-model="form.detail"
-                type="textarea"
-                :rows="6"
-                style="border: 0; border-radius: 0"
-                placeholder="输入商品详情"
-              />
-            </div>
-          </div>
-        </div>
       </div>
 
       <aside class="stick">
         <div class="acard" style="margin-bottom: 16px">
           <div class="ah"><h3>商品图片</h3></div>
           <div class="ab">
-            <div class="dim" style="font-size: 12px; margin-bottom: 10px">主图（首张为封面）</div>
+            <div class="dim" style="font-size: 12px; margin-bottom: 10px">商品主图</div>
             <div class="upload-grid">
               <div
                 v-for="(img, idx) in imageList"
@@ -161,7 +119,7 @@
               >
                 <span class="x" @click="removeImage(idx)">✕</span>
               </div>
-              <div class="add" @click="triggerUpload">
+              <div v-if="imageList.length === 0" class="add" @click="triggerUpload">
                 <div style="text-align: center">＋<small>上传</small></div>
               </div>
             </div>
@@ -173,7 +131,7 @@
               @change="handleFileChange"
             />
             <p class="dim" style="font-size: 11px; margin-top: 10px">
-              建议 800×800，支持 JPG/PNG，最多 8 张
+              建议 800×800，支持 JPG/PNG；当前后端保存单张主图
             </p>
           </div>
         </div>
@@ -238,17 +196,9 @@
               />
             </div>
             <hr class="divider" />
-            <div class="field">
-              <label>运费模板</label>
-              <el-select
-                v-model="form.shippingTemplate"
-                placeholder="选择运费模板"
-                style="width: 100%"
-              >
-                <el-option label="全国包邮" value="全国包邮" />
-                <el-option label="满99包邮" value="满99包邮" />
-              </el-select>
-            </div>
+            <p class="dim" style="font-size: 12px; line-height: 1.6">
+              后端当前持久化商品名称、分类、品牌、价格、库存、规格、主图和发布开关。
+            </p>
           </div>
         </div>
       </aside>
@@ -261,6 +211,7 @@ import { ref, reactive, onMounted, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getItemById, saveItem, updateItem, getCategories } from '@/api/item';
 import { uploadImage } from '@/api/upload';
+import { buildItemPayload } from '@/utils/adminCatalogActions';
 import { ElMessage } from 'element-plus';
 
 const route = useRoute();
@@ -275,12 +226,7 @@ const form = reactive({
   brand: '',
   spec: '',
   image: '',
-  subTitle: '',
-  marketPrice: 150,
-  stockAlert: 20,
-  detail: '',
   status: 1,
-  shippingTemplate: '全国包邮',
   isSeckill: false,
   isRecommend: false,
   isSevenDayReturn: true,
@@ -305,11 +251,7 @@ onMounted(async () => {
       if (item && item.id) {
         Object.assign(form, item);
         if (typeof item.price === 'number') form.price = (item.price / 100).toFixed(2);
-        const mp = item.marketPrice ?? item.originalPrice;
-        if (typeof mp === 'number') form.marketPrice = (mp / 100).toFixed(2);
-        if (item.images && item.images.length) {
-          imageList.value = item.images.filter((img) => img);
-        } else if (item.image) {
+        if (item.image) {
           imageList.value = [item.image];
         }
         if (imageList.value.length === 0) {
@@ -360,8 +302,8 @@ function getImageStyle(img) {
 }
 
 function triggerUpload() {
-  if (imageList.value.length >= 8) {
-    ElMessage.warning('最多上传 8 张图片');
+  if (imageList.value.length >= 1) {
+    ElMessage.warning('当前后端仅保存单张主图');
     return;
   }
   fileInput.value?.click();
@@ -373,7 +315,7 @@ async function handleFileChange(e) {
   try {
     const r = await uploadImage(file);
     if (r && r.url) {
-      imageList.value.push(r.url);
+      imageList.value = [r.url];
     } else {
       ElMessage.error('上传失败');
     }
@@ -422,16 +364,7 @@ function removeSpecValue(gIdx, vIdx) {
 
 async function save() {
   try {
-    const priceYuan = parseFloat(form.price);
-    const specStr =
-      specGroups.value.length > 0 ? JSON.stringify(specGroups.value) : form.spec || '';
-    const payload = {
-      ...form,
-      image: imageList.value[0] || '',
-      images: imageList.value,
-      price: Number.isFinite(priceYuan) ? Math.round(priceYuan * 100) : 0,
-      spec: specStr,
-    };
+    const payload = buildItemPayload(form, imageList.value, specGroups.value);
     if (isEdit.value) await updateItem(route.params.id, payload);
     else await saveItem(payload);
     ElMessage.success('已保存');

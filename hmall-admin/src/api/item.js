@@ -11,6 +11,7 @@ export const deleteItem = (id) => request.delete(`/admin/items/${id}`);
 export const batchDeleteItems = (ids) => request.delete('/admin/items', { data: { ids } });
 export const getItemStats = () => request.get('/admin/items/stats');
 export const getCategories = () => request.get('/categories');
+export const getAdminCategories = () => request.get('/admin/categories');
 export const saveCategory = (data) => request.post('/categories', data);
 export const updateCategory = (id, data) => request.put(`/categories/${id}`, data);
 export const deleteCategory = (id) => request.delete(`/categories/${id}`);
@@ -24,3 +25,4 @@ export const updateBanner = (id, data) => request.put(`/admin/banners/${id}`, da
 export const deleteBanner = (id) => request.delete(`/admin/banners/${id}`);
 export const updateBannerStatus = (id, status) =>
   request.put(`/admin/banners/${id}/status`, status);
+export const updateBannerSort = (id, sort) => request.put(`/admin/banners/${id}/sort`, sort);

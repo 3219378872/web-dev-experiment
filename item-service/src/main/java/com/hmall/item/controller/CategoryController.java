@@ -9,13 +9,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/categories")
 @RequiredArgsConstructor
 public class CategoryController {
 
     private final ICategoryService categoryService;
 
-    @GetMapping
+    @GetMapping("/categories")
     public List<Category> list() {
         return categoryService.lambdaQuery()
                 .eq(Category::getStatus, 1)
@@ -23,14 +22,21 @@ public class CategoryController {
                 .list();
     }
 
-    @PostMapping
+    @GetMapping("/admin/categories")
+    public List<Category> adminList() {
+        return categoryService.lambdaQuery()
+                .orderByAsc(Category::getSortOrder)
+                .list();
+    }
+
+    @PostMapping("/categories")
     public R<Void> save(@RequestBody Category category) {
         category.setCreateTime(LocalDateTime.now());
         categoryService.save(category);
         return R.ok();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/categories/{id}")
     public R<Void> update(@PathVariable Long id, @RequestBody Category category) {
         category.setId(id);
         category.setUpdateTime(LocalDateTime.now());
@@ -38,7 +44,7 @@ public class CategoryController {
         return R.ok();
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/categories/{id}")
     public R<Void> delete(@PathVariable Long id) {
         categoryService.removeById(id);
         return R.ok();

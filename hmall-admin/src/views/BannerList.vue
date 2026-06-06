@@ -3,7 +3,7 @@
     <div class="adm-ph">
       <div>
         <h1>轮播图管理</h1>
-        <p>首页轮播位 · 共 {{ total }} 张 · 拖拽调整顺序</p>
+        <p>首页轮播位 · 共 {{ total }} 张 · 使用上下移动调整顺序</p>
       </div>
       <div class="acts">
         <a class="btn btn-primary" href="#" @click.prevent="openDialog()">＋ 新增轮播图</a>
@@ -12,10 +12,7 @@
 
     <div class="ban-grid">
       <div v-for="b in banners" :key="b.id" class="ban">
-        <div
-          class="preview"
-          :style="`background:${b.gradient || 'linear-gradient(120deg,#FF7A45,#D62E10)'}`"
-        >
+        <div class="preview" :style="bannerPreviewStyle(b)">
           <span class="order">{{ b.sort || 1 }}</span>
           <h3>{{ b.title }}</h3>
           <p>{{ b.subtitle || '轮播图' }}</p>
@@ -35,6 +32,8 @@
           <div class="acts" style="flex-direction: column; align-items: flex-end; gap: 8px">
             <span class="switch" :class="{ on: b.status === 1 }" @click="toggleStatus(b)"></span>
             <span>
+              <a class="lk" href="#" @click.prevent="moveBanner(b, 'up')">上移</a>
+              <a class="lk" href="#" @click.prevent="moveBanner(b, 'down')">下移</a>
               <a class="lk" href="#" @click.prevent="editBanner(b)">编辑</a>
               <a class="lk" href="#" @click.prevent="del(b.id)">删除</a>
             </span>
@@ -57,7 +56,20 @@
     <el-dialog v-model="dialogVisible" :title="editing ? '编辑轮播图' : '新增轮播图'" width="520px">
       <el-form :model="form" label-width="80px">
         <el-form-item label="标题"><el-input v-model="form.title" /></el-form-item>
-        <el-form-item label="图片URL"><el-input v-model="form.imageUrl" /></el-form-item>
+        <el-form-item label="图片">
+          <div class="banner-upload">
+            <div class="thumb" :style="bannerPreviewStyle(form)" />
+            <el-button size="small" @click="triggerUpload">上传图片</el-button>
+            <el-input v-model="form.imageUrl" placeholder="或粘贴图片URL" />
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              style="display: none"
+              @change="handleFileChange"
+            />
+          </div>
+        </el-form-item>
         <el-form-item label="链接"><el-input v-model="form.linkUrl" /></el-form-item>
         <el-form-item label="排序"><el-input-number v-model="form.sort" :min="0" /></el-form-item>
         <el-form-item label="类型">
@@ -77,7 +89,16 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-import { getBanners, saveBanner, updateBanner, deleteBanner, updateBannerStatus } from '@/api/item';
+import {
+  deleteBanner,
+  getBanners,
+  saveBanner,
+  updateBanner,
+  updateBannerSort,
+  updateBannerStatus,
+} from '@/api/item';
+import { uploadImage } from '@/api/upload';
+import { bannerPreviewStyle, nextSort } from '@/utils/adminCatalogActions';
 import { ElMessage, ElMessageBox } from 'element-plus';
 
 const banners = ref([]);
@@ -86,14 +107,13 @@ const page = ref(1);
 const pageSize = ref(10);
 const dialogVisible = ref(false);
 const editing = ref(null);
+const fileInput = ref(null);
 const form = reactive({
   title: '',
   imageUrl: '',
   linkUrl: '',
   sort: 0,
   type: 'carousel',
-  subtitle: '',
-  gradient: '',
 });
 
 async function fetch(p = 1) {
@@ -103,7 +123,6 @@ async function fetch(p = 1) {
     banners.value = (r.list || []).map((b) => ({
       ...b,
       subtitle: b.subtitle || '轮播图',
-      gradient: b.gradient || 'linear-gradient(120deg,#FF7A45,#D62E10)',
       timeRange: b.timeRange || '长期有效',
       enabled: b.status === 1,
     }));
@@ -120,15 +139,17 @@ function openDialog() {
   form.linkUrl = '';
   form.sort = 0;
   form.type = 'carousel';
-  form.subtitle = '';
-  form.gradient = '';
   dialogVisible.value = true;
 }
 
 async function save() {
   try {
     const payload = {
-      ...form,
+      title: form.title,
+      imageUrl: form.imageUrl,
+      linkUrl: form.linkUrl,
+      sort: form.sort,
+      type: form.type,
       status: editing.value ? editing.value.status : 1,
     };
     if (editing.value) {
@@ -160,6 +181,38 @@ async function toggleStatus(b) {
   } catch (err) {
     console.error(err);
   }
+}
+
+async function moveBanner(b, direction) {
+  try {
+    await updateBannerSort(b.id, nextSort(b, direction));
+    await fetch(page.value);
+    ElMessage.success('排序已更新');
+  } catch (err) {
+    console.error(err);
+    ElMessage.error('排序更新失败');
+  }
+}
+
+function triggerUpload() {
+  fileInput.value?.click();
+}
+
+async function handleFileChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const r = await uploadImage(file);
+    if (r?.url) {
+      form.imageUrl = r.url;
+    } else {
+      ElMessage.error('上传失败');
+    }
+  } catch (err) {
+    console.error(err);
+    ElMessage.error('上传失败');
+  }
+  e.target.value = '';
 }
 
 async function del(id) {
@@ -267,6 +320,19 @@ onMounted(() => fetch());
   opacity: 0.9;
   font-size: 13px;
   margin-top: 4px;
+}
+
+.banner-upload {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.banner-upload .thumb {
+  width: 100%;
+  height: 120px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-line);
 }
 .ban .meta {
   padding: 14px 16px;

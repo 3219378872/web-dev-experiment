@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 5cec20e
+last_synced_commit: f68eaef
 last_synced_date: 2026-06-06
-sync_note: "fix(#140,#141): 订单管理端列表/导出支持 userId 过滤，详情页物流复用 /orders/{id}/logistics，退款审核复用 status=6 审核流。"
+sync_note: "fix(#138): item-service 本次只新增管理端分类读取接口 /admin/categories 并同步测试 schema，不改变下单扣库存、购物车清理、支付或订单状态流。"
 ---
 
 # order-checkout-flow

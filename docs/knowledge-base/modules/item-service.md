@@ -2,9 +2,9 @@
 title: item-service
 tracks:
   - item-service/
-last_synced_commit: 99ab98b
-last_synced_date: 2026-06-05
-sync_note: "Issue #95: ItemController 新增 /admin/items/stats 接口（返回 ItemStatsVO）和 minPrice/maxPrice 查询参数，adminQueryItemByPage 排除 status=3（已删除）商品。Item.java/ItemDTO.java 新增 isSeckill/isRecommend/isSevenDayReturn 字段；新增迁移脚本 docs/sql/item-seckill-recommend-fields.sql；init-all-tables.sql 与测试 schema 同步更新。新增 ItemStatsVO。"
+last_synced_commit: f68eaef
+last_synced_date: 2026-06-06
+sync_note: "fix(#138): CategoryController 新增 GET /admin/categories 供管理端读取启用与禁用分类；保留 GET /categories enabled-only 前台合同。测试 schema 与 categories 表名和 update_time 字段对齐。"
 ---
 
 # item-service
@@ -18,7 +18,7 @@ sync_note: "Issue #95: ItemController 新增 /admin/items/stats 接口（返回 
 
 - HTTP API：`/items/**`、`/categories/**`、`/reviews/**`、`/search/**`、
   `/banners/**`、`/ads/**`、`/seckill/**`。
-- 管理端 API：`/admin/items/**`、`/admin/reviews/**`、`/admin/banners/**`。
+- 管理端 API：`/admin/items/**`、`/admin/categories`、`/admin/reviews/**`、`/admin/banners/**`。
 - 对外 Feign：[hm-api](hm-api.md) `ItemClient` 暴露按 ID 批量查商品、扣减库存。
 - 持久层：`hm-item` 数据库；可选 Elasticsearch 索引。
 
@@ -69,6 +69,12 @@ sync_note: "Issue #95: ItemController 新增 /admin/items/stats 接口（返回 
 - `PUT /admin/items/status`：批量更新商品状态（上架/下架）。
 - `DELETE /admin/items`：批量删除商品。
 
+### 分类管理扩展
+
+- `GET /categories`：前台分类列表，仅返回 `status=1` 启用分类，按 `sortOrder` 升序。
+- `GET /admin/categories`：管理端分类列表，返回启用与禁用分类，按 `sortOrder` 升序，
+  用于后台分类生命周期管理。
+
 ### 评价管理扩展
 
 - `GET /admin/reviews`：管理端分页查询评价列表，支持 rating 过滤。
@@ -80,6 +86,8 @@ sync_note: "Issue #95: ItemController 新增 /admin/items/stats 接口（返回 
   [trade-service](trade-service.md) 的 `createOrder` 全局回滚时，本服务的库存扣减经
   `undo_log` 自动反向补偿。XID 经 Feign 头传播，需 `seata-spring-boot-starter`（默认关）。
 - 商品状态机：草稿 → 上架 → 下架，不允许跳跃。
+- 分类读取合同分离：前台 `/categories` 必须保持 enabled-only；后台若需管理禁用分类，
+  使用 `/admin/categories`，不要放宽前台接口。
 - 搜索字段若启用 ES，写入要走双写或 binlog 同步，保持一致性。
 - 评价均分按需异步重算，避免每次写评价同步聚合。
 - Banner 轮播图/广告位支持 type 区分（carousel/ad），position 用于广告位位置标识。
