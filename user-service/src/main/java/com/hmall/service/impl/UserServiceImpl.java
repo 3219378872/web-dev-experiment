@@ -11,6 +11,7 @@ import com.hmall.common.exception.BizIllegalException;
 import com.hmall.common.exception.ForbiddenException;
 import com.hmall.common.utils.UserContext;
 import com.hmall.config.JwtProperties;
+import com.hmall.domain.dto.AdminPasswordUpdateDTO;
 import com.hmall.domain.dto.RegisterFormDTO;
 import com.hmall.domain.dto.ResetPasswordDTO;
 import com.hmall.domain.po.User;
@@ -213,12 +214,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public PageDTO<UserVO> queryUsersPage(Integer page, Integer size, String keyword) {
+        return queryUsersPage(page, size, keyword, null);
+    }
+
+    @Override
+    public PageDTO<UserVO> queryUsersPage(Integer page, Integer size, String keyword, Integer status) {
         // 构建查询条件
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         if (StrUtil.isNotBlank(keyword)) {
-            wrapper.like(User::getUsername, keyword)
-                   .or()
-                   .like(User::getPhone, keyword);
+            wrapper.and(w -> w.like(User::getUsername, keyword)
+                    .or()
+                    .like(User::getPhone, keyword)
+                    .or()
+                    .like(User::getEmail, keyword));
+        }
+        if (status != null) {
+            wrapper.eq(User::getStatus, UserStatus.of(status));
         }
 
         // 执行分页查询
@@ -279,6 +290,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public void updateProfileWithPassword(User profile) {
+        User user = getById(UserContext.getUser());
+        if (user == null) {
+            throw new BadRequestException("用户不存在");
+        }
+        if (StrUtil.isNotBlank(profile.getPassword())) {
+            if (!(profile instanceof AdminPasswordUpdateDTO)) {
+                throw new BadRequestException("当前密码不能为空");
+            }
+            String currentPassword = ((AdminPasswordUpdateDTO) profile).getCurrentPassword();
+            if (StrUtil.isBlank(currentPassword)) {
+                throw new BadRequestException("当前密码不能为空");
+            }
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                throw new BadRequestException("当前密码错误");
+            }
+        }
         updateProfile(profile);
     }
 

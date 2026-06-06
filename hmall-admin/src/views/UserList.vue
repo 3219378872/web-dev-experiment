@@ -5,10 +5,6 @@
         <h1>用户管理</h1>
         <p>共 {{ total }} 名注册用户</p>
       </div>
-      <div class="acts">
-        <el-button class="btn-ghost" size="small">导出用户</el-button>
-        <el-button type="primary" size="small">＋ 新增用户</el-button>
-      </div>
     </div>
 
     <div class="stat-row">
@@ -51,8 +47,8 @@
           style="width: 120px"
         >
           <el-option label="全部" value="" />
-          <el-option label="正常" value="NORMAL" />
-          <el-option label="已禁用" value="FROZEN" />
+          <el-option label="正常" :value="1" />
+          <el-option label="已禁用" :value="2" />
         </el-select>
       </div>
       <div class="grow" />
@@ -161,6 +157,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { getUsers, toggleUserStatus, getUserById } from '@/api/user';
+import { userQueryParams } from '@/utils/adminOpsActions';
 import { ElMessage } from 'element-plus';
 
 const users = ref([]);
@@ -207,7 +204,14 @@ async function showDetail(row) {
 async function fetch(p) {
   if (p) page.value = p;
   try {
-    const r = await getUsers({ page: page.value, pageSize: pageSize.value, ...filter });
+    const r = await getUsers(
+      userQueryParams({
+        page: page.value,
+        pageSize: pageSize.value,
+        keyword: filter.keyword,
+        status: filter.status,
+      })
+    );
     users.value = r.list || [];
     total.value = r.total || 0;
   } catch (err) {

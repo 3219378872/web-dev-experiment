@@ -32,10 +32,10 @@
 
     <div class="acard" style="margin-bottom: 16px">
       <div class="tabs" style="padding: 0 16px">
-        <button :class="{ active: tab === 'all' }" @click="tab = 'all'">全部</button>
-        <button :class="{ active: tab === 'good' }" @click="tab = 'good'">好评</button>
-        <button :class="{ active: tab === 'mid' }" @click="tab = 'mid'">中评</button>
-        <button :class="{ active: tab === 'bad' }" @click="tab = 'bad'">差评</button>
+        <button :class="{ active: tab === 'all' }" @click="switchTab('all')">全部</button>
+        <button :class="{ active: tab === 'good' }" @click="switchTab('good')">好评</button>
+        <button :class="{ active: tab === 'mid' }" @click="switchTab('mid')">中评</button>
+        <button :class="{ active: tab === 'bad' }" @click="switchTab('bad')">差评</button>
       </div>
     </div>
 
@@ -47,7 +47,7 @@
         <el-empty description="暂无评价数据" />
       </div>
       <div v-else id="rev-rows" class="ab">
-        <div v-for="(r, i) in filteredReviews" :key="r.id" class="rev-row">
+        <div v-for="(r, i) in reviews" :key="r.id" class="rev-row">
           <div class="av" :style="`background:${avatarColor(i)}`">
             {{ (r.username || r.userName || '匿')[0] }}
           </div>
@@ -79,8 +79,6 @@
             </div>
           </div>
           <div class="side">
-            <span class="sdot green">已通过</span>
-            <el-button class="btn-ghost" size="small">回复</el-button>
             <el-button
               size="small"
               style="background: #fff; border: 1px solid var(--line-2); color: var(--danger)"
@@ -108,6 +106,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { getReviews, deleteReview } from '@/api/item';
+import { reviewQueryParams } from '@/utils/adminOpsActions';
 import { ElMessage } from 'element-plus';
 
 const reviews = ref([]);
@@ -161,14 +160,6 @@ watch(
   { immediate: true }
 );
 
-const filteredReviews = computed(() => {
-  if (tab.value === 'all') return reviews.value;
-  if (tab.value === 'good') return reviews.value.filter((r) => r.rating >= 4);
-  if (tab.value === 'mid') return reviews.value.filter((r) => r.rating === 3);
-  if (tab.value === 'bad') return reviews.value.filter((r) => r.rating <= 2);
-  return reviews.value;
-});
-
 function starStr(n) {
   return '★★★★★'.slice(0, Math.max(0, Math.min(5, n || 0)));
 }
@@ -176,11 +167,19 @@ function offStars(n) {
   return '★★★★★'.slice(Math.max(0, Math.min(5, n || 0)));
 }
 
+function switchTab(nextTab) {
+  tab.value = nextTab;
+  page.value = 1;
+  fetch();
+}
+
 async function fetch(p) {
   if (p) page.value = p;
   loading.value = true;
   try {
-    const r = await getReviews({ page: page.value, pageSize: pageSize.value });
+    const r = await getReviews(
+      reviewQueryParams({ page: page.value, pageSize: pageSize.value, tab: tab.value })
+    );
     reviews.value = r.list || [];
     total.value = r.total || 0;
   } catch (err) {

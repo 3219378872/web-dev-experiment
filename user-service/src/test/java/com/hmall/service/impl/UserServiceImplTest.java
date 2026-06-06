@@ -500,7 +500,7 @@ class UserServiceImplTest extends UserServiceTestBase {
         @Test
         @DisplayName("有关键词-模糊匹配用户名")
         void withKeyword_filtersByUsername() {
-            PageDTO<UserVO> result = userService.queryUsersPage(1, 10, "test");
+            PageDTO<UserVO> result = userService.queryUsersPage(1, 10, "testuser");
 
             assertThat(result.getList()).hasSize(1);
             assertThat(result.getList().get(0).getUsername()).isEqualTo("testuser");
@@ -518,6 +518,25 @@ class UserServiceImplTest extends UserServiceTestBase {
 
             assertThat(result.getList()).hasSize(1);
             assertThat(result.getList().get(0).getPhone()).isEqualTo("13800138000");
+        }
+
+        @Test
+        @DisplayName("有关键词-模糊匹配邮箱")
+        void withKeyword_filtersByEmail() {
+            PageDTO<UserVO> result = userService.queryUsersPage(1, 10, "existing@test.com");
+
+            assertThat(result.getList()).hasSize(1);
+            assertThat(result.getList().get(0).getUsername()).isEqualTo("existing");
+        }
+
+        @Test
+        @DisplayName("按状态过滤")
+        void withStatus_filtersByStatus() {
+            PageDTO<UserVO> result = userService.queryUsersPage(
+                    1, 10, null, UserStatus.FROZEN.getValue());
+
+            assertThat(result.getList()).hasSize(1);
+            assertThat(result.getList().get(0).getStatus()).isEqualTo(UserStatus.FROZEN);
         }
 
         @Test
@@ -671,7 +690,9 @@ class UserServiceImplTest extends UserServiceTestBase {
         @Test
         @DisplayName("更新密码")
         void updatePassword() {
-            User profile = new User();
+            com.hmall.domain.dto.AdminPasswordUpdateDTO profile =
+                    new com.hmall.domain.dto.AdminPasswordUpdateDTO();
+            profile.setCurrentPassword("admin123");
             profile.setPassword("newpassword123");
 
             userService.updateProfileWithPassword(profile);
@@ -683,8 +704,10 @@ class UserServiceImplTest extends UserServiceTestBase {
         @Test
         @DisplayName("同时更新基本信息和密码")
         void updateBoth() {
-            User profile = new User();
+            com.hmall.domain.dto.AdminPasswordUpdateDTO profile =
+                    new com.hmall.domain.dto.AdminPasswordUpdateDTO();
             profile.setNickname("新昵称");
+            profile.setCurrentPassword("admin123");
             profile.setPassword("newpassword123");
 
             userService.updateProfileWithPassword(profile);
@@ -692,6 +715,31 @@ class UserServiceImplTest extends UserServiceTestBase {
             User updated = userService.getById(1L);
             assertThat(updated.getNickname()).isEqualTo("新昵称");
             assertThat(passwordEncoder.matches("newpassword123", updated.getPassword())).isTrue();
+        }
+
+        @Test
+        @DisplayName("修改密码缺少当前密码-抛出BadRequestException")
+        void updatePassword_missingCurrentPassword_throws() {
+            com.hmall.domain.dto.AdminPasswordUpdateDTO profile =
+                    new com.hmall.domain.dto.AdminPasswordUpdateDTO();
+            profile.setPassword("newpassword123");
+
+            assertThatThrownBy(() -> userService.updateProfileWithPassword(profile))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("当前密码");
+        }
+
+        @Test
+        @DisplayName("修改密码当前密码错误-抛出BadRequestException")
+        void updatePassword_wrongCurrentPassword_throws() {
+            com.hmall.domain.dto.AdminPasswordUpdateDTO profile =
+                    new com.hmall.domain.dto.AdminPasswordUpdateDTO();
+            profile.setCurrentPassword("wrong-password");
+            profile.setPassword("newpassword123");
+
+            assertThatThrownBy(() -> userService.updateProfileWithPassword(profile))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("当前密码错误");
         }
 
         @Test

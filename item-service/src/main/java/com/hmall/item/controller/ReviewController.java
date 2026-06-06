@@ -48,8 +48,10 @@ public class ReviewController {
     public PageDTO<ReviewVO> queryReviewsPage(
             @ApiParam("页码") @RequestParam(defaultValue = "1") Integer page,
             @ApiParam("每页大小") @RequestParam(defaultValue = "10") Integer size,
-            @ApiParam("评分") @RequestParam(required = false) Integer rating) {
-        return reviewService.queryReviewsPage(page, size, rating);
+            @ApiParam("评分") @RequestParam(required = false) Integer rating,
+            @ApiParam("最低评分") @RequestParam(required = false) Integer minRating,
+            @ApiParam("最高评分") @RequestParam(required = false) Integer maxRating) {
+        return reviewService.queryReviewsPage(page, size, rating, minRating, maxRating);
     }
 
     @ApiOperation("管理端删除评价")

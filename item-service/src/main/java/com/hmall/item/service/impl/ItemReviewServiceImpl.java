@@ -31,9 +31,22 @@ public class ItemReviewServiceImpl extends ServiceImpl<ItemReviewMapper, ItemRev
 
     @Override
     public PageDTO<ReviewVO> queryReviewsPage(Integer page, Integer size, Integer rating) {
+        return queryReviewsPage(page, size, rating, null, null);
+    }
+
+    @Override
+    public PageDTO<ReviewVO> queryReviewsPage(
+            Integer page, Integer size, Integer rating, Integer minRating, Integer maxRating) {
         LambdaQueryWrapper<ItemReview> wrapper = new LambdaQueryWrapper<>();
         if (rating != null) {
             wrapper.eq(ItemReview::getRating, rating);
+        } else {
+            if (minRating != null) {
+                wrapper.ge(ItemReview::getRating, minRating);
+            }
+            if (maxRating != null) {
+                wrapper.le(ItemReview::getRating, maxRating);
+            }
         }
         wrapper.orderByDesc(ItemReview::getCreateTime);
 

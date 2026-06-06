@@ -2,9 +2,9 @@
 title: item-service
 tracks:
   - item-service/
-last_synced_commit: f68eaef
+last_synced_commit: 4a14a2b
 last_synced_date: 2026-06-06
-sync_note: "fix(#138): CategoryController 新增 GET /admin/categories 供管理端读取启用与禁用分类；保留 GET /categories enabled-only 前台合同。测试 schema 与 categories 表名和 update_time 字段对齐。"
+sync_note: "fix(#139): 管理端评价列表 GET /admin/reviews 保留 rating 精确过滤，并新增 minRating/maxRating 区间过滤支持好评/差评 tab。"
 ---
 
 # item-service
@@ -77,7 +77,8 @@ sync_note: "fix(#138): CategoryController 新增 GET /admin/categories 供管理
 
 ### 评价管理扩展
 
-- `GET /admin/reviews`：管理端分页查询评价列表，支持 rating 过滤。
+- `GET /admin/reviews`：管理端分页查询评价列表，支持 `rating` 精确过滤，也支持
+  `minRating`/`maxRating` 区间过滤（例如好评 4-5 分、差评 1-2 分）。
 
 ## 注意事项与陷阱
 
@@ -90,5 +91,6 @@ sync_note: "fix(#138): CategoryController 新增 GET /admin/categories 供管理
   使用 `/admin/categories`，不要放宽前台接口。
 - 搜索字段若启用 ES，写入要走双写或 binlog 同步，保持一致性。
 - 评价均分按需异步重算，避免每次写评价同步聚合。
+- 管理端评价 tab 必须由后端过滤返回结果；不要在前端只筛当前页。
 - Banner 轮播图/广告位支持 type 区分（carousel/ad），position 用于广告位位置标识。
 - Seckill 秒杀活动需校验时间窗口（start_time ≤ now ≤ end_time），stockPercent = sold/stock * 100。

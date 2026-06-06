@@ -1,0 +1,7 @@
+slug: 2026-06-06-admin-ops-pages
+status: active
+task_branch: task/2026-06-06-admin-ops-pages
+spec: null
+plan: null
+spec_waiver: "GitHub issues #135, #139, and #143 provide bounded acceptance criteria for existing admin operations pages; no separate design spec needed."
+plan_waiver: "Grouped bugfix is tracked through this harness record with focused tests and verification; no separate multi-step implementation plan needed."
