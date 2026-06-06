@@ -155,9 +155,11 @@ public class OrderController {
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "size", defaultValue = "10") Integer size,
             @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "status", required = false) Integer status) {
         LambdaQueryWrapper<Order> wrapper = new LambdaQueryWrapper<>();
         if (orderId != null) wrapper.eq(Order::getId, orderId);
+        if (userId != null) wrapper.eq(Order::getUserId, userId);
         if (status != null) wrapper.eq(Order::getStatus, status);
         wrapper.orderByDesc(Order::getCreateTime);
         Page<Order> result = orderService.page(new Page<>(page, size), wrapper);
@@ -210,9 +212,11 @@ public class OrderController {
     @GetMapping("/admin/orders/export")
     public ResponseEntity<byte[]> exportOrders(
             @RequestParam(value = "orderId", required = false) Long orderId,
+            @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "status", required = false) Integer status) {
         LambdaQueryWrapper<Order> wrapper = new LambdaQueryWrapper<>();
         if (orderId != null) wrapper.eq(Order::getId, orderId);
+        if (userId != null) wrapper.eq(Order::getUserId, userId);
         if (status != null) wrapper.eq(Order::getStatus, status);
         wrapper.orderByDesc(Order::getCreateTime);
         List<Order> orders = orderService.list(wrapper);

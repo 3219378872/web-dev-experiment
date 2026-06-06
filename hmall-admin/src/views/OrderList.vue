@@ -9,8 +9,10 @@
         </p>
       </div>
       <div class="acts">
-        <a class="btn btn-ghost">导出订单</a>
-        <a class="btn btn-ghost">批量发货</a>
+        <a class="btn btn-ghost" :class="{ disabled: exporting }" @click="handleExport">{{
+          exporting ? '导出中...' : '导出订单'
+        }}</a>
+        <a class="btn btn-ghost" @click="showBatchShip">批量发货</a>
       </div>
     </div>
 
@@ -36,6 +38,16 @@
           class="input"
           placeholder="输入订单号"
           style="width: 150px"
+          @keyup.enter="fetch"
+        />
+      </div>
+      <div class="field-inline">
+        用户ID
+        <input
+          v-model="searchUserId"
+          class="input"
+          placeholder="输入用户ID"
+          style="width: 130px"
           @keyup.enter="fetch"
         />
       </div>
@@ -79,7 +91,7 @@
             </td>
             <td class="dim">{{ row.goodsText || '-' }}</td>
             <td class="amount">&yen;{{ (row.totalFee / 100).toFixed(2) }}</td>
-            <td>{{ payLabel(row.paymentType) }}</td>
+            <td>{{ paymentTypeText(row.paymentType) }}</td>
             <td class="dim">{{ (row.createTime || '').slice(5, 16) }}</td>
             <td>
               <span class="sdot" :class="statusClass(row.status)">{{
@@ -89,7 +101,7 @@
             <td class="actions">
               <span class="lk" @click="$router.push(`/orders/${row.id}`)">详情</span>
               <span
-                v-if="row.status === 2"
+                v-if="canShipOrder(row)"
                 class="lk"
                 :class="{ disabled: shippingId === row.id }"
                 @click="showShip(row)"
@@ -99,10 +111,25 @@
                 >物流</span
               >
               <span
+                v-if="canCancelOrder(row)"
                 class="lk"
                 :class="{ disabled: updatingId === row.id }"
                 @click="updateStatus(row, 5)"
                 >{{ updatingId === row.id ? '处理中...' : '取消' }}</span
+              >
+              <span
+                v-if="canRequestRefundAudit(row)"
+                class="lk"
+                :class="{ disabled: updatingId === row.id }"
+                @click="auditRefund(row, true)"
+                >通过退款</span
+              >
+              <span
+                v-if="canRequestRefundAudit(row)"
+                class="lk"
+                :class="{ disabled: updatingId === row.id }"
+                @click="auditRefund(row, false)"
+                >驳回退款</span
               >
             </td>
           </tr>
@@ -137,19 +164,34 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { getOrders, shipOrder, updateOrderStatus } from '@/api/order';
-import { ElMessage } from 'element-plus';
+import {
+  exportOrders,
+  getOrders,
+  refundAuditOrder,
+  shipOrder,
+  updateOrderStatus,
+} from '@/api/order';
+import {
+  adminOrderQueryParams,
+  canCancelOrder,
+  canRequestRefundAudit,
+  canShipOrder,
+  paymentTypeText,
+} from '@/utils/adminOrderActions';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 const orders = ref([]);
 const total = ref(0);
 const page = ref(1);
 const size = ref(10);
 const searchId = ref('');
+const searchUserId = ref('');
 const activeTab = ref('all');
 const shipVisible = ref(false);
 const trackingNumber = ref('');
 const currentOrder = ref(null);
 const loading = ref(false);
+const exporting = ref(false);
 const shippingId = ref(null);
 const updatingId = ref(null);
 
@@ -248,8 +290,6 @@ function statusText(s) {
 function statusClass(s) {
   return statusMap[s]?.cls || 'gray';
 }
-// OrderVO.paymentType：1 支付宝 / 2 微信 / 3 余额
-const payLabel = (t) => ({ 1: '支付宝', 2: '微信', 3: '余额' })[t] || '-';
 function customerName(o) {
   return o.userName || (o.userId != null ? `用户${o.userId}` : '-');
 }
@@ -278,26 +318,32 @@ function switchTab(val) {
 
 function resetFilter() {
   searchId.value = '';
+  searchUserId.value = '';
   activeTab.value = 'all';
   fetch(1);
+}
+
+function currentQueryParams(p = page.value, withPagination = true) {
+  const params = adminOrderQueryParams({
+    page: p,
+    size: size.value,
+    orderId: searchId.value,
+    userId: searchUserId.value,
+    activeTab: activeTab.value,
+  });
+  if (!withPagination) {
+    delete params.page;
+    delete params.size;
+  }
+  return params;
 }
 
 async function fetch(p = 1) {
   page.value = p;
   loading.value = true;
   try {
-    const params = { page: p, size: size.value };
-    if (searchId.value) params.orderId = searchId.value;
-    if (activeTab.value === 'pendingPay') params.status = 1;
-    if (activeTab.value === 'pendingShip') params.status = 2;
-    if (activeTab.value === 'shipped') params.status = 3;
-    if (activeTab.value === 'done') params.status = 4;
-    if (activeTab.value === 'closed') params.status = 5;
-    if (activeTab.value === 'refund') params.status = 6;
-    const [r] = await Promise.all([
-      getOrders(params),
-      loadStats(),
-    ]);
+    const params = currentQueryParams(p);
+    const [r] = await Promise.all([getOrders(params), loadStats()]);
     const list = (r.list || []).map((o) => ({
       ...o,
       checked: false,
@@ -334,17 +380,34 @@ function showShip(row) {
   shipVisible.value = true;
 }
 
+function showBatchShip() {
+  const selected = orders.value.filter((o) => o.checked);
+  const shippable = selected.filter(canShipOrder);
+  if (!selected.length) {
+    ElMessage.warning('请选择待发货订单');
+    return;
+  }
+  if (!shippable.length) {
+    ElMessage.warning('选中的订单没有可发货项');
+    return;
+  }
+  currentOrder.value = { batch: true, orders: shippable };
+  trackingNumber.value = '';
+  shipVisible.value = true;
+}
+
 async function doShip() {
   if (!trackingNumber.value) {
     ElMessage.warning('请输入物流单号');
     return;
   }
-  const id = currentOrder.value.id;
-  shippingId.value = id;
+  const target = currentOrder.value;
+  const batchOrders = target?.batch ? target.orders : [target];
+  shippingId.value = target?.batch ? 'batch' : target.id;
   try {
-    await shipOrder(id, trackingNumber.value);
+    await Promise.all(batchOrders.map((o) => shipOrder(o.id, trackingNumber.value)));
     shipVisible.value = false;
-    ElMessage.success('已发货');
+    ElMessage.success(target?.batch ? `已发货 ${batchOrders.length} 单` : '已发货');
     fetch();
   } catch (err) {
     console.error(err);
@@ -354,7 +417,31 @@ async function doShip() {
   }
 }
 
+async function auditRefund(row, approved) {
+  try {
+    const actionText = approved ? '通过退款' : '驳回退款';
+    const reason = await ElMessageBox.prompt('请输入审核原因', actionText, {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      inputPlaceholder: approved ? '同意退款' : '不符合退款条件',
+      inputValue: approved ? '同意退款' : '不符合退款条件',
+    });
+    updatingId.value = row.id;
+    await refundAuditOrder(row.id, { approved, reason: reason.value });
+    ElMessage.success('退款审核已提交');
+    await fetch(page.value);
+  } catch (err) {
+    if (err !== 'cancel' && err !== 'close') {
+      console.error(err);
+      ElMessage.error('退款审核失败，请稍后重试');
+    }
+  } finally {
+    updatingId.value = null;
+  }
+}
+
 async function updateStatus(row, status) {
+  if (status === 5 && !canCancelOrder(row)) return;
   updatingId.value = row.id;
   try {
     await updateOrderStatus(row.id, status);
@@ -365,6 +452,29 @@ async function updateStatus(row, status) {
     ElMessage.error('操作失败，请稍后重试');
   } finally {
     updatingId.value = null;
+  }
+}
+
+function downloadOrderCsv(blob) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'orders.csv';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+async function handleExport() {
+  exporting.value = true;
+  try {
+    const blob = await exportOrders(currentQueryParams(page.value, false));
+    downloadOrderCsv(blob);
+    ElMessage.success('订单导出已开始');
+  } catch (err) {
+    console.error(err);
+    ElMessage.error('导出失败，请稍后重试');
+  } finally {
+    exporting.value = false;
   }
 }
 

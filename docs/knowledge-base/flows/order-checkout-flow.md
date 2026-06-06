@@ -5,9 +5,9 @@ tracks:
   - cart-service/
   - item-service/
   - pay-service/
-last_synced_commit: 1b58c3b
+last_synced_commit: 5cec20e
 last_synced_date: 2026-06-06
-sync_note: "fix(#132,#134): C端订单列表支持 keyword 搜索并对齐退款 status=6；我的优惠券改为 UserCouponVO 状态展示，checkout 可用券仍走 /my-coupons/available"
+sync_note: "fix(#140,#141): 订单管理端列表/导出支持 userId 过滤，详情页物流复用 /orders/{id}/logistics，退款审核复用 status=6 审核流。"
 ---
 
 # order-checkout-flow
@@ -41,6 +41,9 @@ sync_note: "fix(#132,#134): C端订单列表支持 keyword 搜索并对齐退款
   可匹配订单号或订单明细商品名，响应 `OrderVO.details` 供前端展示、再次购买和评价入口使用。
 - 退款/售后使用订单状态 `6`。C 端已付款/已发货订单调用 `POST /orders/{id}/refund`
   后进入退款处理中；状态 `5` 仍表示交易关闭/已取消。
+- 管理端订单列表与 CSV 导出支持 `orderId`、`userId`、`status` 过滤；订单详情页物流
+  复用 `GET /orders/{id}/logistics`，退款审核对 `status=6` 订单调用
+  `PUT /admin/orders/{id}/refund-audit`。
 - 券包展示 `GET /my-coupons` 返回 `UserCouponVO`，包含券面信息和 `userCouponStatus`、
   `usedOrderId`、`useTime`、`claimTime`。下单结算可用券继续使用
   `GET /my-coupons/available?amount`，避免把已使用/已过期券混入结算选择。
