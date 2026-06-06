@@ -7,8 +7,8 @@
       </div>
       <div class="acts">
         <el-button size="small" @click="$router.push('/orders')">← 返回列表</el-button>
-        <el-button size="small">打印小票</el-button>
-        <el-button size="small">导出</el-button>
+        <el-button size="small" @click="handlePrint">打印小票</el-button>
+        <el-button size="small" :loading="exporting" @click="handleExport">导出</el-button>
       </div>
     </div>
 
@@ -21,8 +21,20 @@
         <el-button v-if="order.status === 2" type="primary" size="small" @click="showShip"
           >立即发货</el-button
         >
-        <el-button size="small">修改地址</el-button>
-        <el-button size="small">退款</el-button>
+        <el-button
+          v-if="canRequestRefundAudit(order)"
+          size="small"
+          type="success"
+          @click="auditRefund(true)"
+          >通过退款</el-button
+        >
+        <el-button
+          v-if="canRequestRefundAudit(order)"
+          size="small"
+          type="danger"
+          @click="auditRefund(false)"
+          >驳回退款</el-button
+        >
       </div>
     </div>
 
@@ -80,30 +92,27 @@
         <div class="acard">
           <div class="ah">
             <h3>物流跟踪</h3>
-            <span class="dim" style="font-size: 12px">顺丰速运 · SF1366028866018</span>
+            <span class="dim" style="font-size: 12px">{{ logisticsTitle }}</span>
           </div>
-          <div class="ab tl">
-            <div class="ti on">
+          <div v-if="logisticsTraces.length" class="ab tl">
+            <div
+              v-for="(trace, index) in logisticsTraces"
+              :key="`${trace.title}-${trace.time}-${index}`"
+              class="ti"
+              :class="{ on: index === logisticsTraces.length - 1 }"
+            >
               <span class="dot" />
               <div>
-                <div class="tx"><b>商品已在 杭州华东仓 完成打包，等待揽收</b></div>
-                <div class="tm">2026-05-28 15:02 · 操作员 仓管03</div>
+                <div class="tx">
+                  <b v-if="index === logisticsTraces.length - 1">{{ trace.description }}</b>
+                  <template v-else>{{ trace.description || trace.title }}</template>
+                </div>
+                <div class="tm">{{ trace.time }} · {{ trace.title }}</div>
               </div>
             </div>
-            <div class="ti">
-              <span class="dot" />
-              <div>
-                <div class="tx">买家已付款</div>
-                <div class="tm">2026-05-28 14:16</div>
-              </div>
-            </div>
-            <div class="ti">
-              <span class="dot" />
-              <div>
-                <div class="tx">买家提交订单</div>
-                <div class="tm">2026-05-28 14:15</div>
-              </div>
-            </div>
+          </div>
+          <div v-else class="ab">
+            <el-empty description="暂无物流轨迹" />
           </div>
         </div>
       </div>
@@ -156,7 +165,9 @@
               <span class="k">订单号</span
               ><span class="mono" style="font-size: 12px">{{ order?.id }}</span>
             </div>
-            <div class="info-row"><span class="k">支付方式</span>{{ order?.payType || '-' }}</div>
+            <div class="info-row">
+              <span class="k">支付方式</span>{{ paymentTypeText(order?.paymentType) }}
+            </div>
             <div class="info-row">
               <span class="k">支付时间</span>{{ (order?.payTime || '').slice(0, 16) || '-' }}
             </div>
@@ -180,13 +191,26 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { getOrderById, shipOrder } from '@/api/order';
-import { ElMessage } from 'element-plus';
+import {
+  exportOrders,
+  getOrderById,
+  getOrderLogistics,
+  refundAuditOrder,
+  shipOrder,
+} from '@/api/order';
+import {
+  canRequestRefundAudit,
+  mapLogisticsTrace,
+  paymentTypeText,
+} from '@/utils/adminOrderActions';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 const route = useRoute();
 const order = ref(null);
+const logistics = ref([]);
 const shipVisible = ref(false);
 const trackingNumber = ref('');
+const exporting = ref(false);
 
 const statusTitleMap = {
   1: '等待买家付款',
@@ -208,6 +232,10 @@ const statusHintMap = {
 
 const stateTitle = computed(() => statusTitleMap[order.value?.status] || '-');
 const stateHint = computed(() => statusHintMap[order.value?.status] || '-');
+const logisticsTraces = computed(() => logistics.value.map(mapLogisticsTrace));
+const logisticsTitle = computed(() =>
+  logisticsTraces.value.length ? `${logisticsTraces.value.length} 条物流轨迹` : '未查询到物流轨迹'
+);
 
 const goodsList = computed(() => {
   const o = order.value;
@@ -240,22 +268,84 @@ function showShip() {
   shipVisible.value = true;
 }
 
+async function loadOrder() {
+  order.value = await getOrderById(route.params.id);
+}
+
+async function loadLogistics() {
+  logistics.value = await getOrderLogistics(route.params.id);
+}
+
 async function doShip() {
+  if (!trackingNumber.value) {
+    ElMessage.warning('请输入物流单号');
+    return;
+  }
   try {
     await shipOrder(order.value.id, trackingNumber.value);
     shipVisible.value = false;
-    order.value.status = 3;
+    await Promise.all([loadOrder(), loadLogistics()]);
     ElMessage.success('已发货');
   } catch (err) {
     console.error(err);
+    ElMessage.error('发货失败，请稍后重试');
+  }
+}
+
+async function auditRefund(approved) {
+  try {
+    const actionText = approved ? '通过退款' : '驳回退款';
+    const reason = await ElMessageBox.prompt('请输入审核原因', actionText, {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      inputPlaceholder: approved ? '同意退款' : '不符合退款条件',
+      inputValue: approved ? '同意退款' : '不符合退款条件',
+    });
+    await refundAuditOrder(order.value.id, { approved, reason: reason.value });
+    await loadOrder();
+    ElMessage.success('退款审核已提交');
+  } catch (err) {
+    if (err !== 'cancel' && err !== 'close') {
+      console.error(err);
+      ElMessage.error('退款审核失败，请稍后重试');
+    }
+  }
+}
+
+function handlePrint() {
+  window.print();
+}
+
+function downloadOrderCsv(blob) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `order-${order.value.id}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+async function handleExport() {
+  if (!order.value) return;
+  exporting.value = true;
+  try {
+    const blob = await exportOrders({ orderId: order.value.id });
+    downloadOrderCsv(blob);
+    ElMessage.success('订单导出已开始');
+  } catch (err) {
+    console.error(err);
+    ElMessage.error('导出失败，请稍后重试');
+  } finally {
+    exporting.value = false;
   }
 }
 
 onMounted(async () => {
   try {
-    order.value = await getOrderById(route.params.id);
+    await Promise.all([loadOrder(), loadLogistics()]);
   } catch (err) {
     console.error(err);
+    ElMessage.error('订单加载失败，请稍后重试');
   }
 });
 </script>
