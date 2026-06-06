@@ -79,40 +79,20 @@
           </div>
         </div>
 
-        <!-- 配送 + 发票 + 备注 -->
+        <!-- 配送 + 发票 -->
         <div class="block">
           <div class="bh"><h3>配送与发票</h3></div>
           <div class="bd" style="padding-top: 6px">
             <div class="opt-row">
               <span>配送方式</span>
-              <span style="display: flex; gap: 10px">
-                <span class="chip on">普通快递 免运费</span>
-                <span class="chip">当日达 +¥15</span>
+              <span style="display: flex; gap: 10px; align-items: center">
+                <span class="chip on">{{ deliverySummary.method }}</span>
+                <span class="dim" style="font-size: 12px">{{ deliverySummary.description }}</span>
               </span>
             </div>
             <div class="opt-row">
-              <span>配送时间</span>
-              <select>
-                <option>工作日、双休日与节假日均可送货</option>
-                <option>仅工作日送货</option>
-                <option>仅双休日、节假日送货</option>
-              </select>
-            </div>
-            <div class="opt-row">
               <span>发票信息</span>
-              <select>
-                <option>电子普通发票 — 个人</option>
-                <option>电子普通发票 — 企业</option>
-                <option>增值税专用发票</option>
-              </select>
-            </div>
-            <div class="opt-row">
-              <span>订单备注</span>
-              <input
-                v-model="remark"
-                placeholder="选填，给商家留言（如指定送货时间）"
-                style="width: 300px"
-              />
+              <span class="dim" style="font-size: 12px">{{ invoiceSummary.description }}</span>
             </div>
           </div>
         </div>
@@ -122,13 +102,7 @@
           <div class="bh"><h3>支付方式</h3></div>
           <div class="bd">
             <div class="pay-opts">
-              <div
-                v-for="p in payOptions"
-                :key="p.value"
-                class="pay"
-                :class="{ on: payType === p.value }"
-                @click="payType = p.value"
-              >
+              <div v-for="p in payOptions" :key="p.value" class="pay on">
                 <span class="ic" :style="{ background: p.color }">{{ p.icon }}</span>
                 {{ p.label }}
               </div>
@@ -199,24 +173,23 @@ import { useCartStore } from '@/stores/cart';
 import { ElMessage } from 'element-plus';
 import { getAddresses } from '@/api/address';
 import { createOrder, getFreight, getAvailableCoupons } from '@/api/order';
+import {
+  paymentOptions,
+  deliverySummary,
+  invoiceSummary,
+  buildOrderPayload,
+} from '@/utils/checkoutOptions';
 
 const router = useRouter();
 const cartStore = useCartStore();
 const addresses = ref([]);
 const selectedAddress = ref(null);
-const remark = ref('');
-const payType = ref(1);
 const freight = ref(0);
 const couponList = ref([]);
 const selectedCoupon = ref(null);
 const couponDiscount = ref(0);
 
-// 后端 Order.paymentType：1 支付宝 / 2 微信 / 3 余额
-const payOptions = [
-  { value: 1, label: '支付宝', icon: '支', color: '#1677FF' },
-  { value: 2, label: '微信支付', icon: '微', color: '#09BB07' },
-  { value: 3, label: '余额支付', icon: '余', color: '#FF9D00' },
-];
+const payOptions = paymentOptions;
 
 const selectedAddr = computed(() => addresses.value.find((a) => a.id === selectedAddress.value));
 
@@ -304,17 +277,15 @@ watch(selectedAddress, () => {
 });
 
 async function submitOrder() {
-  const details = cartStore.selectedItems.map((i) => ({
-    itemId: i.itemId || i.id,
-    num: i.num,
-  }));
   try {
-    await createOrder({
-      addressId: selectedAddress.value,
-      paymentType: payType.value,
-      details,
-      couponId: selectedCoupon.value || undefined,
-    });
+    await createOrder(
+      buildOrderPayload({
+        addressId: selectedAddress.value,
+        items: cartStore.selectedItems,
+        freight: freight.value,
+        couponId: selectedCoupon.value || undefined,
+      })
+    );
     ElMessage.success('下单成功');
     router.push('/orders');
   } catch (err) {
