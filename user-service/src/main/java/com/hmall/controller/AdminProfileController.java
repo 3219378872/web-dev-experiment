@@ -2,6 +2,7 @@ package com.hmall.controller;
 
 import com.hmall.common.domain.R;
 import com.hmall.domain.dto.AdminPasswordUpdateDTO;
+import com.hmall.domain.vo.UserVO;
 import com.hmall.service.IUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,6 +18,12 @@ import java.util.List;
 public class AdminProfileController {
 
     private final IUserService userService;
+
+    @ApiOperation("获取管理员个人信息")
+    @GetMapping
+    public UserVO getProfile() {
+        return userService.getCurrentUserProfile();
+    }
 
     @ApiOperation("修改管理员信息/密码")
     @PutMapping

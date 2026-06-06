@@ -2,8 +2,8 @@
 
 | Command | Result | Evidence |
 | --- | --- | --- |
-| `cd hmall-admin && npm test -- --run src/__tests__/adminOpsActions.spec.js` | passed | Focused Vitest helper coverage: 4 tests; rerun after status-parameter edge case. |
-| `mvn -q -pl user-service -am -Dtest=UserServiceImplTest -DfailIfNoTests=false test` | passed | Focused user service regression tests passed after adding email/status/current-password coverage. |
+| `cd hmall-admin && npm test -- --run src/__tests__/adminOpsActions.spec.js` | passed | Focused Vitest helper coverage: 5 tests; rerun after server-profile application helper. |
+| `mvn -q -pl user-service -am -Dtest=UserServiceImplTest -DfailIfNoTests=false test` | passed | Focused user service regression tests passed after adding email/status/current-password coverage and admin profile GET controller reuse. |
 | `mvn -q -pl item-service -am -Dtest=ItemReviewServiceImplTest -DfailIfNoTests=false test` | passed | Focused review service regression tests passed after adding rating range coverage. |
 | `cd hmall-admin && npm test` | passed | Admin frontend unit tests passed: 5 files, 14 tests; rerun after avatar preview change. |
 | `cd hmall-admin && npm run build` | passed | Vite production build completed; existing large chunk warnings only; rerun after avatar preview change. |

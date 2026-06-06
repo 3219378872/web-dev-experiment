@@ -4,7 +4,7 @@ tracks:
   - hmall-admin/
 last_synced_commit: 4a14a2b
 last_synced_date: 2026-06-06
-sync_note: "fix(#135,#139,#143): 后台用户/评价/个人中心页面对齐真实分页筛选参数，移除无后端合同的假动作，头像上传走 /upload/image 后持久化，改密提交当前密码。"
+sync_note: "fix(#135,#139,#143): 后台用户/评价/个人中心页面对齐真实分页筛选参数，个人中心读取 /admin/profile，头像上传走 /upload/image 后持久化，改密提交当前密码。"
 
 ---
 
@@ -62,7 +62,8 @@ sync_note: "fix(#135,#139,#143): 后台用户/评价/个人中心页面对齐真
   `status`（1=正常，2=冻结）；新增用户与导出没有后端合同，不在页面展示。
 - 评价管理分页传 `page`/`size`；好评/中评/差评 tab 由后端 rating/minRating/maxRating
   过滤，不做当前页二次筛选。回复与审核状态没有后端合同，不在页面展示。
-- 个人中心头像通过 `POST /upload/image` 上传后再 `PUT /admin/profile` 持久化；
-  修改密码必须提交 `currentPassword` 和新密码。最近登录记录没有后端合同，不展示静态数据。
+- 个人中心挂载时读取 `GET /admin/profile` 填充账号资料；头像通过 `POST /upload/image`
+  上传后再 `PUT /admin/profile` 持久化；修改密码必须提交 `currentPassword` 和新密码。
+  最近登录记录没有后端合同，不展示静态数据。
 - 修改商品状态必须显示当前状态机，避免误操作。
 - 提交前运行 `npm run lint` 和 `npm run format`；pre-commit hook 自动检查。

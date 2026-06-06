@@ -28,6 +28,14 @@ export function buildAdminProfilePayload(form = {}) {
   };
 }
 
+export function applyAdminProfile(form, profile = {}) {
+  if (!profile) return;
+  if (profile.username || profile.account) form.account = profile.username || profile.account;
+  if (profile.nickname || profile.name) form.nickname = profile.nickname || profile.name;
+  if (profile.email !== undefined) form.email = profile.email || '';
+  if (profile.avatar !== undefined) form.avatar = profile.avatar || '';
+}
+
 export function buildAdminPasswordPayload(form = {}) {
   return {
     currentPassword: form.current,

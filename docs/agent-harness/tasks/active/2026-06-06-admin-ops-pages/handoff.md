@@ -41,12 +41,12 @@ Ready for PR; local focused tests, module tests, frontend build/lint, harness, K
 
 ## Known Risks
 - `AdminPasswordUpdateDTO` extends existing `User` payload shape to preserve the current service update path while adding `currentPassword`.
-- Avatar upload now persists and previews `profileForm.avatar`; any broken external image URL will fall back only through browser broken-image behavior.
+- Avatar upload now loads persisted profile data via `GET /admin/profile`, then persists and previews `profileForm.avatar`; any broken external image URL will fall back only through browser broken-image behavior.
 - Login records remain unsupported and hidden; implementing them requires a separate backend contract.
 - Nacos timeout logs can appear during user-service Spring context tests but did not fail the Maven run.
 
 ## Next Action
-Run repo harness/KB/lint gates, commit, push, open PR, wait for CI and codex-review, merge, delete the remote branch, and leave the task active for later unified archival.
+Rerun repo harness/KB/lint gates after the review follow-up, amend/push, wait for CI and codex-review, merge if gates pass, delete the remote branch, and leave the task active for later unified archival.
 
 ## Worktree Or Branch
 - `task/2026-06-06-admin-ops-pages`

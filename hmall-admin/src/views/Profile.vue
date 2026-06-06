@@ -126,9 +126,13 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-import { updateAdminProfile, getAdminPermissions } from '@/api/user';
+import { updateAdminProfile, getAdminPermissions, getAdminProfile } from '@/api/user';
 import { uploadImage } from '@/api/upload';
-import { buildAdminPasswordPayload, buildAdminProfilePayload } from '@/utils/adminOpsActions';
+import {
+  applyAdminProfile,
+  buildAdminPasswordPayload,
+  buildAdminProfilePayload,
+} from '@/utils/adminOpsActions';
 import { ElMessage } from 'element-plus';
 
 const loading = ref(true);
@@ -233,14 +237,11 @@ async function handleAvatarChange(e) {
 onMounted(async () => {
   loading.value = true;
   try {
-    const result = await getAdminPermissions();
-    if (Array.isArray(result)) {
-      permissions.value = result;
-    } else if (result && Array.isArray(result.data)) {
-      permissions.value = result.data;
-    }
+    const [profile, result] = await Promise.all([getAdminProfile(), getAdminPermissions()]);
+    applyAdminProfile(profileForm, profile);
+    permissions.value = Array.isArray(result) ? result : result?.data || [];
   } catch (err) {
-    console.error('加载权限失败', err);
+    console.error('加载个人中心失败', err);
     permissions.value = [];
   } finally {
     permissionsLoading.value = false;

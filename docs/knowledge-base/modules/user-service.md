@@ -4,7 +4,7 @@ tracks:
   - user-service/
 last_synced_commit: 4a14a2b
 last_synced_date: 2026-06-06
-sync_note: "fix(#135,#143): 管理端用户列表新增 status 过滤且 keyword 覆盖 username/phone/email；管理员改密必须提交 currentPassword 并通过 BCrypt 校验。"
+sync_note: "fix(#135,#143): 管理端用户列表新增 status 过滤且 keyword 覆盖 username/phone/email；/admin/profile 支持读取当前管理员脱敏资料，改密必须校验 currentPassword。"
 ---
 
 # user-service
@@ -35,6 +35,7 @@ sync_note: "fix(#135,#143): 管理端用户列表新增 status 过滤且 keyword
   keyword 模糊匹配 username/phone/email，status 可选过滤用户状态（1=正常/2=冻结）。
 - `PUT /admin/users/{id}/status`（body `{status}`）→ `R<Void>`：修改用户状态（1=正常/2=冻结）
 - `GET /admin/users/{id}` → `UserVO`：获取用户详情（脱敏，不含 password）
+- `GET /admin/profile` → `UserVO`：获取当前管理员脱敏资料，供管理端个人中心刷新/回显。
 - `PUT /admin/profile`（body `AdminPasswordUpdateDTO` 兼容 User 字段）→ `R<Void>`：
   管理员修改信息/密码；改密时必须提供 `currentPassword` 并通过 BCrypt 校验。
 - `GET /admin/profile/permissions` → `List<String>`：获取管理员权限码

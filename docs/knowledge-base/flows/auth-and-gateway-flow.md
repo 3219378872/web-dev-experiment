@@ -6,7 +6,7 @@ tracks:
   - hm-common/
 last_synced_commit: 4a14a2b
 last_synced_date: 2026-06-06
-sync_note: "fix(#143): user-service 管理员改密新增 currentPassword 校验；登录/JWT 颁发、Gateway 白名单与 user-info 传播合同未变。"
+sync_note: "fix(#143): user-service /admin/profile 读取当前管理员资料并在改密时校验 currentPassword；登录/JWT 颁发、Gateway 白名单与 user-info 传播合同未变。"
 ---
 
 # auth-and-gateway-flow
@@ -36,9 +36,10 @@ sync_note: "fix(#143): user-service 管理员改密新增 currentPassword 校验
    必须从事件载荷显式设置 `UserContext` 并在 `finally` 中清理。
 6. **管理端额外校验** —— 管理端路由（`/admin/**`）在 Gateway 或下游服务侧再判
    role 是否管理员；非管理员返回 403。
-7. **管理员个人中心改密** —— 已登录管理员调用 `PUT /admin/profile` 提交新密码时，
-   user-service 重新校验 `currentPassword` 的 BCrypt 哈希；该校验不改变 JWT 颁发或
-   Gateway 鉴权链。
+7. **管理员个人中心资料** —— 已登录管理员调用 `GET /admin/profile` 时，user-service
+   按 Gateway 传入的 `user-info` 返回当前管理员 `UserVO`；调用 `PUT /admin/profile`
+   提交新密码时，user-service 重新校验 `currentPassword` 的 BCrypt 哈希。该流程不改变
+   JWT 颁发或 Gateway 鉴权链。
 
 ## 关键不变量
 

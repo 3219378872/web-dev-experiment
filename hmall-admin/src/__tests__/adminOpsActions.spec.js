@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  applyAdminProfile,
   buildAdminPasswordPayload,
   buildAdminProfilePayload,
   reviewQueryParams,
@@ -46,6 +47,29 @@ describe('adminOpsActions', () => {
       nickname: '管理员',
       email: 'admin@example.com',
       avatar: '/files/avatars/a.jpg',
+    });
+  });
+
+  it('applies persisted admin profile values over local defaults', () => {
+    const form = {
+      account: 'local-admin',
+      nickname: '本地昵称',
+      email: '',
+      avatar: '',
+    };
+
+    applyAdminProfile(form, {
+      username: 'server-admin',
+      nickname: '服务端昵称',
+      email: 'admin@example.com',
+      avatar: '/files/avatars/server.jpg',
+    });
+
+    expect(form).toEqual({
+      account: 'server-admin',
+      nickname: '服务端昵称',
+      email: 'admin@example.com',
+      avatar: '/files/avatars/server.jpg',
     });
   });
 
