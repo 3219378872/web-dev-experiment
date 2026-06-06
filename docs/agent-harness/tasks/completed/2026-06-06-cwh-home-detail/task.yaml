@@ -1,7 +1,7 @@
 slug: 2026-06-06-cwh-home-detail
-status: active
+status: done
 task_branch: task/2026-06-06-cwh-home-detail
 spec: null
 plan: null
-spec_waiver: 无独立 spec —— 纯前端缺陷修复（#127/#128），复用既有后端契约，无新设计决策。
+spec_waiver: 无独立 spec —— 纯前端缺陷修复（
 plan_waiver: 无需多步实施 plan —— 单 PR 范围内有界缺陷修复，逐文件改即可。
