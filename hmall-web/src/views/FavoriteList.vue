@@ -74,7 +74,7 @@
                       <span>{{ f.itemSold ? `已售 ${formatSold(f.itemSold)}` : '新品上市' }}</span>
                       <span class="dim">{{ f.shop ? f.shop.slice(0, 6) : '' }}</span>
                     </div>
-                    <button class="btn btn-outline btn-sm fav-add" @click.prevent="addToCart(f.id)">
+                    <button class="btn btn-outline btn-sm fav-add" @click.prevent="addToCart(f)">
                       加入购物车
                     </button>
                   </div>
@@ -99,8 +99,13 @@ import { ref, onMounted } from 'vue';
 import { getFavorites, removeFavorite } from '@/api/common';
 import { ElMessage } from 'element-plus';
 import AccountSidebar from '@/components/AccountSidebar.vue';
+import { useCartStore } from '@/stores/cart';
+import { useUserStore } from '@/stores/user';
+import { buildCartPayloadFromFavorite } from '@/utils/cartFromFavorite';
 
 const favorites = ref([]);
+const cartStore = useCartStore();
+const userStore = useUserStore();
 
 const tagClassMap = {
   热卖: 'tag-price',
@@ -137,8 +142,24 @@ async function removeFav(id) {
   }
 }
 
-function addToCart() {
-  ElMessage.info('加入购物车功能开发中');
+async function addToCart(fav) {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录');
+    return;
+  }
+  const { ok, payload } = buildCartPayloadFromFavorite(fav);
+  if (!ok) {
+    ElMessage.error('商品信息缺失，无法加入购物车');
+    return;
+  }
+  try {
+    await cartStore.addItem(payload);
+    ElMessage.success('已加入购物车');
+  } catch (err) {
+    // 后端异常（如商品下架/无库存）已由 request 响应拦截器统一弹出 msg，
+    // 此处仅吞掉以避免重复提示
+    console.error('加入购物车失败', err);
+  }
 }
 
 onMounted(load);

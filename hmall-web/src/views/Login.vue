@@ -32,7 +32,7 @@
         <template v-else>
           <div class="eyebrow">账户安全</div>
           <h1>找回密码<br />三步重置登录密码</h1>
-          <p>通过注册邮箱或手机号验证身份，安全便捷地重置您的登录密码。</p>
+          <p>通过注册邮箱接收验证码核验身份，安全便捷地重置您的登录密码。</p>
           <div class="auth-feats">
             <div class="f"><span class="d">📧</span>邮箱验证</div>
             <div class="f"><span class="d">🔐</span>身份核验</div>
@@ -80,7 +80,7 @@
               <span class="checkbox" :class="{ on: remember }" @click.stop="remember = !remember">{{
                 remember ? '✓' : ''
               }}</span
-              >记住密码
+              >记住账号
             </label>
             <a style="color: var(--brand); cursor: pointer" @click="switchMode('reset')"
               >忘记密码？</a
@@ -179,15 +179,11 @@
           </div>
 
           <div class="field">
-            <label>注册邮箱 / 手机号</label>
-            <input
-              v-model="resetForm.email"
-              class="input"
-              placeholder="请输入注册时的邮箱或手机号"
-            />
+            <label>注册邮箱</label>
+            <input v-model="resetForm.email" class="input" placeholder="请输入注册时的邮箱地址" />
           </div>
           <div class="field">
-            <label>短信/邮箱验证码</label>
+            <label>邮箱验证码</label>
             <div class="code-row">
               <input v-model="resetForm.code" class="input" placeholder="6 位验证码" />
               <button class="btn btn-outline" :disabled="codeCountdown > 0" @click="sendResetCode">
@@ -349,7 +345,7 @@ async function doRegister() {
 
 async function doReset() {
   if (!resetForm.email || !resetForm.code || !resetForm.newPassword) {
-    ElMessage.warning('请填写邮箱/手机号、验证码与新密码');
+    ElMessage.warning('请填写注册邮箱、验证码与新密码');
     return;
   }
   try {

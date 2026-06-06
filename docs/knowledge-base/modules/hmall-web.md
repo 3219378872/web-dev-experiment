@@ -2,9 +2,9 @@
 title: hmall-web
 tracks:
   - hmall-web/
-last_synced_commit: 287f6e0
+last_synced_commit: 97e8267
 last_synced_date: 2026-06-06
-sync_note: "fix(#127): Home.vue 分页参数 page/size→pageNo/pageSize（api/pageParams.js）、促销区按 ItemDTO.isRecommend、秒杀区接 /seckill/active（utils/seckill.js）；fix(#128): ItemDetail.vue 渲染 ItemDTO.image 真实图片（utils/itemImages.js）、本店优惠券接 /coupons + /coupons/{id}/claim、评价筛选有图/好评/中评/差评（utils/reviewFilters.js）、查看全部改加载更多；新增 utils/homeSections.js 及对应 Vitest 单测"
+sync_note: "fix(#129): FavoriteList.vue 加购接 cartStore.addItem（utils/cartFromFavorite.js）；fix(#130): Profile.vue 头像上传接 /upload/image+PUT /users/profile、gender/birthday 真实持久化、订单统计分页汇总（utils/profileStats.js、utils/avatarUpload.js）、新增 api/user.js getProfile；fix(#133): Login.vue 文案校正（记住账号、邮箱找回），登录标识三态由后端支持；新增三个 utils 对应 Vitest 单测"
 ---
 
 # hmall-web
@@ -54,3 +54,11 @@ sync_note: "fix(#127): Home.vue 分页参数 page/size→pageNo/pageSize（api/p
   （`payOrderByBalance`）执行扣款。支付密码由用户填写，后端校验。
 - 再次购买（OrderList.vue / OrderDetail.vue）：遍历 `order.details` 逐条调 `cartStore.addItem`
   后跳转 `/cart`；若 `details` 为空则提示用户商品信息不完整。
+- 收藏页加购（FavoriteList.vue）：按收藏记录 `itemId` 调 `cartStore.addItem`（payload 由
+  `utils/cartFromFavorite.js` 构造），未登录先提示，后端异常由 axios 拦截器统一弹 msg。
+- 个人中心（Profile.vue）：挂载时 `GET /users/profile` 拉真实资料填表并同步 userStore；
+  头像走 `/upload/image` 拿 url 后立即 `PUT /users/profile` 持久化；gender/birthday 随
+  保存提交；订单统计跨分页累加（`utils/profileStats.js`），不再只统计第一页。绑定手机
+  暂无后端更换流程，置为只读说明。
+- 登录页（Login.vue）：用户名/邮箱/手机号任一登录（后端 `/users/login` 三标识匹配），
+  找回密码仅邮箱验证码；"记住账号"仅存用户名到 localStorage。

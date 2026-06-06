@@ -68,10 +68,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public UserLoginVO login(LoginFormDTO loginDTO) {
         // 1.数据校验
-        String username = loginDTO.getUsername();
+        String identifier = loginDTO.getUsername();
         String password = loginDTO.getPassword();
-        // 2.根据用户名或手机号查询
-        User user = lambdaQuery().eq(User::getUsername, username).one();
+        if (StrUtil.isBlank(identifier) || StrUtil.isBlank(password)) {
+            throw new BadRequestException("用户名或密码错误");
+        }
+        // 2.支持用户名 / 邮箱 / 手机号三种登录标识，命中任一即可
+        User user = lambdaQuery()
+                .eq(User::getUsername, identifier)
+                .or().eq(User::getEmail, identifier)
+                .or().eq(User::getPhone, identifier)
+                .last("limit 1")
+                .one();
         if (user == null) {
             throw new BadRequestException("用户名或密码错误");
         }
@@ -182,10 +190,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (StrUtil.isNotBlank(profile.getEmail())) {
             user.setEmail(profile.getEmail());
         }
+        if (StrUtil.isNotBlank(profile.getGender())) {
+            user.setGender(profile.getGender());
+        }
+        if (profile.getBirthday() != null) {
+            user.setBirthday(profile.getBirthday());
+        }
         if (StrUtil.isNotBlank(profile.getPassword())) {
             user.setPassword(passwordEncoder.encode(profile.getPassword()));
         }
         updateById(user);
+    }
+
+    @Override
+    public UserVO getCurrentUserProfile() {
+        User user = getById(UserContext.getUser());
+        if (user == null) {
+            throw new BadRequestException("用户不存在");
+        }
+        return convertToUserVO(user);
     }
 
     @Override
@@ -300,6 +323,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         vo.setEmail(user.getEmail());
         vo.setAvatar(user.getAvatar());
         vo.setNickname(user.getNickname());
+        vo.setGender(user.getGender());
+        vo.setBirthday(user.getBirthday());
         vo.setCreateTime(user.getCreateTime());
         vo.setUpdateTime(user.getUpdateTime());
         return vo;

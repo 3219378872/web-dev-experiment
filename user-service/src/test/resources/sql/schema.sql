@@ -10,7 +10,9 @@ CREATE TABLE IF NOT EXISTS `user` (
     role VARCHAR(16) DEFAULT 'user',
     email VARCHAR(128),
     avatar VARCHAR(255),
-    nickname VARCHAR(64)
+    nickname VARCHAR(64),
+    gender VARCHAR(1) DEFAULT 'N',
+    birthday DATE
 );
 
 CREATE TABLE IF NOT EXISTS addresses (

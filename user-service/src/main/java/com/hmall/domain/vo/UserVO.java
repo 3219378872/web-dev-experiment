@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -37,6 +38,12 @@ public class UserVO {
 
     @ApiModelProperty("昵称")
     private String nickname;
+
+    @ApiModelProperty("性别：M男 F女 N保密")
+    private String gender;
+
+    @ApiModelProperty("生日")
+    private LocalDate birthday;
 
     @ApiModelProperty("创建时间")
     private LocalDateTime createTime;
