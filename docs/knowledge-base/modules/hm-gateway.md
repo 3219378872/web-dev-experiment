@@ -2,9 +2,9 @@
 title: hm-gateway
 tracks:
   - hm-gateway/
-last_synced_commit: aa63abd
-last_synced_date: 2026-06-05
-sync_note: "Issue #86: 添加 actuator 依赖，配合 docker-compose healthcheck"
+last_synced_commit: 831e366
+last_synced_date: 2026-06-06
+sync_note: "fix(#156): Nacos route seed for item-service includes /admin/categories/** so admin category management reaches CategoryController."
 ---
 
 # hm-gateway
@@ -23,7 +23,8 @@ Spring Cloud Gateway 反向代理：路由分发、JWT 鉴权、CORS、限流、
 - 白名单（`auth.excludePaths`，全方法放行）：`/search/**`, `/users/login`, `/users/register`,
     `/users/send-code`, `/users/reset-password`, `/notifications/active`, `/upload/**`, `/files/**`。
 - 读白名单（`auth.excludeReadPaths`，仅 GET/HEAD/OPTIONS 放行）：`/categories/**`, `/items/**`, `/banners/**`, `/ads/**`, `/seckill/**`, `/faqs/**`。
-- `DynamicRouteLoader` 监听 Nacos `gateway-routes.json` 实现动态路由。
+- `DynamicRouteLoader` 监听 Nacos `gateway-routes.json` 实现动态路由；
+  `scripts/init-nacos-routes.sh` 是 docker-compose/local stack 的 route seed。
 
 ## 上游
 
@@ -39,6 +40,10 @@ Spring Cloud Gateway 反向代理：路由分发、JWT 鉴权、CORS、限流、
 - `filters/AuthGlobalFilter.java` —— 全局鉴权过滤器。
 - `utils/JwtTool.java` —— JWT 解析。
 - `routes/DynamicRouteLoader.java` —— 动态路由。
+- `scripts/init-nacos-routes.sh` —— 发布 `gateway-routes.json` 的本地/compose 路由种子，
+  item-service 路由包含 `/items/**`、`/search/**`、`/categories/**`、`/admin/items/**`、
+  `/admin/categories`、`/admin/categories/**`、`/admin/reviews/**`、`/admin/banners/**`、
+  `/banners/**`、`/ads/**`、`/seckill/**`。
 - `config/AuthProperties.java` / `JwtProperties.java` / `SecurityConfig.java` —— 配置。
 
 ## 注意事项与陷阱

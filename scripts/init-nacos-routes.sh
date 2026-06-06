@@ -28,7 +28,9 @@ ROUTES='[
           "_genkey_5": "/banners/**",
           "_genkey_6": "/ads/**",
           "_genkey_7": "/admin/banners/**",
-          "_genkey_8": "/seckill/**"
+          "_genkey_8": "/seckill/**",
+          "_genkey_9": "/admin/categories",
+          "_genkey_10": "/admin/categories/**"
         }
       }
     ]

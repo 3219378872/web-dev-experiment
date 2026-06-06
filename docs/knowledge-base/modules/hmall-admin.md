@@ -2,9 +2,9 @@
 title: hmall-admin
 tracks:
   - hmall-admin/
-last_synced_commit: 4a14a2b
+last_synced_commit: 831e366
 last_synced_date: 2026-06-06
-sync_note: "fix(#135,#139,#143): 后台用户/评价/个人中心页面对齐真实分页筛选参数，个人中心读取 /admin/profile，头像上传走 /upload/image 后持久化，改密提交当前密码。"
+sync_note: "fix(#155,#156): 管理端入口转发根相对 /files 与 /upload 到 hm-gateway；分类页依赖 /admin/categories 经网关路由到 item-service。"
 
 ---
 
@@ -20,7 +20,9 @@ sync_note: "fix(#135,#139,#143): 后台用户/评价/个人中心页面对齐真
 - 所有 API 请求经 [hm-gateway](hm-gateway.md)；走管理端 `/admin/**` 路由，
   需要管理员角色 JWT。
 - ECharts 大盘数据走 `/admin/stats/**`（trade/item/user 聚合接口）。
-- 文件上传走 [file-service](file-service.md) `/files/upload`。
+- 文件上传走 [file-service](file-service.md) `/upload/image`，返回的图片 URL 是根相对
+  `/files/<key>`；Vite dev proxy 与生产 nginx 必须把 `/files/**`、`/upload/**`
+  原样转发到 [hm-gateway](hm-gateway.md)，不要加 `/api` rewrite。
 
 ## 上游
 
